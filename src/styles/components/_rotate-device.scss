@@ -1,0 +1,48 @@
+.rotate-device {
+    position: relative;
+    opacity: 0;
+    pointer-events: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--background-color);
+    z-index: 4;
+    .inner-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        width: 100%;
+    }
+    .logo {
+        top: 20px;
+        width: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    span {
+        display: block;
+        margin: 0 auto 19px auto;
+        width: 32px;
+        height: 32px;
+        img {
+            width: 100%;
+            height: 100%;
+        }
+    }
+    h2, p {
+        color: var(--text-color);
+    }
+    p {
+        margin-top: 24px;
+    }
+    transition: opacity .3s ease-out;
+    @media screen and (min-width: 320px) and (max-width: 968px) and (orientation: landscape) {
+        opacity: 1;
+        display: block;
+        pointer-events: initial;
+    }
+}

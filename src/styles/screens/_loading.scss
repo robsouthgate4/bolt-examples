@@ -1,0 +1,9 @@
+.loading {
+    @extend .screen;
+    * {
+        pointer-events: none;
+    }
+    svg {
+        transform: scale(5);
+    }
+}

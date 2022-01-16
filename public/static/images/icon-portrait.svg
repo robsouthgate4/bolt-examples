@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="29px" height="27px" viewBox="0 0 29 27" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Portrait</title>
+    <defs>
+        <filter id="filter-1">
+            <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 1.000000 0 0 0 0 1.000000 0 0 0 0 1.000000 0 0 0 1.000000 0"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="UI" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
+        <g id="10" transform="translate(-387.000000, -162.000000)">
+            <g id="Portrait" transform="translate(385.000000, 159.000000)" filter="url(#filter-1)">
+                <g>
+                    <line x1="5.5" y1="4" x2="5.5" y2="29" id="Path" stroke="#202020"></line>
+                    <polygon id="Path" stroke="#202020" points="16 6 30 6 30 29 16 29"></polygon>
+                    <polygon id="Path" stroke="#202020" points="16 9 30 9 30 26 16 26"></polygon>
+                    <polyline id="Path" stroke="#202020" points="9 7 5.5 4 2 7"></polyline>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

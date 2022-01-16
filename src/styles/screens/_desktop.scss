@@ -1,0 +1,57 @@
+.desktop {
+    font-size: 1rem;
+    text-align: center;
+    display: block;
+    overflow-y: auto;
+    background: black;
+    .inner-container {
+        display: block;
+    }
+    a.logo-desktop {
+        display: block;
+        position: relative;
+        top: 0;
+        max-width: 290px;
+        margin: 100px auto;
+    }
+    img.qr-code {
+        display: block;
+        width: 289px;
+        height: 289px;
+        margin: 65px auto 0 auto;
+    }
+    h2 {
+        font-size: 2.125em;
+        line-height: 44px;
+        margin-bottom: 24px;
+        color: white;
+    }
+    p {
+        font-size: 0.875em;
+        line-height: 20px;
+        color: white;
+        &:first-of-type {
+            margin-bottom: 24px;
+        }
+    }
+    footer {
+        position: relative;
+        margin-top: 132px;
+        margin-bottom: 32px;
+        ul {
+            li {
+                display: inline;
+                line-height: 24px;
+                color: #5F6368;
+                margin-right: 12px;
+                &:last-child {
+                    margin-right: 0;
+                }
+            }
+            li a{
+                color: #5F6368;
+                text-decoration: none;
+            }
+        }
+    }
+}
