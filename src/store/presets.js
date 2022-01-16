@@ -4,10 +4,10 @@ import { ScreenTypes } from "@enums";
  */
 
 export const state = {
-  screen: ScreenTypes.LOADING,
-  assetsLoading: true,
-  mute: false,
-  device: {
-    gpuTier: 3,
-  },
+	screen: ScreenTypes.LOADING,
+	assetsLoading: true,
+	mute: false,
+	device: {
+		gpuTier: 3,
+	},
 };

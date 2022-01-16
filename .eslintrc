@@ -1,0 +1,30 @@
+{
+  "ignorePatterns": [
+    "dist",
+    "node_modules",
+    "public",
+  ],
+  "rules": {
+  },
+  "env": {
+    "browser": true,
+    "es6": true,
+    "amd": true,
+    "node": true,
+    "jest": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "mdcs"
+  ],
+  "parserOptions": {
+    "ecmaVersion": 11,
+    "sourceType": "module"
+  },
+  "plugins": [
+    "prettier"
+  ],
+  "settings": {
+    "import/resolver": "webpack"
+  }
+}

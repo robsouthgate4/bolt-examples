@@ -5,7 +5,13 @@
   "scripts": {
     "dev": "webpack serve --config=config/webpack.dev.js --mode=development",
     "build": "webpack --config=config/webpack.prod.js  --mode=production",
-    "start": "npm run dev"
+    "start": "npm run dev",
+    "lint": "NODE_ENV=test npm-run-all --parallel lint:*",
+    "lint:js": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
+    "lint:format": "prettier \"**/*.{md,html,json,yaml,yml}\" --check",
+    "fix": "npm-run-all --sequential fix:*",
+    "fix:js": "eslint \"src/**/*.{js,jsx,ts,tsx}\" --fix",
+    "fix:format": "prettier \"**/*.{md,html,json,yaml,yml}\" --write"
   },
   "author": "",
   "license": "ISC",
@@ -36,6 +42,8 @@
     "copy-webpack-plugin": "^7.0.0",
     "css-loader": "^3.6.0",
     "css-minimizer-webpack-plugin": "^1.2.0",
+    "eslint-config-mdcs": "^5.0.0",
+    "eslint-plugin-prettier": "^3.3.1",
     "file-loader": "^6.0.0",
     "glslify-loader": "^2.0.0",
     "html-loader": "^1.1.0",
@@ -47,6 +55,7 @@
     "postcss": "^8.3.5",
     "postcss-loader": "^5.3.0",
     "postcss-preset-env": "^6.7.0",
+    "prettier": "^2.3.2",
     "raw-loader": "^4.0.1",
     "resolve-url-loader": "^3.1.4",
     "sass-loader": "^11.1.1",

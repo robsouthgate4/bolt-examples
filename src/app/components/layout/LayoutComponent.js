@@ -1,33 +1,46 @@
 export default class LayoutComponent {
-  constructor({ injectPosition, screenEnter, screenExit }) {
-    this.screenEnter = screenEnter || null;
-    this.screenExit = screenExit || null;
 
-    this.injectPosition = injectPosition;
+	constructor( { injectPosition, screenEnter, screenExit } ) {
 
-    this.attached = false;
+		this.screenEnter = screenEnter || null;
+		this.screenExit = screenExit || null;
 
-    this.events = [];
-    this.transitions = [];
+		this.injectPosition = injectPosition;
 
-    if (new.target === Screen) {
-      throw new TypeError("Cannot construct Abstract instances directly");
-    }
-  }
+		this.attached = false;
 
-  cleanUp(layoutEl, root) {
-    root.removeChild(layoutEl);
-    if (this.events.length > 0) {
-      this.events.forEach((subscription) => subscription.unsubscribe());
-    }
-    if (this.transitions.length > 0) {
-      this.transitions.forEach((transition) => transition.kill());
-    }
-  }
+		this.events = [];
+		this.transitions = [];
 
-  initListeners() {}
+		if ( new.target === Screen ) {
 
-  onEnter() {}
+			throw new TypeError( "Cannot construct Abstract instances directly" );
 
-  onExit() {}
+		}
+
+	}
+
+	cleanUp( layoutEl, root ) {
+
+		root.removeChild( layoutEl );
+		if ( this.events.length > 0 ) {
+
+			this.events.forEach( ( subscription ) => subscription.unsubscribe() );
+
+		}
+
+		if ( this.transitions.length > 0 ) {
+
+			this.transitions.forEach( ( transition ) => transition.kill() );
+
+		}
+
+	}
+
+	initListeners() {}
+
+	onEnter() {}
+
+	onExit() {}
+
 }

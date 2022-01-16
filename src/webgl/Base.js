@@ -1,9 +1,9 @@
 import { glSettings } from "@webgl/globals/Constants";
 import * as stats from "stats.js";
 import {
-  glEarlyUpdateTopic,
-  glLateUpdateTopic,
-  glUpdateTopic,
+	glEarlyUpdateTopic,
+	glLateUpdateTopic,
+	glUpdateTopic,
 } from "@pubSub/constants";
 import { publish } from "@pubSub";
 
@@ -12,76 +12,103 @@ import EventListeners from "./globals/EventListeners";
 const { DEBUG_FPS, USE_ORBIT_CONTROLS } = glSettings;
 
 export default class Base extends EventListeners {
-  constructor() {
-    super();
 
-    this.isRunning = false;
-    this.requestFrame = null;
-    this.elapsed = null;
+	constructor() {
 
-    this.mouse = {};
+		super();
 
-    this.width = window.innerWidth;
-    this.height = window.innerHeight;
+		this.isRunning = false;
+		this.requestFrame = null;
+		this.elapsed = null;
 
-    if (DEBUG_FPS) {
-      this.stats = new stats();
-      this.stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-      document.body.appendChild(this.stats.dom);
-    }
+		this.mouse = {};
 
-    if (USE_ORBIT_CONTROLS) {
-      this.controls = null;
-      this.initControls();
-      document.getElementById("ui").style.pointerEvents = "none";
-    }
+		this.width = window.innerWidth;
+		this.height = window.innerHeight;
 
-    document.addEventListener("visibilitychange", () => {
-      document.visibilityState === "visible" ? this.start() : this.pause();
-    });
-  }
+		if ( DEBUG_FPS ) {
 
-  start() {
-    this.isRunning = true;
-    this.run();
-  }
+			this.stats = new stats();
+			this.stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+			document.body.appendChild( this.stats.dom );
 
-  initControls() {}
+		}
 
-  pause() {
-    if (this.requestFrame) {
-      cancelAnimationFrame(this.requestFrame);
-      this.requestFrame = null;
-    }
-    this.isRunning = false;
-  }
+		if ( USE_ORBIT_CONTROLS ) {
 
-  earlyUpdate(elapsed, delta) {
-    publish(glEarlyUpdateTopic, { elapsed, delta });
-  }
+			this.controls = null;
+			this.initControls();
+			document.getElementById( "ui" ).style.pointerEvents = "none";
 
-  update(elapsed, delta) {
-    publish(glUpdateTopic, { elapsed, delta });
-  }
+		}
 
-  lateUpdate(elapsed, delta) {
-    publish(glLateUpdateTopic, { elapsed, delta });
-  }
+		document.addEventListener( "visibilitychange", () => {
 
-  run() {
-    const { DEBUG_FPS } = glSettings;
+			document.visibilityState === "visible" ? this.start() : this.pause();
 
-    const delta = 0;
-    this.elapsed = 0;
+		} );
 
-    this.earlyUpdate(this.elapsed, delta);
-    this.update(this.elapsed, delta);
-    this.lateUpdate(this.elapsed, delta);
+	}
 
-    if (DEBUG_FPS) this.stats.end();
+	start() {
 
-    if (this.isRunning) {
-      this.requestFrame = requestAnimationFrame(this.run.bind(this));
-    }
-  }
+		this.isRunning = true;
+		this.run();
+
+	}
+
+	initControls() {}
+
+	pause() {
+
+		if ( this.requestFrame ) {
+
+			cancelAnimationFrame( this.requestFrame );
+			this.requestFrame = null;
+
+		}
+
+		this.isRunning = false;
+
+	}
+
+	earlyUpdate( elapsed, delta ) {
+
+		publish( glEarlyUpdateTopic, { elapsed, delta } );
+
+	}
+
+	update( elapsed, delta ) {
+
+		publish( glUpdateTopic, { elapsed, delta } );
+
+	}
+
+	lateUpdate( elapsed, delta ) {
+
+		publish( glLateUpdateTopic, { elapsed, delta } );
+
+	}
+
+	run() {
+
+		const { DEBUG_FPS } = glSettings;
+
+		const delta = 0;
+		this.elapsed = 0;
+
+		this.earlyUpdate( this.elapsed, delta );
+		this.update( this.elapsed, delta );
+		this.lateUpdate( this.elapsed, delta );
+
+		if ( DEBUG_FPS ) this.stats.end();
+
+		if ( this.isRunning ) {
+
+			this.requestFrame = requestAnimationFrame( this.run.bind( this ) );
+
+		}
+
+	}
+
 }

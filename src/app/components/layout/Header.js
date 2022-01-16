@@ -6,20 +6,24 @@ import LayoutComponent from "./LayoutComponent";
 import transitionsConfig from "@/config/transitions";
 
 export default class Header extends LayoutComponent {
-  constructor({ injectPosition, screenEnter, screenExit } = {}) {
-    super({ injectPosition, screenEnter, screenExit });
 
-    this.muteToggle = null;
-    this.shopCollectionToggle = null;
-    this.currentState = {
-      screen: ScreenTypes.NONE,
-    };
-  }
+	constructor( { injectPosition, screenEnter, screenExit } = {} ) {
 
-  generateHTML(root) {
-    this.container = document.createElement("header");
+		super( { injectPosition, screenEnter, screenExit } );
 
-    const htmlString = `
+		this.muteToggle = null;
+		this.shopCollectionToggle = null;
+		this.currentState = {
+			screen: ScreenTypes.NONE,
+		};
+
+	}
+
+	generateHTML( root ) {
+
+		this.container = document.createElement( "header" );
+
+		const htmlString = `
       <button class="mute-button muted"></button>
       <a class="logo" href="https://www.phantom.land" target="_blank">
         <img src="static/images/phntm-logo-invert.svg" alt="phantom logo" />
@@ -29,92 +33,120 @@ export default class Header extends LayoutComponent {
       </div>
     `;
 
-    this.container.innerHTML += htmlString;
-    root.insertAdjacentElement(this.injectPosition, this.container);
+		this.container.innerHTML += htmlString;
+		root.insertAdjacentElement( this.injectPosition, this.container );
 
-    this.initListeners();
-  }
+		this.initListeners();
 
-  initListeners() {
-    this.muteToggle = this.container.querySelector(".mute-button");
-    this.infoButtonToggle = this.container.querySelector(".info-button");
+	}
 
-    this.logoClick = fromEvent(this.container.querySelector(".logo"), "click");
+	initListeners() {
 
-    const logoClickObservable$ = this.logoClick.subscribe(() => {
-      window.gtag("event", "click", {
-        event_category: "button",
-        event_label: "header logo",
-      });
-    });
+		this.muteToggle = this.container.querySelector( ".mute-button" );
+		this.infoButtonToggle = this.container.querySelector( ".info-button" );
 
-    const infoToggleObservable$ = fromEvent(
-      this.infoButtonToggle,
-      "click"
-    ).subscribe(() => {
-      this.handleInfoToggle();
-    });
+		this.logoClick = fromEvent( this.container.querySelector( ".logo" ), "click" );
 
-    const soundToggleObservable$ = fromEvent(
-      this.muteToggle,
-      "click"
-    ).subscribe(() => {
-      this.handleMuteToggle();
-    });
+		const logoClickObservable$ = this.logoClick.subscribe( () => {
 
-    this.events.push(
-      soundToggleObservable$,
-      infoToggleObservable$,
-      logoClickObservable$
-    );
+			window.gtag( "event", "click", {
+				event_category: "button",
+				event_label: "header logo",
+			} );
 
-    // get initial state
-    store.subscribe((state) => {
-      this.handleStateUpdate(state);
-      this.currentState = state;
-    });
-  }
+		} );
 
-  handleStateUpdate(state) {
-    const { mute } = state;
-    this.updateSoundIcon(mute);
-    this.runHeaderTransition(state);
-  }
+		const infoToggleObservable$ = fromEvent(
+			this.infoButtonToggle,
+			"click"
+		).subscribe( () => {
 
-  runHeaderTransition(state) {
-    if (!this.currentState.screen) return;
-    if (
-      state.screen === ScreenTypes.EXPERIENCE &&
+			this.handleInfoToggle();
+
+		} );
+
+		const soundToggleObservable$ = fromEvent(
+			this.muteToggle,
+			"click"
+		).subscribe( () => {
+
+			this.handleMuteToggle();
+
+		} );
+
+		this.events.push(
+			soundToggleObservable$,
+			infoToggleObservable$,
+			logoClickObservable$
+		);
+
+		// get initial state
+		store.subscribe( ( state ) => {
+
+			this.handleStateUpdate( state );
+			this.currentState = state;
+
+		} );
+
+	}
+
+	handleStateUpdate( state ) {
+
+		const { mute } = state;
+		this.updateSoundIcon( mute );
+		this.runHeaderTransition( state );
+
+	}
+
+	runHeaderTransition( state ) {
+
+		if ( ! this.currentState.screen ) return;
+		if (
+			state.screen === ScreenTypes.EXPERIENCE &&
       this.currentState.screen === ScreenTypes.INFO
-    ) {
-      transitionsConfig.app.layoutHeaderTransition(this.container, 1);
-    }
-  }
+		) {
 
-  updateSoundIcon(mute) {
-    mute
-      ? this.muteToggle.classList.add("muted")
-      : this.muteToggle.classList.remove("muted");
-  }
+			transitionsConfig.app.layoutHeaderTransition( this.container, 1 );
 
-  handleInfoToggle() {
-    updateScreen(ScreenTypes.INFO);
-  }
+		}
 
-  handleMuteToggle() {
-    updateMute(!this.currentState.mute);
-  }
+	}
 
-  onEnter(root) {
-    if (this.attached) return;
+	updateSoundIcon( mute ) {
 
-    this.generateHTML(root);
-    transitionsConfig.app.layoutHeaderTransition(this.container);
-    this.attached = true;
-  }
+		mute
+			? this.muteToggle.classList.add( "muted" )
+			: this.muteToggle.classList.remove( "muted" );
 
-  onExit(root) {
-    this.attached = false;
-    this.cleanUp(this.container, root);
-  }
+	}
+
+	handleInfoToggle() {
+
+		updateScreen( ScreenTypes.INFO );
+
+	}
+
+	handleMuteToggle() {
+
+		updateMute( ! this.currentState.mute );
+
+	}
+
+	onEnter( root ) {
+
+		if ( this.attached ) return;
+
+		this.generateHTML( root );
+		transitionsConfig.app.layoutHeaderTransition( this.container );
+		this.attached = true;
+
+	}
+
+	onExit( root ) {
+
+		this.attached = false;
+		this.cleanUp( this.container, root );
+
+	}
+
 }

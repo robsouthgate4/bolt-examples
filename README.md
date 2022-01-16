@@ -1,4 +1,4 @@
-# WebGL template
+# Bolt WebGL library
 
 ## Getting Started
 
@@ -36,11 +36,9 @@ Open [http://localhost:8080](http://localhost:8080) with your browser to see the
 
 ## Features
 
-- **[Three.js](https://threejs.org/)** - For rendering 3D graphics with WebGL
 - **[Hammer.js](https://hammerjs.github.io/)** - For handling mobile gestures
 - **[ESLint](https://eslint.org/)** Configuration:
   - Uses [Prettier](https://prettier.io/) ESLint plugin for consistent code style.
-  - Uses [eslint-plugin-import](https://www.npmjs.com/package/eslint-plugin-import) For consistent import order.
 
 ## Learn More
 

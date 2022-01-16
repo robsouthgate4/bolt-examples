@@ -7,77 +7,115 @@ import Experience from "./screens/Experience";
 import RotateDevice from "./components/layout/RotateDevice";
 
 export default class App {
-  constructor() {
-    this.uiHTMLContainer = document.getElementById("ui");
-    this.uiHTMLContainer.style.display = "none";
 
-    updateScreen(ScreenTypes.LOADING);
+	constructor() {
 
-    this.screens = [];
-    this.layoutComponents = [];
-    this.currentState = {};
-    this.localState = {};
+		this.uiHTMLContainer = document.getElementById( "ui" );
+		this.uiHTMLContainer.style.display = "none";
 
-    fromEvent(window, "click").subscribe(() => {});
-  }
+		updateScreen( ScreenTypes.LOADING );
 
-  init() {
-    this.initLayoutComponents();
-    this.initScreens();
-    store.subscribe((state) => {
-      this.handleStateUpdate(state);
-      this.currentState = state;
-    });
-  }
+		this.screens = [];
+		this.layoutComponents = [];
+		this.currentState = {};
+		this.localState = {};
 
-  initLayoutComponents() {
-    const rotateDevice = new RotateDevice({
-      screenEnter: ScreenTypes.LOADING,
-      injectPosition: "afterbegin",
-    });
-    this.layoutComponents.push(rotateDevice);
-  }
+		fromEvent( window, "click" ).subscribe( () => {} );
 
-  initScreens() {
-    this.screens.push(new Experience({ name: ScreenTypes.EXPERIENCE }));
-    fromEvent(window, "resize").subscribe(() => {
-      this.screens.forEach((screen) => screen.onResize());
-    });
-  }
+	}
 
-  handleStateUpdate(state) {
-    // only update screen and layouts if screen state is new
-    if (this.currentState.screen !== state.screen) {
-      this.runScreenTransitions(state);
-      this.runLayoutTransitions(state);
-    }
-  }
+	init() {
 
-  runLayoutTransitions(state) {
-    this.layoutComponents.forEach((layoutComponent) => {
-      if (layoutComponent.screenEnter === state.screen) {
-        layoutComponent.onEnter(this.uiHTMLContainer);
-      }
-      if (layoutComponent.screenExit === state.screen) {
-        layoutComponent.onExit(this.uiHTMLContainer);
-      }
-    });
-  }
+		this.initLayoutComponents();
+		this.initScreens();
+		store.subscribe( ( state ) => {
 
-  runScreenTransitions(state) {
-    this.screens.forEach((screen) => {
-      const screenEl = document.querySelector(
-        `${getClassFromString(screen.name)}`
-      );
-      if (screen.name === state.screen) {
-        screen.active = true;
-        screen.onEnter(this.uiHTMLContainer);
-      } else {
-        if (screen.active) {
-          screen.onExit(screenEl, this.uiHTMLContainer);
-        }
-        screen.active = false;
-      }
-    });
-  }
+			this.handleStateUpdate( state );
+			this.currentState = state;
+
+		} );
+
+	}
+
+	initLayoutComponents() {
+
+		const rotateDevice = new RotateDevice( {
+			screenEnter: ScreenTypes.LOADING,
+			injectPosition: "afterbegin",
+		} );
+		this.layoutComponents.push( rotateDevice );
+
+	}
+
+	initScreens() {
+
+		this.screens.push( new Experience( { name: ScreenTypes.EXPERIENCE } ) );
+		fromEvent( window, "resize" ).subscribe( () => {
+
+			this.screens.forEach( ( screen ) => screen.onResize() );
+
+		} );
+
+	}
+
+	handleStateUpdate( state ) {
+
+		// only update screen and layouts if screen state is new
+		if ( this.currentState.screen !== state.screen ) {
+
+			this.runScreenTransitions( state );
+			this.runLayoutTransitions( state );
+
+		}
+
+	}
+
+	runLayoutTransitions( state ) {
+
+		this.layoutComponents.forEach( ( layoutComponent ) => {
+
+			if ( layoutComponent.screenEnter === state.screen ) {
+
+				layoutComponent.onEnter( this.uiHTMLContainer );
+
+			}
+
+			if ( layoutComponent.screenExit === state.screen ) {
+
+				layoutComponent.onExit( this.uiHTMLContainer );
+
+			}
+
+		} );
+
+	}
+
+	runScreenTransitions( state ) {
+
+		this.screens.forEach( ( screen ) => {
+
+			const screenEl = document.querySelector(
+				`${getClassFromString( screen.name )}`
+			);
+			if ( screen.name === state.screen ) {
+
+				screen.active = true;
+				screen.onEnter( this.uiHTMLContainer );
+
+			} else {
+
+				if ( screen.active ) {
+
+					screen.onExit( screenEl, this.uiHTMLContainer );
+
+				}
+
+				screen.active = false;
+
+			}
+
+		} );
+
+	}
+
 }

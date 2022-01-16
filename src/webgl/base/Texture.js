@@ -14,7 +14,7 @@ export default class Texture {
 		this.type = type;
 		this.format = format;
 		this.pixelType = pixelType;
-    this.imagePath = imagePath;
+		this.imagePath = imagePath;
 
 		this.texture = this.gl.createTexture();
 		//this.gl.activeTexture(this.texture)
@@ -23,11 +23,11 @@ export default class Texture {
 
 	}
 
-	textureUnit( shader, uniformName, unit) {
+	textureUnit( shader, uniformName, unit ) {
 
 		const textureUnit = this.gl.getUniformLocation( shader.program, uniformName );
-    shader.activate();
-    this.gl.uniform1i( textureUnit, unit );
+		shader.activate();
+		this.gl.uniform1i( textureUnit, unit );
 
 	}
 
