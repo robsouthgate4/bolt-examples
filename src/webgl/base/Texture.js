@@ -17,7 +17,6 @@ export default class Texture {
 		this.imagePath = imagePath;
 
 		this.texture = this.gl.createTexture();
-		//this.gl.activeTexture(this.texture)
 		this.gl.bindTexture( this.type, this.texture );
 		this.gl.texImage2D( this.type, 0, this.format, 1, 1, 0, this.format, this.pixelType, new Uint8Array( [ 0, 0, 255, 255 ] ) );
 
