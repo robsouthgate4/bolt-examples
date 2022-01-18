@@ -8,7 +8,8 @@ import Shader from "../base/Shader";
 import vertexShader from "../shaders/default/default.vert";
 import fragmentShader from "../shaders/default/default.frag";
 import Texture from "../base/Texture";
-import { mat4, toRadian, vec3, glMatrix } from "gl-matrix";
+import { mat4, vec3, } from "gl-matrix";
+import Camera from "../base/Camera";
 
 const vertices = [
 	- 0.5, 0.0, 0.5, 0.83, 0.70, 0.44,	0.0, 0.0,
@@ -27,13 +28,6 @@ const indices = [
 	3, 0, 4
 ];
 
-const model = mat4.create();
-const view = mat4.create();
-const projection = mat4.create();
-
-const translation = vec3.create();
-vec3.set( translation, 0, - 0.5, - 2 );
-
 export default class World extends Base {
 
 	constructor() {
@@ -43,7 +37,7 @@ export default class World extends Base {
 		this.canvas = document.getElementById( "experience" );
 		this.canvas.width = window.innerWidth;
 		this.canvas.height = window.innerHeight;
-		this.gl = this.canvas.getContext( "webgl2" );
+		this.gl = this.canvas.getContext( "webgl2", { antialias: true } );
 
 		this.gl.viewport( 0, 0, this.gl.canvas.width, this.gl.canvas.height );
 		this.gl.enable( this.gl.DEPTH_TEST );
@@ -75,10 +69,17 @@ export default class World extends Base {
 		this.vbo.unbind();
 		this.ibo.unbind();
 
-		this.resize();
+		this.camera = new Camera( {
+			width: window.innerWidth,
+			height: window.innerHeight,
+			gl: this.gl,
+			position: vec3.fromValues( 0, 1, 5 ),
+			near: 0.1,
+			far: 1000,
+			fov: 45
+		} );
 
-		mat4.perspective( projection, 45, window.innerWidth / window.innerHeight, 0.01, 1000 );
-		mat4.translate( view, view, translation );
+		this.resize();
 
 	}
 
@@ -87,7 +88,7 @@ export default class World extends Base {
 		let w = window.innerWidth;
 		let h = window.innerHeight;
 
-		mat4.perspective( projection, 45, w / h, 0.01, 1000 );
+		this.camera.resize( w, h );
 
 	}
 
@@ -106,16 +107,7 @@ export default class World extends Base {
 
 		this.shader.activate();
 
-		mat4.rotate( model, model, 0.01, vec3.fromValues( 0, 1, 0 ) );
-
-		const modelLocation = this.gl.getUniformLocation( this.shader.program, "model" );
-		this.gl.uniformMatrix4fv( modelLocation, false, model );
-
-		const viewLocation = this.gl.getUniformLocation( this.shader.program, "view" );
-		this.gl.uniformMatrix4fv( viewLocation, false, view );
-
-		const projectionLocation = this.gl.getUniformLocation( this.shader.program, "projection" );
-		this.gl.uniformMatrix4fv( projectionLocation, false, projection );
+		this.camera.matrix( elapsed, this.shader );
 
 		this.texture.bind();
 

@@ -21,6 +21,10 @@ export default class Base extends EventListeners {
 		this.requestFrame = null;
 		this.elapsed = null;
 
+		this.lastTime = ( new Date() ).getTime(),
+		this.currentTime = 0,
+		this.delta = 0;
+
 		this.mouse = {};
 
 		this.width = window.innerWidth;
@@ -90,16 +94,19 @@ export default class Base extends EventListeners {
 
 	}
 
-	run() {
+	run( timestamp ) {
+
 
 		const { DEBUG_FPS } = glSettings;
 
-		const delta = 0;
-		this.elapsed = 0;
+		this.elapsed = timestamp * 0.001;
+		this.delta = this.elapsed - this.lastTime;
 
-		this.earlyUpdate( this.elapsed, delta );
-		this.update( this.elapsed, delta );
-		this.lateUpdate( this.elapsed, delta );
+		this.lastTime = this.elapsed;
+
+		this.earlyUpdate( this.elapsed, this.delta );
+		this.update( this.elapsed, this.delta );
+		this.lateUpdate( this.elapsed, this.delta );
 
 		if ( DEBUG_FPS ) this.stats.end();
 
