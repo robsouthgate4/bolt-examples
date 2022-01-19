@@ -1,5 +1,4 @@
 import Base from "@webgl/Base";
-import { glSettings } from "@webgl/globals/Constants";
 import IBO from "../base/IBO";
 import VAO from "../base/VAO";
 import VBO from "../base/VBO";
@@ -61,6 +60,8 @@ export default class World extends Base {
 		this.vbo = new VBO( { vertices, gl: this.gl } );
 		this.ibo = new IBO( { indices, gl: this.gl } );
 
+		this.model = mat4.create();
+
 		this.vao.linkAttrib( { vbo: this.vbo, layoutID: 0, numComponents: 3, type: this.gl.FLOAT, stride: 8 * 4, offset: 0 * 4 } );
 		this.vao.linkAttrib( { vbo: this.vbo, layoutID: 1, numComponents: 3, type: this.gl.FLOAT, stride: 8 * 4, offset: 3 * 4 } );
 		this.vao.linkAttrib( { vbo: this.vbo, layoutID: 2, numComponents: 2, type: this.gl.FLOAT, stride: 8 * 4, offset: 6 * 4 } );
@@ -69,12 +70,18 @@ export default class World extends Base {
 		this.vbo.unbind();
 		this.ibo.unbind();
 
+		this.positions = [
+			{ x: 0, y: - 1, z: 0 },
+			{ x: 2, y: 0, z: 0 },
+			{ x: - 2, y: 1, z: 0 },
+		];
+
 		this.camera = new Camera( {
 			width: window.innerWidth,
 			height: window.innerHeight,
 			gl: this.gl,
-			position: vec3.fromValues( 0, 1, 5 ),
-			near: 0.1,
+			position: vec3.fromValues( 0, 0, 5 ),
+			near: 0.01,
 			far: 1000,
 			fov: 45
 		} );
@@ -106,14 +113,23 @@ export default class World extends Base {
 		this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT );
 
 		this.shader.activate();
-
-		this.camera.matrix( elapsed, this.shader );
+		this.camera.matrix( elapsed, delta, this.shader );
 
 		this.texture.bind();
 
 		this.vao.bind();
 
-		this.gl.drawElements( this.gl.TRIANGLES, indices.length, this.gl.UNSIGNED_SHORT, 0 );
+		this.positions.forEach( position => {
+
+			mat4.fromTranslation( this.model, vec3.fromValues( position.x, position.y, position.z ) );
+			mat4.rotate( this.model, this.model, 1, vec3.fromValues( 0, 1, 0 ) );
+
+			const uniformLocationModel = this.gl.getUniformLocation( this.shader.program, "model" );
+			this.gl.uniformMatrix4fv( uniformLocationModel, false, this.model );
+
+			this.gl.drawElements( this.gl.TRIANGLES, indices.length, this.gl.UNSIGNED_SHORT, 0 );
+
+		} );
 
 	}
 

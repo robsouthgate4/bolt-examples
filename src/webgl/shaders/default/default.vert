@@ -21,5 +21,5 @@ void main()
   vColor = aColor;
   vUv = aUv;
 
-  gl_Position = camera * vec4( aPos, 1.0 );
+  gl_Position = camera * model * vec4( aPos, 1.0 );
 }

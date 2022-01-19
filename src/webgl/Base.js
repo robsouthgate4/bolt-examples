@@ -101,7 +101,6 @@ export default class Base extends EventListeners {
 
 		this.elapsed = timestamp * 0.001;
 		this.delta = this.elapsed - this.lastTime;
-
 		this.lastTime = this.elapsed;
 
 		this.earlyUpdate( this.elapsed, this.delta );
