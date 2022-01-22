@@ -26,12 +26,18 @@ export default class Camera {
 		this.up = vec3.fromValues( 0, 1, 0 );
 		this.forward = vec3.fromValues( 0, 0, - 1 );
 
+		this.vector = vec3.create();
+		this.keyPressed = "";
+
+		this.target = vec3.create();
+		vec3.add( this.target, this.position, this.forward );
+
 		this.delta = 0;
 		this.lastFrame = 0;
 
-		this.newLookPosition = vec3.create();
+		this.newPosition = vec3.create();
 
-		vec3.add( this.position, this.position, this.forward );
+		vec3.copy( this.newPosition, this.position );
 
 		this.resize();
 
@@ -41,6 +47,12 @@ export default class Camera {
 
 	initListeners() {
 
+		window.addEventListener( "keyup", () => {
+
+			this.keyPressed = "";
+
+		} );
+
 		window.addEventListener( "keydown", e => {
 
 
@@ -48,41 +60,27 @@ export default class Camera {
 
 			if ( e.key === "w" ) {
 
-				vec3.copy( newPosition, this.forward );
-				vec3.multiply( newPosition, newPosition, vec3.fromValues( 0, 0, 0.1 ) );
-				vec3.add( this.position, this.position, newPosition );
+				this.keyPressed = "w";
 
 			}
 
 			if ( e.key === "s" ) {
 
-				vec3.copy( newPosition, this.forward );
-				vec3.multiply( newPosition, newPosition, vec3.fromValues( 0, 0, 0.1 ) );
-				vec3.sub( this.position, this.position, newPosition );
+				this.keyPressed = "s";
 
 			}
 
 			if ( e.key === "a" ) {
 
-				vec3.copy( newPosition, this.forward );
-				vec3.cross( newPosition, this.up, this.forward );
-				vec3.normalize( newPosition, newPosition );
-				vec3.multiply( newPosition, newPosition, vec3.fromValues( 0.1, 0, 0.0 ) );
-				vec3.add( this.position, this.position, newPosition );
+				this.keyPressed = "a";
 
 			}
 
 			if ( e.key === "d" ) {
 
-				vec3.copy( newPosition, this.forward );
-				vec3.cross( newPosition, this.up, this.forward );
-				vec3.normalize( newPosition, newPosition );
-				vec3.multiply( newPosition, newPosition, vec3.fromValues( 0.1, 0, 0.0 ) );
-				vec3.sub( this.position, this.position, newPosition );
+				this.keyPressed = "d";
 
 			}
-
-			vec3.add( this.newLookPosition, this.position, this.forward );
 
 		} );
 
@@ -94,9 +92,62 @@ export default class Camera {
 
 	}
 
+	processInputs( delta ) {
+
+		this.cameraSpeed = 3 * delta;
+
+		if ( this.keyPressed === "w" ) {
+
+			const tempForward = vec3.clone( this.forward );
+
+			vec3.multiply( tempForward, tempForward, vec3.fromValues( this.cameraSpeed, this.cameraSpeed, this.cameraSpeed ) );
+			vec3.add( this.position, this.position, tempForward );
+
+		}
+
+		if ( this.keyPressed === "s" ) {
+
+			const tempForward = vec3.clone( this.forward );
+
+			vec3.multiply( tempForward, tempForward, vec3.fromValues( this.cameraSpeed, this.cameraSpeed, this.cameraSpeed ) );
+			vec3.sub( this.position, this.position, tempForward );
+
+		}
+
+		if ( this.keyPressed === "a" ) {
+
+			const tempPos = vec3.clone( this.position );
+
+			vec3.cross( tempPos, this.forward, this.up );
+			vec3.normalize( tempPos, tempPos );
+
+			vec3.multiply( tempPos, tempPos, vec3.fromValues( this.cameraSpeed, this.cameraSpeed, this.cameraSpeed ) );
+			vec3.sub( this.position, this.position, tempPos );
+
+		}
+
+		if ( this.keyPressed === "d" ) {
+
+			const tempPos = vec3.clone( this.position );
+
+			vec3.cross( tempPos, this.forward, this.up );
+			vec3.normalize( tempPos, tempPos );
+
+			vec3.multiply( tempPos, tempPos, vec3.fromValues( this.cameraSpeed, this.cameraSpeed, this.cameraSpeed ) );
+			vec3.add( this.position, this.position, tempPos );
+
+		}
+
+
+	}
+
 	matrix( elapsed, delta, shader ) {
 
-		mat4.lookAt( this.view, this.position, this.newLookPosition, this.up );
+		this.processInputs( delta );
+
+		vec3.add( this.target, this.position, this.forward );
+
+		mat4.lookAt( this.view, this.position, this.target, this.up );
 		mat4.multiply( this.camera, this.projection, this.view );
 
 		const uniformLocationView = this.gl.getUniformLocation( shader.program, "view" );

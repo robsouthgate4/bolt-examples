@@ -80,7 +80,7 @@ export default class World extends Base {
 			width: window.innerWidth,
 			height: window.innerHeight,
 			gl: this.gl,
-			position: vec3.fromValues( 0, 0, 5 ),
+			position: vec3.fromValues( 0, 0, 3 ),
 			near: 0.01,
 			far: 1000,
 			fov: 45
