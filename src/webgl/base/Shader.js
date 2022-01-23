@@ -46,6 +46,54 @@ export default class Shader {
 
 	}
 
+	setBool( uniform, value ) {
+
+		this.gl.uniform1i( this.gl.getUniformLocation( this.program, uniform ), + value );
+
+	}
+
+	setInt( uniform, value ) {
+
+		this.gl.uniform1i( this.gl.getUniformLocation( this.program, uniform ), value );
+
+	}
+
+	setFloat( uniform, value ) {
+
+		this.gl.uniform1i( this.gl.getUniformLocation( this.program, uniform ), value );
+
+	}
+
+	setVector2( uniform, value ) {
+
+		this.gl.uniform2fv( this.gl.getUniformLocation( this.program, uniform ), value );
+
+	}
+
+	setVector3( uniform, value ) {
+
+		this.gl.uniform3fv( this.gl.getUniformLocation( this.program, uniform ), value );
+
+	}
+
+	setVector4( uniform, value ) {
+
+		this.gl.uniform4fv( this.gl.getUniformLocation( this.program, uniform ), value );
+
+	}
+
+	setMatrix3( uniform, value ) {
+
+		this.gl.uniformMatrix3fv( this.gl.getUniformLocation( this.program, uniform ), value );
+
+	}
+
+	setMatrix4( uniform, value ) {
+
+		this.gl.uniformMatrix4fv( this.gl.getUniformLocation( this.program, uniform ), value );
+
+	}
+
 	activate() {
 
 		this.gl.useProgram( this.program );

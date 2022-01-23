@@ -55,9 +55,6 @@ export default class Camera {
 
 		window.addEventListener( "keydown", e => {
 
-
-			const newPosition = vec3.create();
-
 			if ( e.key === "w" ) {
 
 				this.keyPressed = "w";

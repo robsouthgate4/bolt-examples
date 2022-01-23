@@ -4,8 +4,8 @@ export default class VBO {
 
 		this.id = id;
 		this.gl = gl;
-		this.positionBuffer = this.gl.createBuffer();
-		this.gl.bindBuffer( this.gl.ARRAY_BUFFER, this.positionBuffer );
+		this.buffer = this.gl.createBuffer();
+		this.gl.bindBuffer( this.gl.ARRAY_BUFFER, this.buffer );
 		this.gl.bufferData(
 			this.gl.ARRAY_BUFFER,
 			new Float32Array( vertices ),
@@ -16,7 +16,7 @@ export default class VBO {
 
 	bind() {
 
-		this.gl.bindBuffer( this.gl.ARRAY_BUFFER, this.positionBuffer );
+		this.gl.bindBuffer( this.gl.ARRAY_BUFFER, this.buffer );
 
 	}
 
@@ -28,7 +28,7 @@ export default class VBO {
 
 	delete() {
 
-		this.gl.deleteBuffer( this.positionBuffer );
+		this.gl.deleteBuffer( this.buffer );
 
 	}
 
