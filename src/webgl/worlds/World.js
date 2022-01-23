@@ -4,8 +4,8 @@ import VAO from "../base/VAO";
 import VBO from "../base/VBO";
 import Shader from "../base/Shader";
 
-import vertexShader from "../shaders/default/default.vert";
-import fragmentShader from "../shaders/default/default.frag";
+import vertexShader from "../base/shaders/default/default.vert";
+import fragmentShader from "../base/shaders/default/default.frag";
 import Texture from "../base/Texture";
 import { mat4, vec3, } from "gl-matrix";
 import Camera from "../base/Camera";

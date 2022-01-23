@@ -1,4 +1,4 @@
-import { mat4, vec3 } from "gl-matrix";
+import { glMatrix, mat4, vec3 } from "gl-matrix";
 
 export default class Camera {
 
@@ -32,8 +32,19 @@ export default class Camera {
 		this.target = vec3.create();
 		vec3.add( this.target, this.position, this.forward );
 
+		// vec3.sub( this.direction, this.position, this.target );
+		// vec3.normalize( this.direction, this.direction );
+
+		this.yaw = - 90;
+		this.pitch = 0;
+
+
+
 		this.delta = 0;
 		this.lastFrame = 0;
+		this.firstMouse = true;
+		this.lastX = window.innerWidth / 2;
+		this.lastY = window.innerHeight / 2;
 
 		this.newPosition = vec3.create();
 
@@ -46,6 +57,8 @@ export default class Camera {
 	}
 
 	initListeners() {
+
+		window.addEventListener( "mousemove", this.handleMouseMove.bind( this ) );
 
 		window.addEventListener( "keyup", () => {
 
@@ -80,6 +93,51 @@ export default class Camera {
 			}
 
 		} );
+
+	}
+
+	handleMouseMove( ev ) {
+
+		const xPos = ev.clientX;
+		const yPos = ev.clientY;
+
+
+		if ( this.firstMouse ) {
+
+			this.lastX = xPos;
+			this.lastY = yPos;
+			this.firstMouse = false;
+
+		}
+
+		let xOffset = xPos - this.lastX;
+		let yOffset = this.lastY - yPos;
+
+		this.lastX = xPos;
+		this.lastY = yPos;
+
+		const sensitivity = 0.1;
+		xOffset *= sensitivity;
+		yOffset *= sensitivity;
+
+		console.log( xOffset );
+
+		this.yaw += xOffset;
+		this.pitch += yOffset;
+
+		if ( this.pitch > 89.0 )
+			this.pitch = 89.0;
+		if ( this.pitch < - 89.0 )
+			this.pitch = - 89.0;
+
+		const direction = vec3.create();
+		direction[ 0 ] = Math.cos( glMatrix.toRadian( this.yaw ) ) * Math.cos( glMatrix.toRadian( this.pitch ) );
+		direction[ 1 ] = Math.sin( glMatrix.toRadian( this.pitch ) );
+		direction[ 2 ] = Math.sin( glMatrix.toRadian( this.yaw ) ) * Math.cos( glMatrix.toRadian( this.pitch ) );
+
+		vec3.normalize( direction, direction );
+		vec3.copy( this.forward, direction );
+
 
 	}
 

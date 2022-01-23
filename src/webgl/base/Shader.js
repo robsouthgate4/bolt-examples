@@ -60,7 +60,7 @@ export default class Shader {
 
 	setFloat( uniform, value ) {
 
-		this.gl.uniform1i( this.gl.getUniformLocation( this.program, uniform ), value );
+		this.gl.uniform1f( this.gl.getUniformLocation( this.program, uniform ), value );
 
 	}
 
@@ -84,13 +84,13 @@ export default class Shader {
 
 	setMatrix3( uniform, value ) {
 
-		this.gl.uniformMatrix3fv( this.gl.getUniformLocation( this.program, uniform ), value );
+		this.gl.uniformMatrix3fv( this.gl.getUniformLocation( this.program, uniform ), false, value );
 
 	}
 
 	setMatrix4( uniform, value ) {
 
-		this.gl.uniformMatrix4fv( this.gl.getUniformLocation( this.program, uniform ), value );
+		this.gl.uniformMatrix4fv( this.gl.getUniformLocation( this.program, uniform ), false, value );
 
 	}
 

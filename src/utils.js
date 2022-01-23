@@ -187,32 +187,3 @@ export const loadBinaryBuffer = ( url ) => {
 	} );
 
 };
-
-export const asyncLoader = ( url, loader, params = {} ) => {
-
-	return new Promise( ( resolve ) => {
-
-		let { dracoLoader } = params;
-		if ( dracoLoader ) {
-
-			dracoLoader.setDecoderConfig( { type: "js" } );
-			dracoLoader.setDecoderPath( "https://www.gstatic.com/draco/v1/decoders/" );
-			loader.setDRACOLoader( dracoLoader );
-
-		}
-
-		loader.load( url, ( data ) => {
-
-			if ( dracoLoader ) {
-
-				dracoLoader.dispose();
-
-			}
-
-			return resolve( data );
-
-		} );
-
-	} );
-
-};
