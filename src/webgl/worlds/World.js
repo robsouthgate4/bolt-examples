@@ -8,7 +8,8 @@ import vertexShader from "../base/shaders/default/default.vert";
 import fragmentShader from "../base/shaders/default/default.frag";
 import Texture from "../base/Texture";
 import { mat4, vec3, } from "gl-matrix";
-import Camera from "../base/Camera";
+import CameraFPS from "../base/CameraFPS";
+import OBJParse from "../base/OBJParse";
 
 const vertices = [
 	- 0.5, 0.0, 0.5, 0.83, 0.70, 0.44,	0.0, 0.0,
@@ -54,6 +55,8 @@ export default class World extends Base {
 		this.texture.loadImage();
 		this.texture.textureUnit( this.shader, "diffuse", 0 );
 
+		const obj = new OBJParse( "static/models/icosphere.obj" );
+
 		this.vao = new VAO( { gl: this.gl } );
 		this.vao.bind();
 
@@ -76,7 +79,7 @@ export default class World extends Base {
 			{ x: - 2, y: 1, z: 0 },
 		];
 
-		this.camera = new Camera( {
+		this.camera = new CameraFPS( {
 			width: window.innerWidth,
 			height: window.innerHeight,
 			gl: this.gl,

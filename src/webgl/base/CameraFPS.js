@@ -28,21 +28,18 @@ export default class Camera {
 
 		this.vector = vec3.create();
 		this.keyPressed = "";
+		this.activeKeys = [];
 
 		this.target = vec3.create();
 		vec3.add( this.target, this.position, this.forward );
 
-		// vec3.sub( this.direction, this.position, this.target );
-		// vec3.normalize( this.direction, this.direction );
-
 		this.yaw = - 90;
 		this.pitch = 0;
-
-
 
 		this.delta = 0;
 		this.lastFrame = 0;
 		this.firstMouse = true;
+		this.mouseDown = false;
 		this.lastX = window.innerWidth / 2;
 		this.lastY = window.innerHeight / 2;
 
@@ -60,9 +57,45 @@ export default class Camera {
 
 		window.addEventListener( "mousemove", this.handleMouseMove.bind( this ) );
 
-		window.addEventListener( "keyup", () => {
+		window.addEventListener( "keyup", e => {
 
-			this.keyPressed = "";
+			if ( e.key === "w" ) {
+
+				this.activeKeys = this.activeKeys.filter( ( e ) => e !== 'w' );
+
+			}
+
+			if ( e.key === "s" ) {
+
+				this.activeKeys = this.activeKeys.filter( ( e ) => e !== 's' );
+
+
+			}
+
+			if ( e.key === "a" ) {
+
+				this.activeKeys = this.activeKeys.filter( ( e ) => e !== 'a' );
+
+
+			}
+
+			if ( e.key === "d" ) {
+
+				this.activeKeys = this.activeKeys.filter( ( e ) => e !== 'd' );
+
+			}
+
+			if ( e.key === "ArrowUp" ) {
+
+				this.activeKeys = this.activeKeys.filter( ( e ) => e !== 'ArrowUp' );
+
+			}
+
+			if ( e.key === "ArrowDown" ) {
+
+				this.activeKeys = this.activeKeys.filter( ( e ) => e !== 'ArrowDown' );
+
+			}
 
 		} );
 
@@ -70,25 +103,37 @@ export default class Camera {
 
 			if ( e.key === "w" ) {
 
-				this.keyPressed = "w";
+				this.activeKeys.push( "w" );
 
 			}
 
 			if ( e.key === "s" ) {
 
-				this.keyPressed = "s";
+				this.activeKeys.push( "s" );
 
 			}
 
 			if ( e.key === "a" ) {
 
-				this.keyPressed = "a";
+				this.activeKeys.push( "a" );
 
 			}
 
 			if ( e.key === "d" ) {
 
-				this.keyPressed = "d";
+				this.activeKeys.push( "d" );
+
+			}
+
+			if ( e.key === "ArrowUp" ) {
+
+				this.activeKeys.push( "ArrowUp" );
+
+			}
+
+			if ( e.key === "ArrowDown" ) {
+
+				this.activeKeys.push( "ArrowDown" );
 
 			}
 
@@ -100,7 +145,6 @@ export default class Camera {
 
 		const xPos = ev.clientX;
 		const yPos = ev.clientY;
-
 
 		if ( this.firstMouse ) {
 
@@ -116,11 +160,9 @@ export default class Camera {
 		this.lastX = xPos;
 		this.lastY = yPos;
 
-		const sensitivity = 0.1;
+		const sensitivity = 0.4;
 		xOffset *= sensitivity;
 		yOffset *= sensitivity;
-
-		console.log( xOffset );
 
 		this.yaw += xOffset;
 		this.pitch += yOffset;
@@ -151,7 +193,7 @@ export default class Camera {
 
 		this.cameraSpeed = 3 * delta;
 
-		if ( this.keyPressed === "w" ) {
+		if ( this.activeKeys.includes( "w" ) ) {
 
 			const tempForward = vec3.clone( this.forward );
 
@@ -160,7 +202,7 @@ export default class Camera {
 
 		}
 
-		if ( this.keyPressed === "s" ) {
+		if ( this.activeKeys.includes( "s" ) ) {
 
 			const tempForward = vec3.clone( this.forward );
 
@@ -169,7 +211,7 @@ export default class Camera {
 
 		}
 
-		if ( this.keyPressed === "a" ) {
+		if ( this.activeKeys.includes( "a" ) ) {
 
 			const tempPos = vec3.clone( this.position );
 
@@ -181,7 +223,7 @@ export default class Camera {
 
 		}
 
-		if ( this.keyPressed === "d" ) {
+		if ( this.activeKeys.includes( "d" ) ) {
 
 			const tempPos = vec3.clone( this.position );
 
@@ -190,6 +232,18 @@ export default class Camera {
 
 			vec3.multiply( tempPos, tempPos, vec3.fromValues( this.cameraSpeed, this.cameraSpeed, this.cameraSpeed ) );
 			vec3.add( this.position, this.position, tempPos );
+
+		}
+
+		if ( this.activeKeys.includes( "ArrowUp" ) ) {
+
+			vec3.add( this.position, this.position, vec3.fromValues( 0, this.cameraSpeed, 0 ) );
+
+		}
+
+		if ( this.activeKeys.includes( "ArrowDown" ) ) {
+
+			vec3.add( this.position, this.position, vec3.fromValues( 0, - this.cameraSpeed, 0 ) );
 
 		}
 
