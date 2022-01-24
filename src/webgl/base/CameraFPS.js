@@ -1,6 +1,6 @@
 import { glMatrix, mat4, vec3 } from "gl-matrix";
 
-export default class Camera {
+export default class CameraFPS {
 
 	constructor( {
 		width,

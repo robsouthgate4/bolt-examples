@@ -6,6 +6,8 @@ export default class OBJParse {
 
 		this.vertices = [];
 		this.indices = [];
+		this.normals = [];
+		this.uvs = [];
 
 
 	}
