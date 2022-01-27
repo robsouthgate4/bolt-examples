@@ -1,7 +1,4 @@
 import Base from "@webgl/Base";
-import VAO from "../base/VAO";
-import VBO from "../base/VBO";
-import IBO from "../base/IBO";
 import Shader from "../base/Shader";
 
 import colorVertex from "../base/shaders/color/color.vert";
@@ -13,7 +10,7 @@ import lightCubeFragment from "../base/shaders/lightCube/lightCube.frag";
 import { mat4, vec3, } from "gl-matrix";
 import CameraFPS from "../base/CameraFPS";
 import Texture from "../base/Texture";
-import GLNode from "../base/Node";
+import GLNode from "../base/GLNode";
 
 const vertices = [
 	- 0.5, - 0.5, - 0.5, 0.0, 0.0, - 1.0,
