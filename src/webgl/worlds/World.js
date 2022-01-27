@@ -13,6 +13,7 @@ import lightCubeFragment from "../base/shaders/lightCube/lightCube.frag";
 import { mat4, vec3, } from "gl-matrix";
 import CameraFPS from "../base/CameraFPS";
 import Texture from "../base/Texture";
+import GLNode from "../base/Node";
 
 const vertices = [
 	- 0.5, - 0.5, - 0.5, 0.0, 0.0, - 1.0,
@@ -78,9 +79,9 @@ export default class World extends Base {
 		this.lightingShader;
 		this.lightCubeShader;
 		this.lightPosition;
-
-		this.cubeVBO;
 		this.lightCubeShader;
+
+		this.cube;
 
 		this.camera;
 
@@ -96,48 +97,7 @@ export default class World extends Base {
 
 		const modelData = await ( await fetch( `/static/models/json/fox.json` ) ).json();
 
-		this.foXTexture = new Texture( {
-			imagePath: "/static/textures/fox.jpeg",
-			type: this.gl.TEXTURE_2D,
-			format: this.gl.RGBA,
-			pixelType: this.gl.UNSIGNED_BYTE,
-			gl: this.gl
-		} );
-
-		this.foXTexture.loadImage();
-
-		const { position, normal, uv } = modelData;
-
-		this.lightingShader = new Shader( { vertexShader: colorVertex, fragmentShader: colorFragment, gl: this.gl } );
-		this.lightCubeShader = new Shader( { vertexShader: lightCubeVertex, fragmentShader: lightCubeFragment, gl: this.gl } );
-
-		// fox setup
-
-		this.foXTexture.textureUnit( this.lightingShader, "diffuseMap", 0 );
-
-		this.foxPositionVBO = new VBO( { data: position, gl: this.gl } );
-		this.foxNormalVBO = new VBO( { data: normal, gl: this.gl } );
-		this.foxUVVBO = new VBO( { data: uv, gl: this.gl } );
-
-		this.foxVAO = new VAO( { gl: this.gl } );
-		this.foxVAO.bind();
-		this.foxVAO.linkAttrib( { vbo: this.foxPositionVBO, layoutID: 0, numComponents: 3, type: this.gl.FLOAT, stride: 3 * 4, offset: 0 * 4 } );
-		this.foxVAO.linkAttrib( { vbo: this.foxNormalVBO, layoutID: 1, numComponents: 3, type: this.gl.FLOAT, stride: 3 * 4, offset: 0 * 4 } );
-		this.foxVAO.linkAttrib( { vbo: this.foxUVVBO, layoutID: 2, numComponents: 2, type: this.gl.FLOAT, stride: 2 * 4, offset: 0 * 4 } );
-		this.foxVAO.unbind();
-
-		// cube setup
-
-		this.cubeVBO = new VBO( { data: vertices, gl: this.gl } );
-
-		this.lightCubeVao = new VAO( { gl: this.gl } );
-		this.lightCubeVao.bind();
-		this.lightCubeVao.linkAttrib( { vbo: this.cubeVBO, layoutID: 0, numComponents: 3, type: this.gl.FLOAT, stride: 6 * 4, offset: 0 * 4 } );
-		this.lightCubeVao.linkAttrib( { vbo: this.cubeVBO, layoutID: 1, numComponents: 3, type: this.gl.FLOAT, stride: 6 * 4, offset: 3 * 4 } );
-		this.lightCubeVao.unbind();
-
-		this.foxPositionVBO.unbind();
-		this.cubeVBO.unbind();
+		this.assetsLoaded = true;
 
 		this.lightPosition = vec3.fromValues( 0, 5, 5 );
 
@@ -150,6 +110,30 @@ export default class World extends Base {
 			far: 1000,
 			fov: 45
 		} );
+
+		this.foXTexture = new Texture( {
+			imagePath: "/static/textures/fox.jpeg",
+			type: this.gl.TEXTURE_2D,
+			format: this.gl.RGBA,
+			pixelType: this.gl.UNSIGNED_BYTE,
+			gl: this.gl
+		} );
+
+		this.foXTexture.loadImage();
+
+		const { position, normal, uv } = modelData;
+
+		// setup shaders
+
+		this.lightingShader = new Shader( { vertexShader: colorVertex, fragmentShader: colorFragment, gl: this.gl } );
+		this.lightCubeShader = new Shader( { vertexShader: lightCubeVertex, fragmentShader: lightCubeFragment, gl: this.gl } );
+
+		this.foXTexture.textureUnit( this.lightingShader, "diffuseMap", 0 );
+
+		// setup nodes
+
+		this.cube = new GLNode( { vertices, gl: this.gl, stride: 6 } );
+		this.fox = new GLNode( { gl: this.gl, positions: position, normals: normal, uvs: uv, stride: 3 } );
 
 		this.resize();
 
@@ -172,9 +156,9 @@ export default class World extends Base {
 
 	update( elapsed, delta ) {
 
-		super.update( elapsed, delta );
+		if ( ! this.assetsLoaded ) return;
 
-		if ( ! this.cubeVBO ) return;
+		super.update( elapsed, delta );
 
 		this.gl.clearColor( 1, 1, 1, 1 );
 		this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT );
@@ -182,8 +166,6 @@ export default class World extends Base {
 		this.camera.update( elapsed, delta );
 
 		this.lightingShader.activate();
-
-		this.foXTexture.bind();
 		this.lightingShader.setVector3( "objectColor", vec3.fromValues( 1.0, 1.0, 1.0 ) );
 		this.lightingShader.setVector3( "lightColor", vec3.fromValues( 1.0, 1.0, 1.0 ) );
 		this.lightingShader.setVector3( "viewPosition", this.camera.getPosition() );
@@ -196,21 +178,21 @@ export default class World extends Base {
 		mat4.rotate( model, model, 1, vec3.fromValues( 0, 1, 0 ) );
 		this.lightingShader.setMatrix4( "model", model );
 
-		this.foxVAO.bind();
-		this.gl.drawArrays( this.gl.TRIANGLES, 0, 8822 / 3 );
+		this.foXTexture.bind();
+		this.fox.draw();
 
 		this.lightCubeShader.activate();
 		this.lightCubeShader.setMatrix4( "view", this.camera.getViewMatrix() );
 		this.lightCubeShader.setMatrix4( "projection", this.camera.getProjectionMatrix() );
-		this.lightCubeShader.setVector3( "lightColor", vec3.fromValues( 1, 1, 0.7 ) );
+		this.lightCubeShader.setVector3( "lightColor", vec3.fromValues( 0, 0, 0 ) );
 
 		mat4.fromTranslation( model, this.lightPosition );
 		mat4.rotate( model, model, 1, vec3.fromValues( 0, 1, 0 ) );
 		mat4.scale( model, model, vec3.fromValues( 0.2, 0.2, 0.2 ) );
 		this.lightCubeShader.setMatrix4( "model", model );
 
-		this.lightCubeVao.bind();
-		this.gl.drawArrays( this.gl.TRIANGLES, 0, 36 );
+		this.cube.draw();
+
 
 	}
 
