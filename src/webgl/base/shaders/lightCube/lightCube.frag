@@ -2,19 +2,18 @@
 
 precision highp float;
 
-//uniform sampler2D diffuse;
-
-uniform vec3 objectColor;
 uniform vec3 lightColor;
+uniform vec3 viewPosition;
 
 out vec4 FragColor;
-
-//in vec3 Normal;
 
 in vec3 vColor;
 in vec2 vUv;
 
 void main()
 {
-   FragColor = vec4( objectColor * lightColor, 1.0 );
+
+  float specularStrength = 0.5;
+
+  FragColor = vec4( lightColor, 1.0 );
 }

@@ -1,6 +1,6 @@
 export default class VBO {
 
-	constructor( { vertices, gl, id } ) {
+	constructor( { data, gl, id } ) {
 
 		this.id = id;
 		this.gl = gl;
@@ -8,7 +8,7 @@ export default class VBO {
 		this.gl.bindBuffer( this.gl.ARRAY_BUFFER, this.buffer );
 		this.gl.bufferData(
 			this.gl.ARRAY_BUFFER,
-			new Float32Array( vertices ),
+			new Float32Array( data ),
 			this.gl.STATIC_DRAW
 		);
 

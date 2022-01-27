@@ -29,6 +29,7 @@ export default class CameraFPS {
 		this.vector = vec3.create();
 		this.keyPressed = "";
 		this.activeKeys = [];
+		this.active = false;
 
 		this.target = vec3.create();
 		vec3.add( this.target, this.position, this.forward );
@@ -85,15 +86,15 @@ export default class CameraFPS {
 
 			}
 
-			if ( e.key === "ArrowUp" ) {
+			if ( e.key === "e" ) {
 
-				this.activeKeys = this.activeKeys.filter( ( e ) => e !== 'ArrowUp' );
+				this.activeKeys = this.activeKeys.filter( ( e ) => e !== 'e' );
 
 			}
 
-			if ( e.key === "ArrowDown" ) {
+			if ( e.key === "q" ) {
 
-				this.activeKeys = this.activeKeys.filter( ( e ) => e !== 'ArrowDown' );
+				this.activeKeys = this.activeKeys.filter( ( e ) => e !== 'q' );
 
 			}
 
@@ -125,15 +126,33 @@ export default class CameraFPS {
 
 			}
 
-			if ( e.key === "ArrowUp" ) {
+			if ( e.key === "e" ) {
 
-				this.activeKeys.push( "ArrowUp" );
+				this.activeKeys.push( "e" );
 
 			}
 
-			if ( e.key === "ArrowDown" ) {
+			if ( e.key === "q" ) {
 
-				this.activeKeys.push( "ArrowDown" );
+				this.activeKeys.push( "q" );
+
+			}
+
+			if ( e.code === "Space" ) {
+
+				this.active = ! this.active;
+
+				if ( ! this.active ) {
+
+					this.firstMouse = true;
+
+					document.body.style.cursor = "pointer";
+
+				} else {
+
+					document.body.style.cursor = "none";
+
+				}
 
 			}
 
@@ -142,6 +161,8 @@ export default class CameraFPS {
 	}
 
 	handleMouseMove( ev ) {
+
+		if ( ! this.active ) return;
 
 		const xPos = ev.clientX;
 		const yPos = ev.clientY;
@@ -191,6 +212,8 @@ export default class CameraFPS {
 
 	processInputs( delta ) {
 
+		if ( ! this.active ) return;
+
 		this.cameraSpeed = 3 * delta;
 
 		if ( this.activeKeys.includes( "w" ) ) {
@@ -235,13 +258,13 @@ export default class CameraFPS {
 
 		}
 
-		if ( this.activeKeys.includes( "ArrowUp" ) ) {
+		if ( this.activeKeys.includes( "e" ) ) {
 
 			vec3.add( this.position, this.position, vec3.fromValues( 0, this.cameraSpeed, 0 ) );
 
 		}
 
-		if ( this.activeKeys.includes( "ArrowDown" ) ) {
+		if ( this.activeKeys.includes( "q" ) ) {
 
 			vec3.add( this.position, this.position, vec3.fromValues( 0, - this.cameraSpeed, 0 ) );
 
@@ -250,23 +273,31 @@ export default class CameraFPS {
 
 	}
 
-	matrix( elapsed, delta, shader ) {
+	getPosition() {
+
+		return this.position;
+
+	}
+
+	getViewMatrix() {
+
+		return this.view;
+
+	}
+
+	getProjectionMatrix() {
+
+		return this.projection;
+
+	}
+
+	update( elapsed, delta ) {
 
 		this.processInputs( delta );
 
 		vec3.add( this.target, this.position, this.forward );
-
 		mat4.lookAt( this.view, this.position, this.target, this.up );
 		mat4.multiply( this.camera, this.projection, this.view );
-
-		const uniformLocationView = this.gl.getUniformLocation( shader.program, "view" );
-		this.gl.uniformMatrix4fv( uniformLocationView, false, this.view );
-
-		const uniformLocationProjection = this.gl.getUniformLocation( shader.program, "projection" );
-		this.gl.uniformMatrix4fv( uniformLocationProjection, false, this.projection );
-
-		const uniformLocationCamera = this.gl.getUniformLocation( shader.program, "camera" );
-		this.gl.uniformMatrix4fv( uniformLocationCamera, false, this.camera );
 
 	}
 
