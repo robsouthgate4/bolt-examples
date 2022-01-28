@@ -17,7 +17,7 @@ export default class GLNode {
 	} ) {
 
 		this.gl = gl;
-		this.stride = stride;
+		this.stride = stride || 3;
 		this.vertices = vertices;
 		this.positions = positions;
 		this.indices = indices;

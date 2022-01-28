@@ -1,17 +1,18 @@
 import Base from "@webgl/Base";
-import Shader from "../base/Shader";
+import Shader from "../core/Shader";
 
-import colorVertex from "../base/shaders/color/color.vert";
-import colorFragment from "../base/shaders/color/color.frag";
+import colorVertex from "../core/shaders/color/color.vert";
+import colorFragment from "../core/shaders/color/color.frag";
 
-import lightCubeVertex from "../base/shaders/lightCube/lightCube.vert";
-import lightCubeFragment from "../base/shaders/lightCube/lightCube.frag";
+import lightCubeVertex from "../core/shaders/lightCube/lightCube.vert";
+import lightCubeFragment from "../core/shaders/lightCube/lightCube.frag";
 
 import { glMatrix, mat4, vec3, } from "gl-matrix";
-import CameraFPS from "../base/CameraFPS";
-import Texture from "../base/Texture";
-import GLNode from "../base/GLNode";
+import CameraFPS from "../core/CameraFPS";
+import Texture from "../core/Texture";
+import GLNode from "../core/GLNode";
 import { loadBinaryBuffer } from "../../utils";
+import Transform from "../modules/SceneGraph/Transform";
 
 const vertices = [
 	- 0.5, - 0.5, - 0.5, 0.0, 0.0, - 1.0,
@@ -63,6 +64,9 @@ export default class World extends Base {
 
 		super();
 
+		this.transform = new Transform();
+		this.transform.getLocalModelMatrix();
+
 		this.canvas = document.getElementById( "experience" );
 		this.canvas.width = window.innerWidth;
 		this.canvas.height = window.innerHeight;
@@ -87,7 +91,6 @@ export default class World extends Base {
 
 		this.gl.viewport( 0, 0, this.gl.canvas.width, this.gl.canvas.height );
 		this.gl.enable( this.gl.DEPTH_TEST );
-		//this.gl.pixelStorei( this.gl.UNPACK_FLIP_Y_WEBGL, true );
 
 		this.init();
 
@@ -256,7 +259,6 @@ export default class World extends Base {
 		this.lightingShader.setMatrix4( "model", model );
 
 		this.model.drawTriangles( this.lightingShader );
-		//this.model.drawTriangles( this.lightingShader );
 
 		this.lightCubeShader.activate();
 		this.lightCubeShader.setMatrix4( "view", this.camera.getViewMatrix() );
