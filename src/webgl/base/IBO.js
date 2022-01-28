@@ -5,11 +5,24 @@ export default class IBO {
 		this.gl = gl;
 		this.indicesBuffer = this.gl.createBuffer();
 		this.gl.bindBuffer( this.gl.ELEMENT_ARRAY_BUFFER, this.indicesBuffer );
-		this.gl.bufferData(
-			this.gl.ELEMENT_ARRAY_BUFFER,
-			new Uint16Array( indices ),
-			this.gl.STATIC_DRAW
-		);
+
+		if ( indices instanceof Uint16Array ) {
+
+			this.gl.bufferData(
+				this.gl.ELEMENT_ARRAY_BUFFER,
+				indices,
+				this.gl.STATIC_DRAW
+			);
+
+		} else {
+
+			this.gl.bufferData(
+				this.gl.ELEMENT_ARRAY_BUFFER,
+				new Uint16Array( indices ),
+				this.gl.STATIC_DRAW
+			);
+
+		}
 
 	}
 

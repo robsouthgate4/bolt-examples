@@ -26,21 +26,24 @@ export default class Texture {
 
 	textureUnit( shader, uniformName, unit ) {
 
-		const textureUnit = this.gl.getUniformLocation( shader.program, uniformName );
 		shader.activate();
+		const textureUnit = this.gl.getUniformLocation( shader.program, uniformName );
 		this.gl.uniform1i( textureUnit, unit );
+
+		this.gl.activeTexture( this.gl.TEXTURE0 + unit );
+		this.bind();
 
 	}
 
 	bind() {
 
-		this.gl.bindTexture( this.type, this.texture );
+		this.gl.bindTexture( this.gl.TEXTURE_2D, this.texture );
 
 	}
 
 	unbind() {
 
-		this.gl.bindTexture( this.type, null );
+		this.gl.bindTexture( this.gl.TEXTURE_2D, null );
 
 	}
 
@@ -65,19 +68,18 @@ export default class Texture {
 
 			if ( this.isPowerOf2( image.width ) && this.isPowerOf2( image.height ) ) {
 
-				// Yes, it's a power of 2. Generate mips.
 				this.gl.generateMipmap( this.gl.TEXTURE_2D );
 
 			}
 
-			this.gl.bindTexture( this.type, this.texture );
-			this.gl.texImage2D( this.type, 0, this.format, this.format, this.pixelType, image );
+			this.gl.bindTexture( this.gl.TEXTURE_2D, this.texture );
+			this.gl.texImage2D( this.gl.TEXTURE_2D, 0, this.format, this.format, this.pixelType, image );
 
 			this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE );
 			this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE );
 			this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR );
 
-			this.gl.bindTexture( this.type, null );
+			this.gl.bindTexture( this.gl.TEXTURE_2D, null );
 
 		} );
 

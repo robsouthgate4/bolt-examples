@@ -6,7 +6,8 @@ uniform vec3 objectColor;
 uniform vec3 lightColor;
 uniform vec3 lightPosition;
 uniform vec3 viewPosition;
-uniform sampler2D diffuseMap;
+uniform sampler2D map0;
+uniform sampler2D map1;
 
 out vec4 FragColor;
 
@@ -17,9 +18,12 @@ in vec3 FragPosition;
 void main()
 {
 
-  vec3 texDiffuse = texture( diffuseMap, vUv ).rgb;
+  vec3 texDiffuse = texture( map0, vUv ).rgb;
+  vec3 texAO      = texture( map1, vUv ).rgb;
 
-  float ambientStrength = 0.5;
+  texDiffuse *= texAO.r;
+
+  float ambientStrength = 0.6;
   vec3  ambient         = ambientStrength * lightColor * texDiffuse;
 
   vec3 norm           = normalize( Normal );
@@ -37,6 +41,8 @@ void main()
 
   vec3 result = ambient * objectColor;
 
-  FragColor = vec4( ( ambient + diffuse + specular ) * objectColor, 1.0);
+  FragColor = vec4( ( ambient + diffuse + specular ) * objectColor , 1.0);
+
+  //FragColor = vec4( texAO, 1.0 );
 
 }

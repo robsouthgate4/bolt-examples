@@ -6,11 +6,25 @@ export default class VBO {
 		this.gl = gl;
 		this.buffer = this.gl.createBuffer();
 		this.gl.bindBuffer( this.gl.ARRAY_BUFFER, this.buffer );
-		this.gl.bufferData(
-			this.gl.ARRAY_BUFFER,
-			new Float32Array( data ),
-			this.gl.STATIC_DRAW
-		);
+
+		if ( data instanceof Float32Array ) {
+
+			this.gl.bufferData(
+				this.gl.ARRAY_BUFFER,
+				data,
+				this.gl.STATIC_DRAW
+			);
+
+		} else {
+
+			this.gl.bufferData(
+				this.gl.ARRAY_BUFFER,
+				new Float32Array( data ),
+				this.gl.STATIC_DRAW
+			);
+
+		}
+
 
 	}
 

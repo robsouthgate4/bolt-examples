@@ -1,6 +1,7 @@
 import { vec3 } from "gl-matrix";
 import VAO from "./VAO";
 import VBO from "./VBO";
+import IBO from "./IBO";
 
 export default class GLNode {
 
@@ -16,11 +17,8 @@ export default class GLNode {
 	} ) {
 
 		this.gl = gl;
-
 		this.stride = stride;
-
 		this.vertices = vertices;
-
 		this.positions = positions;
 		this.indices = indices;
 		this.normals = normals;
@@ -32,17 +30,23 @@ export default class GLNode {
 		// assume the positions, normals and vertices are interleaved
 		if ( this.vertices.length > 0 ) {
 
-			this.handleInterleaved();
+			this.linkInterleavedBuffer();
 
 		} else {
 
-			this.handleBuffers();
+			this.linkBuffers();
+
+		}
+
+		if ( this.indices.length > 0 ) {
+
+			this.ibo = new IBO( { indices, gl: this.gl } );
 
 		}
 
 	}
 
-	handleBuffers() {
+	linkBuffers() {
 
 		const positionVbo = new VBO( { data: this.positions, gl: this.gl } );
 		const normalVbo = new VBO( { data: this.normals, gl: this.gl } );
@@ -63,17 +67,18 @@ export default class GLNode {
 
 	}
 
-	handleInterleaved() {
+	linkInterleavedBuffer() {
 
 		const vbo = new VBO( { data: this.vertices, gl: this.gl } );
 
 		this.vao.bind();
+
 		// link positions
 		this.vao.linkAttrib( { vbo, layoutID: 0, numComponents: 3, type: this.gl.FLOAT, stride: this.stride * 4, offset: 0 * 4 } );
 		// link normals
 		this.vao.linkAttrib( { vbo, layoutID: 1, numComponents: 3, type: this.gl.FLOAT, stride: this.stride * 4, offset: 3 * 4 } );
 		// link uvs
-		//this.vao.linkAttrib( { vbo, layoutID: 2, numComponents: 2, type: this.gl.FLOAT, stride: this.stride * 4, offset: 6 * 4 } ); // TODO: create way to detect data provided
+		this.vao.linkAttrib( { vbo, layoutID: 2, numComponents: 2, type: this.gl.FLOAT, stride: this.stride * 4, offset: 6 * 4 } );
 
 		this.vao.unbind();
 		vbo.unbind();
@@ -138,18 +143,79 @@ export default class GLNode {
 
 	}
 
-	draw() {
+	bindTextures( shader ) {
+
+		if ( ! shader ) return;
+
+		if ( this.textures.length > 0 ) {
+
+			for ( let i = 0; i < this.textures.length; i ++ ) {
+
+				const texture = this.textures[ i ];
+
+				texture.textureUnit( shader, `map${i}`, i );
+				texture.bind();
+
+			}
+
+		}
+
+	}
+
+	drawPoints( shader ) {
+
+		this.bindTextures( shader );
 
 		this.vao.bind();
-		if ( this.vertices.length > 0 ) {
+		this.gl.drawArrays( this.gl.POINTS, 0, this.positions.length / this.stride );
+		this.vao.unbind();
 
-			this.gl.drawArrays( this.gl.TRIANGLES, 0, this.vertices.length / this.stride );
+	}
+
+	drawLines( shader ) {
+
+		this.bindTextures( shader );
+
+		this.vao.bind();
+		this.ibo.bind();
+		this.gl.drawElements( this.gl.LINE_STRIP, this.indices.length, this.gl.UNSIGNED_SHORT, 0 * 4 );
+		this.vao.unbind();
+
+	}
+
+	drawTriangles( shader ) {
+
+		this.bindTextures( shader );
+
+		this.vao.bind();
+
+		if ( this.indices.length > 0 ) {
+
+			this.ibo.bind();
+
+			this.gl.drawElements( this.gl.TRIANGLES, this.indices.length, this.gl.UNSIGNED_SHORT, 0 * 4 );
+
+			this.ibo.unbind();
 
 		} else {
 
-			this.gl.drawArrays( this.gl.TRIANGLES, 0, this.positions.length / this.stride );
+			if ( this.vertices.length > 0 ) {
+
+				// draw interleaved
+
+				this.gl.drawArrays( this.gl.TRIANGLES, 0, this.vertices.length / this.stride );
+
+			} else {
+
+				// draw buffers
+
+				this.gl.drawArrays( this.gl.TRIANGLES, 0, this.positions.length / this.stride );
+
+			}
 
 		}
+
+		this.vao.unbind();
 
 	}
 
