@@ -1,6 +1,7 @@
 import { glMatrix, mat4, vec3 } from "gl-matrix";
+import Camera from "../core/Camera";
 
-export default class CameraFPS {
+export default class CameraFPS extends Camera {
 
 	constructor( {
 		width,
@@ -12,27 +13,19 @@ export default class CameraFPS {
 		far
 	} ) {
 
-		this.gl = gl;
-		this.fov = fov;
-		this.near = near;
-		this.far = far;
-		this.width = width,
-		this.height = height;
-		this.position = position;
+		super( {
+			width,
+			height,
+			position,
+			gl,
+			fov,
+			near,
+			far
+		} );
 
-		this.view = mat4.create();
-		this.projection = mat4.create();
-		this.camera = mat4.create();
-		this.up = vec3.fromValues( 0, 1, 0 );
-		this.forward = vec3.fromValues( 0, 0, - 1 );
-
-		this.vector = vec3.create();
 		this.keyPressed = "";
 		this.activeKeys = [];
 		this.active = false;
-
-		this.target = vec3.create();
-		vec3.add( this.target, this.position, this.forward );
 
 		this.yaw = - 90;
 		this.pitch = 0;

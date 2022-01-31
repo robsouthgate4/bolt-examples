@@ -8,11 +8,13 @@ import lightCubeVertex from "../core/shaders/lightCube/lightCube.vert";
 import lightCubeFragment from "../core/shaders/lightCube/lightCube.frag";
 
 import { glMatrix, mat4, vec3, } from "gl-matrix";
-import CameraFPS from "../core/CameraFPS";
 import ArrayBuffer from "../core/ArrayBuffer";
 import { loadBinaryBuffer } from "../../utils";
 import Node from "../modules/SceneGraph/Node";
 import Transform from "../modules/SceneGraph/Transform";
+import CameraArcball from "../modules/CameraArcball";
+import Camera from "../core/Camera";
+import CameraFPS from "../modules/CameraFPS";
 
 const vertices = [
 	- 0.5, - 0.5, - 0.5, 0.0, 0.0, - 1.0,
@@ -77,11 +79,11 @@ export default class World extends Base {
 		this.cube;
 		this.model;
 
-		this.camera = new CameraFPS( {
+		this.camera = new CameraArcball( {
 			width: window.innerWidth,
 			height: window.innerHeight,
 			gl: this.gl,
-			position: vec3.fromValues( 0, 0, 3 ),
+			position: vec3.fromValues( 0, 0, 5 ),
 			near: 0.01,
 			far: 1000,
 			fov: 45
@@ -187,7 +189,7 @@ export default class World extends Base {
 		this.lightCubeShader.activate();
 		this.lightCubeShader.setVector3( "lightColor", vec3.fromValues( 1, 1, 1 ) );
 
-		// setup nodes
+		// setup transforms
 		this.cubeTransform = new Transform();
 		this.cubeTransform.position[ 0 ] = 0;
 		this.cubeTransform.position[ 1 ] = 0;
@@ -195,15 +197,17 @@ export default class World extends Base {
 		this.cubeTransform.rotation[ 1 ] = glMatrix.toRadian( 45 );
 		this.cubeTransform.scale[ 0 ] = 0.5;
 
+		this.cubeTransformTwo = new Transform();
+		this.cubeTransformTwo.position[ 0 ] = 2;
+		this.cubeTransformTwo.position[ 1 ] = 0;
+		this.cubeTransformTwo.position[ 2 ] = 0;
+
+
+		// setup nodes
 		this.cubeNode = new Node( {
 			arrayBuffer: new ArrayBuffer( { gl: this.gl, vertices, stride: 6 } ),
 			transform: this.cubeTransform
 		} );
-
-		this.cubeTransformTwo = new Transform();
-		this.cubeTransformTwo.position[ 0 ] = 0;
-		this.cubeTransformTwo.position[ 1 ] = 0;
-		this.cubeTransformTwo.position[ 2 ] = - 2;
 
 		this.cubeNodeTwo = new Node( {
 			arrayBuffer: new ArrayBuffer( { gl: this.gl, vertices, stride: 6 } ),
