@@ -3,7 +3,7 @@ import VAO from "./VAO";
 import VBO from "./VBO";
 import IBO from "./IBO";
 
-export default class GLNode {
+export default class ArrayBuffer {
 
 	constructor( {
 		vertices = [],

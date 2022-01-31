@@ -24,7 +24,7 @@ void main()
   texDiffuse *= texAO.r;
 
   float ambientStrength = 0.6;
-  vec3  ambient         = ambientStrength * lightColor * texDiffuse;
+  vec3  ambient         = ambientStrength * lightColor; //* texDiffuse;
 
   vec3 norm           = normalize( Normal );
   vec3 lightDirection = normalize( lightPosition - FragPosition );
@@ -41,7 +41,7 @@ void main()
 
   vec3 result = ambient * objectColor;
 
-  FragColor = vec4( ( ambient + diffuse + specular ) * objectColor * 1.0, 1.0);
+  FragColor = vec4( ( ambient + diffuse + specular ), 1.0);
 
   //FragColor = vec4( texAO, 1.0 );
 

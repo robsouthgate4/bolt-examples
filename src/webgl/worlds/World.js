@@ -9,10 +9,9 @@ import lightCubeFragment from "../core/shaders/lightCube/lightCube.frag";
 
 import { glMatrix, mat4, vec3, } from "gl-matrix";
 import CameraFPS from "../core/CameraFPS";
-import Texture from "../core/Texture";
-import GLNode from "../core/GLNode";
+import ArrayBuffer from "../core/ArrayBuffer";
 import { loadBinaryBuffer } from "../../utils";
-import Transform from "../modules/SceneGraph/Transform";
+import Node from "../modules/SceneGraph/Node";
 
 const vertices = [
 	- 0.5, - 0.5, - 0.5, 0.0, 0.0, - 1.0,
@@ -64,8 +63,7 @@ export default class World extends Base {
 
 		super();
 
-		this.transform = new Transform();
-		this.transform.getLocalModelMatrix();
+
 
 		this.canvas = document.getElementById( "experience" );
 		this.canvas.width = window.innerWidth;
@@ -74,7 +72,8 @@ export default class World extends Base {
 
 		this.lightingShader = new Shader( { vertexShader: colorVertex, fragmentShader: colorFragment, gl: this.gl } );
 		this.lightCubeShader = new Shader( { vertexShader: lightCubeVertex, fragmentShader: lightCubeFragment, gl: this.gl } );
-		this.lightPosition = vec3.fromValues( 0, 5, 5 );
+		this.lightPosition = vec3.fromValues( 0, 0, 0 );
+		this.lightPositionTwo = vec3.fromValues( 2, 0, 0 );
 
 		this.cube;
 		this.model;
@@ -83,7 +82,7 @@ export default class World extends Base {
 			width: window.innerWidth,
 			height: window.innerHeight,
 			gl: this.gl,
-			position: vec3.fromValues( 0, 3, 10 ),
+			position: vec3.fromValues( 0, 0, 3 ),
 			near: 0.01,
 			far: 1000,
 			fov: 45
@@ -179,43 +178,37 @@ export default class World extends Base {
 
 	async init() {
 
-		const gltfModelDAta = await this.loadGLTF( `/static/models/gltf/terrain.gltf` );
-
 		this.assetsLoaded = true;
-
-		const diffuseMap = new Texture( {
-			imagePath: "/static/models/gltf/terrainBase.jpg",
-			type: this.gl.TEXTURE_2D,
-			format: this.gl.RGBA,
-			pixelType: this.gl.UNSIGNED_BYTE,
-			gl: this.gl
-		} );
-
-		diffuseMap.loadImage();
-
-		const aoMap = new Texture( {
-			imagePath: "/static/models/gltf/AO.png",
-			type: this.gl.TEXTURE_2D,
-			format: this.gl.RGBA,
-			pixelType: this.gl.UNSIGNED_BYTE,
-			gl: this.gl
-		} );
-
-		aoMap.loadImage();
-
-		const { positions, normals, uvs, indices } = gltfModelDAta;
 
 		// set shader uniforms
 		this.lightingShader.activate();
 		this.lightingShader.setVector3( "objectColor", vec3.fromValues( 1.0, 1.0, 1.0 ) );
 		this.lightingShader.setVector3( "lightColor", vec3.fromValues( 0.95, 1.0, 1.0 ) );
-		this.lightingShader.setVector3( "lightPosition", this.lightPosition );
+
+		this.lightCubeShader.activate();
+		this.lightCubeShader.setVector3( "lightColor", vec3.fromValues( 1, 1, 1 ) );
 
 		// setup nodes
-		this.cube = new GLNode( { gl: this.gl, vertices, stride: 6 } );
-		this.model = new GLNode( { gl: this.gl, textures: [ diffuseMap, aoMap ], positions, normals, uvs, indices, stride: 3 } );
+		this.cube = new ArrayBuffer( { gl: this.gl, vertices, stride: 6 } );
 
-		console.log( this.model );
+		this.cubeNode = new Node( {
+			arrayBuffer: new ArrayBuffer( { gl: this.gl, vertices, stride: 6 } ),
+			shader: this.lightingShader
+		} );
+
+		mat4.fromTranslation( this.cubeNode.localMatrix, this.lightPosition );
+		mat4.scale( this.cubeNode.localMatrix, this.cubeNode.localMatrix, vec3.fromValues( 0.6, 0.6, 0.6 ) );
+
+		this.cubeNodeTwo = new Node( {
+			arrayBuffer: new ArrayBuffer( { gl: this.gl, vertices, stride: 6 } ),
+			shader: this.lightingShader
+		} );
+
+		this.cubeNodeTwo.setParent( this.cubeNode );
+
+		mat4.fromTranslation( this.cubeNodeTwo.localMatrix, this.lightPositionTwo );
+
+
 
 		this.resize();
 
@@ -247,30 +240,17 @@ export default class World extends Base {
 
 		this.camera.update( elapsed, delta );
 
-		this.lightingShader.activate();
-		this.lightingShader.setVector3( "viewPosition", this.camera.getPosition() );
-		this.lightingShader.setMatrix4( "view", this.camera.getViewMatrix() );
-		this.lightingShader.setMatrix4( "projection", this.camera.getProjectionMatrix() );
+		mat4.rotate( this.cubeNode.localMatrix, this.cubeNode.localMatrix, glMatrix.toRadian( 2 ), vec3.fromValues( 0, 1, 0 ) );
 
-		const model = mat4.create();
-		mat4.fromTranslation( model, vec3.fromValues( 0, 0, 0 ) );
-		mat4.scale( model, model, vec3.fromValues( 1, 1, 1 ) );
-		mat4.rotate( model, model, glMatrix.toRadian( 45 ), vec3.fromValues( 0, 1, 0 ) );
-		this.lightingShader.setMatrix4( "model", model );
+		this.cubeNode.updateModelMatrix();
 
-		this.model.drawTriangles( this.lightingShader );
+		this.cubeNode.drawTriangles( this.lightCubeShader, this.camera );
+		this.cubeNodeTwo.drawTriangles( this.lightCubeShader, this.camera );
 
-		this.lightCubeShader.activate();
-		this.lightCubeShader.setMatrix4( "view", this.camera.getViewMatrix() );
-		this.lightCubeShader.setMatrix4( "projection", this.camera.getProjectionMatrix() );
-		this.lightCubeShader.setVector3( "lightColor", vec3.fromValues( 0, 0, 0 ) );
 
-		mat4.fromTranslation( model, this.lightPosition );
-		mat4.rotate( model, model, 1, vec3.fromValues( 0, 1, 0 ) );
-		mat4.scale( model, model, vec3.fromValues( 0.2, 0.2, 0.2 ) );
-		this.lightCubeShader.setMatrix4( "model", model );
 
-		this.cube.drawTriangles();
+
+
 
 	}
 
