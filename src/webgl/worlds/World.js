@@ -12,6 +12,7 @@ import CameraFPS from "../core/CameraFPS";
 import ArrayBuffer from "../core/ArrayBuffer";
 import { loadBinaryBuffer } from "../../utils";
 import Node from "../modules/SceneGraph/Node";
+import Transform from "../modules/SceneGraph/Transform";
 
 const vertices = [
 	- 0.5, - 0.5, - 0.5, 0.0, 0.0, - 1.0,
@@ -62,8 +63,6 @@ export default class World extends Base {
 	constructor() {
 
 		super();
-
-
 
 		this.canvas = document.getElementById( "experience" );
 		this.canvas.width = window.innerWidth;
@@ -189,26 +188,30 @@ export default class World extends Base {
 		this.lightCubeShader.setVector3( "lightColor", vec3.fromValues( 1, 1, 1 ) );
 
 		// setup nodes
-		this.cube = new ArrayBuffer( { gl: this.gl, vertices, stride: 6 } );
+		this.cubeTransform = new Transform();
+		this.cubeTransform.position[ 0 ] = 0;
+		this.cubeTransform.position[ 1 ] = 0;
+		this.cubeTransform.position[ 2 ] = 0;
+		this.cubeTransform.rotation[ 1 ] = glMatrix.toRadian( 45 );
+		this.cubeTransform.scale[ 0 ] = 0.5;
 
 		this.cubeNode = new Node( {
 			arrayBuffer: new ArrayBuffer( { gl: this.gl, vertices, stride: 6 } ),
-			shader: this.lightingShader
+			transform: this.cubeTransform
 		} );
 
-		mat4.fromTranslation( this.cubeNode.localMatrix, this.lightPosition );
-		mat4.scale( this.cubeNode.localMatrix, this.cubeNode.localMatrix, vec3.fromValues( 0.6, 0.6, 0.6 ) );
+		this.cubeTransformTwo = new Transform();
+		this.cubeTransformTwo.position[ 0 ] = 0;
+		this.cubeTransformTwo.position[ 1 ] = 0;
+		this.cubeTransformTwo.position[ 2 ] = - 2;
 
 		this.cubeNodeTwo = new Node( {
 			arrayBuffer: new ArrayBuffer( { gl: this.gl, vertices, stride: 6 } ),
-			shader: this.lightingShader
+			transform: this.cubeTransformTwo
 		} );
 
 		this.cubeNodeTwo.setParent( this.cubeNode );
-
-		mat4.fromTranslation( this.cubeNodeTwo.localMatrix, this.lightPositionTwo );
-
-
+		this.cubeNode.updateModelMatrix();
 
 		this.resize();
 
@@ -240,17 +243,8 @@ export default class World extends Base {
 
 		this.camera.update( elapsed, delta );
 
-		mat4.rotate( this.cubeNode.localMatrix, this.cubeNode.localMatrix, glMatrix.toRadian( 2 ), vec3.fromValues( 0, 1, 0 ) );
-
-		this.cubeNode.updateModelMatrix();
-
 		this.cubeNode.drawTriangles( this.lightCubeShader, this.camera );
 		this.cubeNodeTwo.drawTriangles( this.lightCubeShader, this.camera );
-
-
-
-
-
 
 	}
 

@@ -2,13 +2,14 @@ import { mat4 } from "gl-matrix";
 
 export default class Node {
 
-	constructor( { arrayBuffer } ) {
+	constructor( { arrayBuffer, transform } ) {
 
 		this.localMatrix = mat4.create();
 		this.modelMatrix = mat4.create();
 		this.children = [];
 		this.parent = null;
 		this.arrayBuffer = arrayBuffer;
+		this.transform = transform;
 
 	}
 
@@ -37,6 +38,13 @@ export default class Node {
 	}
 
 	updateModelMatrix( parentModelMatrix ) {
+
+		const transform = this.transform;
+		if ( transform ) {
+
+			transform.getMatrix( this.localMatrix );
+
+		}
 
 		if ( parentModelMatrix ) {
 
