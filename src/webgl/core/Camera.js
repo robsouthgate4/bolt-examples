@@ -32,7 +32,7 @@ export default class Camera {
 		this.target = vec3.create();
 		vec3.add( this.target, this.position, this.forward );
 
-		this.resize();
+		this.resize( width, height );
 
 	}
 

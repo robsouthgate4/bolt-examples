@@ -66,9 +66,12 @@ export default class World extends Base {
 
 		super();
 
+		this.width = 512;
+		this.height = 512;
+
 		this.canvas = document.getElementById( "experience" );
-		this.canvas.width = window.innerWidth;
-		this.canvas.height = window.innerHeight;
+		this.canvas.width = this.width;
+		this.canvas.height = this.height;
 		this.gl = this.canvas.getContext( "webgl2", { antialias: true } );
 
 		this.lightingShader = new Shader( { vertexShader: colorVertex, fragmentShader: colorFragment, gl: this.gl } );
@@ -80,8 +83,8 @@ export default class World extends Base {
 		this.model;
 
 		this.camera = new CameraArcball( {
-			width: window.innerWidth,
-			height: window.innerHeight,
+			width: this.width,
+			height: this.height,
 			gl: this.gl,
 			position: vec3.fromValues( 0, 0, 0 ),
 			near: 0.01,
@@ -196,30 +199,19 @@ export default class World extends Base {
 		this.cubeTransform.position[ 0 ] = 0;
 		this.cubeTransform.position[ 1 ] = 0;
 		this.cubeTransform.position[ 2 ] = 0;
-		this.cubeTransform.rotation[ 1 ] = glMatrix.toRadian( 45 );
 
 		this.cubeTransformTwo = new Transform();
 		this.cubeTransformTwo.position[ 0 ] = 0;
 		this.cubeTransformTwo.position[ 1 ] = 0;
 		this.cubeTransformTwo.position[ 2 ] = 0;
-		this.cubeTransformTwo.scale[ 0 ] = 0.5;
-		this.cubeTransformTwo.scale[ 1 ] = 0.5;
-		this.cubeTransformTwo.scale[ 2 ] = 0.5;
+		this.cubeTransformTwo.scale = vec3.fromValues( 0.75, 0.75, 0.75 );
 
 
 		// setup nodes
 		this.cubeNode = new Node( {
-			arrayBuffer: new ArrayBuffer( { gl: this.gl, indices, positions, normals, uvs, stride: 6 } ),
+			arrayBuffer: new ArrayBuffer( { gl: this.gl, vertices, uvs, stride: 6 } ),
 			transform: this.cubeTransform
 		} );
-
-		this.cubeNodeTwo = new Node( {
-			arrayBuffer: new ArrayBuffer( { gl: this.gl, vertices, stride: 6 } ),
-			transform: this.cubeTransformTwo
-		} );
-
-		this.cubeNodeTwo.setParent( this.cubeNode );
-		this.cubeNode.updateModelMatrix();
 
 		this.resize();
 
@@ -227,10 +219,21 @@ export default class World extends Base {
 
 	resize() {
 
-		let w = window.innerWidth;
-		let h = window.innerHeight;
+		const displayWidth = this.gl.canvas.clientWidth;
+		const displayHeight = this.gl.canvas.clientHeight;
 
-		this.camera.resize( w, h );
+		// Check if the this.gl.canvas is not the same size.
+		const needResize = this.gl.canvas.width !== displayWidth ||
+                     this.gl.canvas.height !== displayHeight;
+
+		if ( needResize ) {
+
+			this.gl.canvas.width = displayWidth;
+			this.gl.canvas.height = displayHeight;
+
+		}
+
+		this.camera.resize( this.gl.canvas.width, this.gl.canvas.height );
 
 	}
 
@@ -246,13 +249,16 @@ export default class World extends Base {
 
 		super.update( elapsed, delta );
 
+		this.gl.viewport( 0, 0, this.gl.canvas.width, this.gl.canvas.height );
 		this.gl.clearColor( 0, 0, 0, 1 );
 		this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT );
 
 		this.camera.update( elapsed, delta );
 
+		this.cubeTransform.rotation[ 1 ] += glMatrix.toRadian( 1 );
+		this.cubeNode.updateModelMatrix();
+
 		this.cubeNode.drawTriangles( this.lightCubeShader, this.camera );
-		this.cubeNodeTwo.drawTriangles( this.lightCubeShader, this.camera );
 
 	}
 

@@ -24,7 +24,7 @@ export default class Main {
 		this.world.start();
 		window.addEventListener( "resize", () => {
 
-			this.world.resize( window.innerWidth, window.innerHeight );
+			this.world.resize( );
 
 		} );
 		updateAssetsLoading( false );

@@ -15,13 +15,15 @@ html {
 body {
     overflow: hidden;
     touch-action: pan-y;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 canvas#experience {
-    position: fixed;
     z-index: 0;
-    width: 100%;
-    height: 100%;
+    width: 512px;
+    height: 512px;
     //opacity: 0;
 }
 

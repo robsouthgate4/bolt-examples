@@ -46,9 +46,9 @@ export default class CameraArcball extends Camera {
 		this.targetYOnMouseDown = 0;
 
 		this.targetX = 0;
-		this.targetY = Math.PI * 0.25;
+		this.targetY = Math.PI * 0.15;
 
-		this.radius = 5;
+		this.radius = 2;
 
 		this.damping = 0.2;
 

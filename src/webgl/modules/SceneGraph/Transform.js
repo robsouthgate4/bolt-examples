@@ -1,8 +1,10 @@
-import { mat4, vec3 } from "gl-matrix";
+import { mat4, vec3, quat } from "gl-matrix";
 
 export default class Transform {
 
 	constructor() {
+
+		console.log( quat );
 
 		this.position = vec3.fromValues( 0, 0, 0 );
 		this.rotation = vec3.fromValues( 0, 0, 0 );
@@ -15,6 +17,10 @@ export default class Transform {
 		const t = this.position;
 		const r = this.rotation;
 		const s = this.scale;
+
+		const q = quat.create();
+
+		mat4.fromRotationTranslationScale( localMatrix, q, t, s );
 
 		mat4.translate( localMatrix, localMatrix, t );
 		mat4.rotateX( localMatrix, localMatrix, r[ 0 ] );
