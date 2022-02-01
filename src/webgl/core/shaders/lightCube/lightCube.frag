@@ -8,12 +8,12 @@ uniform vec3 viewPosition;
 out vec4 FragColor;
 
 in vec3 vColor;
-in vec2 vUv;
+in vec3 vNormal;
 
 void main()
 {
 
   float specularStrength = 0.5;
 
-  FragColor = vec4( lightColor, 1.0 );
+  FragColor = vec4( vNormal * 0.5 + 0.5, 1.0 );
 }

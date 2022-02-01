@@ -83,7 +83,7 @@ export default class World extends Base {
 			width: window.innerWidth,
 			height: window.innerHeight,
 			gl: this.gl,
-			position: vec3.fromValues( 0, 0, 5 ),
+			position: vec3.fromValues( 0, 0, 0 ),
 			near: 0.01,
 			far: 1000,
 			fov: 45
@@ -179,6 +179,8 @@ export default class World extends Base {
 
 	async init() {
 
+		const { positions, normals, uvs, indices } = await this.loadGLTF( "/static/models/gltf/cube.gltf" );
+
 		this.assetsLoaded = true;
 
 		// set shader uniforms
@@ -195,17 +197,19 @@ export default class World extends Base {
 		this.cubeTransform.position[ 1 ] = 0;
 		this.cubeTransform.position[ 2 ] = 0;
 		this.cubeTransform.rotation[ 1 ] = glMatrix.toRadian( 45 );
-		this.cubeTransform.scale[ 0 ] = 0.5;
 
 		this.cubeTransformTwo = new Transform();
-		this.cubeTransformTwo.position[ 0 ] = 2;
+		this.cubeTransformTwo.position[ 0 ] = 0;
 		this.cubeTransformTwo.position[ 1 ] = 0;
 		this.cubeTransformTwo.position[ 2 ] = 0;
+		this.cubeTransformTwo.scale[ 0 ] = 0.5;
+		this.cubeTransformTwo.scale[ 1 ] = 0.5;
+		this.cubeTransformTwo.scale[ 2 ] = 0.5;
 
 
 		// setup nodes
 		this.cubeNode = new Node( {
-			arrayBuffer: new ArrayBuffer( { gl: this.gl, vertices, stride: 6 } ),
+			arrayBuffer: new ArrayBuffer( { gl: this.gl, indices, positions, normals, uvs, stride: 6 } ),
 			transform: this.cubeTransform
 		} );
 

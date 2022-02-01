@@ -1,4 +1,4 @@
-import { glMatrix, mat4, vec3 } from "gl-matrix";
+import { mat4, vec3 } from "gl-matrix";
 import Camera from "../core/Camera";
 
 export default class CameraArcball extends Camera {
@@ -7,6 +7,7 @@ export default class CameraArcball extends Camera {
 		width,
 		height,
 		position,
+		target,
 		gl,
 		fov,
 		near,
@@ -23,8 +24,7 @@ export default class CameraArcball extends Camera {
 			far
 		} );
 
-		this.target = vec3.fromValues( 0, 0, 0 );
-		//vec3.add( this.target, this.position, this.forward );
+		this.target = target || vec3.fromValues( 0, 0, 0 );
 
 		this.firstMouse = true;
 		this.mouseDown = false;
@@ -36,8 +36,8 @@ export default class CameraArcball extends Camera {
 		this.azimuth = 0;
 		this.elevation = 0;
 
-		this.deltaAzimuth = 0;
-		this.deltaElevation = 0;
+		this.rotateAmountX = 3;
+		this.rotateAmountY = 3;
 
 		this.mouseXOnMouseDown = 0;
 		this.mouseYOnMouseDown = 0;
@@ -46,9 +46,11 @@ export default class CameraArcball extends Camera {
 		this.targetYOnMouseDown = 0;
 
 		this.targetX = 0;
-		this.targetY = 0;
+		this.targetY = Math.PI * 0.25;
 
 		this.radius = 5;
+
+		this.damping = 0.2;
 
 		this.resize();
 
@@ -67,18 +69,8 @@ export default class CameraArcball extends Camera {
 	getMousePosition( ev ) {
 
 		return {
-			normalized: {
-				x: ( ev.clientX / window.innerWidth ) * 2 - 1,
-				y: - ( ev.clientY / window.innerHeight ) * 2 + 1,
-			},
-			raw: {
-				x: ev.clientX,
-				y: ev.clientY,
-			},
-			rawNormalized: {
-				x: ( ev.clientX - window.innerWidth * 0.5 ) * 2,
-				y: ( ev.clientY - window.innerHeight * 0.5 ) * 2,
-			},
+			x: ( ev.clientX / window.innerWidth ) * 2 - 1,
+			y: - ( ev.clientY / window.innerHeight ) * 2 + 1,
 		};
 
 	}
@@ -87,8 +79,8 @@ export default class CameraArcball extends Camera {
 
 		this.mouseDown = true;
 
-		this.mouseXOnMouseDown = this.getMousePosition( ev ).normalized.x * 3;
-		this.mouseYOnMouseDown = this.getMousePosition( ev ).normalized.y * 3;
+		this.mouseXOnMouseDown = this.getMousePosition( ev ).x * this.rotateAmountX;
+		this.mouseYOnMouseDown = this.getMousePosition( ev ).y * this.rotateAmountY;
 
 		this.targetXOnMouseDown = this.targetX;
 		this.targetYOnMouseDown = this.targetY;
@@ -99,8 +91,8 @@ export default class CameraArcball extends Camera {
 
 		if ( ! this.mouseDown ) return;
 
-		const mouseX = this.getMousePosition( ev ).normalized.x * 3;
-		const mouseY = this.getMousePosition( ev ).normalized.y * 3;
+		const mouseX = this.getMousePosition( ev ).x * this.rotateAmountX;
+		const mouseY = this.getMousePosition( ev ).y * this.rotateAmountY;
 
 		this.targetX = this.targetXOnMouseDown + ( mouseX - this.mouseXOnMouseDown );
 		this.targetY = this.targetYOnMouseDown - ( mouseY - this.mouseYOnMouseDown );
@@ -120,12 +112,12 @@ export default class CameraArcball extends Camera {
 
 		const sineAzimuth = Math.sin( this.azimuth );
 		const cosineAzimuth = Math.cos( this.azimuth );
-		const sinePolar = Math.sin( this.elevation );
-		const cosinePolar = Math.cos( this.elevation );
+		const sineElevation = Math.sin( this.elevation );
+		const cosineElevation = Math.cos( this.elevation );
 
-		direction[ 0 ] = this.radius * cosinePolar * cosineAzimuth;
-		direction[ 1 ] = this.radius * sinePolar;
-		direction[ 2 ] = this.radius * cosinePolar * sineAzimuth;
+		direction[ 0 ] = this.radius * cosineElevation * cosineAzimuth;
+		direction[ 1 ] = this.radius * sineElevation;
+		direction[ 2 ] = this.radius * cosineElevation * sineAzimuth;
 
 		return direction;
 
@@ -136,13 +128,6 @@ export default class CameraArcball extends Camera {
 	resize( width, height ) {
 
 		mat4.perspective( this.projection, this.fov, width / height, this.near, this.far );
-
-	}
-
-	processInputs( delta ) {
-
-		if ( ! this.active ) return;
-
 
 	}
 
@@ -164,10 +149,10 @@ export default class CameraArcball extends Camera {
 
 	}
 
-	update( elapsed, delta ) {
+	update( ) {
 
-		this.azimuth += ( this.targetX - this.azimuth ) * 0.1;
-		this.elevation += ( this.targetY - this.elevation ) * 0.1;
+		this.azimuth += ( this.targetX - this.azimuth ) * this.damping;
+		this.elevation += ( this.targetY - this.elevation ) * this.damping;
 
 		this.elevation = Math.max( this.elevation, 0 );
 		this.elevation = Math.min( Math.PI / 2, this.elevation );

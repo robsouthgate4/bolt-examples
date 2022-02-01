@@ -41,7 +41,7 @@ void main()
 
   vec3 result = ambient * objectColor;
 
-  FragColor = vec4( ( ambient + diffuse + specular ), 1.0);
+  FragColor = vec4(1.0);
 
   //FragColor = vec4( texAO, 1.0 );
 
