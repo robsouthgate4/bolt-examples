@@ -2,10 +2,12 @@ import Base from "@webgl/Base";
 import Shader from "../core/Shader";
 import Texture from "../core/Texture";
 
+//@ts-ignore
 import volumetricVertex from "../core/shaders/volumetric/volumetric.vert";
+//@ts-ignore
 import volumetricFragment from "../core/shaders/volumetric/volumetric.frag";
 
-import { glMatrix, vec3, } from "gl-matrix";
+import { vec3, } from "gl-matrix";
 import ArrayBuffer from "../core/ArrayBuffer";
 import { loadBinaryBuffer } from "../../utils";
 import Node from "../modules/SceneGraph/Node";
@@ -57,6 +59,10 @@ const vertices = [
 ];
 
 export default class World extends Base {
+  canvas: HTMLCanvasElement | null;
+  gl: WebGL2RenderingContext | null;
+  lightingShader: Shader;
+  lightPosition: vec3;
 
 	constructor() {
 
@@ -65,12 +71,13 @@ export default class World extends Base {
 		this.width = 512;
 		this.height = 512;
 
-		this.canvas = document.getElementById( "experience" );
-		this.canvas.width = this.width;
-		this.canvas.height = this.height;
-		this.gl = this.canvas.getContext( "webgl2", { antialias: true } );
+		this.canvas = <HTMLCanvasElement>document.getElementById( "experience" );
+    this.canvas.width = this.width;
+    this.canvas.height = this.height;
 
-		this.lightingShader = new Shader( { vertexShader: volumetricVertex, fragmentShader: volumetricFragment, gl: this.gl } );
+		this.gl = <WebGL2RenderingContext>this.canvas.getContext( "webgl2", { antialias: true } );
+
+		this.lightingShader = new Shader( volumetricVertex, volumetricFragment, this.gl );
 		this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
 		this.camera = new CameraArcball( {
@@ -245,9 +252,6 @@ export default class World extends Base {
 		this.lightingShader.activate();
 		this.lightingShader.setVector3( "viewPosition", this.camera.position );
 		this.lightingShader.setFloat( "time", elapsed );
-
-		//this.cubeTransform.rotation[ 1 ] += 0.01;
-		//this.cubeNode.updateModelMatrix();
 
 		this.cubeNode.drawTriangles( this.lightingShader, this.camera );
 
