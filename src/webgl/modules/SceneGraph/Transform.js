@@ -4,8 +4,6 @@ export default class Transform {
 
 	constructor() {
 
-		console.log( quat );
-
 		this.position = vec3.fromValues( 0, 0, 0 );
 		this.rotation = vec3.fromValues( 0, 0, 0 );
 		this.scale = vec3.fromValues( 1, 1, 1 );

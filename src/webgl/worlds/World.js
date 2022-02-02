@@ -1,20 +1,16 @@
 import Base from "@webgl/Base";
 import Shader from "../core/Shader";
+import Texture from "../core/Texture";
 
-import colorVertex from "../core/shaders/color/color.vert";
-import colorFragment from "../core/shaders/color/color.frag";
+import volumetricVertex from "../core/shaders/volumetric/volumetric.vert";
+import volumetricFragment from "../core/shaders/volumetric/volumetric.frag";
 
-import lightCubeVertex from "../core/shaders/lightCube/lightCube.vert";
-import lightCubeFragment from "../core/shaders/lightCube/lightCube.frag";
-
-import { glMatrix, mat4, vec3, } from "gl-matrix";
+import { glMatrix, vec3, } from "gl-matrix";
 import ArrayBuffer from "../core/ArrayBuffer";
 import { loadBinaryBuffer } from "../../utils";
 import Node from "../modules/SceneGraph/Node";
 import Transform from "../modules/SceneGraph/Transform";
 import CameraArcball from "../modules/CameraArcball";
-import Camera from "../core/Camera";
-import CameraFPS from "../modules/CameraFPS";
 
 const vertices = [
 	- 0.5, - 0.5, - 0.5, 0.0, 0.0, - 1.0,
@@ -74,13 +70,8 @@ export default class World extends Base {
 		this.canvas.height = this.height;
 		this.gl = this.canvas.getContext( "webgl2", { antialias: true } );
 
-		this.lightingShader = new Shader( { vertexShader: colorVertex, fragmentShader: colorFragment, gl: this.gl } );
-		this.lightCubeShader = new Shader( { vertexShader: lightCubeVertex, fragmentShader: lightCubeFragment, gl: this.gl } );
-		this.lightPosition = vec3.fromValues( 0, 0, 0 );
-		this.lightPositionTwo = vec3.fromValues( 2, 0, 0 );
-
-		this.cube;
-		this.model;
+		this.lightingShader = new Shader( { vertexShader: volumetricVertex, fragmentShader: volumetricFragment, gl: this.gl } );
+		this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
 		this.camera = new CameraArcball( {
 			width: this.width,
@@ -182,7 +173,15 @@ export default class World extends Base {
 
 	async init() {
 
-		const { positions, normals, uvs, indices } = await this.loadGLTF( "/static/models/gltf/cube.gltf" );
+		const equi = new Texture( {
+			imagePath: "/static/textures/equi-studio.jpg",
+			type: this.gl.TEXTURE_2D,
+			format: this.gl.RGBA,
+			pixelType: this.gl.UNSIGNED_BYTE,
+			gl: this.gl
+		} );
+
+		equi.loadImage();
 
 		this.assetsLoaded = true;
 
@@ -191,25 +190,13 @@ export default class World extends Base {
 		this.lightingShader.setVector3( "objectColor", vec3.fromValues( 1.0, 1.0, 1.0 ) );
 		this.lightingShader.setVector3( "lightColor", vec3.fromValues( 0.95, 1.0, 1.0 ) );
 
-		this.lightCubeShader.activate();
-		this.lightCubeShader.setVector3( "lightColor", vec3.fromValues( 1, 1, 1 ) );
-
 		// setup transforms
 		this.cubeTransform = new Transform();
-		this.cubeTransform.position[ 0 ] = 0;
-		this.cubeTransform.position[ 1 ] = 0;
-		this.cubeTransform.position[ 2 ] = 0;
-
-		this.cubeTransformTwo = new Transform();
-		this.cubeTransformTwo.position[ 0 ] = 0;
-		this.cubeTransformTwo.position[ 1 ] = 0;
-		this.cubeTransformTwo.position[ 2 ] = 0;
-		this.cubeTransformTwo.scale = vec3.fromValues( 0.75, 0.75, 0.75 );
-
+		this.cubeTransform.position = vec3.fromValues( 0, 0, 0 );
 
 		// setup nodes
 		this.cubeNode = new Node( {
-			arrayBuffer: new ArrayBuffer( { gl: this.gl, vertices, uvs, stride: 6 } ),
+			arrayBuffer: new ArrayBuffer( { gl: this.gl, vertices, textures: [ equi ], stride: 6 } ),
 			transform: this.cubeTransform
 		} );
 
@@ -250,15 +237,19 @@ export default class World extends Base {
 		super.update( elapsed, delta );
 
 		this.gl.viewport( 0, 0, this.gl.canvas.width, this.gl.canvas.height );
-		this.gl.clearColor( 0, 0, 0, 1 );
+		this.gl.clearColor( 1, 1, 1, 1 );
 		this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT );
 
 		this.camera.update( elapsed, delta );
 
-		this.cubeTransform.rotation[ 1 ] += glMatrix.toRadian( 1 );
-		this.cubeNode.updateModelMatrix();
+		this.lightingShader.activate();
+		this.lightingShader.setVector3( "viewPosition", this.camera.position );
+		this.lightingShader.setFloat( "time", elapsed );
 
-		this.cubeNode.drawTriangles( this.lightCubeShader, this.camera );
+		//this.cubeTransform.rotation[ 1 ] += 0.01;
+		//this.cubeNode.updateModelMatrix();
+
+		this.cubeNode.drawTriangles( this.lightingShader, this.camera );
 
 	}
 
