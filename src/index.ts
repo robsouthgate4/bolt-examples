@@ -4,6 +4,6 @@ import "./styles/index.scss";
 
 	const Main = ( await import( "./entries/Main" ) ).default;
 	const main = new Main();
-	main.init();
+	main._start();
 
 } )();

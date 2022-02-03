@@ -151,22 +151,22 @@ float GetDist( vec3 p )
 
   p = ( rotateY( time * 0.2 ) * vec4( p, 1.0 ) ).xyz;
 
-  float displacement = sin( 60. * p.x + (time * 1.) ) * sin( 60. * p.y + (time * 1.) ) * sin( 60. * p.z + (time * 1.) ) * 0.01;
+  float displacement = sin( 30. * p.x + (time * 1.) ) * sin( 30. * p.y + (time * 1.) ) * sin( 30. * p.z + (time * 1.) ) * 0.01;
 
   //p += displacement;
 
   float d1 = mix( sdOctahedron( p, 0.3 ), sdRoundBox( p, vec3( 0.1 ), 0.1 ), elasticInOut( sin( time * 1.0 ) * 0.5 + 0.5 ) );
-  float d2 = mix( d1, length( p ) - 0.3, elasticInOut( sin( (time - 1.0) * 1.0 ) * 0.5 + 0.5 ) );
+  float d2 = length( p + vec3( 0.0, sin( time ) * 0.23, 0.0 ) ) - 0.1;
   float d3 = length( p + vec3( sin( time * 3.) * 0.2, cos( time * 3.) * 0.1, 0.0 ) ) - 0.1;
   float d4 = length( p + vec3( cos( time * 0.9) * 0.2, sin( time * 1.2) * 0.1, 0.0 ) ) - 0.1;
 
-  float f = 0.2;
+  float f = 0.1;
 
-  float a = opSmoothDifference( d1, d2  );
+  float a = opSmoothUnion( d1, d2, f  );
   float b = opSmoothUnion( a, d3, f );
   float c = opSmoothUnion( b, d4, f );
 
-  return d2;
+  return d1;
 }
 
 float fresnel(vec3 n, vec3 rd) {
@@ -265,6 +265,6 @@ void main()
     col += fresn * 0.04;
   }
 
-  FragColor = vec4( col, 1.0 );
+  FragColor = vec4( Normal, 1.0 );
 
 }

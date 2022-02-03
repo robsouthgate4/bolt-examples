@@ -1,119 +1,145 @@
 import { mat3, mat4, vec2, vec3, vec4 } from "gl-matrix";
 
 export default class Shader {
+
   gl: WebGL2RenderingContext;
   vertexShader: WebGLShader;
-  fragmentShader: WebGLShader
+  fragmentShader: WebGLShader;
   program: WebGLProgram;
 
-	constructor( vertexShaderSrc: string, fragmentShaderSrc: string, gl : WebGL2RenderingContext ) {
+  constructor(
+  	vertexShaderSrc: string,
+  	fragmentShaderSrc: string,
+  	gl: WebGL2RenderingContext
+  ) {
 
-		this.gl = gl;
+  	this.gl = gl;
 
+  	this.vertexShader = <WebGLShader>(
+      this.gl.createShader( this.gl.VERTEX_SHADER )
+    );
 
-		this.vertexShader = <WebGLShader>this.gl.createShader( this.gl.VERTEX_SHADER );
+  	this.gl.shaderSource( this.vertexShader, vertexShaderSrc );
+  	this.gl.compileShader( this.vertexShader );
+  	const vertexLogs = this.gl.getShaderInfoLog( this.vertexShader );
 
-    this.gl.shaderSource( this.vertexShader, vertexShaderSrc );
-    this.gl.compileShader( this.vertexShader );
-    const vertexLogs = this.gl.getShaderInfoLog( this.vertexShader );
+  	if ( vertexLogs && vertexLogs.length > 0 ) {
 
-    if ( vertexLogs && vertexLogs.length > 0 ) {
+  		throw vertexLogs;
 
-      throw vertexLogs;
+  	}
 
-    }
+  	this.fragmentShader = <WebGLShader>(
+      this.gl.createShader( this.gl.FRAGMENT_SHADER )
+    );
 
-    this.fragmentShader = <WebGLShader>this.gl.createShader( this.gl.FRAGMENT_SHADER );
+  	this.gl.shaderSource( this.fragmentShader, fragmentShaderSrc );
+  	this.gl.compileShader( this.fragmentShader );
 
-    this.gl.shaderSource( this.fragmentShader, fragmentShaderSrc );
-    this.gl.compileShader( this.fragmentShader );
+  	const fragmentLogs = this.gl.getShaderInfoLog( this.fragmentShader );
 
-    const fragmentLogs = this.gl.getShaderInfoLog( this.fragmentShader );
+  	if ( fragmentLogs && fragmentLogs.length > 0 ) {
 
-    if ( fragmentLogs && fragmentLogs.length > 0 ) {
+  		throw fragmentLogs;
 
-      throw fragmentLogs;
+  	}
 
-    }
+  	this.program = <WebGLProgram> this.gl.createProgram();
 
-    this.program = <WebGLProgram>this.gl.createProgram();
+  	this.gl.attachShader( this.program, this.vertexShader );
+  	this.gl.attachShader( this.program, this.fragmentShader );
+  	this.gl.linkProgram( this.program );
 
+  	if ( ! this.gl.getProgramParameter( this.program, this.gl.LINK_STATUS ) ) {
 
-    this.gl.attachShader( this.program, this.vertexShader );
-    this.gl.attachShader( this.program, this.fragmentShader );
+  		const info = this.gl.getProgramInfoLog( this.program );
+  		throw "Could not compile WebGL program. \n\n" + info;
 
-    this.gl.linkProgram( this.program );
+  	}
 
-    if ( ! this.gl.getProgramParameter( this.program, this.gl.LINK_STATUS ) ) {
+  	this.gl.deleteShader( this.vertexShader );
+  	this.gl.deleteShader( this.fragmentShader );
 
-      var info = this.gl.getProgramInfoLog( this.program );
-      throw 'Could not compile WebGL program. \n\n' + info;
+  }
 
-    }
+  setBool( uniform: string, value: number ) {
 
-		this.gl.deleteShader( this.vertexShader );
-		this.gl.deleteShader( this.fragmentShader );
+  	this.gl.uniform1i(
+  		this.gl.getUniformLocation( this.program, uniform ),
+  		+ value
+  	);
 
-	}
+  }
 
-	setBool( uniform: string, value: number ) {
+  setInt( uniform: string, value: number ) {
 
-		this.gl.uniform1i( this.gl.getUniformLocation( this.program, uniform ), + value );
+  	this.gl.uniform1i( this.gl.getUniformLocation( this.program, uniform ), value );
 
-	}
+  }
 
-	setInt( uniform: string, value: number ) {
+  setFloat( uniform: string, value: number ) {
 
-		this.gl.uniform1i( this.gl.getUniformLocation( this.program, uniform ), value );
+  	this.gl.uniform1f( this.gl.getUniformLocation( this.program, uniform ), value );
 
-	}
+  }
 
-	setFloat( uniform: string, value: number ) {
+  setVector2( uniform: string, value: vec2 ) {
 
-		this.gl.uniform1f( this.gl.getUniformLocation( this.program, uniform ), value );
+  	this.gl.uniform2fv(
+  		this.gl.getUniformLocation( this.program, uniform ),
+  		value
+  	);
 
-	}
+  }
 
-	setVector2( uniform: string, value: vec2 ) {
+  setVector3( uniform: string, value: vec3 ) {
 
-		this.gl.uniform2fv( this.gl.getUniformLocation( this.program, uniform ), value );
+  	this.gl.uniform3fv(
+  		this.gl.getUniformLocation( this.program, uniform ),
+  		value
+  	);
 
-	}
+  }
 
-	setVector3( uniform: string, value: vec3 ) {
+  setVector4( uniform: string, value: vec4 ) {
 
-		this.gl.uniform3fv( this.gl.getUniformLocation( this.program, uniform ), value );
+  	this.gl.uniform4fv(
+  		this.gl.getUniformLocation( this.program, uniform ),
+  		value
+  	);
 
-	}
+  }
 
-	setVector4( uniform: string, value: vec4 ) {
+  setMatrix3( uniform: string, value: mat3 ) {
 
-		this.gl.uniform4fv( this.gl.getUniformLocation( this.program, uniform ), value );
+  	this.gl.uniformMatrix3fv(
+  		this.gl.getUniformLocation( this.program, uniform ),
+  		false,
+  		value
+  	);
 
-	}
+  }
 
-	setMatrix3( uniform: string, value: mat3 ) {
+  setMatrix4( uniform: string, value: mat4 ) {
 
-		this.gl.uniformMatrix3fv( this.gl.getUniformLocation( this.program, uniform ), false, value );
+  	this.gl.uniformMatrix4fv(
+  		this.gl.getUniformLocation( this.program, uniform ),
+  		false,
+  		value
+  	);
 
-	}
+  }
 
-	setMatrix4( uniform: string, value: mat4 ) {
+  activate() {
 
-		this.gl.uniformMatrix4fv( this.gl.getUniformLocation( this.program, uniform ), false, value );
+  	this.gl.useProgram( this.program );
 
-	}
+  }
 
-	activate() {
+  delete() {
 
-		this.gl.useProgram( this.program );
+  	this.gl.deleteProgram( this.program );
 
-	}
-
-	delete() {
-
-		this.gl.deleteProgram( this.program );
-
-	}
+  }
 
 }
