@@ -5,7 +5,8 @@ precision highp float;
 uniform vec3 objectColor;
 uniform vec3 lightColor;
 uniform float time;
-uniform sampler2D map0;
+uniform sampler2D mapEqui;
+uniform sampler2D mapAO;
 uniform vec3 viewPosition;
 
 out vec4 FragColor;
@@ -151,29 +152,27 @@ float GetDist( vec3 p )
 
   p = ( rotateY( time * 0.2 ) * vec4( p, 1.0 ) ).xyz;
 
-  float displacement = sin( 30. * p.x + (time * 1.) ) * sin( 30. * p.y + (time * 1.) ) * sin( 30. * p.z + (time * 1.) ) * 0.01;
+  float displacement = sin( 90. * p.x + (time * 1.) ) * sin( 90. * p.y + (time * 1.) ) * sin( 90. * p.z + (time * 1.) ) * 0.001;
 
-  //p += displacement;
+  p += displacement;
 
-  float d1 = mix( sdOctahedron( p, 0.3 ), sdRoundBox( p, vec3( 0.1 ), 0.1 ), elasticInOut( sin( time * 1.0 ) * 0.5 + 0.5 ) );
-  float d2 = length( p + vec3( 0.0, sin( time ) * 0.23, 0.0 ) ) - 0.1;
+  float d1 = mix( sdOctahedron( p, 0.3 ), sdRoundBox( p, vec3( 0.1 ), 0.1 ), 1.0 /*elasticInOut( sin( time * 1.0 ) * 0.5 + 0.5 )*/ );
+  float d2 = length( p + vec3( cos( time ) * 0.23, sin( time ) * 0.23, 0.0 ) ) - 0.1;
   float d3 = length( p + vec3( sin( time * 3.) * 0.2, cos( time * 3.) * 0.1, 0.0 ) ) - 0.1;
   float d4 = length( p + vec3( cos( time * 0.9) * 0.2, sin( time * 1.2) * 0.1, 0.0 ) ) - 0.1;
 
   float f = 0.1;
 
-  float a = opSmoothUnion( d1, d2, f  );
+  float a = opSmoothDifference( d1, d2  );
   float b = opSmoothUnion( a, d3, f );
   float c = opSmoothUnion( b, d4, f );
 
-  return d1;
+  return b;
 }
 
 float fresnel(vec3 n, vec3 rd) {
   return pow(clamp(1. - dot(n, -rd), 0., 1.), 3.);
 }
-
-
 
 
 float RayMarch( vec3 ro, vec3 rd )
@@ -248,7 +247,7 @@ void main()
 
     vec2 uv = envMapEquirect( reflectViewDirection, 1.0 );
 
-    vec3 reflectionTex = texture( map0, uv ).rgb;
+    vec3 reflectionTex = texture( mapEqui, uv ).rgb;
 
     float specularStrength = 0.1;
     float spec             = pow( max( dot( viewDirection, reflectLightDirection ), 0.0 ), 24.0 );
@@ -258,9 +257,10 @@ void main()
 
     col = mix( reflectionTex * 1., vec3( 0.6 ), dif );
 
-    col += fresn * 0.04;
+    col += fresn * 0.1;
   }
 
-  FragColor = vec4( Normal * 0.5 + 0.5, 1.0 );
+
+  FragColor = vec4( col, 1.0 );
 
 }

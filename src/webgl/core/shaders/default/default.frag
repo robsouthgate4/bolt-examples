@@ -9,12 +9,11 @@ uniform vec3 lightColor;
 
 out vec4 FragColor;
 
-//in vec3 Normal;
+in vec3 Normal;
 
 in vec3 vColor;
-in vec2 vUv;
 
 void main()
 {
-   FragColor = vec4( objectColor * lightColor, 1.0 );
+   FragColor = vec4( Normal * 0.5 + 0.5, 1.0 );
 }

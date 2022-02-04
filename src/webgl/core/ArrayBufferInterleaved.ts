@@ -5,13 +5,18 @@ import IBO from "./IBO";
 import Texture from "./Texture";
 import Shader from "./Shader";
 
+interface TextureObject {
+  unifornMame: string;
+  texture: Texture
+}
+
 export default class ArrayBufferInterleaved {
 
   gl: WebGL2RenderingContext;
   stride: number;
   buffer?: number[] | Float32Array;
   indices?: number[] | Float32Array;
-  textures?: Texture[];
+  textures?: TextureObject[];
   vao: VAO;
   ibo!: IBO;
 
@@ -20,7 +25,7 @@ export default class ArrayBufferInterleaved {
   	stride: number,
   	buffer?: number[] | Float32Array,
   	indices?: number[] | Float32Array,
-  	textures?: Texture[]
+  	textures?: TextureObject[]
   ) {
 
   	this.gl = gl;
@@ -116,10 +121,10 @@ export default class ArrayBufferInterleaved {
 
   		for ( let i = 0; i < this.textures.length; i ++ ) {
 
-  			const texture = this.textures[ i ];
+  			const textureObject = this.textures[ i ];
 
-  			texture.textureUnit( shader, `map${i}`, i );
-  			texture.bind();
+  			textureObject.texture.textureUnit( shader, textureObject.unifornMame, i );
+  			textureObject.texture.bind();
 
   		}
 

@@ -39,12 +39,13 @@ export default class Texture {
 
   textureUnit( shader: Shader, uniformName: string, unit: number ) {
 
+
   	shader.activate();
   	const textureUnit = this.gl.getUniformLocation( shader.program, uniformName );
-  	this.gl.uniform1i( textureUnit, unit );
-
   	this.gl.activeTexture( this.gl.TEXTURE0 + unit );
   	this.bind();
+  	this.gl.uniform1i( textureUnit, unit );
+
 
   }
 
@@ -79,18 +80,18 @@ export default class Texture {
 
   	image.addEventListener( "load", () => {
 
-  		if ( this.isPowerOf2( image.width ) && this.isPowerOf2( image.height ) ) {
-
-  			this.gl.generateMipmap( this.gl.TEXTURE_2D );
-
-  		}
-
   		this.gl.bindTexture( this.gl.TEXTURE_2D, this.texture );
   		this.gl.texImage2D( this.gl.TEXTURE_2D, 0, this.format, this.format, this.pixelType, image );
 
   		this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.wrapS );
   		this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.wrapT );
   		this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR );
+
+  		if ( this.isPowerOf2( image.width ) && this.isPowerOf2( image.height ) ) {
+
+  			this.gl.generateMipmap( this.gl.TEXTURE_2D );
+
+  		}
 
   		this.gl.bindTexture( this.gl.TEXTURE_2D, null );
 

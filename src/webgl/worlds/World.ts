@@ -7,13 +7,17 @@ import volumetricVertex from "../core/shaders/volumetric/volumetric.vert";
 //@ts-ignore
 import volumetricFragment from "../core/shaders/volumetric/volumetric.frag";
 
+//@ts-ignore
+import defaultVertex from "../core/shaders/default/default.vert";
+//@ts-ignore
+import defaultFragment from "../core/shaders/default/default.frag";
+
 import { vec3, } from "gl-matrix";
-import ArrayBuffer from "../core/ArrayBuffer";
 import Node from "../modules/SceneGraph/Node";
 import Transform from "../modules/SceneGraph/Transform";
 import ArrayBufferInterleaved from "../core/ArrayBufferInterleaved";
-import GLTFParser, { GLTFBufferObject } from "../modules/GLTFParser";
 import CameraArcball from "../modules/CameraArcball";
+import CameraFPS from "../modules/CameraFPS";
 
 const vertices = [
 	- 0.5, - 0.5, - 0.5, 0.0, 0.0, - 1.0,
@@ -65,13 +69,14 @@ export default class World extends Base {
   gl: WebGL2RenderingContext;
   lightingShader: Shader;
   lightPosition: vec3;
-  camera: CameraArcball;
+  camera: CameraArcball | CameraFPS;
   assetsLoaded!: boolean;
   cubeTransform!: Transform;
   cubeNode!: Node;
-  gltfParser: GLTFParser;
   boxTransform!: Transform;
-  boxNode!: Node;
+  torusNode!: Node;
+  cubeMinimal!: ArrayBufferInterleaved;
+  cubeMinimalShader: Shader;
 
   constructor() {
 
@@ -87,14 +92,13 @@ export default class World extends Base {
   	this.gl = <WebGL2RenderingContext> this.canvas.getContext( "webgl2", { antialias: true } );
 
   	this.lightingShader = new Shader( volumetricVertex, volumetricFragment, this.gl );
+  	this.cubeMinimalShader = new Shader( defaultVertex, defaultFragment, this.gl );
   	this.lightPosition = vec3.fromValues( 0, 10, 0 );
-
-  	this.gltfParser = new GLTFParser( "/static/models/gltf/cube.gltf" );
 
   	this.camera = new CameraArcball(
   		this.width,
   		this.height,
-  		vec3.fromValues( 0, 5, 2 ),
+  		vec3.fromValues( 0, 0, 0.6 ),
   		vec3.fromValues( 0, 0, 0 ),
   		45,
   		0.01,
@@ -117,12 +121,12 @@ export default class World extends Base {
   	const equi = new Texture(
   		"/static/textures/equi-studio.jpg",
   		this.gl );
-
   	equi.loadImage();
 
-  	const boxBuffers = await this.gltfParser.loadGLTF() as GLTFBufferObject;
-
-  	console.log( boxBuffers );
+  	const AO = new Texture(
+  		"/static/models/gltf/AO.png",
+  		this.gl );
+  	AO.loadImage();
 
   	this.assetsLoaded = true;
 
@@ -140,22 +144,23 @@ export default class World extends Base {
 
   	// setup nodes
   	this.cubeNode = new Node(
-  		new ArrayBufferInterleaved( this.gl, 6, vertices, [], [ equi ] ),
+  		new ArrayBufferInterleaved(
+  			this.gl,
+  			6,
+  			vertices,
+  			[],
+  			[
+  				{ unifornMame: "mapEqui", texture: equi },
+  				{ unifornMame: "mapAO", texture: AO }
+  			]
+  		),
   		this.cubeTransform
   	);
 
-  	this.cubeNode.transform.scale = vec3.fromValues( 0.75, 0.75, 0.75 );
-
-
-
-  	this.boxNode = new Node(
-  		new ArrayBuffer( this.gl, boxBuffers.positions, boxBuffers.normals, boxBuffers.uvs, boxBuffers.indices ),
-  		this.boxTransform
-  	);
-
-  	this.boxNode.setParent( this.cubeNode );
-
+  	this.cubeNode.transform.scale = vec3.fromValues( 1, 1, 1 );
   	this.cubeNode.updateModelMatrix();
+
+
 
   	this.resize();
 
@@ -197,17 +202,15 @@ export default class World extends Base {
   	this.gl.clearColor( 1, 1, 1, 1 );
   	this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT );
 
-  	this.camera.update();
+  	this.camera.update( delta );
 
   	this.lightingShader.activate();
   	this.lightingShader.setVector3( "viewPosition", this.camera.position );
   	this.lightingShader.setFloat( "time", elapsed );
 
-  	this.cubeNode.transform.rotation[ 1 ] += 0.01;
-  	//this.cubeNode.updateModelMatrix();
+  	this.cubeNode.updateModelMatrix();
 
   	this.cubeNode.drawTriangles( this.lightingShader, this.camera );
-  	this.boxNode.drawTriangles( this.lightingShader, this.camera );
 
   }
 
