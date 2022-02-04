@@ -94,12 +94,14 @@ export default class World extends Base {
   	this.camera = new CameraArcball(
   		this.width,
   		this.height,
-  		vec3.fromValues( 0, 0, 3 ),
+  		vec3.fromValues( 0, 5, 2 ),
   		vec3.fromValues( 0, 0, 0 ),
   		45,
   		0.01,
   		1000,
-  		this.gl
+  		this.gl,
+  		0.2,
+  		2
   	);
 
   	this.gl.viewport( 0, 0, this.gl.canvas.width, this.gl.canvas.height );

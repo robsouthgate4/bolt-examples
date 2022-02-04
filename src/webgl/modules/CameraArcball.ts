@@ -31,7 +31,9 @@ export default class CameraArcball extends Camera {
   	fov: number,
   	near: number,
   	far: number,
-  	gl: WebGL2RenderingContext ) {
+  	gl: WebGL2RenderingContext,
+  	damping?: number,
+  	speed?: number ) {
 
   	super(
   		width,
@@ -40,7 +42,7 @@ export default class CameraArcball extends Camera {
   		fov,
   		near,
   		far,
-  		gl
+  		gl,
   		);
 
   	this.position = position;
@@ -60,8 +62,8 @@ export default class CameraArcball extends Camera {
   	this.elevation = this.initialPositionSpherical[ 1 ];
   	this.radius = this.initialPositionSpherical[ 2 ];
 
-  	this.rotateAmountX = 3;
-  	this.rotateAmountY = 3;
+  	this.rotateAmountX = speed || 1;
+  	this.rotateAmountY = speed || 1;
 
   	this.mouseXOnMouseDown = 0;
   	this.mouseYOnMouseDown = 0;
@@ -72,7 +74,7 @@ export default class CameraArcball extends Camera {
   	this.targetX = this.azimuth;
   	this.targetY = this.elevation;
 
-  	this.damping = 0.2;
+  	this.damping = damping || 1;
 
   	this.resize( window.innerWidth, window.innerHeight );
 
@@ -128,7 +130,7 @@ export default class CameraArcball extends Camera {
 
   }
 
-  cartesianToSpherical( x: number, y: number, z: number ) {
+  cartesianToSpherical( y: number, x: number, z: number ) {
 
   	const radius = Math.sqrt( x * x + y * y + z * z );
   	let elevation;
