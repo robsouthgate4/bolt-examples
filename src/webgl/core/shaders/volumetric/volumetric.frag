@@ -238,15 +238,11 @@ void main()
 
     vec3 n = GetNormal( p );
 
-    vec3  lightPosition  = vec3(3., -5., 0.);
-
-    vec3  lightDirection = normalize( lightPosition - p );
-
-    float dif            = clamp( dot( n, lightDirection ), 0., 1.);
-
-    vec3 reflectViewDirection = refract( -rd, normalize( n ), 1.0 / 1.2 );
-
-    vec3 viewDirection    = normalize( viewPosition - FragPosition );
+    vec3  lightPosition        = vec3(3., -5., 0.);
+    vec3  lightDirection       = normalize( lightPosition - p );
+    float dif                  = clamp( dot( n, lightDirection ), 0., 1.);
+    vec3  reflectViewDirection = refract( -rd, normalize( n ), 1.0 / 1.2 );
+    vec3  viewDirection        = normalize( viewPosition - FragPosition );
 
     vec3 reflectLightDirection = reflect( -lightDirection, n );
 
@@ -265,6 +261,6 @@ void main()
     col += fresn * 0.04;
   }
 
-  FragColor = vec4( Normal, 1.0 );
+  FragColor = vec4( Normal * 0.5 + 0.5, 1.0 );
 
 }

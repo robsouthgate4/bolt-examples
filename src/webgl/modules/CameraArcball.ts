@@ -21,6 +21,7 @@ export default class CameraArcball extends Camera {
   targetYOnMouseDown!: number;
   mouseY: number;
   lastY: number;
+  initialPositionSpherical: number[];
 
   constructor(
   	width: number,
@@ -42,6 +43,10 @@ export default class CameraArcball extends Camera {
   		gl
   		);
 
+  	this.position = position;
+
+  	this.initialPositionSpherical = this.cartesianToSpherical( this.position[ 0 ], this.position[ 1 ], this.position[ 2 ] );
+
   	this.target = target || vec3.fromValues( 0, 0, 0 );
 
   	this.firstMouse = true;
@@ -51,8 +56,9 @@ export default class CameraArcball extends Camera {
   	this.lastX = 0;
   	this.lastY = 0;
 
-  	this.azimuth = 0;
-  	this.elevation = 0;
+  	this.azimuth = this.initialPositionSpherical[ 0 ];
+  	this.elevation = this.initialPositionSpherical[ 1 ];
+  	this.radius = this.initialPositionSpherical[ 2 ];
 
   	this.rotateAmountX = 3;
   	this.rotateAmountY = 3;
@@ -63,10 +69,8 @@ export default class CameraArcball extends Camera {
   	this.targetXOnMouseDown = 0;
   	this.targetYOnMouseDown = 0;
 
-  	this.targetX = 0;
-  	this.targetY = 0;// Math.PI * 0.15;
-
-  	this.radius = 5;
+  	this.targetX = this.azimuth;
+  	this.targetY = this.elevation;
 
   	this.damping = 0.2;
 
@@ -124,7 +128,29 @@ export default class CameraArcball extends Camera {
 
   }
 
-  generatePosition() {
+  cartesianToSpherical( x: number, y: number, z: number ) {
+
+  	const radius = Math.sqrt( x * x + y * y + z * z );
+  	let elevation;
+  	let azimuth;
+
+  	if ( this.radius === 0 ) {
+
+  		elevation = 0;
+  		azimuth = 0;
+
+  	} else {
+
+  		elevation = Math.atan2( x, z );
+  		azimuth = Math.acos( Math.min( Math.max( y / radius, - 1 ), 1 ) );
+
+  	}
+
+  	return [ azimuth, elevation, radius ];
+
+  }
+
+  spherialToCartesian() {
 
   	const direction = vec3.create();
 
@@ -174,9 +200,9 @@ export default class CameraArcball extends Camera {
   	this.elevation = Math.min( Math.PI / 2, this.elevation );
 
   	// generate spherical coordinates for new position
-  	this.position[ 0 ] = this.generatePosition()[ 0 ];
-  	this.position[ 1 ] = this.generatePosition()[ 1 ];
-  	this.position[ 2 ] = this.generatePosition()[ 2 ];
+  	this.position[ 0 ] = this.spherialToCartesian()[ 0 ];
+  	this.position[ 1 ] = this.spherialToCartesian()[ 1 ];
+  	this.position[ 2 ] = this.spherialToCartesian()[ 2 ];
 
   	mat4.lookAt( this.view, this.position, this.target, this.up );
   	mat4.multiply( this.camera, this.projection, this.view );

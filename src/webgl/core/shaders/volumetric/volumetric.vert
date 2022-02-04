@@ -20,7 +20,7 @@ void main()
 
   Ro = ( inverse( model ) * vec4( viewPosition, 1.0 ) ).xyz;
 
-  Normal = mat3( transpose( inverse( model ) ) ) * aNormal;
+  Normal = aNormal;
 
   FragPosition = vec3( model * vec4( aPosition, 1.0 ) );
 

@@ -94,7 +94,7 @@ export default class World extends Base {
   	this.camera = new CameraArcball(
   		this.width,
   		this.height,
-  		vec3.fromValues( 0, 0, 0 ),
+  		vec3.fromValues( 0, 0, 3 ),
   		vec3.fromValues( 0, 0, 0 ),
   		45,
   		0.01,
@@ -119,6 +119,7 @@ export default class World extends Base {
   	equi.loadImage();
 
   	const boxBuffers = await this.gltfParser.loadGLTF() as GLTFBufferObject;
+
   	console.log( boxBuffers );
 
   	this.assetsLoaded = true;
@@ -141,12 +142,18 @@ export default class World extends Base {
   		this.cubeTransform
   	);
 
+  	this.cubeNode.transform.scale = vec3.fromValues( 0.75, 0.75, 0.75 );
+
+
+
   	this.boxNode = new Node(
   		new ArrayBuffer( this.gl, boxBuffers.positions, boxBuffers.normals, boxBuffers.uvs, boxBuffers.indices ),
   		this.boxTransform
   	);
 
-  	this.boxNode.updateModelMatrix();
+  	this.boxNode.setParent( this.cubeNode );
+
+  	this.cubeNode.updateModelMatrix();
 
   	this.resize();
 
@@ -188,14 +195,16 @@ export default class World extends Base {
   	this.gl.clearColor( 1, 1, 1, 1 );
   	this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT );
 
-  	this.camera.update( );
+  	this.camera.update();
 
   	this.lightingShader.activate();
   	this.lightingShader.setVector3( "viewPosition", this.camera.position );
   	this.lightingShader.setFloat( "time", elapsed );
 
-  	this.cubeNode.drawTriangles( this.lightingShader, this.camera );
+  	this.cubeNode.transform.rotation[ 1 ] += 0.01;
+  	//this.cubeNode.updateModelMatrix();
 
+  	this.cubeNode.drawTriangles( this.lightingShader, this.camera );
   	this.boxNode.drawTriangles( this.lightingShader, this.camera );
 
   }
