@@ -237,7 +237,7 @@ void main()
 
     vec3 n = GetNormal( p );
 
-    vec3  lightPosition        = vec3(3., -5., 0.);
+    vec3  lightPosition        = vec3( 3., -5., 0. );
     vec3  lightDirection       = normalize( lightPosition - p );
     float dif                  = clamp( dot( n, lightDirection ), 0., 1.);
     vec3  reflectViewDirection = refract( -rd, normalize( n ), 1.0 / 1.2 );
@@ -256,11 +256,11 @@ void main()
     float fresn = fresnel( n, rd );
 
     col = mix( reflectionTex * 1., vec3( 0.6 ), dif );
-
     col += fresn * 0.1;
+
   }
 
 
-  FragColor = vec4( col, 1.0 );
+  FragColor = vec4( Normal * 0.5 + 0.5, 1.0 );
 
 }

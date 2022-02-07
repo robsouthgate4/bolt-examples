@@ -1,5 +1,5 @@
 
-import World from "@/webgl/worlds/World";
+import World from "@/webgl/worlds/WorldInstanced";
 
 export default class Main {
 

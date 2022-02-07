@@ -36,6 +36,8 @@ export default class FBO {
 
   	this.gl.framebufferTexture2D( this.gl.FRAMEBUFFER, attachment, this.gl.TEXTURE_2D, this.targetTexture, 0 );
 
+  	this.unbind();
+
   }
 
   bind() {

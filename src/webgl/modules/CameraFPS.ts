@@ -219,7 +219,7 @@ export default class CameraFPS extends Camera {
 
   	if ( ! this.active ) return;
 
-  	this.cameraSpeed = 3 * delta;
+  	this.cameraSpeed = 10 * delta;
 
   	if ( this.activeKeys.includes( "w" ) ) {
 

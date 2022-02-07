@@ -2,18 +2,14 @@ import Base from "@webgl/Base";
 import Shader from "../core/Shader";
 import Texture from "../core/Texture";
 
-//@ts-ignore
-import volumetricVertex from "../core/shaders/volumetric/volumetric.vert";
-//@ts-ignore
-import volumetricFragment from "../core/shaders/volumetric/volumetric.frag";
 
 //@ts-ignore
 import defaultVertexInstanced from "../core/shaders/defaultInstanced/defaultInstanced.vert";
 //@ts-ignore
 import defaultFragmentInstanced from "../core/shaders/defaultInstanced/defaultInstanced.frag";
 
-import { vec3, } from "gl-matrix";
-import Node from "../modules/SceneGraph/Node";
+import { mat4, quat, vec3, } from "gl-matrix";
+
 import Transform from "../modules/SceneGraph/Transform";
 import ArrayBufferInterleaved from "../core/ArrayBufferInterleaved";
 import CameraArcball from "../modules/CameraArcball";
@@ -73,10 +69,7 @@ export default class World extends Base {
   camera: CameraArcball | CameraFPS;
   assetsLoaded!: boolean;
   cubeTransform!: Transform;
-  cubeNode!: Node;
-  boxTransform!: Transform;
-  torusNode!: Node;
-  cubeMinimal!: ArrayBufferInterleaved;
+  cubeNode!: ArrayBufferInterleaved;
   fbo!: FBO;
 
   constructor() {
@@ -95,17 +88,14 @@ export default class World extends Base {
   	this.lightingShader = new Shader( defaultVertexInstanced, defaultFragmentInstanced, this.gl );
   	this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
-  	this.camera = new CameraArcball(
+  	this.camera = new CameraFPS(
   		this.width,
   		this.height,
-  		vec3.fromValues( 0, 0, 3 ),
-  		vec3.fromValues( 0, 0, 0 ),
+  		vec3.fromValues( 0, 4, 10 ),
   		45,
   		0.01,
   		1000,
   		this.gl,
-  		0.2,
-  		2
   	);
 
   	this.gl.viewport( 0, 0, this.gl.canvas.width, this.gl.canvas.height );
@@ -137,27 +127,51 @@ export default class World extends Base {
   	this.lightingShader.setTexture( "mapEqui", equi );
   	this.lightingShader.setTexture( "mapAO", AO );
 
+  	const instanceCount = 50000;
+
+  	const instanceMatrices: mat4[] = [];
+
+  	for ( let i = 0; i < instanceCount; i ++ ) {
+
+  		const x = ( Math.random() * 2 - 1 ) * 100;
+  		const y = ( Math.random() * 2 - 1 ) * 2;
+  		const z = Math.random() * 500;
+
+  		const tempTranslation = vec3.fromValues( x, y, - z );
+  		const tempRotation = quat.fromValues( 0, 0, 0, 0 );
+  		const tempScale = vec3.fromValues( 1, 1, 1 );
+
+  		const translation = mat4.create();
+  		mat4.fromTranslation( translation, tempTranslation );
+
+  		const rotation = mat4.create();
+  		mat4.fromQuat( rotation, tempRotation );
+
+  		const scale = mat4.create();
+  		mat4.fromScaling( scale, tempScale );
+
+  		const combined = mat4.create();
+  		mat4.multiply( combined, translation, rotation );
+  		mat4.multiply( combined, combined, scale );
+
+  		instanceMatrices.push( combined );
+
+  	}
+
   	// setup transforms
   	this.cubeTransform = new Transform();
 
   	// setup nodes
-  	this.cubeNode = new Node(
-  		new ArrayBufferInterleaved(
-  			this.gl,
-  			6,
-  			buffer,
-  			{
-  				instanced: true,
-  				instanceCount: 10
-  			}
-  		),
-  		this.cubeTransform
-  	);
-
-
-  	this.cubeNode.transform.position = vec3.fromValues( 0, 0, 0 );
-  	this.cubeNode.transform.scale = vec3.fromValues( 1, 1, 1 );
-  	this.cubeNode.updateModelMatrix();
+  	this.cubeNode = new ArrayBufferInterleaved(
+  		this.gl,
+  		6,
+  		buffer,
+  		{
+  			instanced: true,
+  			instanceCount,
+  			instanceMatrices
+  		}
+  	),
 
   	this.resize();
 
@@ -204,10 +218,10 @@ export default class World extends Base {
   	this.lightingShader.activate();
   	this.lightingShader.setVector3( "viewPosition", this.camera.position );
   	this.lightingShader.setFloat( "time", elapsed );
+  	this.lightingShader.setMatrix4( "projection", this.camera.getProjectionMatrix() );
+  	this.lightingShader.setMatrix4( "view", this.camera.getViewMatrix() );
 
-  	this.cubeNode.updateModelMatrix();
-
-  	this.cubeNode.drawTriangles( this.lightingShader, this.camera );
+  	this.cubeNode.drawTriangles( this.lightingShader );
 
   }
 

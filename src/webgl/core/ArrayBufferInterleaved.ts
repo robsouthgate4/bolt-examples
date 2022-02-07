@@ -1,38 +1,38 @@
-import { vec3 } from "gl-matrix";
+import { mat4, vec3, vec4 } from "gl-matrix";
 import VAO from "./VAO";
 import VBO from "./VBO";
 import IBO from "./IBO";
-import Texture from "./Texture";
 import Shader from "./Shader";
-
-interface TextureObject {
-  unifornMame: string;
-  texture: Texture
-}
+import { ArrayBufferParams } from "./ArrayBuffer";
+import VBOInstanced from "./VBOInstanced";
 
 export default class ArrayBufferInterleaved {
 
   gl: WebGL2RenderingContext;
   stride: number;
-  buffer?: number[] | Float32Array;
-  indices?: number[] | Float32Array;
-  textures?: TextureObject[];
+  buffer: number[] | Float32Array;
+  indices?: number[] | Uint16Array;
+  instanced?: boolean;
+  instanceCount?: number;
+  instanceMatrices?: mat4[];
   vao: VAO;
   ibo!: IBO;
 
   constructor(
   	gl: WebGL2RenderingContext,
   	stride: number,
-  	buffer?: number[] | Float32Array,
-  	indices?: number[] | Float32Array,
-  	textures?: TextureObject[]
+  	buffer: number[] | Float32Array,
+  	params?: ArrayBufferParams
   ) {
 
   	this.gl = gl;
   	this.stride = stride || 3;
   	this.buffer = buffer;
-  	this.textures = textures;
-  	this.indices = indices;
+
+  	this.indices = params?.indices;
+  	this.instanced = params?.instanced;
+  	this.instanceMatrices = params?.instanceMatrices;
+  	this.instanceCount = params?.instanceCount;
 
   	this.vao = new VAO( gl );
 
@@ -43,12 +43,34 @@ export default class ArrayBufferInterleaved {
 
   linkBuffers() {
 
-  	const vbo = new VBO( this.buffer || [], this.gl );
+  	const vbo = new VBO( this.buffer, this.gl );
 
   	this.vao.bind();
   	this.vao.linkAttrib( vbo, 0, 3, this.gl.FLOAT, this.stride * 4, 0 );
   	this.vao.linkAttrib( vbo, 1, 3, this.gl.FLOAT, this.stride * 4, 3 * 4 );
   	this.vao.linkAttrib( vbo, 2, 3, this.gl.FLOAT, this.stride * 4, 6 * 4 );
+
+  	if ( this.instanced && this.instanceMatrices ) {
+
+  		const instancedVBO = new VBOInstanced( this.instanceMatrices, this.gl );
+  		instancedVBO.bind();
+
+  		const bytesMatrix = 4 * 16;
+  		const bytesVec4 = 4 * 4;
+
+  		this.vao.linkAttrib( instancedVBO, 3, 4, this.gl.FLOAT, bytesMatrix, 0 * bytesVec4 );
+  		this.vao.linkAttrib( instancedVBO, 4, 4, this.gl.FLOAT, bytesMatrix, 1 * bytesVec4 );
+  		this.vao.linkAttrib( instancedVBO, 5, 4, this.gl.FLOAT, bytesMatrix, 2 * bytesVec4 );
+  		this.vao.linkAttrib( instancedVBO, 6, 4, this.gl.FLOAT, bytesMatrix, 3 * bytesVec4 );
+
+  		this.gl.vertexAttribDivisor( 3, 1 );
+  		this.gl.vertexAttribDivisor( 4, 1 );
+  		this.gl.vertexAttribDivisor( 5, 1 );
+  		this.gl.vertexAttribDivisor( 6, 1 );
+
+  		instancedVBO.unbind();
+
+  	}
 
   	this.vao.unbind();
   	vbo.unbind();
@@ -117,13 +139,13 @@ export default class ArrayBufferInterleaved {
 
   	if ( ! shader ) return;
 
-  	if ( this.textures && this.textures.length > 0 ) {
+  	if ( shader.textures && shader.textures.length > 0 ) {
 
-  		for ( let i = 0; i < this.textures.length; i ++ ) {
+  		for ( let i = 0; i < shader.textures.length; i ++ ) {
 
-  			const textureObject = this.textures[ i ];
+  			const textureObject = shader.textures[ i ];
 
-  			textureObject.texture.textureUnit( shader, textureObject.unifornMame, i );
+  			textureObject.texture.textureUnit( shader, textureObject.uniformName, i );
   			textureObject.texture.bind();
 
   		}
@@ -181,7 +203,18 @@ export default class ArrayBufferInterleaved {
 
   			// draw interleaved
 
-  			this.gl.drawArrays( this.gl.TRIANGLES, 0, this.buffer.length / this.stride );
+  			if ( this.instanced && this.instanceCount ) {
+
+  				//onsole.log( this.instanceCount );
+
+  				this.gl.drawArraysInstanced( this.gl.TRIANGLES, 0, this.buffer.length / this.stride, this.instanceCount );
+
+  			} else {
+
+  				this.gl.drawArrays( this.gl.TRIANGLES, 0, this.buffer.length / this.stride );
+
+  			}
+
 
   		}
 

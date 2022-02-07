@@ -1,4 +1,12 @@
 import { mat3, mat4, vec2, vec3, vec4 } from "gl-matrix";
+import Texture from "./Texture";
+
+
+interface TextureObject {
+  uniformName: string;
+  texture: Texture
+}
+
 
 export default class Shader {
 
@@ -6,12 +14,18 @@ export default class Shader {
   vertexShader: WebGLShader;
   fragmentShader: WebGLShader;
   program: WebGLProgram;
+  textureUnit: number;
+  textures: TextureObject[];
 
   constructor(
   	vertexShaderSrc: string,
   	fragmentShaderSrc: string,
   	gl: WebGL2RenderingContext
   ) {
+
+  	this.textureUnit = 0;
+
+  	this.textures = <TextureObject[]>[];
 
   	this.gl = gl;
 
@@ -127,6 +141,15 @@ export default class Shader {
   		false,
   		value
   	);
+
+  }
+
+  setTexture( uniform: string, texture: Texture ) {
+
+  	this.textures.push( {
+  		uniformName: uniform,
+  		texture
+  	} );
 
   }
 

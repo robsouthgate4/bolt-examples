@@ -1,10 +1,15 @@
-import { vec3 } from "gl-matrix";
+import { mat4, vec3 } from "gl-matrix";
 import VAO from "./VAO";
 import VBO from "./VBO";
 import IBO from "./IBO";
-import Texture from "./Texture";
 import Shader from "./Shader";
 
+export interface ArrayBufferParams {
+  indices?: number[] | Uint16Array;
+  instanced?: boolean;
+  instanceCount?: number;
+  instanceMatrices?: mat4[];
+}
 
 export default class ArrayBuffer {
 
@@ -13,7 +18,7 @@ export default class ArrayBuffer {
   normals: number[]| Float32Array;
   uvs?: number[]| Float32Array;
   indices?: number[] | Uint16Array;
-  textures?: Texture[];
+  instanced?: boolean;
   vao: VAO;
   ibo!: IBO;
 
@@ -22,16 +27,17 @@ export default class ArrayBuffer {
   	positions: number[] | Float32Array,
   	normals: number[]| Float32Array,
   	uvs: number[]| Float32Array,
-  	indices?: number[] | Uint16Array,
-  	textures?: Texture[]
+  	params: ArrayBufferParams
+
   ) {
 
   	this.gl = gl;
   	this.positions = positions;
-  	this.indices = indices;
   	this.normals = normals;
   	this.uvs = uvs;
-  	this.textures = textures;
+
+  	this.indices = params.indices;
+  	this.instanced = params.instanced;
 
   	this.vao = new VAO( gl );
 
@@ -128,14 +134,14 @@ export default class ArrayBuffer {
 
   	if ( ! shader ) return;
 
-  	if ( this.textures && this.textures.length > 0 ) {
+  	if ( shader.textures && shader.textures.length > 0 ) {
 
-  		for ( let i = 0; i < this.textures.length; i ++ ) {
+  		for ( let i = 0; i < shader.textures.length; i ++ ) {
 
-  			const texture = this.textures[ i ];
+  			const textureObject = shader.textures[ i ];
 
-  			texture.textureUnit( shader, `map${i}`, i );
-  			texture.bind();
+  			textureObject.texture.textureUnit( shader, textureObject.uniformName, i );
+  			textureObject.texture.bind();
 
   		}
 

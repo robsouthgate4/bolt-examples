@@ -70,8 +70,6 @@ export default class GLTFParser {
 
   	const indexAccessorID = gltf.meshes[ 0 ].primitives[ 0 ].indices;
 
-  	console.log( indexAccessorID );
-
   	if ( gltf.accessors[ indexAccessorID ].componentType != 5123 ) {
 
   		return null;

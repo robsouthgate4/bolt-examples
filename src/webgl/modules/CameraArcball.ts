@@ -32,8 +32,8 @@ export default class CameraArcball extends Camera {
   	near: number,
   	far: number,
   	gl: WebGL2RenderingContext,
-  	damping?: number,
-  	speed?: number ) {
+  	damping = 0.2,
+  	speed = 3 ) {
 
   	super(
   		width,

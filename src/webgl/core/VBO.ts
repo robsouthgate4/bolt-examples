@@ -1,9 +1,11 @@
+import { mat4 } from "gl-matrix";
+
 export default class VBO {
 
   gl: WebGL2RenderingContext;
   buffer: WebGLBuffer;
 
-  constructor( data: Float32Array | number[], gl: WebGL2RenderingContext ) {
+  constructor( data: Float32Array | number[], gl: WebGL2RenderingContext, drawType = gl.STATIC_DRAW ) {
 
   	this.gl = gl;
   	this.buffer = <WebGLBuffer>( this.gl.createBuffer() );
@@ -14,7 +16,7 @@ export default class VBO {
   		this.gl.bufferData(
   			this.gl.ARRAY_BUFFER,
   			data,
-  			this.gl.STATIC_DRAW
+  			drawType
   		);
 
   	} else {
@@ -22,7 +24,7 @@ export default class VBO {
   		this.gl.bufferData(
   			this.gl.ARRAY_BUFFER,
   			new Float32Array( data ),
-  			this.gl.STATIC_DRAW
+  			drawType
   		);
 
   	}
