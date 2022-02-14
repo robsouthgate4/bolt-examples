@@ -1,32 +1,41 @@
-export const getClassFromString = ( name ) => `.${name.replace( /_/g, "-" )}`;
 
-export const timeout = ( ms ) => {
+
+export const getClassFromString = ( name: string ) =>
+	`.${name.replace( /_/g, "-" )}`;
+
+export const timeout = ( ms: number ) => {
 
 	return new Promise( ( resolve ) => setTimeout( resolve, ms ) );
 
 };
 
-export const fit = ( value, low1, high1, low2, high2 ) => {
+export const fit = (
+	value: number,
+	low1: number,
+	high1: number,
+	low2: number,
+	high2: number
+) => {
 
 	return low2 + ( ( high2 - low2 ) * ( value - low1 ) ) / ( high1 - low1 );
 
 };
 
-export const bellCurve = ( value ) => {
+export const bellCurve = ( value: number ) => {
 
 	return ( Math.sin( 2 * Math.PI * ( value - 0.2 ) ) + 1 ) / 2;
 
 };
 
-export const lerp = ( v0, v1, t ) => {
+export const lerp = ( v0: number, v1: number, t: number ) => {
 
 	return v0 * ( 1 - t ) + v1 * t;
 
 };
 
-export const hexToRgb = ( hex ) => {
+export const hexToRgb = ( hex: string ) => {
 
-	let result = /^0x?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec( hex );
+	const result = /^0x?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec( hex );
 
 	return result
 		? {
@@ -38,14 +47,14 @@ export const hexToRgb = ( hex ) => {
 
 };
 
-export const strToBool = ( s ) => {
+export const strToBool = ( s: string ) => {
 
 	const regex = /^\s*(true|1|on)\s*$/i;
 	return regex.test( s );
 
 };
 
-export const getSearchParam = ( param ) => {
+export const getSearchParam = ( param: string ) => {
 
 	const queryString = window.location.search;
 	const urlParams = new URLSearchParams( queryString );
@@ -81,6 +90,7 @@ export const isFirefoxIOS = () => navigator.userAgent.match( "FxiOS" );
 export const getDeviceType = () => {
 
 	const ua = navigator.userAgent;
+	//@ts-ignore
 	if ( !! window.MSInputMethodContext && !! document.documentMode ) {
 
 		// ie11
@@ -108,39 +118,13 @@ export const getDeviceType = () => {
 
 };
 
-export const getTextureMapData = ( heightmap ) => {
 
-	const { image } = heightmap;
-	const canvas = document.createElement( "canvas" );
-	canvas.width = image.naturalWidth;
-	canvas.height = image.naturalHeight;
-	const context = canvas.getContext( "2d" );
-	context.drawImage( image, 0, 0 );
-	const imageData = context.getImageData( 0, 0, image.width, image.height );
-	return imageData;
 
-};
-
-export const getTexturePixelValue = ( imageData, coordinate ) => {
-
-	const { x, y } = coordinate;
-	const position = ( x + imageData.width * y ) * 4;
-	const data = imageData.data;
-	const colorValue = {
-		r: data[ position ] / 255,
-		g: data[ position + 1 ] / 255,
-		b: data[ position + 2 ] / 255,
-		a: data[ position + 3 ] / 255,
-	};
-	return colorValue;
-
-};
-
-export const loadAudioBuffer = ( url, audioContext ) => {
+export const loadAudioBuffer = ( url: string, audioContext: AudioContext ) => {
 
 	return new Promise( ( resolve, reject ) => {
 
-		var request = new XMLHttpRequest();
+		const request = new XMLHttpRequest();
 		request.open( "GET", url, true );
 		request.responseType = "arraybuffer";
 		request.onload = () => {
@@ -163,11 +147,11 @@ export const loadAudioBuffer = ( url, audioContext ) => {
 
 };
 
-export const loadBinaryBuffer = ( url ) => {
+export const loadBinaryBuffer = ( url: string ) => {
 
 	return new Promise( ( resolve, reject ) => {
 
-		var request = new XMLHttpRequest();
+		const request = new XMLHttpRequest();
 		request.open( "GET", url, true );
 		request.responseType = "arraybuffer";
 		request.onload = () => {

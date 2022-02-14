@@ -2,8 +2,6 @@
 
 precision highp float;
 
-//uniform sampler2D diffuse;
-
 uniform vec3 objectColor;
 uniform vec3 lightColor;
 

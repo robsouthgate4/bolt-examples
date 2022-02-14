@@ -4,26 +4,27 @@ precision highp float;
 
 layout (location = 0) in vec3 aPosition;
 layout (location = 1) in vec3 aNormal;
-//layout (location = 2) in vec2 aUv;
 
-// out vec3 Normal;
-// out vec2 vUv;
+out vec3 Normal;
 out vec3 FragPosition;
+out vec3 Ro;
+out vec3 HitPos;
 
 uniform mat4 projection;
 uniform mat4 model;
 uniform mat4 view;
-
-uniform mat4 camera;
+uniform vec3 viewPosition;
 
 void main()
 {
 
-  //Normal = mat3( transpose( inverse( model ) ) ) * aNormal;
+  Ro = ( inverse( model ) * vec4( viewPosition, 1.0 ) ).xyz;
+
+  Normal = aNormal;
 
   FragPosition = vec3( model * vec4( aPosition, 1.0 ) );
 
-  //vUv = aUv;
+  HitPos = aPosition;
 
   gl_Position = projection * view * model * vec4( aPosition, 1.0 );
 
