@@ -1,24 +1,23 @@
 
-import World from "@/webgl/worlds/WorldInstanced";
+import Example from "@/webgl/examples/Instancing";
 
 export default class Main {
 
-  world!: World;
   loading: boolean;
 
   constructor() {
 
   	this.loading = false;
-  	this._start();
 
   }
   _start() {
 
-  	this.world = new World();
-  	this.world.start();
+  	const example = new Example();
+  	example.start();
+
   	window.addEventListener( "resize", () => {
 
-  		this.world.resize( );
+  		example.resize( );
 
   	} );
 

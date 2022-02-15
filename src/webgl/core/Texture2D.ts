@@ -27,7 +27,8 @@ export default class Texture {
 
   	this.texture = <WebGLTexture>( this.gl.createTexture() );
 
-  	this.gl.bindTexture( this.gl.TEXTURE_2D, this.texture );
+  	this.bind();
+
   	this.gl.texImage2D( this.gl.TEXTURE_2D, 0, this.format, 1, 1, 0, this.format, this.gl.UNSIGNED_BYTE, new Uint8Array( [ 0, 0, 255, 255 ] ) );
   	this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST );
   	this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR );

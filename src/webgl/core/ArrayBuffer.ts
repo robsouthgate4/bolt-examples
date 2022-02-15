@@ -3,199 +3,185 @@ import VAO from "./VAO";
 import VBO from "./VBO";
 import IBO from "./IBO";
 import Shader from "./Shader";
+import VBOInstanced from "./VBOInstanced";
 
 export interface ArrayBufferParams {
-  indices?: number[] | Uint16Array;
-  instanced?: boolean;
-  instanceCount?: number;
-  instanceMatrices?: mat4[];
+	indices?: number[] | Uint16Array;
+	instanced?: boolean;
+	instanceCount?: number;
+	instanceMatrices?: mat4[];
 }
 
 export default class ArrayBuffer {
 
-  gl: WebGL2RenderingContext;
-  positions: number[] | Float32Array;
-  normals: number[]| Float32Array;
-  uvs?: number[]| Float32Array;
-  indices?: number[] | Uint16Array;
-  instanced?: boolean;
-  vao: VAO;
-  ibo!: IBO;
+	gl: WebGL2RenderingContext;
+	positions: number[] | Float32Array;
+	normals: number[]| Float32Array;
+	uvs?: number[]| Float32Array;
+	indices?: number[] | Uint16Array;
+	instanced?: boolean;
+	vao: VAO;
+	ibo!: IBO;
+	instanceMatrices?: mat4[];
+	instanceCount?: number;
 
-  constructor(
-  	gl: WebGL2RenderingContext,
-  	positions: number[] | Float32Array,
-  	normals: number[]| Float32Array,
-  	uvs: number[]| Float32Array,
-  	params: ArrayBufferParams
+	constructor(
+		gl: WebGL2RenderingContext,
+		positions: number[] | Float32Array,
+		normals: number[]| Float32Array,
+		uvs: number[]| Float32Array,
+		params?: ArrayBufferParams
+	) {
 
-  ) {
+		this.gl = gl;
+		this.positions = positions;
+		this.normals = normals;
+		this.uvs = uvs;
 
-  	this.gl = gl;
-  	this.positions = positions;
-  	this.normals = normals;
-  	this.uvs = uvs;
+		console.log(params)
 
-  	this.indices = params.indices;
-  	this.instanced = params.instanced;
+		this.indices = params?.indices;
+		this.instanced = params?.instanced;
+		this.instanceMatrices = params?.instanceMatrices;
+		this.instanceCount = params?.instanceCount;
 
-  	this.vao = new VAO( gl );
+		this.vao = new VAO( gl );
 
-  	this.linkBuffers();
+		this.linkBuffers();
 
-  	if ( this.indices && this.indices.length > 0 ) {
+		if ( this.indices && this.indices.length > 0 ) {
 
-  		this.ibo = new IBO( this.indices, gl );
+			this.ibo = new IBO( this.indices, gl );
 
-  	}
+		}
 
-  }
+	}
 
-  linkBuffers() {
+	linkBuffers() {
 
-  	const positionVbo = new VBO( this.positions || [], this.gl );
-  	const normalVbo = new VBO( this.normals || [], this.gl );
-  	const uvVbo = new VBO( this.uvs || [], this.gl );
+		const positionVbo = new VBO( this.positions || [], this.gl );
+		const normalVbo = new VBO( this.normals || [], this.gl );
+		const uvVbo = new VBO( this.uvs || [], this.gl );
 
-  	this.vao.bind();
-  	// link positions
-  	this.vao.linkAttrib( positionVbo, 0, 3, this.gl.FLOAT, 3 * 4, 0 * 4 );
-  	// link normals
-  	this.vao.linkAttrib( normalVbo, 1, 3, this.gl.FLOAT, 3 * 4, 0 * 4 );
-  	// link uvs
-  	this.vao.linkAttrib( uvVbo, 2, 2, this.gl.FLOAT, 2 * 4, 0 * 4 );
+		this.vao.bind();
+		// link positions
+		this.vao.linkAttrib( positionVbo, 0, 3, this.gl.FLOAT, 3 * 4, 0 * 4 );
+		this.vao.linkAttrib( normalVbo, 1, 3, this.gl.FLOAT, 3 * 4, 0 * 4 );
+		this.vao.linkAttrib( uvVbo, 2, 2, this.gl.FLOAT, 2 * 4, 0 * 4 );
 
-  	this.vao.unbind();
-  	positionVbo.unbind();
-  	normalVbo.unbind();
-  	uvVbo.unbind();
+		if ( this.instanced && this.instanceMatrices ) {
 
-  }
+			const instancedVBO = new VBOInstanced( this.instanceMatrices, this.gl );
+			instancedVBO.bind();
 
-  calculateTangents( vs: number[], tc: number[], ind: number[] ) : number[] {
+			console.log(instancedVBO)
 
-  	const tangents = [] as vec3[];
+			const bytesMatrix = 4 * 16;
+			const bytesVec4 = 4 * 4;
 
-  	for ( let i = 0; i < vs.length / 3; i ++ ) {
+			this.vao.linkAttrib( instancedVBO, 3, 4, this.gl.FLOAT, bytesMatrix, 0 * bytesVec4 );
+			this.vao.linkAttrib( instancedVBO, 4, 4, this.gl.FLOAT, bytesMatrix, 1 * bytesVec4 );
+			this.vao.linkAttrib( instancedVBO, 5, 4, this.gl.FLOAT, bytesMatrix, 2 * bytesVec4 );
+			this.vao.linkAttrib( instancedVBO, 6, 4, this.gl.FLOAT, bytesMatrix, 3 * bytesVec4 );
 
-  		tangents[ i ] = [ 0, 0, 0 ];
+			this.gl.vertexAttribDivisor( 3, 1 );
+			this.gl.vertexAttribDivisor( 4, 1 );
+			this.gl.vertexAttribDivisor( 5, 1 );
+			this.gl.vertexAttribDivisor( 6, 1 );
 
-  	}
+			instancedVBO.unbind();
 
-  	let
-  		a = [ 0, 0, 0 ] as vec3,
-  		b = [ 0, 0, 0 ] as vec3,
-  		triTangent = [ 0, 0, 0 ] as vec3;
+		}
 
-  	for ( let i = 0; i < ind.length; i += 3 ) {
+		this.vao.unbind();
+		positionVbo.unbind();
+		normalVbo.unbind();
+		uvVbo.unbind();
 
-  		const i0 = ind[ i ];
-  		const i1 = ind[ i + 1 ];
-  		const i2 = ind[ i + 2 ];
+	}
 
-  		const pos0 = <vec3>( [ vs[ i0 * 3 ], vs[ i0 * 3 + 1 ], vs[ i0 * 3 + 2 ] ] );
-  		const pos1 = <vec3>( [ vs[ i1 * 3 ], vs[ i1 * 3 + 1 ], vs[ i1 * 3 + 2 ] ] );
-  		const pos2 = <vec3>( [ vs[ i2 * 3 ], vs[ i2 * 3 + 1 ], vs[ i2 * 3 + 2 ] ] );
+	bindTextures( shader: Shader ) {
 
-  		const tex0 = [ tc[ i0 * 2 ], tc[ i0 * 2 + 1 ] ];
-  		const tex1 = [ tc[ i1 * 2 ], tc[ i1 * 2 + 1 ] ];
-  		const tex2 = [ tc[ i2 * 2 ], tc[ i2 * 2 + 1 ] ];
+		if ( ! shader ) return;
 
-  		vec3.subtract( a, pos1, pos0 );
-  		vec3.subtract( b, pos2, pos0 );
+		if ( shader.textures && shader.textures.length > 0 ) {
 
-  		const c2c1b = tex1[ 1 ] - tex0[ 1 ];
-  		const c3c1b = tex2[ 0 ] - tex0[ 1 ];
+			for ( let i = 0; i < shader.textures.length; i ++ ) {
 
-  		triTangent = [ c3c1b * a[ 0 ] - c2c1b * b[ 0 ], c3c1b * a[ 1 ] - c2c1b * b[ 1 ], c3c1b * a[ 2 ] - c2c1b * b[ 2 ] ];
+				const textureObject = shader.textures[ i ];
 
-  		vec3.add( triTangent, tangents[ i0 ], triTangent );
-  		vec3.add( triTangent, tangents[ i1 ], triTangent );
-  		vec3.add( triTangent, tangents[ i2 ], triTangent );
+				textureObject.texture.textureUnit( shader, textureObject.uniformName, i );
+				textureObject.texture.bind();
 
-  	}
+			}
 
-  	// Normalize tangents
-  	const ts: number[] = [];
-  	tangents.forEach( ( tan: vec3 ) => {
+		}
 
-  		vec3.normalize( tan, tan );
-  		ts.push( tan[ 0 ] );
-  		ts.push( tan[ 1 ] );
-  		ts.push( tan[ 2 ] );
+	}
 
-  	} );
+	drawPoints( shader: Shader ) {
 
-  	return ts;
+		this.bindTextures( shader );
 
-  }
+		this.vao.bind();
+		this.gl.drawArrays( this.gl.POINTS, 0, this.positions.length / 3 );
+		this.vao.unbind();
 
-  bindTextures( shader: Shader ) {
+	}
 
-  	if ( ! shader ) return;
+	drawLines( shader: Shader ) {
 
-  	if ( shader.textures && shader.textures.length > 0 ) {
+		this.bindTextures( shader );
 
-  		for ( let i = 0; i < shader.textures.length; i ++ ) {
+		if ( this.indices && this.indices.length ) {
 
-  			const textureObject = shader.textures[ i ];
+			this.vao.bind();
+			this.ibo.bind();
+			this.gl.drawElements( this.gl.LINE_STRIP, this.indices.length, this.gl.UNSIGNED_SHORT, 0 * 4 );
+			this.vao.unbind();
 
-  			textureObject.texture.textureUnit( shader, textureObject.uniformName, i );
-  			textureObject.texture.bind();
+		}
 
-  		}
+	}
 
-  	}
+	drawTriangles( shader: Shader ) {
 
-  }
+		this.bindTextures( shader );
 
-  drawPoints( shader: Shader ) {
+		this.vao.bind();
 
-  	this.bindTextures( shader );
+		if ( this.indices && this.indices.length > 0 ) {
 
-  	this.vao.bind();
-  	this.gl.drawArrays( this.gl.POINTS, 0, this.positions.length / 3 );
-  	this.vao.unbind();
+			this.ibo.bind();
 
-  }
+			if ( this.instanced && this.instanceCount ) {
 
-  drawLines( shader: Shader ) {
+				this.gl.drawElementsInstanced( this.gl.TRIANGLES, this.indices.length, this.gl.UNSIGNED_SHORT, 0, this.instanceCount  )
 
-  	this.bindTextures( shader );
+			} else {
 
-  	if ( this.indices && this.indices.length ) {
+				this.gl.drawElements( this.gl.TRIANGLES, this.indices.length, this.gl.UNSIGNED_SHORT, 0 );
 
-  		this.vao.bind();
-  		this.ibo.bind();
-  		this.gl.drawElements( this.gl.LINE_STRIP, this.indices.length, this.gl.UNSIGNED_SHORT, 0 * 4 );
-  		this.vao.unbind();
+			}
 
-  	}
+			this.ibo.unbind();
 
-  }
+		} else {
 
-  drawTriangles( shader: Shader ) {
+			if ( this.instanced && this.instanceCount ) {
 
-  	this.bindTextures( shader );
+				this.gl.drawArraysInstanced( this.gl.TRIANGLES, 0, this.positions.length / 3, this.instanceCount );
 
-  	this.vao.bind();
+			} else {
 
-  	if ( this.indices && this.indices.length > 0 ) {
+				this.gl.drawArrays( this.gl.TRIANGLES, 0, this.positions.length / 3 );
 
-  		this.ibo.bind();
+			}
 
-  		this.gl.drawElements( this.gl.TRIANGLES, this.indices.length, this.gl.UNSIGNED_SHORT, 0 * 4 );
+		}
 
-  		this.ibo.unbind();
+		this.vao.unbind();
 
-  	} else {
-
-  		this.gl.drawArrays( this.gl.TRIANGLES, 0, this.positions.length / 3 );
-
-  	}
-
-  	this.vao.unbind();
-
-  }
+	}
 
 }

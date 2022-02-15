@@ -60,7 +60,7 @@ const buffer = [
 	- 0.5, 0.5, - 0.5, 0.0, 1.0, 0.0
 ];
 
-export default class World extends Base {
+export default class extends Base {
 
   canvas: HTMLCanvasElement;
   gl: WebGL2RenderingContext;
@@ -127,7 +127,7 @@ export default class World extends Base {
   	this.lightingShader.setTexture( "mapEqui", equi );
   	this.lightingShader.setTexture( "mapAO", AO );
 
-  	const instanceCount = 50000;
+  	const instanceCount = 10000;
 
   	const instanceMatrices: mat4[] = [];
 

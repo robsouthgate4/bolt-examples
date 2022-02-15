@@ -32,25 +32,29 @@ To build project run:
 npm run build
 ```
 
-Open [http://localhost:8080](http://localhost:8080) with your browser to see the app.
+Open [http://localhost:8080](http://localhost:8080) with your browser to see the
+app.
 
 ## Features
 
-- **[Hammer.js](https://hammerjs.github.io/)** - For handling mobile gestures
-- **[ESLint](https://eslint.org/)** Configuration:
-  - Uses [Prettier](https://prettier.io/) ESLint plugin for consistent code style.
+-   **[Hammer.js](https://hammerjs.github.io/)** - For handling mobile gestures
+-   **[ESLint](https://eslint.org/)** Configuration:
+    -   Uses [Prettier](https://prettier.io/) ESLint plugin for consistent code
+        style.
 
 ## Learn More
 
-To format ESlint on save in VScode, open your workspace settings ('Shift-Command-P' and select 'Open Workspace Settings (JSON)'), then paste the following in:
+To format ESlint on save in VScode, open your workspace settings
+('Shift-Command-P' and select 'Open Workspace Settings (JSON)'), then paste the
+following in:
 
 `/.vscode/settings.json`
 
 ```json
 {
-  "editor.formatOnSave": false,
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
-  }
+	"editor.formatOnSave": false,
+	"editor.codeActionsOnSave": {
+		"source.fixAll.eslint": true
+	}
 }
 ```

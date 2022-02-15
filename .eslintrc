@@ -22,6 +22,6 @@
     "mdcs"
   ],
   "rules": {
-
+    "@typescript-eslint/indent": "off"
   }
 }

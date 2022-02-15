@@ -3,81 +3,28 @@ import Shader from "../core/Shader";
 import Texture from "../core/Texture";
 
 //@ts-ignore
-import volumetricVertex from "../core/shaders/volumetric/volumetric.vert";
+import defaultVertex from "../core/shaders/default/default.vert";
 //@ts-ignore
-import volumetricFragment from "../core/shaders/volumetric/volumetric.frag";
-
-//@ts-ignore
-import defaultVertexInstanced from "../core/shaders/defaultInstanced/defaultInstanced.vert";
-//@ts-ignore
-import defaultFragmentInstanced from "../core/shaders/defaultInstanced/defaultInstanced.frag";
+import defaultFragment from "../core/shaders/default/default.frag";
 
 import { vec3, } from "gl-matrix";
 import Node from "../modules/SceneGraph/Node";
 import Transform from "../modules/SceneGraph/Transform";
 import ArrayBufferInterleaved from "../core/ArrayBufferInterleaved";
 import CameraArcball from "../modules/CameraArcball";
-import CameraFPS from "../modules/CameraFPS";
-import FBO from "../core/FBO";
+import ArrayBuffer from "../core/ArrayBuffer";
+import GLTFParser from "../modules/GLTFParser";
 
-const buffer = [
-	- 0.5, - 0.5, - 0.5, 0.0, 0.0, - 1.0,
-	0.5, - 0.5, - 0.5, 0.0, 0.0, - 1.0,
-	0.5, 0.5, - 0.5, 0.0, 0.0, - 1.0,
-	0.5, 0.5, - 0.5, 0.0, 0.0, - 1.0,
-	- 0.5, 0.5, - 0.5, 0.0, 0.0, - 1.0,
-	- 0.5, - 0.5, - 0.5, 0.0, 0.0, - 1.0,
-
-	- 0.5, - 0.5, 0.5, 0.0, 0.0, 1.0,
-	0.5, - 0.5, 0.5, 0.0, 0.0, 1.0,
-	0.5, 0.5, 0.5, 0.0, 0.0, 1.0,
-	0.5, 0.5, 0.5, 0.0, 0.0, 1.0,
-	- 0.5, 0.5, 0.5, 0.0, 0.0, 1.0,
-	- 0.5, - 0.5, 0.5, 0.0, 0.0, 1.0,
-
-	- 0.5, 0.5, 0.5, - 1.0, 0.0, 0.0,
-	- 0.5, 0.5, - 0.5, - 1.0, 0.0, 0.0,
-	- 0.5, - 0.5, - 0.5, - 1.0, 0.0, 0.0,
-	- 0.5, - 0.5, - 0.5, - 1.0, 0.0, 0.0,
-	- 0.5, - 0.5, 0.5, - 1.0, 0.0, 0.0,
-	- 0.5, 0.5, 0.5, - 1.0, 0.0, 0.0,
-
-	0.5, 0.5, 0.5, 1.0, 0.0, 0.0,
-	0.5, 0.5, - 0.5, 1.0, 0.0, 0.0,
-	0.5, - 0.5, - 0.5, 1.0, 0.0, 0.0,
-	0.5, - 0.5, - 0.5, 1.0, 0.0, 0.0,
-	0.5, - 0.5, 0.5, 1.0, 0.0, 0.0,
-	0.5, 0.5, 0.5, 1.0, 0.0, 0.0,
-
-	- 0.5, - 0.5, - 0.5, 0.0, - 1.0, 0.0,
-	0.5, - 0.5, - 0.5, 0.0, - 1.0, 0.0,
-	0.5, - 0.5, 0.5, 0.0, - 1.0, 0.0,
-	0.5, - 0.5, 0.5, 0.0, - 1.0, 0.0,
-	- 0.5, - 0.5, 0.5, 0.0, - 1.0, 0.0,
-	- 0.5, - 0.5, - 0.5, 0.0, - 1.0, 0.0,
-
-	- 0.5, 0.5, - 0.5, 0.0, 1.0, 0.0,
-	0.5, 0.5, - 0.5, 0.0, 1.0, 0.0,
-	0.5, 0.5, 0.5, 0.0, 1.0, 0.0,
-	0.5, 0.5, 0.5, 0.0, 1.0, 0.0,
-	- 0.5, 0.5, 0.5, 0.0, 1.0, 0.0,
-	- 0.5, 0.5, - 0.5, 0.0, 1.0, 0.0
-];
-
-export default class World extends Base {
+export default class extends Base {
 
   canvas: HTMLCanvasElement;
   gl: WebGL2RenderingContext;
   lightingShader: Shader;
   lightPosition: vec3;
-  camera: CameraArcball | CameraFPS;
+  camera: CameraArcball;
   assetsLoaded!: boolean;
-  cubeTransform!: Transform;
-  cubeNode!: Node;
-  boxTransform!: Transform;
+  torusTransform!: Transform;
   torusNode!: Node;
-  cubeMinimal!: ArrayBufferInterleaved;
-  fbo!: FBO;
 
   constructor() {
 
@@ -92,7 +39,7 @@ export default class World extends Base {
 
   	this.gl = <WebGL2RenderingContext> this.canvas.getContext( "webgl2", { antialias: true } );
 
-  	this.lightingShader = new Shader( defaultVertexInstanced, defaultFragmentInstanced, this.gl );
+  	this.lightingShader = new Shader( defaultVertex, defaultFragment, this.gl );
   	this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
   	this.camera = new CameraArcball(
@@ -128,6 +75,13 @@ export default class World extends Base {
   		this.gl );
   	AO.loadImage();
 
+	
+	const gltfLoader =  new GLTFParser("/static/models/gltf/torus.gltf");
+
+	const data = await gltfLoader.loadGLTF();
+
+	if( !data ) return;
+
   	this.assetsLoaded = true;
 
   	// set shader uniforms
@@ -138,26 +92,18 @@ export default class World extends Base {
   	this.lightingShader.setTexture( "mapAO", AO );
 
   	// setup transforms
-  	this.cubeTransform = new Transform();
+  	this.torusTransform = new Transform();	  
 
   	// setup nodes
-  	this.cubeNode = new Node(
-  		new ArrayBufferInterleaved(
-  			this.gl,
-  			6,
-  			buffer,
-  			{
-  				instanced: true,
-  				instanceCount: 10
-  			}
-  		),
-  		this.cubeTransform
+  	this.torusNode = new Node(
+		new ArrayBuffer(this.gl, data.positions, data.normals, data.uvs, { indices: data.indices } ),
+  		this.torusTransform
   	);
 
 
-  	this.cubeNode.transform.position = vec3.fromValues( 0, 0, 0 );
-  	this.cubeNode.transform.scale = vec3.fromValues( 1, 1, 1 );
-  	this.cubeNode.updateModelMatrix();
+  	this.torusNode.transform.position = vec3.fromValues( 0, 0, 0 );
+  	this.torusNode.transform.scale = vec3.fromValues( 1, 1, 1 );
+  	this.torusNode.updateModelMatrix();
 
   	this.resize();
 
@@ -195,7 +141,7 @@ export default class World extends Base {
 
   	super.update( elapsed, delta );
 
-  	this.camera.update( delta );
+  	this.camera.update();
 
   	this.gl.viewport( 0, 0, this.gl.canvas.width, this.gl.canvas.height );
   	this.gl.clearColor( 0, 0, 0, 0 );
@@ -205,9 +151,9 @@ export default class World extends Base {
   	this.lightingShader.setVector3( "viewPosition", this.camera.position );
   	this.lightingShader.setFloat( "time", elapsed );
 
-  	this.cubeNode.updateModelMatrix();
+  	this.torusNode.updateModelMatrix();
 
-  	this.cubeNode.drawTriangles( this.lightingShader, this.camera );
+  	this.torusNode.drawTriangles( this.lightingShader, this.camera );
 
   }
 
