@@ -99,6 +99,7 @@ export default class Base {
   	this.delta = this.elapsed - this.lastTime;
   	this.lastTime = this.elapsed;
 
+
   	this.earlyUpdate( this.elapsed, this.delta );
   	this.update( this.elapsed, this.delta );
   	this.lateUpdate( this.elapsed, this.delta );

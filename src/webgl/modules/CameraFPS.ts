@@ -278,24 +278,6 @@ export default class CameraFPS extends Camera {
 
   }
 
-  getPosition() {
-
-  	return this.position;
-
-  }
-
-  getViewMatrix() {
-
-  	return this.view;
-
-  }
-
-  getProjectionMatrix() {
-
-  	return this.projection;
-
-  }
-
   update( delta?: number ) {
 
   	if ( delta ) this.processInputs( delta );

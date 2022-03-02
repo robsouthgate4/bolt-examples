@@ -16,7 +16,7 @@ export default class Camera {
   forward: vec3;
   vector: vec3;
   active: boolean;
-  target: vec3;
+  target = vec3.fromValues( 0, 0, 0 );
 
   constructor(
   	width: number,
@@ -40,13 +40,15 @@ export default class Camera {
   	this.projection = mat4.create();
   	this.camera = mat4.create();
   	this.up = vec3.fromValues( 0, 1, 0 );
+
+
   	this.forward = vec3.fromValues( 0, 0, - 1 );
 
   	this.vector = vec3.create();
   	this.active = false;
 
   	this.target = vec3.create();
-  	vec3.add( this.target, this.position, this.forward );
+  	//vec3.add( this.target, this.position, this.forward );
 
   	this.resize( width, height );
 

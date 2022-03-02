@@ -2,7 +2,7 @@
 
 precision highp float;
 
-layout (location = 0) in vec3 aPosition;
+layout (location = 0) in vec3 aPositionition;
 layout (location = 1) in vec3 aNormal;
 
 out vec3 Normal;
@@ -22,10 +22,10 @@ void main()
 
   Normal = aNormal;
 
-  FragPosition = vec3( model * vec4( aPosition, 1.0 ) );
+  FragPosition = vec3( model * vec4( aPositionition, 1.0 ) );
 
-  HitPos = aPosition;
+  HitPos = aPositionition;
 
-  gl_Position = projection * view * model * vec4( aPosition, 1.0 );
+  gl_Position = projection * view * model * vec4( aPositionition, 1.0 );
 
 }

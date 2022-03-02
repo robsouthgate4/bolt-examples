@@ -12,7 +12,9 @@ import Node from "../modules/SceneGraph/Node";
 import Transform from "../modules/SceneGraph/Transform";
 import CameraArcball from "../modules/CameraArcball";
 import ArrayBuffer from "../core/ArrayBuffer";
-import GLTFParser from "../modules/GLTFParser";
+import Sphere from "../modules/Primitives/Sphere";
+import Cube from "../modules/Primitives/Box";
+import Plane from "../modules/Primitives/Plane";
 
 export default class extends Base {
 
@@ -21,9 +23,11 @@ export default class extends Base {
   shader: Shader;
   lightPosition: vec3;
   camera: CameraArcball;
-  assetsLoaded!: boolean;
+  assetsLoaded?: boolean;
   torusTransform!: Transform;
-  torusNode!: Node;
+  sphereNode!: Node;
+  cubeNode!: Node;
+  planeNode!: Node;
 
   constructor() {
 
@@ -44,7 +48,7 @@ export default class extends Base {
   	this.camera = new CameraArcball(
   		this.width,
   		this.height,
-  		vec3.fromValues( 0, 0, 3 ),
+  		vec3.fromValues( 0, 2, 6 ),
   		vec3.fromValues( 0, 0, 0 ),
   		45,
   		0.01,
@@ -64,41 +68,27 @@ export default class extends Base {
 
   async init() {
 
-  	const equi = new Texture(
-  		"/static/textures/equi-studio.jpg",
-  		this.gl );
-  	equi.loadImage();
+  	const sphereGeometry = new Sphere( { radius: 1, widthSegments: 32, heightSegments: 32 } );
+  	const cubeGeometry = new Cube( { widthSegments: 1, heightSegments: 1 } );
+  	const planeGeometry = new Plane( { widthSegments: 10, heightSegments: 10 } );
 
-  	const AO = new Texture(
-  		"/static/models/gltf/AO.png",
-  		this.gl );
-  	AO.loadImage();
-
-
-  	const gltfLoader = new GLTFParser( "/static/models/gltf/torus.gltf" );
-
-  	const data = await gltfLoader.loadGLTF();
-
-  	if ( ! data ) return;
-
-  	this.assetsLoaded = true;
-
-  	// set shader uniforms
-  	this.shader.activate();
-  	this.shader.setVector3( "objectColor", vec3.fromValues( 1.0, 0.0, 0.0 ) );
-  	this.shader.setVector3( "lightColor", vec3.fromValues( 0.95, 1.0, 1.0 ) );
-  	this.shader.setTexture( "mapEqui", equi );
-  	this.shader.setTexture( "mapAO", AO );
-
-
-  	// setup nodes
-  	this.torusNode = new Node(
-  		new ArrayBuffer( this.gl, data.positions, data.normals, data.uvs, { indices: data.indices } ),
+  	this.sphereNode = new Node(
+  		new ArrayBuffer( this.gl, sphereGeometry.positions, sphereGeometry.normals, sphereGeometry.uvs, { indices: sphereGeometry.indices } ),
   	);
 
-  	this.torusNode.transform.position = vec3.fromValues( 0, 0, 0 );
-  	this.torusNode.transform.scale = vec3.fromValues( 1, 1, 1 );
-  	this.torusNode.updateModelMatrix();
+  	this.cubeNode = new Node(
+  		new ArrayBuffer( this.gl, cubeGeometry.positions, cubeGeometry.normals, cubeGeometry.uvs, { indices: cubeGeometry.indices } ),
+  	);
+
+  	this.cubeNode.autoUpdate = false;
+  	this.cubeNode.transform.position[ 0 ] = 1.5;
+  	this.cubeNode.updateModelMatrix();
+
+  	this.planeNode = new Node(
+  		new ArrayBuffer( this.gl, planeGeometry.positions, planeGeometry.normals, planeGeometry.uvs, { indices: planeGeometry.indices } ),
+  	);
+
+  	this.planeNode.transform.position[ 0 ] = - 1.5;
 
   	this.resize();
 
@@ -132,8 +122,6 @@ export default class extends Base {
 
   update( elapsed: number, delta: number ) {
 
-  	if ( ! this.assetsLoaded ) return;
-
   	super.update( elapsed, delta );
 
   	this.camera.update();
@@ -146,9 +134,14 @@ export default class extends Base {
   	this.shader.setVector3( "viewPosition", this.camera.position );
   	this.shader.setFloat( "time", elapsed );
 
-  	this.torusNode.updateModelMatrix();
+  	this.cubeNode.transform.rotation[ 1 ] += 0.01;
+  	this.cubeNode.updateModelMatrix();
 
-  	this.torusNode.drawTriangles( this.shader, this.camera );
+  	this.sphereNode.transform.rotation[ 1 ] = this.planeNode.transform.rotation[ 1 ] += 0.01;
+
+  	this.sphereNode.drawTriangles( this.shader, this.camera );
+  	this.cubeNode.drawTriangles( this.shader, this.camera );
+  	this.planeNode.drawTriangles( this.shader, this.camera );
 
   }
 

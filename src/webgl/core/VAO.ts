@@ -3,36 +3,36 @@ import VBO from "./VBO";
 export default class VAO {
 
   gl: WebGL2RenderingContext;
-  vao: WebGLVertexArrayObject;
+  arrayObject: WebGLVertexArrayObject;
 
   constructor( gl: WebGL2RenderingContext ) {
 
   	this.gl = gl;
-  	this.vao = <WebGLVertexArrayObject>( this.gl.createVertexArray() );
+  	this.arrayObject = <WebGLVertexArrayObject>( this.gl.createVertexArray() );
 
   }
 
   linkVBO( vbo: VBO, layoutID: number ) {
 
   	vbo.bind();
-  	this.gl.vertexAttribPointer( layoutID, 3, this.gl.FLOAT, false, 0, 0 );
   	this.gl.enableVertexAttribArray( layoutID );
+  	this.gl.vertexAttribPointer( layoutID, 3, this.gl.FLOAT, false, 0, 0 );
   	vbo.unbind();
 
   }
 
-  linkAttrib( vbo: VBO, layoutID: number, numComponents: number, type: number, stride: number, offset: number ) {
+  linkAttrib( vbo: VBO, layoutID: number, numComponents: number, type: number, stride = 0, offset = 0 ) {
 
   	vbo.bind();
-  	this.gl.vertexAttribPointer( layoutID, numComponents, type, false, stride, offset );
   	this.gl.enableVertexAttribArray( layoutID );
+  	this.gl.vertexAttribPointer( layoutID, numComponents, type, false, stride, offset );
   	vbo.unbind();
 
   }
 
   bind() {
 
-  	this.gl.bindVertexArray( this.vao );
+  	this.gl.bindVertexArray( this.arrayObject );
 
   }
 
@@ -44,7 +44,7 @@ export default class VAO {
 
   delete() {
 
-  	this.gl.deleteVertexArray( this.vao );
+  	this.gl.deleteVertexArray( this.arrayObject );
 
   }
 

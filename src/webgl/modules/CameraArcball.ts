@@ -22,6 +22,7 @@ export default class CameraArcball extends Camera {
   mouseY: number;
   lastY: number;
   initialPositionSpherical: number[];
+  scrollSpeed: number;
 
   constructor(
   	width: number,
@@ -33,7 +34,8 @@ export default class CameraArcball extends Camera {
   	far: number,
   	gl: WebGL2RenderingContext,
   	damping = 0.2,
-  	speed = 3 ) {
+  	speed = 3,
+  	scrollSpeed = 0.3 ) {
 
   	super(
   		width,
@@ -62,6 +64,8 @@ export default class CameraArcball extends Camera {
   	this.elevation = this.initialPositionSpherical[ 1 ];
   	this.radius = this.initialPositionSpherical[ 2 ];
 
+  	this.scrollSpeed = scrollSpeed;
+
   	this.rotateAmountX = speed || 1;
   	this.rotateAmountY = speed || 1;
 
@@ -87,6 +91,7 @@ export default class CameraArcball extends Camera {
   	window.addEventListener( "mousemove", this.handleMouseMove.bind( this ) );
   	window.addEventListener( "mousedown", this.handleMouseDown.bind( this ) );
   	window.addEventListener( "mouseup", this.handleMouseUp.bind( this ) );
+  	window.addEventListener( "wheel", this.handleWheel.bind( this ) );
 
   }
 
@@ -96,6 +101,13 @@ export default class CameraArcball extends Camera {
   		x: ( ev.clientX / window.innerWidth ) * 2 - 1,
   		y: - ( ev.clientY / window.innerHeight ) * 2 + 1,
   	};
+
+  }
+
+  handleWheel( ev: WheelEvent ) {
+
+  	const direction = Math.sign( ev.deltaY );
+  	this.radius -= direction * this.scrollSpeed;
 
   }
 
@@ -175,23 +187,7 @@ export default class CameraArcball extends Camera {
 
   }
 
-  getPosition() {
 
-  	return this.position;
-
-  }
-
-  getViewMatrix() {
-
-  	return this.view;
-
-  }
-
-  getProjectionMatrix() {
-
-  	return this.projection;
-
-  }
 
   update( ) {
 

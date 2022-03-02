@@ -19,7 +19,7 @@ export default class extends Base {
 
   canvas: HTMLCanvasElement;
   gl: WebGL2RenderingContext;
-  lightingShader: Shader;
+  shader: Shader;
   lightPosition: vec3;
   camera: CameraFPS;
   assetsLoaded!: boolean;
@@ -30,8 +30,10 @@ export default class extends Base {
 
   	super();
 
-  	this.width = window.innerWidth;
-  	this.height = window.innerHeight;
+  	const devicePixelRatio = Math.min( 2, window.devicePixelRatio || 1 );
+
+  	this.width = window.innerWidth * devicePixelRatio;
+  	this.height = window.innerHeight * devicePixelRatio;
 
   	this.canvas = <HTMLCanvasElement>document.getElementById( "experience" );
   	this.canvas.width = this.width;
@@ -39,7 +41,7 @@ export default class extends Base {
 
   	this.gl = <WebGL2RenderingContext> this.canvas.getContext( "webgl2", { antialias: true } );
 
-  	this.lightingShader = new Shader( defaultVertexInstanced, defaultFragmentInstanced, this.gl );
+  	this.shader = new Shader( defaultVertexInstanced, defaultFragmentInstanced, this.gl );
   	this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
   	this.camera = new CameraFPS(
@@ -72,30 +74,30 @@ export default class extends Base {
   		this.gl );
   	AO.loadImage();
 
-	const gltfLoader =  new GLTFParser("/static/models/gltf/torus.gltf");
+  	const gltfLoader = new GLTFParser( "/static/models/gltf/torus.gltf" );
 
-	const data = await gltfLoader.loadGLTF();
+  	const data = await gltfLoader.loadGLTF();
 
-	if( !data ) return;
+  	if ( ! data ) return;
 
   	this.assetsLoaded = true;
 
   	// set shader uniforms
-  	this.lightingShader.activate();
-  	this.lightingShader.setVector3( "objectColor", vec3.fromValues( 1.0, 0.0, 0.0 ) );
-  	this.lightingShader.setVector3( "lightColor", vec3.fromValues( 0.95, 1.0, 1.0 ) );
-  	this.lightingShader.setTexture( "mapEqui", equi );
-  	this.lightingShader.setTexture( "mapAO", AO );
+  	this.shader.activate();
+  	this.shader.setVector3( "objectColor", vec3.fromValues( 1.0, 0.0, 0.0 ) );
+  	this.shader.setVector3( "lightColor", vec3.fromValues( 0.95, 1.0, 1.0 ) );
+  	this.shader.setTexture( "mapEqui", equi );
+  	this.shader.setTexture( "mapAO", AO );
 
-  	const instanceCount = 100;
+  	const instanceCount = 2000;
 
   	const instanceMatrices: mat4[] = [];
 
   	for ( let i = 0; i < instanceCount; i ++ ) {
 
-  		const x = ( Math.random() * 2 - 1 ) * 10;
+  		const x = ( Math.random() * 2 - 1 ) * 50;
   		const y = ( Math.random() * 2 - 1 ) * 2;
-  		const z = Math.random() * 50;
+  		const z = Math.random() * 500;
 
   		const tempTranslation = vec3.fromValues( x, y, - z );
   		const tempRotation = quat.fromValues( 0, 0, 0, 0 );
@@ -121,15 +123,15 @@ export default class extends Base {
   	// setup nodes
   	this.torusBuffer = new ArrayBuffer(
   		this.gl,
-		data.positions,
-		data.normals, 
-		data.uvs,
-		{
-			indices: data.indices,
-			instanced: true,
-			instanceCount,
-			instanceMatrices
-		}
+  		data.positions,
+  		data.normals,
+  		data.uvs,
+  		{
+  			indices: data.indices,
+  			instanced: true,
+  			instanceCount,
+  			instanceMatrices
+  		}
   	),
 
   	this.resize();
@@ -138,17 +140,18 @@ export default class extends Base {
 
   resize() {
 
+  	const devicePixelRatio = Math.min( 2, window.devicePixelRatio || 1 );
+
   	const displayWidth = this.gl.canvas.clientWidth;
   	const displayHeight = this.gl.canvas.clientHeight;
 
-  	// Check if the this.gl.canvas is not the same size.
   	const needResize = this.gl.canvas.width !== displayWidth ||
                      this.gl.canvas.height !== displayHeight;
 
   	if ( needResize ) {
 
-  		this.gl.canvas.width = displayWidth;
-  		this.gl.canvas.height = displayHeight;
+  		this.gl.canvas.width = displayWidth * devicePixelRatio;
+  		this.gl.canvas.height = displayHeight * devicePixelRatio;
 
   	}
 
@@ -174,13 +177,13 @@ export default class extends Base {
   	this.gl.clearColor( 0, 0, 0, 0 );
   	this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT );
 
-  	this.lightingShader.activate();
-  	this.lightingShader.setVector3( "viewPosition", this.camera.position );
-  	this.lightingShader.setFloat( "time", elapsed );
-  	this.lightingShader.setMatrix4( "projection", this.camera.getProjectionMatrix() );
-  	this.lightingShader.setMatrix4( "view", this.camera.getViewMatrix() );
+  	this.shader.activate();
+  	this.shader.setVector3( "viewPosition", this.camera.position );
+  	this.shader.setFloat( "time", elapsed );
+  	this.shader.setMatrix4( "projection", this.camera.getProjectionMatrix() );
+  	this.shader.setMatrix4( "view", this.camera.getViewMatrix() );
 
-  	this.torusBuffer.drawTriangles( this.lightingShader );
+  	this.torusBuffer.drawTriangles( this.shader );
 
   }
 

@@ -7,7 +7,6 @@ interface TextureObject {
   texture: Texture
 }
 
-
 export default class Shader {
 
   gl: WebGL2RenderingContext;
@@ -20,11 +19,13 @@ export default class Shader {
   constructor(
   	vertexShaderSrc: string,
   	fragmentShaderSrc: string,
-  	gl: WebGL2RenderingContext
+  	gl: WebGL2RenderingContext,
+  	parameters?: {
+      transformFeedbackVaryings: string[]
+    }
   ) {
 
   	this.textureUnit = 0;
-
   	this.textures = <TextureObject[]>[];
 
   	this.gl = gl;
@@ -62,6 +63,19 @@ export default class Shader {
 
   	this.gl.attachShader( this.program, this.vertexShader );
   	this.gl.attachShader( this.program, this.fragmentShader );
+
+  	if ( parameters?.transformFeedbackVaryings ) {
+
+  		console.log( parameters.transformFeedbackVaryings );
+
+  		this.gl.transformFeedbackVaryings(
+  			this.program,
+  			parameters.transformFeedbackVaryings,
+  			this.gl.SEPARATE_ATTRIBS
+  		);
+
+  	}
+
   	this.gl.linkProgram( this.program );
 
   	if ( ! this.gl.getProgramParameter( this.program, this.gl.LINK_STATUS ) ) {
@@ -70,6 +84,8 @@ export default class Shader {
   		throw "Could not compile WebGL program. \n\n" + info;
 
   	}
+
+
 
   	this.gl.deleteShader( this.vertexShader );
   	this.gl.deleteShader( this.fragmentShader );

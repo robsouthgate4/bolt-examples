@@ -1,7 +1,5 @@
 import Base from "@webgl/Base";
 import Shader from "../core/Shader";
-import Texture from "../core/Texture";
-
 
 //@ts-ignore
 import defaultVertexInstanced from "../core/shaders/defaultInstanced/defaultInstanced.vert";
@@ -64,7 +62,7 @@ export default class extends Base {
 
   canvas: HTMLCanvasElement;
   gl: WebGL2RenderingContext;
-  lightingShader: Shader;
+  shader: Shader;
   lightPosition: vec3;
   camera: CameraArcball | CameraFPS;
   assetsLoaded!: boolean;
@@ -85,7 +83,7 @@ export default class extends Base {
 
   	this.gl = <WebGL2RenderingContext> this.canvas.getContext( "webgl2", { antialias: true } );
 
-  	this.lightingShader = new Shader( defaultVertexInstanced, defaultFragmentInstanced, this.gl );
+  	this.shader = new Shader( defaultVertexInstanced, defaultFragmentInstanced, this.gl );
   	this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
   	this.camera = new CameraFPS(
@@ -108,24 +106,13 @@ export default class extends Base {
 
   async init() {
 
-  	const equi = new Texture(
-  		"/static/textures/equi-studio.jpg",
-  		this.gl );
-  	equi.loadImage();
-
-  	const AO = new Texture(
-  		"/static/models/gltf/AO.png",
-  		this.gl );
-  	AO.loadImage();
 
   	this.assetsLoaded = true;
 
   	// set shader uniforms
-  	this.lightingShader.activate();
-  	this.lightingShader.setVector3( "objectColor", vec3.fromValues( 1.0, 0.0, 0.0 ) );
-  	this.lightingShader.setVector3( "lightColor", vec3.fromValues( 0.95, 1.0, 1.0 ) );
-  	this.lightingShader.setTexture( "mapEqui", equi );
-  	this.lightingShader.setTexture( "mapAO", AO );
+  	this.shader.activate();
+  	this.shader.setVector3( "objectColor", vec3.fromValues( 1.0, 0.0, 0.0 ) );
+  	this.shader.setVector3( "lightColor", vec3.fromValues( 0.95, 1.0, 1.0 ) );
 
   	const instanceCount = 10000;
 
@@ -215,13 +202,13 @@ export default class extends Base {
   	this.gl.clearColor( 0, 0, 0, 0 );
   	this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT );
 
-  	this.lightingShader.activate();
-  	this.lightingShader.setVector3( "viewPosition", this.camera.position );
-  	this.lightingShader.setFloat( "time", elapsed );
-  	this.lightingShader.setMatrix4( "projection", this.camera.getProjectionMatrix() );
-  	this.lightingShader.setMatrix4( "view", this.camera.getViewMatrix() );
+  	this.shader.activate();
+  	this.shader.setVector3( "viewPosition", this.camera.position );
+  	this.shader.setFloat( "time", elapsed );
+  	this.shader.setMatrix4( "projection", this.camera.getProjectionMatrix() );
+  	this.shader.setMatrix4( "view", this.camera.getViewMatrix() );
 
-  	this.cubeNode.drawTriangles( this.lightingShader );
+  	this.cubeNode.drawTriangles( this.shader );
 
   }
 

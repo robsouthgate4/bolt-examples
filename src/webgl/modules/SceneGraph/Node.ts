@@ -13,15 +13,18 @@ export default class Node {
   parent: Node | null;
   arrayBuffer: ArrayBuffer | ArrayBufferInterleaved;
   transform: Transform;
+  autoUpdate: boolean;
 
-  constructor( arrayBuffer: ArrayBuffer | ArrayBufferInterleaved, transform: Transform ) {
+  constructor( arrayBuffer: ArrayBuffer | ArrayBufferInterleaved ) {
 
   	this.localMatrix = mat4.create();
   	this.modelMatrix = mat4.create();
   	this.children = [];
   	this.parent = null;
   	this.arrayBuffer = arrayBuffer;
-  	this.transform = transform;
+  	this.transform = new Transform();
+
+  	this.autoUpdate = true;
 
   }
 
@@ -80,6 +83,12 @@ export default class Node {
   	shader.setMatrix4( "view", camera.getViewMatrix() );
   	shader.setMatrix4( "projection", camera.getProjectionMatrix() );
   	shader.setMatrix4( "model", this.modelMatrix );
+
+  	if ( this.autoUpdate ) {
+
+  		this.updateModelMatrix();
+
+  	}
 
   }
 

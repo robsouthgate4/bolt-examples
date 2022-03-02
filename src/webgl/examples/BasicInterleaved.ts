@@ -2,10 +2,6 @@ import Base from "@webgl/Base";
 import Shader from "../core/Shader";
 import Texture from "../core/Texture";
 
-//@ts-ignore
-import volumetricVertex from "../core/shaders/volumetric/volumetric.vert";
-//@ts-ignore
-import volumetricFragment from "../core/shaders/volumetric/volumetric.frag";
 
 //@ts-ignore
 import defaultVertex from "../core/shaders/default/default.vert";
@@ -68,7 +64,7 @@ export default class extends Base {
 
 	canvas: HTMLCanvasElement;
 	gl: WebGL2RenderingContext;
-	lightingShader: Shader;
+	shader: Shader;
 	lightPosition: vec3;
 	camera: CameraArcball | CameraFPS;
 	assetsLoaded!: boolean;
@@ -92,7 +88,7 @@ export default class extends Base {
 
 		this.gl = <WebGL2RenderingContext> this.canvas.getContext( "webgl2", { antialias: true } );
 
-		this.lightingShader = new Shader( defaultVertex, defaultFragment, this.gl );
+		this.shader = new Shader( defaultVertex, defaultFragment, this.gl );
 		this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
 		this.camera = new CameraArcball(
@@ -118,44 +114,41 @@ export default class extends Base {
 
 	async init() {
 
-	const equi = new Texture(
-		"/static/textures/equi-studio.jpg",
-		this.gl );
-	equi.loadImage();
+		const equi = new Texture(
+			"/static/textures/equi-studio.jpg",
+			this.gl );
+		equi.loadImage();
 
-	const AO = new Texture(
-		"/static/models/gltf/AO.png",
-		this.gl );
-	AO.loadImage();
+		const AO = new Texture(
+			"/static/models/gltf/AO.png",
+			this.gl );
+		AO.loadImage();
 
-	this.assetsLoaded = true;
+		this.assetsLoaded = true;
 
-	// set shader uniforms
-	this.lightingShader.activate();
-	this.lightingShader.setVector3( "objectColor", vec3.fromValues( 1.0, 0.0, 0.0 ) );
-	this.lightingShader.setVector3( "lightColor", vec3.fromValues( 0.95, 1.0, 1.0 ) );
-	this.lightingShader.setTexture( "mapEqui", equi );
-	this.lightingShader.setTexture( "mapAO", AO );
-
-	// setup transforms
-	this.cubeTransform = new Transform();
-
-	// setup nodes
-	this.cubeNode = new Node(
-		new ArrayBufferInterleaved(
-			this.gl,
-			6,
-			buffer,
-		),
-		this.cubeTransform
-	);
+		// set shader uniforms
+		this.shader.activate();
+		this.shader.setVector3( "objectColor", vec3.fromValues( 1.0, 0.0, 0.0 ) );
+		this.shader.setVector3( "lightColor", vec3.fromValues( 0.95, 1.0, 1.0 ) );
+		this.shader.setTexture( "mapEqui", equi );
+		this.shader.setTexture( "mapAO", AO );
 
 
-	this.cubeNode.transform.position = vec3.fromValues( 0, 0, 0 );
-	this.cubeNode.transform.scale = vec3.fromValues( 1, 1, 1 );
-	this.cubeNode.updateModelMatrix();
+		// setup nodes
+		this.cubeNode = new Node(
+			new ArrayBufferInterleaved(
+				this.gl,
+				6,
+				buffer,
+			),
+		);
 
-	this.resize();
+
+		this.cubeNode.transform.position = vec3.fromValues( 0, 0, 0 );
+		this.cubeNode.transform.scale = vec3.fromValues( 1, 1, 1 );
+		this.cubeNode.updateModelMatrix();
+
+		this.resize();
 
 	}
 
@@ -197,13 +190,13 @@ export default class extends Base {
 		this.gl.clearColor( 0, 0, 0, 0 );
 		this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT );
 
-		this.lightingShader.activate();
-		this.lightingShader.setVector3( "viewPosition", this.camera.position );
-		this.lightingShader.setFloat( "time", elapsed );
+		this.shader.activate();
+		this.shader.setVector3( "viewPosition", this.camera.position );
+		this.shader.setFloat( "time", elapsed );
 
 		this.cubeNode.updateModelMatrix();
 
-		this.cubeNode.drawTriangles( this.lightingShader, this.camera );
+		this.cubeNode.drawTriangles( this.shader, this.camera );
 
 	}
 

@@ -38,8 +38,6 @@ export default class ArrayBuffer {
 		this.normals = normals;
 		this.uvs = uvs;
 
-		console.log(params)
-
 		this.indices = params?.indices;
 		this.instanced = params?.instanced;
 		this.instanceMatrices = params?.instanceMatrices;
@@ -57,6 +55,27 @@ export default class ArrayBuffer {
 
 	}
 
+	addAttribute( buffer: Float32Array | number[], size: number, layoutID: number ) {
+
+		const vbo = new VBO( buffer || [], this.gl );
+
+		this.vao.bind();
+		this.vao.linkAttrib( vbo, layoutID, size, this.gl.FLOAT, size * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
+		this.vao.unbind();
+
+	}
+
+	addInstancedAttribute( buffer: Float32Array | number[], size: number, layoutID: number ) {
+
+		const vbo = new VBO( buffer || [], this.gl );
+
+		this.vao.bind();
+		this.vao.linkAttrib( vbo, layoutID, size, this.gl.FLOAT, size * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
+		this.gl.vertexAttribDivisor( 3, 1 );
+		this.vao.unbind();
+
+	}
+
 	linkBuffers() {
 
 		const positionVbo = new VBO( this.positions || [], this.gl );
@@ -65,19 +84,18 @@ export default class ArrayBuffer {
 
 		this.vao.bind();
 		// link positions
-		this.vao.linkAttrib( positionVbo, 0, 3, this.gl.FLOAT, 3 * 4, 0 * 4 );
-		this.vao.linkAttrib( normalVbo, 1, 3, this.gl.FLOAT, 3 * 4, 0 * 4 );
-		this.vao.linkAttrib( uvVbo, 2, 2, this.gl.FLOAT, 2 * 4, 0 * 4 );
+		this.vao.linkAttrib( positionVbo, 0, 3, this.gl.FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
+		this.vao.linkAttrib( normalVbo, 1, 3, this.gl.FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
+		this.vao.linkAttrib( uvVbo, 2, 2, this.gl.FLOAT, 2 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
 
 		if ( this.instanced && this.instanceMatrices ) {
+
 
 			const instancedVBO = new VBOInstanced( this.instanceMatrices, this.gl );
 			instancedVBO.bind();
 
-			console.log(instancedVBO)
-
 			const bytesMatrix = 4 * 16;
-			const bytesVec4 = 4 * 4;
+			const bytesVec4 = 4 * Float32Array.BYTES_PER_ELEMENT;
 
 			this.vao.linkAttrib( instancedVBO, 3, 4, this.gl.FLOAT, bytesMatrix, 0 * bytesVec4 );
 			this.vao.linkAttrib( instancedVBO, 4, 4, this.gl.FLOAT, bytesMatrix, 1 * bytesVec4 );
@@ -137,7 +155,7 @@ export default class ArrayBuffer {
 
 			this.vao.bind();
 			this.ibo.bind();
-			this.gl.drawElements( this.gl.LINE_STRIP, this.indices.length, this.gl.UNSIGNED_SHORT, 0 * 4 );
+			this.gl.drawElements( this.gl.LINE_STRIP, this.indices.length, this.gl.UNSIGNED_SHORT, 0 * Float32Array.BYTES_PER_ELEMENT );
 			this.vao.unbind();
 
 		}
@@ -156,7 +174,7 @@ export default class ArrayBuffer {
 
 			if ( this.instanced && this.instanceCount ) {
 
-				this.gl.drawElementsInstanced( this.gl.TRIANGLES, this.indices.length, this.gl.UNSIGNED_SHORT, 0, this.instanceCount  )
+				this.gl.drawElementsInstanced( this.gl.TRIANGLES, this.indices.length, this.gl.UNSIGNED_SHORT, 0, this.instanceCount );
 
 			} else {
 

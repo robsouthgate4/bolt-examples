@@ -1,4 +1,4 @@
-import { mat4, vec3 } from "gl-matrix";
+import { mat4 } from "gl-matrix";
 import VAO from "./VAO";
 import VBO from "./VBO";
 import IBO from "./IBO";
@@ -18,12 +18,12 @@ export default class ArrayBufferInterleaved {
 	vao: VAO;
 	ibo!: IBO;
 
-  constructor(
-	gl: WebGL2RenderingContext,
-	stride: number,
-	buffer: number[] | Float32Array,
-	params?: ArrayBufferParams
-  ) {
+	constructor(
+		gl: WebGL2RenderingContext,
+		stride: number,
+		buffer: number[] | Float32Array,
+		params?: ArrayBufferParams
+	) {
 
   	this.gl = gl;
   	this.stride = stride || 3;
@@ -39,9 +39,9 @@ export default class ArrayBufferInterleaved {
   	// assume the positions, normals and vertices are interleaved
   	this.linkBuffers();
 
-  }
+	}
 
-  linkBuffers() {
+	linkBuffers() {
 
   	const vbo = new VBO( this.buffer, this.gl );
 
@@ -51,7 +51,7 @@ export default class ArrayBufferInterleaved {
   	this.vao.linkAttrib( vbo, 2, 3, this.gl.FLOAT, this.stride * 4, 6 * 4 );
 
   	if ( this.instanced && this.instanceMatrices ) {
-		
+
   		const instancedVBO = new VBOInstanced( this.instanceMatrices, this.gl );
   		instancedVBO.bind();
 
@@ -75,9 +75,30 @@ export default class ArrayBufferInterleaved {
   	this.vao.unbind();
   	vbo.unbind();
 
-  }
+	}
 
-  bindTextures( shader: Shader ) {
+	addAttribute( buffer: Float32Array | number[], size: number, layoutID: number ) {
+
+		const vbo = new VBO( buffer || [], this.gl );
+
+		this.vao.bind();
+		this.vao.linkAttrib( vbo, layoutID, size, this.gl.FLOAT, 0 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
+		this.vao.unbind();
+
+	}
+
+	addInstancedAttribute( buffer: Float32Array | number[], size: number, layoutID: number ) {
+
+		const vbo = new VBO( buffer || [], this.gl );
+
+		this.vao.bind();
+		this.vao.linkAttrib( vbo, layoutID, size, this.gl.FLOAT, 0 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
+		this.gl.vertexAttribDivisor( 3, 1 );
+		this.vao.unbind();
+
+	}
+
+	bindTextures( shader: Shader ) {
 
   	if ( ! shader ) return;
 
@@ -94,9 +115,9 @@ export default class ArrayBufferInterleaved {
 
   	}
 
-  }
+	}
 
-  drawPoints( shader: Shader ) {
+	drawPoints( shader: Shader ) {
 
   	this.bindTextures( shader );
 
@@ -108,9 +129,9 @@ export default class ArrayBufferInterleaved {
 
   	}
 
-  }
+	}
 
-  drawLines( shader: Shader ) {
+	drawLines( shader: Shader ) {
 
   	this.bindTextures( shader );
 
@@ -123,9 +144,9 @@ export default class ArrayBufferInterleaved {
 
   	}
 
-  }
+	}
 
-  drawTriangles( shader: Shader ) {
+	drawTriangles( shader: Shader ) {
 
   	this.bindTextures( shader );
 
@@ -164,6 +185,6 @@ export default class ArrayBufferInterleaved {
 
   	this.vao.unbind();
 
-  }
+	}
 
 }
