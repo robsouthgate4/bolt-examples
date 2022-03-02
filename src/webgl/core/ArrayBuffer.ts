@@ -12,6 +12,13 @@ export interface ArrayBufferParams {
 	instanceMatrices?: mat4[];
 }
 
+export interface GeometryBuffers {
+    positions: number[] | Float32Array,
+		normals: number[] | Float32Array,
+		uvs: number[] | Float32Array,
+    indices: number[] | Uint16Array
+}
+
 export default class ArrayBuffer {
 
 	gl: WebGL2RenderingContext;
@@ -27,18 +34,19 @@ export default class ArrayBuffer {
 
 	constructor(
 		gl: WebGL2RenderingContext,
-		positions: number[] | Float32Array,
-		normals: number[]| Float32Array,
-		uvs: number[]| Float32Array,
+		geometry: GeometryBuffers,
+		// positions: number[] | Float32Array,
+		// normals: number[]| Float32Array,
+		// uvs: number[]| Float32Array,
 		params?: ArrayBufferParams
 	) {
 
 		this.gl = gl;
-		this.positions = positions;
-		this.normals = normals;
-		this.uvs = uvs;
+		this.positions = geometry.positions;
+		this.normals = geometry.normals;
+		this.uvs = geometry.uvs;
 
-		this.indices = params?.indices;
+		this.indices = geometry.indices;
 		this.instanced = params?.instanced;
 		this.instanceMatrices = params?.instanceMatrices;
 		this.instanceCount = params?.instanceCount;

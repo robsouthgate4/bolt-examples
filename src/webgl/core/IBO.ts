@@ -2,10 +2,12 @@ export default class IBO {
 
   gl: WebGL2RenderingContext;
   indicesBuffer: WebGLBuffer | null;
+  count: number;
 
   constructor( indices: Uint16Array | number[], gl: WebGL2RenderingContext ) {
 
   	this.gl = gl;
+  	this.count = indices.length;
   	this.indicesBuffer = this.gl.createBuffer();
   	this.gl.bindBuffer( this.gl.ELEMENT_ARRAY_BUFFER, this.indicesBuffer );
 

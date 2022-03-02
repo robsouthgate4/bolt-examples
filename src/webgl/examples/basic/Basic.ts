@@ -77,9 +77,9 @@ export default class extends Base {
 
   	const gltfLoader = new GLTFParser( "/static/models/gltf/torus.gltf" );
 
-  	const data = await gltfLoader.loadGLTF();
+  	const geometry = await gltfLoader.loadGLTF();
 
-  	if ( ! data ) return;
+  	if ( ! geometry ) return;
 
   	this.assetsLoaded = true;
 
@@ -93,7 +93,7 @@ export default class extends Base {
 
   	// setup nodes
   	this.torusNode = new Node(
-  		new ArrayBuffer( this.gl, data.positions, data.normals, data.uvs, { indices: data.indices } ),
+  		new ArrayBuffer( this.gl, geometry ),
   	);
 
   	this.torusNode.transform.position = vec3.fromValues( 0, 0, 0 );

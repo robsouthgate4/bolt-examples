@@ -12,8 +12,8 @@ import { mat4, quat, vec3, } from "gl-matrix";
 
 import Transform from "../../modules/SceneGraph/Transform";
 import ArrayBuffer from "../../core/ArrayBuffer";
-import CameraFPS from "../../modules/CameraFPS";
 import GLTFParser from "../../modules/GLTFParser";
+import Camera from "@/webgl/core/Camera";
 
 export default class extends Base {
 
@@ -21,7 +21,7 @@ export default class extends Base {
   gl: WebGL2RenderingContext;
   shader: Shader;
   lightPosition: vec3;
-  camera: CameraFPS;
+  camera: Camera;
   assetsLoaded!: boolean;
   cubeTransform!: Transform;
   torusBuffer!: ArrayBuffer;
@@ -44,15 +44,17 @@ export default class extends Base {
   	this.shader = new Shader( defaultVertexInstanced, defaultFragmentInstanced, this.gl );
   	this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
-  	this.camera = new CameraFPS(
+  	this.camera = new Camera(
   		this.width,
   		this.height,
-  		vec3.fromValues( 0, 4, 10 ),
+  		vec3.fromValues( 0, 15, 10 ),
   		45,
   		0.01,
   		1000,
   		this.gl,
   	);
+
+  	this.camera.lookAt( vec3.fromValues( 0, 0, - 50 ) );
 
   	this.gl.viewport( 0, 0, this.gl.canvas.width, this.gl.canvas.height );
   	this.gl.enable( this.gl.DEPTH_TEST );
@@ -76,9 +78,9 @@ export default class extends Base {
 
   	const gltfLoader = new GLTFParser( "/static/models/gltf/torus.gltf" );
 
-  	const data = await gltfLoader.loadGLTF();
+  	const geometry = await gltfLoader.loadGLTF();
 
-  	if ( ! data ) return;
+  	if ( ! geometry ) return;
 
   	this.assetsLoaded = true;
 
@@ -123,11 +125,8 @@ export default class extends Base {
   	// setup nodes
   	this.torusBuffer = new ArrayBuffer(
   		this.gl,
-  		data.positions,
-  		data.normals,
-  		data.uvs,
+  		geometry,
   		{
-  			indices: data.indices,
   			instanced: true,
   			instanceCount,
   			instanceMatrices
@@ -171,7 +170,7 @@ export default class extends Base {
 
   	super.update( elapsed, delta );
 
-  	this.camera.update( delta );
+  	this.camera.update();
 
   	this.gl.viewport( 0, 0, this.gl.canvas.width, this.gl.canvas.height );
   	this.gl.clearColor( 0, 0, 0, 0 );

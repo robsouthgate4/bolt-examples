@@ -72,11 +72,11 @@ export default class extends Base {
   	const planeGeometry = new Plane( { widthSegments: 10, heightSegments: 10 } );
 
   	this.sphereNode = new Node(
-  		new ArrayBuffer( this.gl, sphereGeometry.positions, sphereGeometry.normals, sphereGeometry.uvs, { indices: sphereGeometry.indices } ),
+  		new ArrayBuffer( this.gl, sphereGeometry ),
   	);
 
   	this.cubeNode = new Node(
-  		new ArrayBuffer( this.gl, cubeGeometry.positions, cubeGeometry.normals, cubeGeometry.uvs, { indices: cubeGeometry.indices } ),
+  		new ArrayBuffer( this.gl, cubeGeometry ),
   	);
 
   	this.cubeNode.autoUpdate = false;
@@ -84,7 +84,7 @@ export default class extends Base {
   	this.cubeNode.updateModelMatrix();
 
   	this.planeNode = new Node(
-  		new ArrayBuffer( this.gl, planeGeometry.positions, planeGeometry.normals, planeGeometry.uvs, { indices: planeGeometry.indices } ),
+  		new ArrayBuffer( this.gl, planeGeometry ),
   	);
 
   	this.planeNode.transform.position[ 0 ] = - 1.5;

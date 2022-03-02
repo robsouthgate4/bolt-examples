@@ -47,9 +47,6 @@ export default class Camera {
   	this.vector = vec3.create();
   	this.active = false;
 
-  	this.target = vec3.create();
-  	//vec3.add( this.target, this.position, this.forward );
-
   	this.resize( width, height );
 
   }
@@ -57,6 +54,12 @@ export default class Camera {
   resize( width: number, height: number ) {
 
   	mat4.perspective( this.projection, this.fov, width / height, this.near, this.far );
+
+  }
+
+  lookAt( target: vec3 ) {
+
+  	vec3.copy( this.target, target );
 
   }
 
