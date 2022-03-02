@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/Primitives";
+import Example from "@/webgl/examples/basic/Primitives";
 
 export default class Main {
 

@@ -3,14 +3,14 @@ import Shader from "../../core/Shader";
 
 
 //@ts-ignore
-import particlesVertexInstanced from "../core/shaders/gpgpu/particles.vert";
+import particlesVertexInstanced from "../../core/shaders/gpgpu/particles.vert";
 //@ts-ignore
-import particlesFragmentInstanced from "../core/shaders/gpgpu/particles.frag";
+import particlesFragmentInstanced from "../../core/shaders/gpgpu/particles.frag";
 
 //@ts-ignore
-import simulationVertex from "../core/shaders/gpgpu/simulation/simulation.vert";
+import simulationVertex from "../../core/shaders/gpgpu/simulation/simulation.vert";
 //@ts-ignore
-import simulationFragment from "../core/shaders/gpgpu/simulation/simulation.frag";
+import simulationFragment from "../../core/shaders/gpgpu/simulation/simulation.frag";
 
 import { mat4, vec3, } from "gl-matrix";
 
@@ -19,7 +19,6 @@ import ArrayBufferInterleaved from "../../core/ArrayBufferInterleaved";
 import CameraFPS from "../../modules/CameraFPS";
 import VBO from "../../core/VBO";
 import VAO from "../../core/VAO";
-
 
 export default class extends Base {
 
@@ -54,8 +53,6 @@ export default class extends Base {
   	this.canvas.height = this.height;
 
   	this.gl = <WebGL2RenderingContext> this.canvas.getContext( "webgl2", { antialias: true } );
-
-  	//TODO: Implement transform feedback
 
   	this.particleShader = new Shader( particlesVertexInstanced, particlesFragmentInstanced, this.gl );
 

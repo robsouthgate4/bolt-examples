@@ -95,7 +95,6 @@ export default class Node {
   drawTriangles( shader: Shader, camera: Camera ) {
 
   	this.updateMatrices( shader, camera );
-
   	this.arrayBuffer.drawTriangles( shader );
 
   }
@@ -103,7 +102,6 @@ export default class Node {
   drawLines( shader: Shader, camera: Camera ) {
 
   	this.updateMatrices( shader, camera );
-
   	this.arrayBuffer.drawLines( shader );
 
   }
@@ -111,7 +109,6 @@ export default class Node {
   drawPoints( shader: Shader, camera: Camera ) {
 
   	this.updateMatrices( shader, camera );
-
   	this.arrayBuffer.drawPoints( shader );
 
   }
