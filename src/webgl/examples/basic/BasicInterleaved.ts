@@ -1,20 +1,20 @@
 import Base from "@webgl/Base";
-import Shader from "../core/Shader";
-import Texture from "../core/Texture";
+import Shader from "../../core/Shader";
+import Texture from "../../core/Texture";
 
 
 //@ts-ignore
-import defaultVertex from "../core/shaders/default/default.vert";
+import defaultVertex from "../../core/shaders/default/default.vert";
 //@ts-ignore
-import defaultFragment from "../core/shaders/default/default.frag";
+import defaultFragment from "../../core/shaders/default/default.frag";
 
 import { vec3, } from "gl-matrix";
-import Node from "../modules/SceneGraph/Node";
-import Transform from "../modules/SceneGraph/Transform";
-import ArrayBufferInterleaved from "../core/ArrayBufferInterleaved";
-import CameraArcball from "../modules/CameraArcball";
-import CameraFPS from "../modules/CameraFPS";
-import FBO from "../core/FBO";
+import Node from "../../modules/SceneGraph/Node";
+import Transform from "../../modules/SceneGraph/Transform";
+import ArrayBufferInterleaved from "../../core/ArrayBufferInterleaved";
+import CameraArcball from "../../modules/CameraArcball";
+import CameraFPS from "../../modules/CameraFPS";
+import FBO from "../../core/FBO";
 
 const buffer = [
 	- 0.5, - 0.5, - 0.5, 0.0, 0.0, - 1.0,

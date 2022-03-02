@@ -1,62 +1,19 @@
 import Base from "@webgl/Base";
-import Shader from "../core/Shader";
+import Shader from "../../core/Shader";
+import Texture from "../../core/Texture";
+
 
 //@ts-ignore
-import defaultVertexInstanced from "../core/shaders/defaultInstanced/defaultInstanced.vert";
+import defaultVertexInstanced from "../../core/shaders/defaultInstanced/defaultInstanced.vert";
 //@ts-ignore
-import defaultFragmentInstanced from "../core/shaders/defaultInstanced/defaultInstanced.frag";
+import defaultFragmentInstanced from "../../core/shaders/defaultInstanced/defaultInstanced.frag";
 
 import { mat4, quat, vec3, } from "gl-matrix";
 
-import Transform from "../modules/SceneGraph/Transform";
-import ArrayBufferInterleaved from "../core/ArrayBufferInterleaved";
-import CameraArcball from "../modules/CameraArcball";
-import CameraFPS from "../modules/CameraFPS";
-import FBO from "../core/FBO";
-
-const buffer = [
-	- 0.5, - 0.5, - 0.5, 0.0, 0.0, - 1.0,
-	0.5, - 0.5, - 0.5, 0.0, 0.0, - 1.0,
-	0.5, 0.5, - 0.5, 0.0, 0.0, - 1.0,
-	0.5, 0.5, - 0.5, 0.0, 0.0, - 1.0,
-	- 0.5, 0.5, - 0.5, 0.0, 0.0, - 1.0,
-	- 0.5, - 0.5, - 0.5, 0.0, 0.0, - 1.0,
-
-	- 0.5, - 0.5, 0.5, 0.0, 0.0, 1.0,
-	0.5, - 0.5, 0.5, 0.0, 0.0, 1.0,
-	0.5, 0.5, 0.5, 0.0, 0.0, 1.0,
-	0.5, 0.5, 0.5, 0.0, 0.0, 1.0,
-	- 0.5, 0.5, 0.5, 0.0, 0.0, 1.0,
-	- 0.5, - 0.5, 0.5, 0.0, 0.0, 1.0,
-
-	- 0.5, 0.5, 0.5, - 1.0, 0.0, 0.0,
-	- 0.5, 0.5, - 0.5, - 1.0, 0.0, 0.0,
-	- 0.5, - 0.5, - 0.5, - 1.0, 0.0, 0.0,
-	- 0.5, - 0.5, - 0.5, - 1.0, 0.0, 0.0,
-	- 0.5, - 0.5, 0.5, - 1.0, 0.0, 0.0,
-	- 0.5, 0.5, 0.5, - 1.0, 0.0, 0.0,
-
-	0.5, 0.5, 0.5, 1.0, 0.0, 0.0,
-	0.5, 0.5, - 0.5, 1.0, 0.0, 0.0,
-	0.5, - 0.5, - 0.5, 1.0, 0.0, 0.0,
-	0.5, - 0.5, - 0.5, 1.0, 0.0, 0.0,
-	0.5, - 0.5, 0.5, 1.0, 0.0, 0.0,
-	0.5, 0.5, 0.5, 1.0, 0.0, 0.0,
-
-	- 0.5, - 0.5, - 0.5, 0.0, - 1.0, 0.0,
-	0.5, - 0.5, - 0.5, 0.0, - 1.0, 0.0,
-	0.5, - 0.5, 0.5, 0.0, - 1.0, 0.0,
-	0.5, - 0.5, 0.5, 0.0, - 1.0, 0.0,
-	- 0.5, - 0.5, 0.5, 0.0, - 1.0, 0.0,
-	- 0.5, - 0.5, - 0.5, 0.0, - 1.0, 0.0,
-
-	- 0.5, 0.5, - 0.5, 0.0, 1.0, 0.0,
-	0.5, 0.5, - 0.5, 0.0, 1.0, 0.0,
-	0.5, 0.5, 0.5, 0.0, 1.0, 0.0,
-	0.5, 0.5, 0.5, 0.0, 1.0, 0.0,
-	- 0.5, 0.5, 0.5, 0.0, 1.0, 0.0,
-	- 0.5, 0.5, - 0.5, 0.0, 1.0, 0.0
-];
+import Transform from "../../modules/SceneGraph/Transform";
+import ArrayBuffer from "../../core/ArrayBuffer";
+import CameraFPS from "../../modules/CameraFPS";
+import GLTFParser from "../../modules/GLTFParser";
 
 export default class extends Base {
 
@@ -64,18 +21,19 @@ export default class extends Base {
   gl: WebGL2RenderingContext;
   shader: Shader;
   lightPosition: vec3;
-  camera: CameraArcball | CameraFPS;
+  camera: CameraFPS;
   assetsLoaded!: boolean;
   cubeTransform!: Transform;
-  cubeNode!: ArrayBufferInterleaved;
-  fbo!: FBO;
+  torusBuffer!: ArrayBuffer;
 
   constructor() {
 
   	super();
 
-  	this.width = window.innerWidth;
-  	this.height = window.innerHeight;
+  	const devicePixelRatio = Math.min( 2, window.devicePixelRatio || 1 );
+
+  	this.width = window.innerWidth * devicePixelRatio;
+  	this.height = window.innerHeight * devicePixelRatio;
 
   	this.canvas = <HTMLCanvasElement>document.getElementById( "experience" );
   	this.canvas.width = this.width;
@@ -106,6 +64,21 @@ export default class extends Base {
 
   async init() {
 
+  	const equi = new Texture(
+  		"/static/textures/equi-studio.jpg",
+  		this.gl );
+  	equi.loadImage();
+
+  	const AO = new Texture(
+  		"/static/models/gltf/AO.png",
+  		this.gl );
+  	AO.loadImage();
+
+  	const gltfLoader = new GLTFParser( "/static/models/gltf/torus.gltf" );
+
+  	const data = await gltfLoader.loadGLTF();
+
+  	if ( ! data ) return;
 
   	this.assetsLoaded = true;
 
@@ -113,14 +86,16 @@ export default class extends Base {
   	this.shader.activate();
   	this.shader.setVector3( "objectColor", vec3.fromValues( 1.0, 0.0, 0.0 ) );
   	this.shader.setVector3( "lightColor", vec3.fromValues( 0.95, 1.0, 1.0 ) );
+  	this.shader.setTexture( "mapEqui", equi );
+  	this.shader.setTexture( "mapAO", AO );
 
-  	const instanceCount = 10000;
+  	const instanceCount = 2000;
 
   	const instanceMatrices: mat4[] = [];
 
   	for ( let i = 0; i < instanceCount; i ++ ) {
 
-  		const x = ( Math.random() * 2 - 1 ) * 100;
+  		const x = ( Math.random() * 2 - 1 ) * 50;
   		const y = ( Math.random() * 2 - 1 ) * 2;
   		const z = Math.random() * 500;
 
@@ -145,15 +120,14 @@ export default class extends Base {
 
   	}
 
-  	// setup transforms
-  	this.cubeTransform = new Transform();
-
   	// setup nodes
-  	this.cubeNode = new ArrayBufferInterleaved(
+  	this.torusBuffer = new ArrayBuffer(
   		this.gl,
-  		6,
-  		buffer,
+  		data.positions,
+  		data.normals,
+  		data.uvs,
   		{
+  			indices: data.indices,
   			instanced: true,
   			instanceCount,
   			instanceMatrices
@@ -166,17 +140,18 @@ export default class extends Base {
 
   resize() {
 
+  	const devicePixelRatio = Math.min( 2, window.devicePixelRatio || 1 );
+
   	const displayWidth = this.gl.canvas.clientWidth;
   	const displayHeight = this.gl.canvas.clientHeight;
 
-  	// Check if the this.gl.canvas is not the same size.
   	const needResize = this.gl.canvas.width !== displayWidth ||
                      this.gl.canvas.height !== displayHeight;
 
   	if ( needResize ) {
 
-  		this.gl.canvas.width = displayWidth;
-  		this.gl.canvas.height = displayHeight;
+  		this.gl.canvas.width = displayWidth * devicePixelRatio;
+  		this.gl.canvas.height = displayHeight * devicePixelRatio;
 
   	}
 
@@ -208,7 +183,7 @@ export default class extends Base {
   	this.shader.setMatrix4( "projection", this.camera.getProjectionMatrix() );
   	this.shader.setMatrix4( "view", this.camera.getViewMatrix() );
 
-  	this.cubeNode.drawTriangles( this.shader );
+  	this.torusBuffer.drawTriangles( this.shader );
 
   }
 

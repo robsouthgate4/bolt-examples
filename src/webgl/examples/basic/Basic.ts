@@ -1,18 +1,18 @@
 import Base from "@webgl/Base";
-import Shader from "../core/Shader";
-import Texture from "../core/Texture";
+import Shader from "../../core/Shader";
+import Texture from "../../core/Texture";
 
 //@ts-ignore
-import defaultVertex from "../core/shaders/default/default.vert";
+import defaultVertex from "../../core/shaders/default/default.vert";
 //@ts-ignore
-import defaultFragment from "../core/shaders/default/default.frag";
+import defaultFragment from "../../core/shaders/default/default.frag";
 
 import { vec3, } from "gl-matrix";
-import Node from "../modules/SceneGraph/Node";
-import Transform from "../modules/SceneGraph/Transform";
-import CameraArcball from "../modules/CameraArcball";
-import ArrayBuffer from "../core/ArrayBuffer";
-import GLTFParser from "../modules/GLTFParser";
+import Node from "../../modules/SceneGraph/Node";
+import Transform from "../../modules/SceneGraph/Transform";
+import CameraArcball from "../../modules/CameraArcball";
+import ArrayBuffer from "../../core/ArrayBuffer";
+import GLTFParser from "../../modules/GLTFParser";
 
 export default class extends Base {
 

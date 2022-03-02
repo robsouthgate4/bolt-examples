@@ -1,20 +1,19 @@
 import Base from "@webgl/Base";
-import Shader from "../core/Shader";
-import Texture from "../core/Texture";
+import Shader from "../../core/Shader";
 
 //@ts-ignore
-import defaultVertex from "../core/shaders/default/default.vert";
+import defaultVertex from "../../core/shaders/default/default.vert";
 //@ts-ignore
-import defaultFragment from "../core/shaders/default/default.frag";
+import defaultFragment from "../../core/shaders/default/default.frag";
 
 import { vec3, } from "gl-matrix";
-import Node from "../modules/SceneGraph/Node";
-import Transform from "../modules/SceneGraph/Transform";
-import CameraArcball from "../modules/CameraArcball";
-import ArrayBuffer from "../core/ArrayBuffer";
-import Sphere from "../modules/Primitives/Sphere";
-import Cube from "../modules/Primitives/Box";
-import Plane from "../modules/Primitives/Plane";
+import Node from "../../modules/SceneGraph/Node";
+import Transform from "../../modules/SceneGraph/Transform";
+import CameraArcball from "../../modules/CameraArcball";
+import ArrayBuffer from "../../core/ArrayBuffer";
+import Sphere from "../../modules/Primitives/Sphere";
+import Cube from "../../modules/Primitives/Box";
+import Plane from "../../modules/Primitives/Plane";
 
 export default class extends Base {
 

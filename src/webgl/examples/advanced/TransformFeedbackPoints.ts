@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Shader from "../core/Shader";
+import Shader from "../../core/Shader";
 
 
 //@ts-ignore
@@ -14,11 +14,11 @@ import simulationFragment from "../core/shaders/gpgpu/simulation/simulation.frag
 
 import { mat4, vec3, } from "gl-matrix";
 
-import Transform from "../modules/SceneGraph/Transform";
-import ArrayBufferInterleaved from "../core/ArrayBufferInterleaved";
-import CameraFPS from "../modules/CameraFPS";
-import VBO from "../core/VBO";
-import VAO from "../core/VAO";
+import Transform from "../../modules/SceneGraph/Transform";
+import ArrayBufferInterleaved from "../../core/ArrayBufferInterleaved";
+import CameraFPS from "../../modules/CameraFPS";
+import VBO from "../../core/VBO";
+import VAO from "../../core/VAO";
 
 
 export default class extends Base {

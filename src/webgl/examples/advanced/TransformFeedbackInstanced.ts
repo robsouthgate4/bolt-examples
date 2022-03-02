@@ -1,24 +1,24 @@
 import Base from "@webgl/Base";
-import Shader from "../core/Shader";
+import Shader from "../../core/Shader";
 
 
 //@ts-ignore
-import particlesVertexInstanced from "../core/shaders/gpgpuInstanced/particles.vert";
+import particlesVertexInstanced from "../../core/shaders/gpgpuInstanced/particles.vert";
 //@ts-ignore
-import particlesFragmentInstanced from "../core/shaders/gpgpuInstanced/particles.frag";
+import particlesFragmentInstanced from "../../core/shaders/gpgpuInstanced/particles.frag";
 
 //@ts-ignore
-import simulationVertex from "../core/shaders/gpgpuInstanced/simulation/simulation.vert";
+import simulationVertex from "../../core/shaders/gpgpuInstanced/simulation/simulation.vert";
 //@ts-ignore
-import simulationFragment from "../core/shaders/gpgpuInstanced/simulation/simulation.frag";
+import simulationFragment from "../../core/shaders/gpgpuInstanced/simulation/simulation.frag";
 
 import { mat4, vec3, } from "gl-matrix";
 
-import Transform from "../modules/SceneGraph/Transform";
-import ArrayBufferInterleaved from "../core/ArrayBufferInterleaved";
-import CameraFPS from "../modules/CameraFPS";
-import VBO from "../core/VBO";
-import VAO from "../core/VAO";
+import Transform from "../../modules/SceneGraph/Transform";
+import ArrayBufferInterleaved from "../../core/ArrayBufferInterleaved";
+import CameraFPS from "../../modules/CameraFPS";
+import VBO from "../../core/VBO";
+import VAO from "../../core/VAO";
 
 const buffer = [
 	- 0.5, - 0.5, - 0.5, 0.0, 0.0, - 1.0,
