@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/advanced/TransformFeedbackInstanced";
+import Example from "@/webgl/examples/basic/Shadows";
 
 export default class Main {
 

@@ -21,6 +21,7 @@ import VBO from "../../core/VBO";
 import VAO from "../../core/VAO";
 import Sphere from "@/webgl/modules/Primitives/Sphere";
 import IBO from "@/webgl/core/IBO";
+import Camera from "@/webgl/core/Camera";
 
 interface TransformFeedbackObject {
   updateVAO: VAO;
@@ -34,7 +35,7 @@ export default class extends Base {
   gl: WebGL2RenderingContext;
   particleShader!: Shader;
   lightPosition: vec3;
-  camera: CameraFPS;
+  camera: Camera;
   assetsLoaded!: boolean;
   cubeTransform!: Transform;
   torusBuffer!: ArrayBufferInterleaved;
@@ -90,17 +91,17 @@ export default class extends Base {
 
   	this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
-  	this.camera = new CameraFPS(
+  	this.camera = new Camera(
   		this.width,
   		this.height,
-  		vec3.fromValues( 0, 10, 50 ),
+  		vec3.fromValues( 0, 5, 30 ),
   		45,
   		0.01,
   		1000,
   		this.gl,
   	);
 
-  	this.camera.lookAt( vec3.fromValues( 5, 0, 0 ) );
+  	this.camera.lookAt( vec3.fromValues( 0, 0, 0 ) );
 
   	this.gl.viewport( 0, 0, this.gl.canvas.width, this.gl.canvas.height );
   	this.gl.enable( this.gl.DEPTH_TEST );
@@ -238,7 +239,7 @@ export default class extends Base {
 
   	super.update( elapsed, delta );
 
-  	this.camera.update( delta );
+  	this.camera.update( );
 
   	this.gl.viewport( 0, 0, this.gl.canvas.width, this.gl.canvas.height );
   	this.gl.clearColor( 0, 0, 0, 0 );

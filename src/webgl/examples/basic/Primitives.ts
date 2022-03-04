@@ -12,7 +12,7 @@ import Transform from "../../modules/SceneGraph/Transform";
 import CameraArcball from "../../modules/CameraArcball";
 import ArrayBuffer from "../../core/ArrayBuffer";
 import Sphere from "../../modules/Primitives/Sphere";
-import Cube from "../../modules/Primitives/Box";
+import Cube from "../../modules/Primitives/Cube";
 import Plane from "../../modules/Primitives/Plane";
 
 export default class extends Base {
