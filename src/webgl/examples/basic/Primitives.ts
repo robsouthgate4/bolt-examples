@@ -142,6 +142,7 @@ export default class extends Base {
   	this.cubeNode.drawTriangles( this.shader, this.camera );
   	this.planeNode.drawTriangles( this.shader, this.camera );
 
+
   }
 
   lateUpdate( elapsed: number, delta: number ) {

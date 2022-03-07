@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/basic/Shadows";
+import Example from "@/webgl/examples/basic/PostProcessing";
 
 export default class Main {
 

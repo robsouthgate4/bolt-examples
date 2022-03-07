@@ -11,11 +11,18 @@ export default class Texture {
   wrapS!: number;
 
   constructor(
-  	imagePath : string,
   	gl: WebGL2RenderingContext,
-  	wrapS?: number,
-  	wrapT?: number,
+  	{
+  		imagePath = "",
+  		wrapS = gl.CLAMP_TO_EDGE,
+  		wrapT = gl.CLAMP_TO_EDGE,
+  		width = 256,
+  		height = 256
+  	} = {}
   ) {
+
+  	console.log( width );
+  	console.log( height );
 
   	this.gl = gl;
   	this.format = this.gl.RGBA;
@@ -28,7 +35,7 @@ export default class Texture {
   	this.texture = <WebGLTexture>( this.gl.createTexture() );
 
   	this.gl.bindTexture( this.gl.TEXTURE_2D, this.texture );
-  	this.gl.texImage2D( this.gl.TEXTURE_2D, 0, this.format, 1, 1, 0, this.format, this.gl.UNSIGNED_BYTE, new Uint8Array( [ 0, 0, 255, 255 ] ) );
+  	this.gl.texImage2D( this.gl.TEXTURE_2D, 0, this.format, width, height, 0, this.format, this.gl.UNSIGNED_BYTE, null );
   	this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST );
   	this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR );
 

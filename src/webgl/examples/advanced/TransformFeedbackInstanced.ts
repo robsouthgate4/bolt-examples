@@ -16,7 +16,6 @@ import { mat4, vec3, } from "gl-matrix";
 
 import Transform from "../../modules/SceneGraph/Transform";
 import ArrayBufferInterleaved from "../../core/ArrayBufferInterleaved";
-import CameraFPS from "../../modules/CameraFPS";
 import VBO from "../../core/VBO";
 import VAO from "../../core/VAO";
 import Sphere from "@/webgl/modules/Primitives/Sphere";

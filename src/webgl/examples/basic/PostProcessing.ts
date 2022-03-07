@@ -1,6 +1,5 @@
 import Base from "@webgl/Base";
 import Shader from "../../core/Shader";
-import Texture from "../../core/Texture";
 
 //@ts-ignore
 import defaultVertex from "../../core/shaders/default/default.vert";
@@ -12,7 +11,8 @@ import Node from "../../modules/SceneGraph/Node";
 import Transform from "../../modules/SceneGraph/Transform";
 import CameraArcball from "../../modules/CameraArcball";
 import ArrayBuffer from "../../core/ArrayBuffer";
-import GLTFParser from "../../modules/GLTFParser";
+import Sphere from "../../modules/Primitives/Sphere";
+import Post from "@/webgl/modules/Post";
 
 export default class extends Base {
 
@@ -21,9 +21,12 @@ export default class extends Base {
   shader: Shader;
   lightPosition: vec3;
   camera: CameraArcball;
-  assetsLoaded!: boolean;
+  assetsLoaded?: boolean;
   torusTransform!: Transform;
-  torusNode!: Node;
+  sphereNode!: Node;
+  cubeNode!: Node;
+  planeNode!: Node;
+  post: Post;
 
   constructor() {
 
@@ -38,13 +41,15 @@ export default class extends Base {
 
   	this.gl = <WebGL2RenderingContext> this.canvas.getContext( "webgl2", { antialias: true } );
 
+  	this.post = new Post( this.gl );
+
   	this.shader = new Shader( defaultVertex, defaultFragment, this.gl );
   	this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
   	this.camera = new CameraArcball(
   		this.width,
   		this.height,
-  		vec3.fromValues( 0, 0, 3 ),
+  		vec3.fromValues( 0, 2, 6 ),
   		vec3.fromValues( 0, 0, 0 ),
   		45,
   		0.01,
@@ -64,27 +69,11 @@ export default class extends Base {
 
   async init() {
 
+  	const sphereGeometry = new Sphere( { radius: 1, widthSegments: 32, heightSegments: 32 } );
 
-  	const gltfLoader = new GLTFParser( "/static/models/gltf/torus.gltf" );
-
-  	const geometry = await gltfLoader.loadGLTF();
-
-  	if ( ! geometry ) return;
-
-  	this.assetsLoaded = true;
-
-  	// set shader uniforms
-  	this.shader.activate();
-  	this.shader.setVector3( "objectColor", vec3.fromValues( 1.0, 0.0, 0.0 ) );
-  	this.shader.setVector3( "lightColor", vec3.fromValues( 0.95, 1.0, 1.0 ) );
-
-  	// setup nodes
-  	this.torusNode = new Node(
-  		new ArrayBuffer( this.gl, geometry ),
+  	this.sphereNode = new Node(
+  		new ArrayBuffer( this.gl, sphereGeometry ),
   	);
-
-  	this.torusNode.transform.position = vec3.fromValues( 0, 0, 0 );
-  	this.torusNode.transform.scale = vec3.fromValues( 1, 1, 1 );
 
   	this.resize();
 
@@ -118,9 +107,9 @@ export default class extends Base {
 
   update( elapsed: number, delta: number ) {
 
-  	if ( ! this.assetsLoaded ) return;
-
   	super.update( elapsed, delta );
+
+  	this.post.begin();
 
   	this.camera.update();
 
@@ -131,7 +120,12 @@ export default class extends Base {
   	this.shader.activate();
   	this.shader.setVector3( "viewPosition", this.camera.position );
   	this.shader.setFloat( "time", elapsed );
-  	this.torusNode.drawTriangles( this.shader, this.camera );
+
+  	this.sphereNode.transform.rotation[ 1 ] += 0.01;
+  	this.sphereNode.drawTriangles( this.shader, this.camera );
+
+  	this.post.end();
+
 
   }
 

@@ -66,16 +66,6 @@ export default class extends Base {
 
   async init() {
 
-  	const equi = new Texture(
-  		"/static/textures/equi-studio.jpg",
-  		this.gl );
-  	equi.loadImage();
-
-  	const AO = new Texture(
-  		"/static/models/gltf/AO.png",
-  		this.gl );
-  	AO.loadImage();
-
   	const gltfLoader = new GLTFParser( "/static/models/gltf/torus.gltf" );
 
   	const geometry = await gltfLoader.loadGLTF();
@@ -88,8 +78,6 @@ export default class extends Base {
   	this.shader.activate();
   	this.shader.setVector3( "objectColor", vec3.fromValues( 1.0, 0.0, 0.0 ) );
   	this.shader.setVector3( "lightColor", vec3.fromValues( 0.95, 1.0, 1.0 ) );
-  	this.shader.setTexture( "mapEqui", equi );
-  	this.shader.setTexture( "mapAO", AO );
 
   	const instanceCount = 2000;
 
