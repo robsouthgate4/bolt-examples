@@ -1,4 +1,5 @@
 import { mat3, mat4, vec2, vec3, vec4 } from "gl-matrix";
+import { isTouchDevice } from "../globals/constants";
 import Texture from "./Texture";
 
 
@@ -162,10 +163,25 @@ export default class Shader {
 
   setTexture( uniform: string, texture: Texture ) {
 
-  	this.textures.push( {
-  		uniformName: uniform,
-  		texture
-  	} );
+  	const exists = this.textures.findIndex( texture => texture.uniformName === uniform );
+
+  	if ( exists != - 1 ) {
+
+  		this.textures[ exists ] = {
+  			uniformName: uniform,
+  			texture
+  		};
+
+  	} else {
+
+  		this.textures.push( {
+  			uniformName: uniform,
+  			texture
+  		} );
+
+  	}
+
+
 
   }
 

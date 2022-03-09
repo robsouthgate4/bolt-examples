@@ -31,8 +31,6 @@ export default class extends Base {
   lightPosition: vec3;
   camera: Camera;
   assetsLoaded!: boolean;
-  cubeTransform!: Transform;
-  torusBuffer!: ArrayBufferInterleaved;
   simulationShader!: Shader;
   simulationShaderLocations!: { tfOldPosition: number; tfOldVelocity: number; };
   particleShaderLocations!: { aPosition: number; aOffset: number; aNormal: number; };

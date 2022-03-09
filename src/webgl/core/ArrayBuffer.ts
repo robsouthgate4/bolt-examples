@@ -88,7 +88,7 @@ export default class ArrayBuffer {
 		const uvVbo = new VBO( this.uvs || [], this.gl );
 
 		this.vao.bind();
-		// link positions
+
 		this.vao.linkAttrib( positionVbo, 0, 3, this.gl.FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
 
 		if ( this.normals.length > 0 ) {

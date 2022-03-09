@@ -76,6 +76,6 @@ void main() {
 
     float conditional = orValue( when_lt( lumaB, lumaMin ), when_gt( lumaB,lumaMax ) );
 
-    FragColor = mix( rgbB, rgbA, conditional);
+    FragColor = mix( rgbB, rgbA, conditional) * 1.0;
 
 }

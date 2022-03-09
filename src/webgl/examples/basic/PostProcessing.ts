@@ -10,8 +10,10 @@ import Transform from "../../modules/SceneGraph/Transform";
 import CameraArcball from "../../modules/CameraArcball";
 import ArrayBuffer from "../../core/ArrayBuffer";
 import Sphere from "../../modules/Primitives/Sphere";
-import Post from "@/webgl/modules/Post";
+import Post from "@/webgl/modules/Post/Post";
 import Plane from "@/webgl/modules/Primitives/Plane";
+import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
+import RGBSplitPass from "@/webgl/modules/Post/passes/RGBSplitPass";
 
 export default class extends Base {
 
@@ -26,6 +28,8 @@ export default class extends Base {
   cubeNode!: Node;
   planeNode!: Node;
   post: Post;
+  fxaa!: FXAAPass;
+  rbgSplit!: RGBSplitPass;
 
   constructor() {
 
@@ -67,6 +71,19 @@ export default class extends Base {
   }
 
   async init() {
+
+  	// this.fxaa = new FXAAPass( this.gl, {
+  	// 	width: this.width,
+  	// 	height: this.height
+  	// } );
+
+  	// this.rbgSplit = new RGBSplitPass( this.gl, {
+  	// 	width: this.width,
+  	// 	height: this.height
+  	// } );
+
+  	// this.post.add( this.fxaa );
+  	// this.post.add( this.rbgSplit );
 
   	const sphereGeometry = new Sphere( { radius: 1, widthSegments: 64, heightSegments: 64 } );
   	const planeGeometry = new Plane( { widthSegments: 2, heightSegments: 2 } );
@@ -127,8 +144,6 @@ export default class extends Base {
   	this.gl.viewport( 0, 0, this.gl.canvas.width, this.gl.canvas.height );
   	this.gl.clearColor( 0, 0, 0, 0 );
   	this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT );
-
-  	this.shader.activate();
 
   	this.sphereNode.drawTriangles( this.shader, this.camera );
   	this.planeNode.drawTriangles( this.shader, this.camera );
