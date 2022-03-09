@@ -4,7 +4,7 @@ export default class IBO {
   indicesBuffer: WebGLBuffer | null;
   count: number;
 
-  constructor( indices: Uint16Array | number[], gl: WebGL2RenderingContext ) {
+  constructor( gl: WebGL2RenderingContext, indices: Uint16Array | number[], ) {
 
   	this.gl = gl;
   	this.count = indices.length;

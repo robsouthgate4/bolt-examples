@@ -1,15 +1,10 @@
 import Base from "@webgl/Base";
 import Shader from "../../core/Shader";
 
-
-//@ts-ignore
 import particlesVertexInstanced from "../../core/shaders/gpgpu/particles.vert";
-//@ts-ignore
 import particlesFragmentInstanced from "../../core/shaders/gpgpu/particles.frag";
 
-//@ts-ignore
 import simulationVertex from "../../core/shaders/gpgpu/simulation/simulation.vert";
-//@ts-ignore
 import simulationFragment from "../../core/shaders/gpgpu/simulation/simulation.frag";
 
 import { mat4, vec3, } from "gl-matrix";

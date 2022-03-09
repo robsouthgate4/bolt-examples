@@ -1,9 +1,8 @@
 import Base from "@webgl/Base";
 import Shader from "../../core/Shader";
 
-//@ts-ignore
+
 import defaultVertexInstanced from "../../core/shaders/defaultInstanced/defaultInstanced.vert";
-//@ts-ignore
 import defaultFragmentInstanced from "../../core/shaders/defaultInstanced/defaultInstanced.frag";
 
 import { mat4, quat, vec3, } from "gl-matrix";

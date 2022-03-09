@@ -1,0 +1,37 @@
+export default class RBO {
+
+  width = 256;
+  height = 256;
+  gl: WebGL2RenderingContext;
+  renderBuffer: WebGLRenderbuffer;
+
+  constructor(
+  	gl: WebGL2RenderingContext,
+  	{
+  		width = 256,
+  		height = 256,
+  	} = {}
+  ) {
+
+  	this.gl = gl;
+
+  	this.renderBuffer = <WebGLRenderbuffer> this.gl.createRenderbuffer();
+  	this.bind();
+  	this.gl.renderbufferStorage( this.gl.RENDERBUFFER, this.gl.DEPTH24_STENCIL8, width, height );
+  	this.gl.framebufferRenderbuffer( this.gl.FRAMEBUFFER, this.gl.DEPTH_STENCIL_ATTACHMENT, this.gl.RENDERBUFFER, this.renderBuffer );
+
+  }
+
+  bind() {
+
+  	this.gl.bindRenderbuffer( this.gl.RENDERBUFFER, this.renderBuffer );
+
+  }
+
+  unbind() {
+
+  	this.gl.bindRenderbuffer( this.gl.RENDERBUFFER, null );
+
+  }
+
+}

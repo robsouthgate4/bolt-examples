@@ -11,15 +11,15 @@ export default class FBO {
 
   constructor(
   	gl: WebGL2RenderingContext,
-  	format: number,
   	{
+  		format = gl.RGBA,
   		width = 256,
   		height = 256,
   	} = {}
   ) {
 
   	this.gl = gl;
-  	this.format = format || this.gl.RGBA;
+  	this.format = format;
 
   	this.targetTexture = new Texture( this.gl, { width, height } );
   	this.targetTexture.bind();

@@ -13,10 +13,10 @@ export interface ArrayBufferParams {
 }
 
 export interface GeometryBuffers {
-    positions: number[] | Float32Array,
-		normals: number[] | Float32Array,
-		uvs: number[] | Float32Array,
-    indices: number[] | Uint16Array
+    positions?: number[] | Float32Array,
+		normals?: number[] | Float32Array,
+		uvs?: number[] | Float32Array,
+    indices?: number[] | Uint16Array
 }
 
 export default class ArrayBuffer {
@@ -24,7 +24,7 @@ export default class ArrayBuffer {
 	gl: WebGL2RenderingContext;
 	positions: number[] | Float32Array;
 	normals: number[]| Float32Array;
-	uvs?: number[]| Float32Array;
+	uvs: number[]| Float32Array;
 	indices?: number[] | Uint16Array;
 	instanced?: boolean;
 	vao: VAO;
@@ -35,18 +35,15 @@ export default class ArrayBuffer {
 	constructor(
 		gl: WebGL2RenderingContext,
 		geometry: GeometryBuffers,
-		// positions: number[] | Float32Array,
-		// normals: number[]| Float32Array,
-		// uvs: number[]| Float32Array,
 		params?: ArrayBufferParams
 	) {
 
 		this.gl = gl;
-		this.positions = geometry.positions;
-		this.normals = geometry.normals;
-		this.uvs = geometry.uvs;
+		this.positions = geometry.positions || [];
+		this.normals = geometry.normals || [];
+		this.uvs = geometry.uvs || [];
 
-		this.indices = geometry.indices;
+		this.indices = geometry.indices || [];
 		this.instanced = params?.instanced;
 		this.instanceMatrices = params?.instanceMatrices;
 		this.instanceCount = params?.instanceCount;
@@ -57,7 +54,7 @@ export default class ArrayBuffer {
 
 		if ( this.indices && this.indices.length > 0 ) {
 
-			this.ibo = new IBO( this.indices, gl );
+			this.ibo = new IBO( gl, this.indices );
 
 		}
 
@@ -93,8 +90,18 @@ export default class ArrayBuffer {
 		this.vao.bind();
 		// link positions
 		this.vao.linkAttrib( positionVbo, 0, 3, this.gl.FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
-		this.vao.linkAttrib( normalVbo, 1, 3, this.gl.FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
-		this.vao.linkAttrib( uvVbo, 2, 2, this.gl.FLOAT, 2 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
+
+		if ( this.normals.length > 0 ) {
+
+			this.vao.linkAttrib( normalVbo, 1, 3, this.gl.FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
+
+		}
+
+		if ( this.uvs.length > 0 ) {
+
+			this.vao.linkAttrib( uvVbo, 2, 2, this.gl.FLOAT, 2 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
+
+		}
 
 		if ( this.instanced && this.instanceMatrices ) {
 

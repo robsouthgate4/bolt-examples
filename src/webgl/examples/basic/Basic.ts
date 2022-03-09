@@ -1,10 +1,6 @@
 import Base from "@webgl/Base";
 import Shader from "../../core/Shader";
-import Texture from "../../core/Texture";
-
-//@ts-ignore
 import defaultVertex from "../../core/shaders/default/default.vert";
-//@ts-ignore
 import defaultFragment from "../../core/shaders/default/default.frag";
 
 import { vec3, } from "gl-matrix";

@@ -1,9 +1,7 @@
 import Base from "@webgl/Base";
 import Shader from "../../core/Shader";
 
-//@ts-ignore
 import defaultVertex from "../../core/shaders/default/default.vert";
-//@ts-ignore
 import defaultFragment from "../../core/shaders/default/default.frag";
 
 import { vec3, } from "gl-matrix";
@@ -13,6 +11,7 @@ import CameraArcball from "../../modules/CameraArcball";
 import ArrayBuffer from "../../core/ArrayBuffer";
 import Sphere from "../../modules/Primitives/Sphere";
 import Post from "@/webgl/modules/Post";
+import Plane from "@/webgl/modules/Primitives/Plane";
 
 export default class extends Base {
 
@@ -69,11 +68,23 @@ export default class extends Base {
 
   async init() {
 
-  	const sphereGeometry = new Sphere( { radius: 1, widthSegments: 32, heightSegments: 32 } );
+  	const sphereGeometry = new Sphere( { radius: 1, widthSegments: 64, heightSegments: 64 } );
+  	const planeGeometry = new Plane( { widthSegments: 2, heightSegments: 2 } );
 
   	this.sphereNode = new Node(
   		new ArrayBuffer( this.gl, sphereGeometry ),
   	);
+
+  	this.planeNode = new Node(
+  		new ArrayBuffer( this.gl, planeGeometry ),
+  	);
+
+  	this.planeNode.transform.scale[ 0 ] = 3;
+  	this.planeNode.transform.scale[ 1 ] = 3;
+  	this.planeNode.transform.scale[ 2 ] = 3;
+
+  	this.planeNode.transform.rotation[ 0 ] = Math.PI * 0.5;
+  	this.planeNode.transform.position[ 1 ] = - 0.25;
 
   	this.resize();
 
@@ -118,11 +129,9 @@ export default class extends Base {
   	this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT );
 
   	this.shader.activate();
-  	this.shader.setVector3( "viewPosition", this.camera.position );
-  	this.shader.setFloat( "time", elapsed );
 
-  	this.sphereNode.transform.rotation[ 1 ] += 0.01;
   	this.sphereNode.drawTriangles( this.shader, this.camera );
+  	this.planeNode.drawTriangles( this.shader, this.camera );
 
   	this.post.end();
 

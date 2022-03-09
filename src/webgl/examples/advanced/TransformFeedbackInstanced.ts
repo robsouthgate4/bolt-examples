@@ -1,15 +1,10 @@
 import Base from "@webgl/Base";
 import Shader from "../../core/Shader";
 
-
-//@ts-ignore
 import particlesVertexInstanced from "../../core/shaders/gpgpuInstanced/particles.vert";
-//@ts-ignore
 import particlesFragmentInstanced from "../../core/shaders/gpgpuInstanced/particles.frag";
 
-//@ts-ignore
 import simulationVertex from "../../core/shaders/gpgpuInstanced/simulation/simulation.vert";
-//@ts-ignore
 import simulationFragment from "../../core/shaders/gpgpuInstanced/simulation/simulation.frag";
 
 import { mat4, vec3, } from "gl-matrix";
@@ -145,7 +140,7 @@ export default class extends Base {
   	// mesh vbo
   	const meshPositionVBO = new VBO( sphereGeometry.positions, this.gl, this.gl.STATIC_DRAW );
   	const meshNormalVBO = new VBO( sphereGeometry.normals, this.gl, this.gl.STATIC_DRAW );
-  	this.meshIBO = new IBO( sphereGeometry.indices, this.gl );
+  	this.meshIBO = new IBO( this.gl, sphereGeometry.indices );
 
   	// buffers for position and velocity
   	const offset1VBO = new VBO( offsets, this.gl, this.gl.DYNAMIC_DRAW );
