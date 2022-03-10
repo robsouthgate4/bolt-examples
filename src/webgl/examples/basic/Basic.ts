@@ -77,7 +77,7 @@ export default class extends Base {
 
   	// setup nodes
   	this.torusNode = new Node(
-  		new ArrayBuffer( this.bolt, geometry ),
+  		new ArrayBuffer( geometry ),
   	);
 
   	this.torusNode.transform.position = vec3.fromValues( 0, 0, 0 );

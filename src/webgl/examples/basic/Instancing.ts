@@ -10,17 +10,18 @@ import Transform from "../../core/Transform";
 import ArrayBuffer from "../../core/ArrayBuffer";
 import GLTFParser from "../../modules/GLTFParser";
 import Camera from "@/webgl/core/Camera";
+import Bolt from "@/webgl/core/Bolt";
 
 export default class extends Base {
 
   canvas: HTMLCanvasElement;
-  gl: WebGL2RenderingContext;
   shader: Shader;
   lightPosition: vec3;
   camera: Camera;
   assetsLoaded!: boolean;
   cubeTransform!: Transform;
   torusBuffer!: ArrayBuffer;
+  bolt: Bolt;
 
   constructor() {
 
@@ -35,7 +36,8 @@ export default class extends Base {
   	this.canvas.width = this.width;
   	this.canvas.height = this.height;
 
-  	this.gl = <WebGL2RenderingContext> this.canvas.getContext( "webgl2", { antialias: true } );
+  	this.bolt = Bolt.getInstance();
+  	this.bolt.init( this.canvas, { antialias: true } );
 
   	this.shader = new Shader( defaultVertexInstanced, defaultFragmentInstanced );
   	this.lightPosition = vec3.fromValues( 0, 10, 0 );
@@ -51,8 +53,8 @@ export default class extends Base {
 
   	this.camera.lookAt( vec3.fromValues( 0, 0, - 50 ) );
 
-  	this.gl.viewport( 0, 0, this.gl.canvas.width, this.gl.canvas.height );
-  	this.gl.enable( this.gl.DEPTH_TEST );
+  	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+  	this.bolt.enableDepth();
 
   	this.init();
 
@@ -121,22 +123,21 @@ export default class extends Base {
 
   resize() {
 
-  	const devicePixelRatio = Math.min( 2, window.devicePixelRatio || 1 );
+  	const displayWidth = this.bolt.gl.canvas.clientWidth;
+  	const displayHeight = this.bolt.gl.canvas.clientHeight;
 
-  	const displayWidth = this.gl.canvas.clientWidth;
-  	const displayHeight = this.gl.canvas.clientHeight;
-
-  	const needResize = this.gl.canvas.width !== displayWidth ||
-                     this.gl.canvas.height !== displayHeight;
+  	// Check if the this.bolt.gl.canvas is not the same size.
+  	const needResize = this.bolt.gl.canvas.width !== displayWidth ||
+                     this.bolt.gl.canvas.height !== displayHeight;
 
   	if ( needResize ) {
 
-  		this.gl.canvas.width = displayWidth * devicePixelRatio;
-  		this.gl.canvas.height = displayHeight * devicePixelRatio;
+  		this.bolt.gl.canvas.width = displayWidth;
+  		this.bolt.gl.canvas.height = displayHeight;
 
   	}
 
-  	this.camera.resize( this.gl.canvas.width, this.gl.canvas.height );
+  	this.camera.resize( this.bolt.gl.canvas.width, this.bolt.gl.canvas.height );
 
   }
 
@@ -154,9 +155,8 @@ export default class extends Base {
 
   	this.camera.update();
 
-  	this.gl.viewport( 0, 0, this.gl.canvas.width, this.gl.canvas.height );
-  	this.gl.clearColor( 0, 0, 0, 0 );
-  	this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT );
+  	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+  	this.bolt.clear( 1, 1, 1, 1 );
 
   	this.shader.activate();
   	this.shader.setVector3( "viewPosition", this.camera.position );

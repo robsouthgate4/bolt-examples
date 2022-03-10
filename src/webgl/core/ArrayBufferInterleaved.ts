@@ -5,6 +5,7 @@ import IBO from "./IBO";
 import Shader from "./Shader";
 import { ArrayBufferParams } from "./ArrayBuffer";
 import VBOInstanced from "./VBOInstanced";
+import Bolt from "./Bolt";
 
 export default class ArrayBufferInterleaved {
 
@@ -19,13 +20,12 @@ export default class ArrayBufferInterleaved {
 	ibo!: IBO;
 
 	constructor(
-		gl: WebGL2RenderingContext,
 		stride: number,
 		buffer: number[] | Float32Array,
 		params?: ArrayBufferParams
 	) {
 
-  	this.gl = gl;
+  	this.gl = Bolt.getInstance().gl;
   	this.stride = stride || 3;
   	this.buffer = buffer;
 

@@ -12,6 +12,7 @@ import ArrayBufferInterleaved from "../../core/ArrayBufferInterleaved";
 import CameraArcball from "../../modules/CameraArcball";
 import CameraFPS from "../../modules/CameraFPS";
 import FBO from "../../core/FBO";
+import Bolt from "@/webgl/core/Bolt";
 
 const buffer = [
 	- 0.5, - 0.5, - 0.5, 0.0, 0.0, - 1.0,
@@ -60,7 +61,6 @@ const buffer = [
 export default class extends Base {
 
   canvas: HTMLCanvasElement;
-  gl: WebGL2RenderingContext;
   shader: Shader;
   lightPosition: vec3;
   camera: CameraArcball | CameraFPS;
@@ -68,6 +68,7 @@ export default class extends Base {
   cubeTransform!: Transform;
   cubeNode!: ArrayBufferInterleaved;
   fbo!: FBO;
+  bolt: Bolt;
 
   constructor() {
 
@@ -80,7 +81,8 @@ export default class extends Base {
   	this.canvas.width = this.width;
   	this.canvas.height = this.height;
 
-  	this.gl = <WebGL2RenderingContext> this.canvas.getContext( "webgl2", { antialias: true } );
+  	this.bolt = Bolt.getInstance();
+  	this.bolt.init( this.canvas, { antialias: true } );
 
   	this.shader = new Shader( defaultVertexInstanced, defaultFragmentInstanced );
   	this.lightPosition = vec3.fromValues( 0, 10, 0 );
@@ -94,8 +96,8 @@ export default class extends Base {
   		1000
   	);
 
-  	this.gl.viewport( 0, 0, this.gl.canvas.width, this.gl.canvas.height );
-  	this.gl.enable( this.gl.DEPTH_TEST );
+  	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+  	this.bolt.enableDepth();
 
   	this.init();
 
@@ -103,7 +105,6 @@ export default class extends Base {
   }
 
   async init() {
-
 
   	this.assetsLoaded = true;
 
@@ -148,7 +149,6 @@ export default class extends Base {
 
   	// setup nodes
   	this.cubeNode = new ArrayBufferInterleaved(
-  		this.gl,
   		6,
   		buffer,
   		{
@@ -164,21 +164,21 @@ export default class extends Base {
 
   resize() {
 
-  	const displayWidth = this.gl.canvas.clientWidth;
-  	const displayHeight = this.gl.canvas.clientHeight;
+  	const displayWidth = this.bolt.gl.canvas.clientWidth;
+  	const displayHeight = this.bolt.gl.canvas.clientHeight;
 
-  	// Check if the this.gl.canvas is not the same size.
-  	const needResize = this.gl.canvas.width !== displayWidth ||
-                     this.gl.canvas.height !== displayHeight;
+  	// Check if the this.bolt.gl.canvas is not the same size.
+  	const needResize = this.bolt.gl.canvas.width !== displayWidth ||
+                     this.bolt.gl.canvas.height !== displayHeight;
 
   	if ( needResize ) {
 
-  		this.gl.canvas.width = displayWidth;
-  		this.gl.canvas.height = displayHeight;
+  		this.bolt.gl.canvas.width = displayWidth;
+  		this.bolt.gl.canvas.height = displayHeight;
 
   	}
 
-  	this.camera.resize( this.gl.canvas.width, this.gl.canvas.height );
+  	this.camera.resize( this.bolt.gl.canvas.width, this.bolt.gl.canvas.height );
 
   }
 
@@ -196,9 +196,8 @@ export default class extends Base {
 
   	this.camera.update( delta );
 
-  	this.gl.viewport( 0, 0, this.gl.canvas.width, this.gl.canvas.height );
-  	this.gl.clearColor( 0, 0, 0, 0 );
-  	this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT );
+  	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+  	this.bolt.clear( 1, 1, 1, 1 );
 
   	this.shader.activate();
   	this.shader.setVector3( "viewPosition", this.camera.position );
