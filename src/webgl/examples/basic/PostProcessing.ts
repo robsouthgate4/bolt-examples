@@ -106,7 +106,7 @@ export default class extends Base {
 
   	this.post.add( this.renderPass );
   	this.post.add( this.rbgSplit );
-  	this.post.add( this.pixelate );
+  	//this.post.add( this.pixelate );
   	this.post.add( this.fxaa, true );
 
   	const sphereGeometry = new Sphere( { radius: 1, widthSegments: 64, heightSegments: 64 } );
@@ -147,6 +147,7 @@ export default class extends Base {
 
   	}
 
+  	this.post.resize( this.bolt.gl.canvas.width, this.bolt.gl.canvas.height );
   	this.camera.resize( this.bolt.gl.canvas.width, this.bolt.gl.canvas.height );
 
   }

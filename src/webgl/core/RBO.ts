@@ -23,6 +23,14 @@ export default class RBO {
 
   }
 
+  resize( width: number, height: number ) {
+
+  	this.gl.bindRenderbuffer( this.gl.RENDERBUFFER, this.renderBuffer );
+  	this.gl.renderbufferStorage( this.gl.RENDERBUFFER, this.gl.DEPTH24_STENCIL8, width, height );
+  	this.gl.bindRenderbuffer( this.gl.RENDERBUFFER, null );
+
+  }
+
   bind() {
 
   	this.gl.bindRenderbuffer( this.gl.RENDERBUFFER, this.renderBuffer );

@@ -30,7 +30,12 @@ export default class Post {
 
   resize( width: number, height: number ) {
 
-  	return;
+  	this._passes.forEach( ( pass: Pass ) => {
+
+  		pass.fbo.resize( width, height );
+  		pass.rbo.resize( width, height );
+
+  	} );
 
   }
 

@@ -83,8 +83,6 @@ export default class Bolt {
 
   		}
 
-  		//console.log( drawType );
-
   		if ( drawType === this.gl.POINTS ) {
 
   			drawable.drawPoints( shader, this._camera );
