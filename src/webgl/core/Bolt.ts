@@ -47,7 +47,13 @@ export default class Bolt {
 
   disableDepth() {
 
-  	this.gl?.disable( this.gl.DEPTH_TEST );
+  	this.gl.disable( this.gl.DEPTH_TEST );
+
+  }
+
+  getContext() {
+
+  	return this.gl;
 
   }
 
