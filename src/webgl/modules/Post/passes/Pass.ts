@@ -1,13 +1,13 @@
 import ArrayBuffer from "@/webgl/core/ArrayBuffer";
 import FBO from "@/webgl/core/FBO";
 import RBO from "@/webgl/core/RBO";
-import Texture from "@/webgl/core/Texture";
 
 export abstract class Pass {
 
   fbo: FBO;
   rbo: RBO;
   fullScreenTriangle: ArrayBuffer;
+  private _renderToScreen = false;
 
   constructor( gl: WebGL2RenderingContext, {
   	width = 256,
@@ -35,6 +35,18 @@ export abstract class Pass {
 
   }
 
-	abstract draw( readFBO?: FBO, writeFBO?: FBO ): void
+  set renderToScreen( val: boolean ) {
+
+  	this._renderToScreen = val;
+
+  }
+
+  get renderToScreen(): boolean {
+
+  	return this._renderToScreen;
+
+  }
+
+	abstract draw( readFBO?: FBO, renderToScreen?: boolean ): void
 
 }

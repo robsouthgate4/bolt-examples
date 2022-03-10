@@ -27,9 +27,13 @@ export default class FXAAPass extends Pass {
 
   }
 
-  draw( readFBO?: FBO, writeFBO?: FBO ) {
+  draw( readFBO?: FBO, renderToScreen?: boolean ) {
 
-  	//this.fbo.bind();
+  	if ( ! renderToScreen ) {
+
+  		this.fbo.bind();
+
+  	}
 
   	if ( ! readFBO ) {
 

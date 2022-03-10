@@ -24,7 +24,7 @@ export default class RenderPass extends Pass {
 
   draw( ) {
 
-  	//this.fbo.bind();
+  	return;
 
   }
 

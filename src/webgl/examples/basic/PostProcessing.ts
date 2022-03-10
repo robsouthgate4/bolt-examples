@@ -14,6 +14,8 @@ import Post from "@/webgl/modules/Post/Post";
 import Plane from "@/webgl/modules/Primitives/Plane";
 import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
 import RGBSplitPass from "@/webgl/modules/Post/passes/RGBSplitPass";
+import PixelatePass from "@/webgl/modules/Post/passes/PixelatePass";
+import RenderPass from "@/webgl/modules/Post/passes/RenderPass";
 
 export default class extends Base {
 
@@ -30,6 +32,8 @@ export default class extends Base {
   post: Post;
   fxaa!: FXAAPass;
   rbgSplit!: RGBSplitPass;
+  renderPass!: RenderPass;
+  pixelate!: PixelatePass;
 
   constructor() {
 
@@ -72,18 +76,32 @@ export default class extends Base {
 
   async init() {
 
-  	// this.fxaa = new FXAAPass( this.gl, {
-  	// 	width: this.width,
-  	// 	height: this.height
-  	// } );
+  	this.renderPass = new RenderPass( this.gl, {
+  		width: this.width,
+  		height: this.height
+  	} );
 
-  	// this.rbgSplit = new RGBSplitPass( this.gl, {
-  	// 	width: this.width,
-  	// 	height: this.height
-  	// } );
+  	this.fxaa = new FXAAPass( this.gl, {
+  		width: this.width,
+  		height: this.height
+  	} );
 
-  	// this.post.add( this.fxaa );
-  	// this.post.add( this.rbgSplit );
+  	this.rbgSplit = new RGBSplitPass( this.gl, {
+  		width: this.width,
+  		height: this.height
+  	} );
+
+  	this.pixelate = new PixelatePass( this.gl, {
+  		width: this.width,
+  		height: this.height,
+  		xPixels: 100,
+  		yPixels: 100
+  	} );
+
+  	this.post.add( this.renderPass );
+  	this.post.add( this.rbgSplit );
+  	this.post.add( this.pixelate );
+  	this.post.add( this.fxaa, true );
 
   	const sphereGeometry = new Sphere( { radius: 1, widthSegments: 64, heightSegments: 64 } );
   	const planeGeometry = new Plane( { widthSegments: 2, heightSegments: 2 } );
@@ -142,7 +160,7 @@ export default class extends Base {
   	this.camera.update();
 
   	this.gl.viewport( 0, 0, this.gl.canvas.width, this.gl.canvas.height );
-  	this.gl.clearColor( 0, 0, 0, 0 );
+  	this.gl.clearColor( 1, 1, 1, 1 );
   	this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT );
 
   	this.sphereNode.drawTriangles( this.shader, this.camera );

@@ -1,52 +1,33 @@
 
-import FXAAPass from "./passes/FXAAPass";
 import { Pass } from "./passes/Pass";
 import RenderPass from "./passes/RenderPass";
-import RGBSplitPass from "./passes/RGBSplitPass";
 
 export default class Post {
 
   gl: WebGL2RenderingContext;
-  height: number;
-  width: number;
+  _height: number;
+  _width: number;
   _passes: Pass[] = [];
-  renderPass: RenderPass;
-  rbgSplit: RGBSplitPass;
-  fxaa: FXAAPass;
 
   constructor( gl: WebGL2RenderingContext ) {
 
   	this.gl = gl;
 
-  	this.width = window.innerWidth;
-  	this.height = window.innerHeight;
-
-  	this.renderPass = new RenderPass( this.gl, {
-  		width: this.width,
-  		height: this.height
-  	} );
-
-  	this.fxaa = new FXAAPass( this.gl, {
-  		width: this.width,
-  		height: this.height
-  	} );
-
-  	this.rbgSplit = new RGBSplitPass( this.gl, {
-  		width: this.width,
-  		height: this.height
-  	} );
+  	this._width = window.innerWidth;
+  	this._height = window.innerHeight;
 
   	this._passes = [];
 
   }
 
-  add( pass: Pass ) {
+  add( pass: Pass, renderToScreen = false ) {
 
+  	pass.renderToScreen = renderToScreen;
   	this._passes.push( pass );
 
   }
 
-  resize() {
+  resize( width: number, height: number ) {
 
   	return;
 
@@ -54,19 +35,45 @@ export default class Post {
 
   begin() {
 
-  	this.renderPass.fbo.bind();
+  	this._passes.forEach( ( pass: Pass ) => {
+
+  		if ( pass instanceof RenderPass ) {
+
+  			pass.fbo.bind();
+
+  			if ( pass.renderToScreen ) {
+
+  				pass.fbo.unbind();
+
+  			}
+
+  		}
+
+  	} );
+
   	this.gl.enable( this.gl.DEPTH_TEST );
+
 
   }
 
   end() {
 
-  	this.renderPass.fbo.unbind();
+  	this.gl.disable( this.gl.DEPTH_TEST );
 
-  	this.gl.disable( this.gl.DEPTH_TEST ); // prevent discarding triangle
 
-  	this.rbgSplit.draw( this.renderPass.fbo );
-  	this.fxaa.draw( this.rbgSplit.fbo );
+  	this._passes.forEach( ( pass: Pass, index: number ) => {
+
+  		if ( pass instanceof RenderPass ) {
+
+  			pass.fbo.unbind();
+
+  		} else {
+
+  			pass.draw( this._passes[ index - 1 ].fbo, pass.renderToScreen );
+
+  		}
+
+  	} );
 
   }
 

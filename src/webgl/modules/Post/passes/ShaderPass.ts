@@ -1,26 +1,32 @@
 import Shader from "@/webgl/core/Shader";
 import { Pass } from "./Pass";
 
-import vertexShader from "./shaders/rgbSplit/rgbSplit.vert";
-import fragmentShader from "./shaders/rgbSplit/rgbSplit.frag";
+
 import FBO from "@/webgl/core/FBO";
 import ArrayBuffer from "@/webgl/core/ArrayBuffer";
 
-export default class RGBSplitPass extends Pass {
+interface ShaderPassParams {
+  width: number;
+  height: number;
+  shader: Shader
+}
+
+export default class ShaderPass extends Pass {
 
   shader!: Shader;
 
   constructor( gl: WebGL2RenderingContext, {
   	width = 256,
-  	height = 256
-  } ) {
+  	height = 256,
+  	shader
+  }: ShaderPassParams ) {
 
   	super( gl, {
   		width,
   		height
   	} );
 
-  	this.shader = new Shader( vertexShader, fragmentShader, gl );
+  	this.shader = shader;
   	this.shader.activate();
   	this.shader.setTexture( "map", this.fbo.targetTexture );
 
