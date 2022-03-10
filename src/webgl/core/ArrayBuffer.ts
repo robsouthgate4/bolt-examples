@@ -8,7 +8,8 @@ import VBOInstanced from "./VBOInstanced";
 import Bolt from "./Bolt";
 
 export interface ArrayBufferParams {
-	indices?: number[] | Uint16Array;
+  indices?: number[];
+  drawType?: number;
 	instanced?: boolean;
 	instanceCount?: number;
 	instanceMatrices?: mat4[];
@@ -33,189 +34,211 @@ export default class ArrayBuffer {
 	ibo!: IBO;
 	instanceMatrices?: mat4[];
 	instanceCount?: number;
+  drawType = Bolt.getInstance().gl.TRIANGLES;
 
-	constructor(
-		geometry: GeometryBuffers,
-		params?: ArrayBufferParams
-	) {
+  constructor(
+  	geometry: GeometryBuffers,
+  	params?: ArrayBufferParams
+  ) {
 
-		this.gl = Bolt.getInstance().gl;
-		this.positions = geometry.positions || [];
-		this.normals = geometry.normals || [];
-		this.uvs = geometry.uvs || [];
+  	this.gl = Bolt.getInstance().gl;
+  	this.positions = geometry.positions || [];
+  	this.normals = geometry.normals || [];
+  	this.uvs = geometry.uvs || [];
 
-		this.indices = geometry.indices || [];
-		this.instanced = params?.instanced;
-		this.instanceMatrices = params?.instanceMatrices;
-		this.instanceCount = params?.instanceCount;
+  	this.indices = geometry.indices || [];
+  	this.instanced = params?.instanced;
+  	this.instanceMatrices = params?.instanceMatrices;
+  	this.instanceCount = params?.instanceCount;
+  	this.vao = new VAO();
 
-		this.vao = new VAO();
+  	this.linkBuffers();
 
-		this.linkBuffers();
+  	if ( this.indices && this.indices.length > 0 ) {
 
-		if ( this.indices && this.indices.length > 0 ) {
+  		this.ibo = new IBO( this.indices );
 
-			this.ibo = new IBO( this.indices );
+  	}
 
-		}
+  }
 
-	}
+  setDrawType( type: number ) {
 
-	addAttribute( buffer: Float32Array | number[], size: number, layoutID: number ) {
+  	this.drawType = type;
 
-		const vbo = new VBO( buffer || [] );
+  	return this;
 
-		this.vao.bind();
-		this.vao.linkAttrib( vbo, layoutID, size, this.gl.FLOAT, size * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
-		this.vao.unbind();
+  }
 
-	}
+  addAttribute( buffer: Float32Array | number[], size: number, layoutID: number ) {
 
-	addInstancedAttribute( buffer: Float32Array | number[], size: number, layoutID: number ) {
+  	const vbo = new VBO( buffer || [] );
 
-		const vbo = new VBO( buffer || [] );
+  	this.vao.bind();
+  	this.vao.linkAttrib( vbo, layoutID, size, this.gl.FLOAT, size * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
+  	this.vao.unbind();
 
-		this.vao.bind();
-		this.vao.linkAttrib( vbo, layoutID, size, this.gl.FLOAT, size * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
-		this.gl.vertexAttribDivisor( 3, 1 );
-		this.vao.unbind();
+  }
 
-	}
+  addInstancedAttribute( buffer: Float32Array | number[], size: number, layoutID: number ) {
 
-	linkBuffers() {
+  	const vbo = new VBO( buffer || [] );
 
-		const positionVbo = new VBO( this.positions || [], );
-		const normalVbo = new VBO( this.normals || [], );
-		const uvVbo = new VBO( this.uvs || [], );
+  	this.vao.bind();
+  	this.vao.linkAttrib( vbo, layoutID, size, this.gl.FLOAT, size * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
+  	this.gl.vertexAttribDivisor( 3, 1 );
+  	this.vao.unbind();
 
-		this.vao.bind();
+  }
 
-		this.vao.linkAttrib( positionVbo, 0, 3, this.gl.FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
+  linkBuffers() {
 
-		if ( this.normals.length > 0 ) {
+  	const positionVbo = new VBO( this.positions || [], );
+  	const normalVbo = new VBO( this.normals || [], );
+  	const uvVbo = new VBO( this.uvs || [], );
 
-			this.vao.linkAttrib( normalVbo, 1, 3, this.gl.FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
+  	this.vao.bind();
 
-		}
+  	this.vao.linkAttrib( positionVbo, 0, 3, this.gl.FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
 
-		if ( this.uvs.length > 0 ) {
+  	if ( this.normals.length > 0 ) {
 
-			this.vao.linkAttrib( uvVbo, 2, 2, this.gl.FLOAT, 2 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
+  		this.vao.linkAttrib( normalVbo, 1, 3, this.gl.FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
 
-		}
+  	}
 
-		if ( this.instanced && this.instanceMatrices ) {
+  	if ( this.uvs.length > 0 ) {
 
+  		this.vao.linkAttrib( uvVbo, 2, 2, this.gl.FLOAT, 2 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
 
-			const instancedVBO = new VBOInstanced( this.instanceMatrices, );
-			instancedVBO.bind();
+  	}
 
-			const bytesMatrix = 4 * 16;
-			const bytesVec4 = 4 * Float32Array.BYTES_PER_ELEMENT;
+  	if ( this.instanced && this.instanceMatrices ) {
 
-			this.vao.linkAttrib( instancedVBO, 3, 4, this.gl.FLOAT, bytesMatrix, 0 * bytesVec4 );
-			this.vao.linkAttrib( instancedVBO, 4, 4, this.gl.FLOAT, bytesMatrix, 1 * bytesVec4 );
-			this.vao.linkAttrib( instancedVBO, 5, 4, this.gl.FLOAT, bytesMatrix, 2 * bytesVec4 );
-			this.vao.linkAttrib( instancedVBO, 6, 4, this.gl.FLOAT, bytesMatrix, 3 * bytesVec4 );
 
-			this.gl.vertexAttribDivisor( 3, 1 );
-			this.gl.vertexAttribDivisor( 4, 1 );
-			this.gl.vertexAttribDivisor( 5, 1 );
-			this.gl.vertexAttribDivisor( 6, 1 );
+  		const instancedVBO = new VBOInstanced( this.instanceMatrices, );
+  		instancedVBO.bind();
 
-			instancedVBO.unbind();
+  		const bytesMatrix = 4 * 16;
+  		const bytesVec4 = 4 * Float32Array.BYTES_PER_ELEMENT;
 
-		}
+  		this.vao.linkAttrib( instancedVBO, 3, 4, this.gl.FLOAT, bytesMatrix, 0 * bytesVec4 );
+  		this.vao.linkAttrib( instancedVBO, 4, 4, this.gl.FLOAT, bytesMatrix, 1 * bytesVec4 );
+  		this.vao.linkAttrib( instancedVBO, 5, 4, this.gl.FLOAT, bytesMatrix, 2 * bytesVec4 );
+  		this.vao.linkAttrib( instancedVBO, 6, 4, this.gl.FLOAT, bytesMatrix, 3 * bytesVec4 );
 
-		this.vao.unbind();
-		positionVbo.unbind();
-		normalVbo.unbind();
-		uvVbo.unbind();
+  		this.gl.vertexAttribDivisor( 3, 1 );
+  		this.gl.vertexAttribDivisor( 4, 1 );
+  		this.gl.vertexAttribDivisor( 5, 1 );
+  		this.gl.vertexAttribDivisor( 6, 1 );
 
-	}
+  		instancedVBO.unbind();
 
-	bindTextures( shader: Shader ) {
+  	}
 
-		if ( ! shader ) return;
+  	this.vao.unbind();
+  	positionVbo.unbind();
+  	normalVbo.unbind();
+  	uvVbo.unbind();
 
-		if ( shader.textures && shader.textures.length > 0 ) {
+  }
 
-			for ( let i = 0; i < shader.textures.length; i ++ ) {
+  bindTextures( shader: Shader ) {
 
-				const textureObject = shader.textures[ i ];
+  	if ( ! shader ) return;
 
-				textureObject.texture.textureUnit( shader, textureObject.uniformName, i );
-				textureObject.texture.bind();
+  	if ( shader.textures && shader.textures.length > 0 ) {
 
-			}
+  		for ( let i = 0; i < shader.textures.length; i ++ ) {
 
-		}
+  			const textureObject = shader.textures[ i ];
 
-	}
+  			textureObject.texture.textureUnit( shader, textureObject.uniformName, i );
+  			textureObject.texture.bind();
 
-	drawPoints( shader: Shader ) {
+  		}
 
-		this.bindTextures( shader );
+  	}
 
-		this.vao.bind();
-		this.gl.drawArrays( this.gl.POINTS, 0, this.positions.length / 3 );
-		this.vao.unbind();
+  }
 
-	}
+  drawPoints( shader: Shader ) {
 
-	drawLines( shader: Shader ) {
+  	this.bindTextures( shader );
 
-		this.bindTextures( shader );
 
-		if ( this.indices && this.indices.length ) {
 
-			this.vao.bind();
-			this.ibo.bind();
-			this.gl.drawElements( this.gl.LINE_STRIP, this.indices.length, this.gl.UNSIGNED_SHORT, 0 * Float32Array.BYTES_PER_ELEMENT );
-			this.vao.unbind();
 
-		}
+  	if ( this.indices && this.indices.length ) {
 
-	}
+  		this.vao.bind();
+  		this.ibo.bind();
+  		this.gl.drawElements( this.gl.POINTS, this.indices.length, this.gl.UNSIGNED_SHORT, 0 );
+  		this.vao.unbind();
 
-	drawTriangles( shader: Shader ) {
+  	} else {
 
-		this.bindTextures( shader );
+  		this.vao.bind();
+  		this.gl.drawArrays( this.gl.POINTS, 0, this.positions.length / 3 );
+  		this.vao.unbind();
 
-		this.vao.bind();
+  	}
 
-		if ( this.indices && this.indices.length > 0 ) {
+  }
 
-			this.ibo.bind();
+  drawLines( shader: Shader ) {
 
-			if ( this.instanced && this.instanceCount ) {
+  	this.bindTextures( shader );
 
-				this.gl.drawElementsInstanced( this.gl.TRIANGLES, this.indices.length, this.gl.UNSIGNED_SHORT, 0, this.instanceCount );
+  	if ( this.indices && this.indices.length ) {
 
-			} else {
+  		this.vao.bind();
+  		this.ibo.bind();
+  		this.gl.drawElements( this.gl.LINE_STRIP, this.indices.length, this.gl.UNSIGNED_SHORT, 0 );
+  		this.vao.unbind();
 
-				this.gl.drawElements( this.gl.TRIANGLES, this.indices.length, this.gl.UNSIGNED_SHORT, 0 );
+  	}
 
-			}
+  }
 
-			this.ibo.unbind();
+  drawTriangles( shader: Shader ) {
 
-		} else {
+  	this.bindTextures( shader );
 
-			if ( this.instanced && this.instanceCount ) {
+  	this.vao.bind();
 
-				this.gl.drawArraysInstanced( this.gl.TRIANGLES, 0, this.positions.length / 3, this.instanceCount );
+  	if ( this.indices && this.indices.length > 0 ) {
 
-			} else {
+  		this.ibo.bind();
 
-				this.gl.drawArrays( this.gl.TRIANGLES, 0, this.positions.length / 3 );
+  		if ( this.instanced && this.instanceCount ) {
 
-			}
+  			this.gl.drawElementsInstanced( this.gl.TRIANGLES, this.indices.length, this.gl.UNSIGNED_SHORT, 0, this.instanceCount );
 
-		}
+  		} else {
 
-		this.vao.unbind();
+  			this.gl.drawElements( this.gl.TRIANGLES, this.indices.length, this.gl.UNSIGNED_SHORT, 0 );
 
-	}
+  		}
+
+  		this.ibo.unbind();
+
+  	} else {
+
+  		if ( this.instanced && this.instanceCount ) {
+
+  			this.gl.drawArraysInstanced( this.gl.TRIANGLES, 0, this.positions.length / 3, this.instanceCount );
+
+  		} else {
+
+  			this.gl.drawArrays( this.gl.TRIANGLES, 0, this.positions.length / 3 );
+
+  		}
+
+  	}
+
+  	this.vao.unbind();
+
+  }
 
 }

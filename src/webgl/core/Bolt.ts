@@ -3,6 +3,9 @@ This will be our renderer
 */
 
 import ArrayBuffer from "./ArrayBuffer";
+import Camera from "./Camera";
+import Node from "./Node";
+import Shader from "./Shader";
 
 interface BoltParams {
   antialias?: boolean
@@ -12,6 +15,7 @@ export default class Bolt {
 
   private static _instance: Bolt;
   gl!: WebGL2RenderingContext;
+  private _camera!: Camera;
 
   static getInstance(): Bolt {
 
@@ -39,6 +43,12 @@ export default class Bolt {
 
   }
 
+  setCamera( camera: Camera ) {
+
+  	this._camera = camera;
+
+  }
+
   enableDepth() {
 
   	this.gl.enable( this.gl.DEPTH_TEST );
@@ -57,9 +67,39 @@ export default class Bolt {
 
   }
 
-  draw( drawable: ArrayBuffer ) {
+  draw( shader: Shader, drawables: ArrayBuffer[] | Node[] ) {
 
-  	return;
+  	let drawType: number;
+
+  	drawables.forEach( ( drawable: Node | ArrayBuffer ) => {
+
+  		if ( drawable instanceof Node ) {
+
+  			drawType = drawable.arrayBuffer.drawType;
+
+  		} else {
+
+  			drawType = drawable.drawType;
+
+  		}
+
+  		//console.log( drawType );
+
+  		if ( drawType === this.gl.POINTS ) {
+
+  			drawable.drawPoints( shader, this._camera );
+
+  		} else if ( drawType === this.gl.LINES ) {
+
+  			drawable.drawLines( shader, this._camera );
+
+  		} else if ( drawType === this.gl.TRIANGLES ) {
+
+  			drawable.drawTriangles( shader, this._camera );
+
+  		}
+
+  	} );
 
   }
 

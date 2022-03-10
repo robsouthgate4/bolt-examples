@@ -21,9 +21,6 @@ export default class Texture {
   	} = {}
   ) {
 
-  	console.log( width );
-  	console.log( height );
-
   	this.gl = gl;
   	this.format = this.gl.RGBA;
   	this.pixelType = this.gl.UNSIGNED_BYTE;

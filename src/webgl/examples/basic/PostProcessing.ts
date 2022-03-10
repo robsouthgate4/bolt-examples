@@ -36,6 +36,7 @@ export default class extends Base {
   renderPass!: RenderPass;
   pixelate!: PixelatePass;
   bolt: Bolt;
+  gl: WebGL2RenderingContext;
 
   constructor() {
 
@@ -48,14 +49,6 @@ export default class extends Base {
   	this.canvas.width = this.width;
   	this.canvas.height = this.height;
 
-  	this.bolt = Bolt.getInstance();
-  	this.bolt.init( this.canvas, { antialias: true } );
-
-  	this.post = new Post( this.bolt );
-
-  	this.shader = new Shader( defaultVertex, defaultFragment );
-  	this.lightPosition = vec3.fromValues( 0, 10, 0 );
-
   	this.camera = new CameraArcball(
   		this.width,
   		this.height,
@@ -67,6 +60,17 @@ export default class extends Base {
   		0.2,
   		2
   	);
+
+  	this.bolt = Bolt.getInstance();
+  	this.bolt.init( this.canvas, { antialias: true } );
+  	this.bolt.setCamera( this.camera );
+
+  	this.gl = this.bolt.getContext();
+
+  	this.post = new Post( this.bolt );
+
+  	this.shader = new Shader( defaultVertex, defaultFragment );
+  	this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
   	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
   	this.bolt.enableDepth();
@@ -96,17 +100,17 @@ export default class extends Base {
   	this.pixelate = new PixelatePass( this.bolt, {
   		width: this.width,
   		height: this.height,
-  		xPixels: 100,
-  		yPixels: 100
+  		xPixels: 30,
+  		yPixels: 30
   	} );
 
   	this.post.add( this.renderPass );
   	this.post.add( this.rbgSplit );
-  	this.post.add( this.pixelate, false );
+  	this.post.add( this.pixelate );
   	this.post.add( this.fxaa, true );
 
   	const sphereGeometry = new Sphere( { radius: 1, widthSegments: 64, heightSegments: 64 } );
-  	const planeGeometry = new Plane( { widthSegments: 2, heightSegments: 2 } );
+  	const planeGeometry = new Plane( { widthSegments: 64, heightSegments: 64 } );
 
   	this.sphereNode = new Node(
   		new ArrayBuffer( sphereGeometry ),
@@ -164,8 +168,7 @@ export default class extends Base {
   	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
   	this.bolt.clear( 1, 1, 1, 1 );
 
-  	this.sphereNode.drawTriangles( this.shader, this.camera );
-  	this.planeNode.drawTriangles( this.shader, this.camera );
+  	this.bolt.draw( this.shader, [ this.sphereNode, this.planeNode ] );
 
   	this.post.end();
 

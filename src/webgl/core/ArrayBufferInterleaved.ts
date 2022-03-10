@@ -18,12 +18,13 @@ export default class ArrayBufferInterleaved {
 	instanceMatrices?: mat4[];
 	vao: VAO;
 	ibo!: IBO;
+  drawType: number;
 
-	constructor(
-		stride: number,
-		buffer: number[] | Float32Array,
-		params?: ArrayBufferParams
-	) {
+  constructor(
+  	stride: number,
+  	buffer: number[] | Float32Array,
+  	params?: ArrayBufferParams
+  ) {
 
   	this.gl = Bolt.getInstance().gl;
   	this.stride = stride || 3;
@@ -33,15 +34,16 @@ export default class ArrayBufferInterleaved {
   	this.instanced = params?.instanced;
   	this.instanceMatrices = params?.instanceMatrices;
   	this.instanceCount = params?.instanceCount;
+  	this.drawType = params?.drawType || this.gl.TRIANGLES;
 
   	this.vao = new VAO();
 
   	// assume the positions, normals and vertices are interleaved
   	this.linkBuffers();
 
-	}
+  }
 
-	linkBuffers() {
+  linkBuffers() {
 
   	const vbo = new VBO( this.buffer );
 
@@ -75,30 +77,35 @@ export default class ArrayBufferInterleaved {
   	this.vao.unbind();
   	vbo.unbind();
 
-	}
+  }
+  setDrawType( type: number ) {
 
-	addAttribute( buffer: Float32Array | number[], size: number, layoutID: number ) {
+  	this.drawType = type;
 
-		const vbo = new VBO( buffer || [] );
+  }
 
-		this.vao.bind();
-		this.vao.linkAttrib( vbo, layoutID, size, this.gl.FLOAT, 0 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
-		this.vao.unbind();
+  addAttribute( buffer: Float32Array | number[], size: number, layoutID: number ) {
 
-	}
+  	const vbo = new VBO( buffer || [] );
 
-	addInstancedAttribute( buffer: Float32Array | number[], size: number, layoutID: number ) {
+  	this.vao.bind();
+  	this.vao.linkAttrib( vbo, layoutID, size, this.gl.FLOAT, 0 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
+  	this.vao.unbind();
 
-		const vbo = new VBO( buffer || [] );
+  }
 
-		this.vao.bind();
-		this.vao.linkAttrib( vbo, layoutID, size, this.gl.FLOAT, 0 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
-		this.gl.vertexAttribDivisor( 3, 1 );
-		this.vao.unbind();
+  addInstancedAttribute( buffer: Float32Array | number[], size: number, layoutID: number ) {
 
-	}
+  	const vbo = new VBO( buffer || [] );
 
-	bindTextures( shader: Shader ) {
+  	this.vao.bind();
+  	this.vao.linkAttrib( vbo, layoutID, size, this.gl.FLOAT, 0 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
+  	this.gl.vertexAttribDivisor( 3, 1 );
+  	this.vao.unbind();
+
+  }
+
+  bindTextures( shader: Shader ) {
 
   	if ( ! shader ) return;
 
@@ -115,9 +122,9 @@ export default class ArrayBufferInterleaved {
 
   	}
 
-	}
+  }
 
-	drawPoints( shader: Shader ) {
+  drawPoints( shader: Shader ) {
 
   	this.bindTextures( shader );
 
@@ -129,9 +136,9 @@ export default class ArrayBufferInterleaved {
 
   	}
 
-	}
+  }
 
-	drawLines( shader: Shader ) {
+  drawLines( shader: Shader ) {
 
   	this.bindTextures( shader );
 
@@ -144,9 +151,9 @@ export default class ArrayBufferInterleaved {
 
   	}
 
-	}
+  }
 
-	drawTriangles( shader: Shader ) {
+  drawTriangles( shader: Shader ) {
 
   	this.bindTextures( shader );
 
@@ -185,6 +192,6 @@ export default class ArrayBufferInterleaved {
 
   	this.vao.unbind();
 
-	}
+  }
 
 }
