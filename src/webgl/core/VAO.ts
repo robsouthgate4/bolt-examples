@@ -1,13 +1,15 @@
 import VBO from "./VBO";
 
+import Bolt from "./Bolt";
+
 export default class VAO {
 
-  gl: WebGL2RenderingContext;
   arrayObject: WebGLVertexArrayObject;
+  gl: WebGL2RenderingContext;
 
-  constructor( gl: WebGL2RenderingContext ) {
+  constructor( ) {
 
-  	this.gl = gl;
+  	this.gl = Bolt.getInstance().gl;
   	this.arrayObject = <WebGLVertexArrayObject>( this.gl.createVertexArray() );
 
   }

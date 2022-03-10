@@ -6,7 +6,7 @@ import defaultFragmentInstanced from "../../core/shaders/defaultInstanced/defaul
 
 import { mat4, quat, vec3, } from "gl-matrix";
 
-import Transform from "../../modules/SceneGraph/Transform";
+import Transform from "../../core/Transform";
 import ArrayBuffer from "../../core/ArrayBuffer";
 import GLTFParser from "../../modules/GLTFParser";
 import Camera from "@/webgl/core/Camera";
@@ -37,7 +37,7 @@ export default class extends Base {
 
   	this.gl = <WebGL2RenderingContext> this.canvas.getContext( "webgl2", { antialias: true } );
 
-  	this.shader = new Shader( defaultVertexInstanced, defaultFragmentInstanced, this.gl );
+  	this.shader = new Shader( defaultVertexInstanced, defaultFragmentInstanced );
   	this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
   	this.camera = new Camera(
@@ -47,7 +47,6 @@ export default class extends Base {
   		45,
   		0.01,
   		1000,
-  		this.gl,
   	);
 
   	this.camera.lookAt( vec3.fromValues( 0, 0, - 50 ) );
@@ -108,7 +107,6 @@ export default class extends Base {
 
   	// setup nodes
   	this.torusBuffer = new ArrayBuffer(
-  		this.gl,
   		geometry,
   		{
   			instanced: true,

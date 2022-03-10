@@ -32,7 +32,6 @@ export default class CameraArcball extends Camera {
   	fov: number,
   	near: number,
   	far: number,
-  	gl: WebGL2RenderingContext,
   	damping = 0.2,
   	speed = 3,
   	scrollSpeed = 0.3 ) {
@@ -43,8 +42,7 @@ export default class CameraArcball extends Camera {
   		position,
   		fov,
   		near,
-  		far,
-  		gl,
+  		far
   		);
 
   	this.position = position;

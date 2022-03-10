@@ -4,6 +4,7 @@ import { Pass } from "./Pass";
 
 import FBO from "@/webgl/core/FBO";
 import ArrayBuffer from "@/webgl/core/ArrayBuffer";
+import Bolt from "@/webgl/core/Bolt";
 
 interface ShaderPassParams {
   width: number;
@@ -15,13 +16,13 @@ export default class ShaderPass extends Pass {
 
   shader!: Shader;
 
-  constructor( gl: WebGL2RenderingContext, {
+  constructor( bolt: Bolt, {
   	width = 256,
   	height = 256,
   	shader
   }: ShaderPassParams ) {
 
-  	super( gl, {
+  	super( bolt, {
   		width,
   		height
   	} );
@@ -39,7 +40,7 @@ export default class ShaderPass extends Pass {
   		2, 1, 0
   	];
 
-  	this.fullScreenTriangle = new ArrayBuffer( gl, {
+  	this.fullScreenTriangle = new ArrayBuffer( {
   		positions: triangleVertices,
   		indices: triangleIndices
   	} );

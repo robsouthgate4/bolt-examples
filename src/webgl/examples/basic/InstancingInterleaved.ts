@@ -7,7 +7,7 @@ import defaultFragmentInstanced from "../../core/shaders/defaultInstanced/defaul
 
 import { mat4, quat, vec3, } from "gl-matrix";
 
-import Transform from "../../modules/SceneGraph/Transform";
+import Transform from "../../core/Transform";
 import ArrayBufferInterleaved from "../../core/ArrayBufferInterleaved";
 import CameraArcball from "../../modules/CameraArcball";
 import CameraFPS from "../../modules/CameraFPS";
@@ -82,7 +82,7 @@ export default class extends Base {
 
   	this.gl = <WebGL2RenderingContext> this.canvas.getContext( "webgl2", { antialias: true } );
 
-  	this.shader = new Shader( defaultVertexInstanced, defaultFragmentInstanced, this.gl );
+  	this.shader = new Shader( defaultVertexInstanced, defaultFragmentInstanced );
   	this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
   	this.camera = new CameraFPS(
@@ -91,8 +91,7 @@ export default class extends Base {
   		vec3.fromValues( 0, 4, 10 ),
   		45,
   		0.01,
-  		1000,
-  		this.gl,
+  		1000
   	);
 
   	this.gl.viewport( 0, 0, this.gl.canvas.width, this.gl.canvas.height );

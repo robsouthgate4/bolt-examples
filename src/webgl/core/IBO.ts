@@ -1,12 +1,14 @@
+import Bolt from "./Bolt";
+
 export default class IBO {
 
   gl: WebGL2RenderingContext;
   indicesBuffer: WebGLBuffer | null;
   count: number;
 
-  constructor( gl: WebGL2RenderingContext, indices: Uint16Array | number[], ) {
+  constructor( indices: Uint16Array | number[], ) {
 
-  	this.gl = gl;
+  	this.gl = Bolt.getInstance().gl;
   	this.count = indices.length;
   	this.indicesBuffer = this.gl.createBuffer();
   	this.gl.bindBuffer( this.gl.ELEMENT_ARRAY_BUFFER, this.indicesBuffer );

@@ -34,7 +34,7 @@ export default class ArrayBufferInterleaved {
   	this.instanceMatrices = params?.instanceMatrices;
   	this.instanceCount = params?.instanceCount;
 
-  	this.vao = new VAO( gl );
+  	this.vao = new VAO();
 
   	// assume the positions, normals and vertices are interleaved
   	this.linkBuffers();
@@ -43,7 +43,7 @@ export default class ArrayBufferInterleaved {
 
 	linkBuffers() {
 
-  	const vbo = new VBO( this.buffer, this.gl );
+  	const vbo = new VBO( this.buffer );
 
   	this.vao.bind();
   	this.vao.linkAttrib( vbo, 0, 3, this.gl.FLOAT, this.stride * 4, 0 );
@@ -52,7 +52,7 @@ export default class ArrayBufferInterleaved {
 
   	if ( this.instanced && this.instanceMatrices ) {
 
-  		const instancedVBO = new VBOInstanced( this.instanceMatrices, this.gl );
+  		const instancedVBO = new VBOInstanced( this.instanceMatrices );
   		instancedVBO.bind();
 
   		const bytesMatrix = 4 * 16;
@@ -79,7 +79,7 @@ export default class ArrayBufferInterleaved {
 
 	addAttribute( buffer: Float32Array | number[], size: number, layoutID: number ) {
 
-		const vbo = new VBO( buffer || [], this.gl );
+		const vbo = new VBO( buffer || [] );
 
 		this.vao.bind();
 		this.vao.linkAttrib( vbo, layoutID, size, this.gl.FLOAT, 0 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
@@ -89,7 +89,7 @@ export default class ArrayBufferInterleaved {
 
 	addInstancedAttribute( buffer: Float32Array | number[], size: number, layoutID: number ) {
 
-		const vbo = new VBO( buffer || [], this.gl );
+		const vbo = new VBO( buffer || [] );
 
 		this.vao.bind();
 		this.vao.linkAttrib( vbo, layoutID, size, this.gl.FLOAT, 0 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );

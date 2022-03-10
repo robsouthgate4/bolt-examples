@@ -1,3 +1,5 @@
+import Bolt from "./Bolt";
+
 export default class RBO {
 
   width = 256;
@@ -6,14 +8,13 @@ export default class RBO {
   renderBuffer: WebGLRenderbuffer;
 
   constructor(
-  	gl: WebGL2RenderingContext,
   	{
   		width = 256,
   		height = 256,
   	} = {}
   ) {
 
-  	this.gl = gl;
+  	this.gl = Bolt.getInstance().gl;
 
   	this.renderBuffer = <WebGLRenderbuffer> this.gl.createRenderbuffer();
   	this.bind();

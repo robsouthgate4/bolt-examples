@@ -1,17 +1,18 @@
 
+import Bolt from "@/webgl/core/Bolt";
 import { Pass } from "./passes/Pass";
 import RenderPass from "./passes/RenderPass";
 
 export default class Post {
 
-  gl: WebGL2RenderingContext;
   _height: number;
   _width: number;
   _passes: Pass[] = [];
+  bolt: Bolt;
 
-  constructor( gl: WebGL2RenderingContext ) {
+  constructor( bolt: Bolt ) {
 
-  	this.gl = gl;
+  	this.bolt = bolt;
 
   	this._width = window.innerWidth;
   	this._height = window.innerHeight;
@@ -51,15 +52,13 @@ export default class Post {
 
   	} );
 
-  	this.gl.enable( this.gl.DEPTH_TEST );
-
+  	this.bolt.enableDepth();
 
   }
 
   end() {
 
-  	this.gl.disable( this.gl.DEPTH_TEST );
-
+  	this.bolt.disableDepth();
 
   	this._passes.forEach( ( pass: Pass, index: number ) => {
 

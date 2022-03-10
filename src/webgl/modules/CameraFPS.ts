@@ -22,8 +22,7 @@ export default class CameraFPS extends Camera {
   	position: vec3,
   	fov: number,
   	near: number,
-  	far: number,
-  	gl: WebGL2RenderingContext ) {
+  	far: number ) {
 
   	super(
   		width,
@@ -31,8 +30,7 @@ export default class CameraFPS extends Camera {
   		position,
   		fov,
   		near,
-  		far,
-  		gl
+  		far
   	);
 
   	this.keyPressed = "";

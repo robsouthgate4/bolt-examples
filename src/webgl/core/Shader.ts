@@ -1,7 +1,6 @@
 import { mat3, mat4, vec2, vec3, vec4 } from "gl-matrix";
-import { isTouchDevice } from "../globals/constants";
 import Texture from "./Texture";
-
+import Bolt from "./Bolt";
 
 interface TextureObject {
   uniformName: string;
@@ -20,7 +19,6 @@ export default class Shader {
   constructor(
   	vertexShaderSrc: string,
   	fragmentShaderSrc: string,
-  	gl: WebGL2RenderingContext,
   	parameters?: {
       transformFeedbackVaryings: string[]
     }
@@ -29,7 +27,7 @@ export default class Shader {
   	this.textureUnit = 0;
   	this.textures = <TextureObject[]>[];
 
-  	this.gl = gl;
+  	this.gl = Bolt.getInstance().gl;
 
   	this.vertexShader = <WebGLShader>(
       this.gl.createShader( this.gl.VERTEX_SHADER )

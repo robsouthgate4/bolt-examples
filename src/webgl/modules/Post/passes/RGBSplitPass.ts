@@ -5,22 +5,23 @@ import vertexShader from "./shaders/rgbSplit/rgbSplit.vert";
 import fragmentShader from "./shaders/rgbSplit/rgbSplit.frag";
 import FBO from "@/webgl/core/FBO";
 import ArrayBuffer from "@/webgl/core/ArrayBuffer";
+import Bolt from "@/webgl/core/Bolt";
 
 export default class RGBSplitPass extends Pass {
 
   shader!: Shader;
 
-  constructor( gl: WebGL2RenderingContext, {
+  constructor( bolt: Bolt, {
   	width = 256,
   	height = 256
   } ) {
 
-  	super( gl, {
+  	super( bolt, {
   		width,
   		height
   	} );
 
-  	this.shader = new Shader( vertexShader, fragmentShader, gl );
+  	this.shader = new Shader( vertexShader, fragmentShader );
   	this.shader.activate();
   	this.shader.setTexture( "map", this.fbo.targetTexture );
 
@@ -33,7 +34,7 @@ export default class RGBSplitPass extends Pass {
   		2, 1, 0
   	];
 
-  	this.fullScreenTriangle = new ArrayBuffer( gl, {
+  	this.fullScreenTriangle = new ArrayBuffer( {
   		positions: triangleVertices,
   		indices: triangleIndices
   	} );

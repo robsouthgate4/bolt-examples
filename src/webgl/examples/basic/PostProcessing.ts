@@ -5,8 +5,8 @@ import defaultVertex from "../../core/shaders/default/default.vert";
 import defaultFragment from "../../core/shaders/default/default.frag";
 
 import { vec3, } from "gl-matrix";
-import Node from "../../modules/SceneGraph/Node";
-import Transform from "../../modules/SceneGraph/Transform";
+import Node from "../../core/Node";
+import Transform from "../../core/Transform";
 import CameraArcball from "../../modules/CameraArcball";
 import ArrayBuffer from "../../core/ArrayBuffer";
 import Sphere from "../../modules/Primitives/Sphere";
@@ -17,10 +17,11 @@ import RGBSplitPass from "@/webgl/modules/Post/passes/RGBSplitPass";
 import PixelatePass from "@/webgl/modules/Post/passes/PixelatePass";
 import RenderPass from "@/webgl/modules/Post/passes/RenderPass";
 
+import Bolt from "@/webgl/core/Bolt";
+
 export default class extends Base {
 
   canvas: HTMLCanvasElement;
-  gl: WebGL2RenderingContext;
   shader: Shader;
   lightPosition: vec3;
   camera: CameraArcball;
@@ -34,6 +35,7 @@ export default class extends Base {
   rbgSplit!: RGBSplitPass;
   renderPass!: RenderPass;
   pixelate!: PixelatePass;
+  bolt: Bolt;
 
   constructor() {
 
@@ -46,11 +48,12 @@ export default class extends Base {
   	this.canvas.width = this.width;
   	this.canvas.height = this.height;
 
-  	this.gl = <WebGL2RenderingContext> this.canvas.getContext( "webgl2", { antialias: true } );
+  	this.bolt = Bolt.getInstance();
+  	this.bolt.init( this.canvas, { antialias: true } );
 
-  	this.post = new Post( this.gl );
+  	this.post = new Post( this.bolt );
 
-  	this.shader = new Shader( defaultVertex, defaultFragment, this.gl );
+  	this.shader = new Shader( defaultVertex, defaultFragment );
   	this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
   	this.camera = new CameraArcball(
@@ -61,13 +64,12 @@ export default class extends Base {
   		45,
   		0.01,
   		1000,
-  		this.gl,
   		0.2,
   		2
   	);
 
-  	this.gl.viewport( 0, 0, this.gl.canvas.width, this.gl.canvas.height );
-  	this.gl.enable( this.gl.DEPTH_TEST );
+  	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+  	this.bolt.enableDepth();
 
   	this.init();
 
@@ -76,22 +78,22 @@ export default class extends Base {
 
   async init() {
 
-  	this.renderPass = new RenderPass( this.gl, {
+  	this.renderPass = new RenderPass( this.bolt, {
   		width: this.width,
   		height: this.height
   	} );
 
-  	this.fxaa = new FXAAPass( this.gl, {
+  	this.fxaa = new FXAAPass( this.bolt, {
   		width: this.width,
   		height: this.height
   	} );
 
-  	this.rbgSplit = new RGBSplitPass( this.gl, {
+  	this.rbgSplit = new RGBSplitPass( this.bolt, {
   		width: this.width,
   		height: this.height
   	} );
 
-  	this.pixelate = new PixelatePass( this.gl, {
+  	this.pixelate = new PixelatePass( this.bolt, {
   		width: this.width,
   		height: this.height,
   		xPixels: 100,
@@ -100,18 +102,18 @@ export default class extends Base {
 
   	this.post.add( this.renderPass );
   	this.post.add( this.rbgSplit );
-  	this.post.add( this.pixelate );
-  	this.post.add( this.fxaa, true );
+  	this.post.add( this.pixelate, true );
+  	//this.post.add( this.fxaa, true );
 
   	const sphereGeometry = new Sphere( { radius: 1, widthSegments: 64, heightSegments: 64 } );
   	const planeGeometry = new Plane( { widthSegments: 2, heightSegments: 2 } );
 
   	this.sphereNode = new Node(
-  		new ArrayBuffer( this.gl, sphereGeometry ),
+  		new ArrayBuffer( sphereGeometry ),
   	);
 
   	this.planeNode = new Node(
-  		new ArrayBuffer( this.gl, planeGeometry ),
+  		new ArrayBuffer( planeGeometry ),
   	);
 
   	this.planeNode.transform.scale[ 0 ] = 3;
@@ -127,21 +129,21 @@ export default class extends Base {
 
   resize() {
 
-  	const displayWidth = this.gl.canvas.clientWidth;
-  	const displayHeight = this.gl.canvas.clientHeight;
+  	const displayWidth = this.bolt.gl.canvas.clientWidth;
+  	const displayHeight = this.bolt.gl.canvas.clientHeight;
 
-  	// Check if the this.gl.canvas is not the same size.
-  	const needResize = this.gl.canvas.width !== displayWidth ||
-                     this.gl.canvas.height !== displayHeight;
+  	// Check if the this.bolt.gl.canvas is not the same size.
+  	const needResize = this.bolt.gl.canvas.width !== displayWidth ||
+                     this.bolt.gl.canvas.height !== displayHeight;
 
   	if ( needResize ) {
 
-  		this.gl.canvas.width = displayWidth;
-  		this.gl.canvas.height = displayHeight;
+  		this.bolt.gl.canvas.width = displayWidth;
+  		this.bolt.gl.canvas.height = displayHeight;
 
   	}
 
-  	this.camera.resize( this.gl.canvas.width, this.gl.canvas.height );
+  	this.camera.resize( this.bolt.gl.canvas.width, this.bolt.gl.canvas.height );
 
   }
 
@@ -159,9 +161,8 @@ export default class extends Base {
 
   	this.camera.update();
 
-  	this.gl.viewport( 0, 0, this.gl.canvas.width, this.gl.canvas.height );
-  	this.gl.clearColor( 1, 1, 1, 1 );
-  	this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT );
+  	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+  	this.bolt.clear( 1, 1, 1, 1 );
 
   	this.sphereNode.drawTriangles( this.shader, this.camera );
   	this.planeNode.drawTriangles( this.shader, this.camera );

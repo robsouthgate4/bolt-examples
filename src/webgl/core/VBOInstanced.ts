@@ -1,13 +1,14 @@
 import { mat4 } from "gl-matrix";
+import Bolt from "./Bolt";
 
 export default class VBOInstanced {
 
   gl: WebGL2RenderingContext;
   buffer: WebGLBuffer;
 
-  constructor( data: mat4[], gl: WebGL2RenderingContext, drawType = gl.STATIC_DRAW ) {
+  constructor( data: mat4[], drawType = Bolt.getInstance().gl.STATIC_DRAW ) {
 
-  	this.gl = gl;
+  	this.gl = Bolt.getInstance().gl;
   	this.buffer = <WebGLBuffer>( this.gl.createBuffer() );
   	this.gl.bindBuffer( this.gl.ARRAY_BUFFER, this.buffer );
 

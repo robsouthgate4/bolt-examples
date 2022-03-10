@@ -1,4 +1,5 @@
 import ArrayBuffer from "@/webgl/core/ArrayBuffer";
+import Bolt from "@/webgl/core/Bolt";
 import FBO from "@/webgl/core/FBO";
 import RBO from "@/webgl/core/RBO";
 
@@ -9,15 +10,15 @@ export abstract class Pass {
   fullScreenTriangle: ArrayBuffer;
   private _renderToScreen = false;
 
-  constructor( gl: WebGL2RenderingContext, {
+  constructor( bolt: Bolt, {
   	width = 256,
   	height = 256
   } ) {
 
-  	this.fbo = new FBO( gl, { width, height } );
+  	this.fbo = new FBO( { width, height } );
   	this.fbo.bind();
 
-  	this.rbo = new RBO( gl, { width, height } );
+  	this.rbo = new RBO( { width, height } );
   	this.fbo.unbind();
 
   	const triangleVertices = [
@@ -28,7 +29,7 @@ export abstract class Pass {
   		2, 1, 0
   	];
 
-  	this.fullScreenTriangle = new ArrayBuffer( gl, {
+  	this.fullScreenTriangle = new ArrayBuffer( {
   		positions: triangleVertices,
   		indices: triangleIndices
   	} );

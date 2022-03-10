@@ -1,8 +1,8 @@
 import { mat4, vec3 } from "gl-matrix";
+import Bolt from "./Bolt";
 
 export default class Camera {
 
-  gl: WebGL2RenderingContext;
   fov: number;
   near: number;
   far: number;
@@ -24,11 +24,9 @@ export default class Camera {
   	position: vec3,
   	fov: number,
   	near: number,
-  	far: number,
-  	gl: WebGL2RenderingContext
+  	far: number
   ) {
 
-  	this.gl = gl;
   	this.fov = fov;
   	this.near = near;
   	this.far = far;

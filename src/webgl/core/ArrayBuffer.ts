@@ -5,6 +5,8 @@ import IBO from "./IBO";
 import Shader from "./Shader";
 import VBOInstanced from "./VBOInstanced";
 
+import Bolt from "./Bolt";
+
 export interface ArrayBufferParams {
 	indices?: number[] | Uint16Array;
 	instanced?: boolean;
@@ -33,12 +35,11 @@ export default class ArrayBuffer {
 	instanceCount?: number;
 
 	constructor(
-		gl: WebGL2RenderingContext,
 		geometry: GeometryBuffers,
 		params?: ArrayBufferParams
 	) {
 
-		this.gl = gl;
+		this.gl = Bolt.getInstance().gl;
 		this.positions = geometry.positions || [];
 		this.normals = geometry.normals || [];
 		this.uvs = geometry.uvs || [];
@@ -48,13 +49,13 @@ export default class ArrayBuffer {
 		this.instanceMatrices = params?.instanceMatrices;
 		this.instanceCount = params?.instanceCount;
 
-		this.vao = new VAO( gl );
+		this.vao = new VAO();
 
 		this.linkBuffers();
 
 		if ( this.indices && this.indices.length > 0 ) {
 
-			this.ibo = new IBO( gl, this.indices );
+			this.ibo = new IBO( this.indices );
 
 		}
 
@@ -62,7 +63,7 @@ export default class ArrayBuffer {
 
 	addAttribute( buffer: Float32Array | number[], size: number, layoutID: number ) {
 
-		const vbo = new VBO( buffer || [], this.gl );
+		const vbo = new VBO( buffer || [] );
 
 		this.vao.bind();
 		this.vao.linkAttrib( vbo, layoutID, size, this.gl.FLOAT, size * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
@@ -72,7 +73,7 @@ export default class ArrayBuffer {
 
 	addInstancedAttribute( buffer: Float32Array | number[], size: number, layoutID: number ) {
 
-		const vbo = new VBO( buffer || [], this.gl );
+		const vbo = new VBO( buffer || [] );
 
 		this.vao.bind();
 		this.vao.linkAttrib( vbo, layoutID, size, this.gl.FLOAT, size * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
@@ -83,9 +84,9 @@ export default class ArrayBuffer {
 
 	linkBuffers() {
 
-		const positionVbo = new VBO( this.positions || [], this.gl );
-		const normalVbo = new VBO( this.normals || [], this.gl );
-		const uvVbo = new VBO( this.uvs || [], this.gl );
+		const positionVbo = new VBO( this.positions || [], );
+		const normalVbo = new VBO( this.normals || [], );
+		const uvVbo = new VBO( this.uvs || [], );
 
 		this.vao.bind();
 
@@ -106,7 +107,7 @@ export default class ArrayBuffer {
 		if ( this.instanced && this.instanceMatrices ) {
 
 
-			const instancedVBO = new VBOInstanced( this.instanceMatrices, this.gl );
+			const instancedVBO = new VBOInstanced( this.instanceMatrices, );
 			instancedVBO.bind();
 
 			const bytesMatrix = 4 * 16;

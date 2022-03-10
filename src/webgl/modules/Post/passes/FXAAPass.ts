@@ -4,24 +4,24 @@ import { Pass } from "./Pass";
 import vertexShader from "./shaders/fxaa/fxaa.vert";
 import fragmentShader from "./shaders/fxaa/fxaa.frag";
 import { vec2 } from "gl-matrix";
-import Texture from "@/webgl/core/Texture";
 import FBO from "@/webgl/core/FBO";
+import Bolt from "@/webgl/core/Bolt";
 
 export default class FXAAPass extends Pass {
 
   shader!: Shader;
 
-  constructor( gl: WebGL2RenderingContext, {
+  constructor( bolt: Bolt, {
   	width = 256,
   	height = 256
   } ) {
 
-  	super( gl, {
+  	super( bolt, {
   		width,
   		height
   	} );
 
-  	this.shader = new Shader( vertexShader, fragmentShader, gl );
+  	this.shader = new Shader( vertexShader, fragmentShader );
   	this.shader.activate();
   	this.shader.setVector2( "resolution", vec2.fromValues( width, height ) );
 

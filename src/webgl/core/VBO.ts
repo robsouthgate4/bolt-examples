@@ -1,12 +1,13 @@
 
+import Bolt from "./Bolt";
 export default class VBO {
 
   gl: WebGL2RenderingContext;
   buffer: WebGLBuffer;
 
-  constructor( data: Float32Array | number[], gl: WebGL2RenderingContext, drawType = gl.STATIC_DRAW ) {
+  constructor( data: Float32Array | number[], drawType = Bolt.getInstance().gl.STATIC_DRAW ) {
 
-  	this.gl = gl;
+  	this.gl = Bolt.getInstance().gl;
   	this.buffer = <WebGLBuffer>( this.gl.createBuffer() );
   	this.gl.bindBuffer( this.gl.ARRAY_BUFFER, this.buffer );
 

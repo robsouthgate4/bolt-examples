@@ -1,24 +1,24 @@
 import Texture from "./Texture";
+import Bolt from "./Bolt";
 
 export default class FBO {
 
   width = 256;
   height = 256;
-  gl: WebGL2RenderingContext;
   format: number;
   targetTexture: Texture;
   frameBuffer: WebGLFramebuffer;
+  gl: WebGL2RenderingContext;
 
   constructor(
-  	gl: WebGL2RenderingContext,
   	{
-  		format = gl.RGBA,
+  		format = Bolt.getInstance().gl.RGBA,
   		width = 256,
   		height = 256,
   	} = {}
   ) {
 
-  	this.gl = gl;
+  	this.gl = Bolt.getInstance().gl;
   	this.format = format;
 
   	this.targetTexture = new Texture( this.gl, { width, height } );

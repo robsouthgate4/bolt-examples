@@ -5,6 +5,7 @@ import vertexShader from "./shaders/pixelate/pixelate.vert";
 import fragmentShader from "./shaders/pixelate/pixelate.frag";
 import FBO from "@/webgl/core/FBO";
 import ArrayBuffer from "@/webgl/core/ArrayBuffer";
+import Bolt from "@/webgl/core/Bolt";
 
 export default class PixelatePass extends Pass {
 
@@ -12,14 +13,14 @@ export default class PixelatePass extends Pass {
   private _xPixels: number;
   private _yPixels: number;
 
-  constructor( gl: WebGL2RenderingContext, {
+  constructor( bolt: Bolt, {
   	width = 256,
   	height = 256,
   	xPixels = 50,
   	yPixels = 50
   } ) {
 
-  	super( gl, {
+  	super( bolt, {
   		width,
   		height
   	} );
@@ -27,7 +28,7 @@ export default class PixelatePass extends Pass {
   	this._xPixels = xPixels;
   	this._yPixels = yPixels;
 
-  	this.shader = new Shader( vertexShader, fragmentShader, gl );
+  	this.shader = new Shader( vertexShader, fragmentShader );
   	this.shader.activate();
   	this.shader.setFloat( "xPixels", this._xPixels );
   	this.shader.setFloat( "yPixels", this._yPixels );
@@ -42,7 +43,7 @@ export default class PixelatePass extends Pass {
   		2, 1, 0
   	];
 
-  	this.fullScreenTriangle = new ArrayBuffer( gl, {
+  	this.fullScreenTriangle = new ArrayBuffer( {
   		positions: triangleVertices,
   		indices: triangleIndices
   	} );
