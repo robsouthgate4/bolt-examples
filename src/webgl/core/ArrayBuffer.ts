@@ -15,10 +15,10 @@ export interface ArrayBufferParams {
 }
 
 export interface GeometryBuffers {
-    positions?: number[] | Float32Array,
-		normals?: number[] | Float32Array,
-		uvs?: number[] | Float32Array,
-    indices?: number[] | Uint16Array
+  positions?: number[] | Float32Array,
+  normals?: number[] | Float32Array,
+  uvs?: number[] | Float32Array,
+  indices?: number[] | Uint16Array
 }
 
 export default class ArrayBuffer {
