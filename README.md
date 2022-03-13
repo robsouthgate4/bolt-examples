@@ -37,7 +37,6 @@ app.
 
 ## Features
 
--   **[Hammer.js](https://hammerjs.github.io/)** - For handling mobile gestures
 -   **[ESLint](https://eslint.org/)** Configuration:
     -   Uses [Prettier](https://prettier.io/) ESLint plugin for consistent code
         style.
