@@ -22,7 +22,6 @@ export default class Node {
   	this.children = [];
   	this.parent = null;
   	this.arrayBuffer = arrayBuffer;
-  	console.log( this.arrayBuffer );
   	this.transform = new Transform();
 
   	this.autoUpdate = true;

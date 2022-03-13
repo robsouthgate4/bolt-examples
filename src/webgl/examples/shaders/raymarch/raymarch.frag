@@ -2,11 +2,8 @@
 
 precision highp float;
 
-uniform vec3 objectColor;
-uniform vec3 lightColor;
 uniform float time;
 uniform sampler2D mapEqui;
-uniform sampler2D mapAO;
 uniform vec3 viewPosition;
 
 out vec4 FragColor;
@@ -156,7 +153,7 @@ float GetDist( vec3 p )
 
   p += displacement;
 
-  float d1 = mix( sdOctahedron( p, 0.3 ), sdRoundBox( p, vec3( 0.1 ), 0.1 ), 1.0 /*elasticInOut( sin( time * 1.0 ) * 0.5 + 0.5 )*/ );
+  float d1 = mix( sdOctahedron( p, 0.3 ), sdRoundBox( p, vec3( 0.1 ), 0.1 ), elasticInOut( sin( time * 1.0 ) * 0.5 + 0.5 ) );
   float d2 = length( p + vec3( cos( time ) * 0.23, sin( time ) * 0.23, 0.0 ) ) - 0.1;
   float d3 = length( p + vec3( sin( time * 3.) * 0.2, cos( time * 3.) * 0.1, 0.0 ) ) - 0.1;
   float d4 = length( p + vec3( cos( time * 0.9) * 0.2, sin( time * 1.2) * 0.1, 0.0 ) ) - 0.1;
@@ -167,7 +164,7 @@ float GetDist( vec3 p )
   float b = opSmoothUnion( a, d3, f );
   float c = opSmoothUnion( b, d4, f );
 
-  return b;
+  return c;
 }
 
 float fresnel(vec3 n, vec3 rd) {
@@ -255,12 +252,12 @@ void main()
 
     float fresn = fresnel( n, rd );
 
-    col = mix( reflectionTex * 1., vec3( 0.6 ), dif );
+    col = mix( reflectionTex * 0.8, vec3( 0.9 ), dif );
     col += fresn * 0.1;
 
   }
 
 
-  FragColor = vec4( Normal * 0.5 + 0.5, 1.0 );
+  FragColor = vec4( col, 1.0 );
 
 }

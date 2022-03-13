@@ -1,15 +1,19 @@
 import Base from "@webgl/Base";
 import Shader from "../../core/Shader";
-import defaultVertex from "../../examples/shaders/default/default.vert";
-import defaultFragment from "../../examples/shaders/default/default.frag";
+import vertexShader from "../../examples/shaders/raymarch/raymarch.vert";
+import fragmentShader from "../../examples/shaders/raymarch/raymarch.frag";
 
 import { vec3, } from "gl-matrix";
 import Node from "../../core/Node";
 import Transform from "../../core/Transform";
 import CameraArcball from "../../modules/CameraArcball";
 import ArrayBuffer from "../../core/ArrayBuffer";
-import GLTFParser from "../../modules/GLTFParser";
 import Bolt from "@/webgl/core/Bolt";
+import Cube from "@/webgl/modules/Primitives/Cube";
+import Texture from "@/webgl/core/Texture";
+import Post from "@/webgl/modules/Post/Post";
+import RenderPass from "@/webgl/modules/Post/passes/RenderPass";
+import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
 
 export default class extends Base {
 
@@ -19,8 +23,9 @@ export default class extends Base {
   camera: CameraArcball;
   assetsLoaded!: boolean;
   torusTransform!: Transform;
-  torusNode!: Node;
-  bolt: any;
+  cubeNode!: Node;
+  bolt: Bolt;
+  post: Post;
 
   constructor() {
 
@@ -36,13 +41,13 @@ export default class extends Base {
   	this.bolt = Bolt.getInstance();
   	this.bolt.init( this.canvas, { antialias: true } );
 
-  	this.shader = new Shader( defaultVertex, defaultFragment );
+  	this.shader = new Shader( vertexShader, fragmentShader );
   	this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
   	this.camera = new CameraArcball(
   		this.width,
   		this.height,
-  		vec3.fromValues( 0, 0, 3 ),
+  		vec3.fromValues( 0, 0.5, 1 ),
   		vec3.fromValues( 0, 0, 0 ),
   		45,
   		0.01,
@@ -51,7 +56,20 @@ export default class extends Base {
   		2
   	);
 
+  	this.post = new Post( this.bolt );
+
+  	this.post.add( new RenderPass( this.bolt, {
+  		width: this.width,
+  		height: this.height
+  	} ) );
+
+  	this.post.add( new FXAAPass( this.bolt, {
+  		width: this.width,
+  		height: this.height,
+  	} ), true );
+
   	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+  	this.bolt.setCamera( this.camera );
   	this.bolt.enableDepth();
 
   	this.init();
@@ -61,27 +79,20 @@ export default class extends Base {
 
   async init() {
 
+  	const geometry = new Cube();
 
-  	const gltfLoader = new GLTFParser( "/static/models/gltf/torus.gltf" );
-
-  	const geometry = await gltfLoader.loadGLTF();
-
-  	if ( ! geometry ) return;
+  	const equiTexture = new Texture( this.bolt.getContext(), { imagePath: "/static/textures/equi-studio.jpg" } );
+  	equiTexture.loadImage();
 
   	this.assetsLoaded = true;
 
-  	// set shader uniforms
   	this.shader.activate();
-  	this.shader.setVector3( "objectColor", vec3.fromValues( 1.0, 0.0, 0.0 ) );
-  	this.shader.setVector3( "lightColor", vec3.fromValues( 0.95, 1.0, 1.0 ) );
+  	this.shader.setTexture( "mapEqui", equiTexture );
 
   	// setup nodes
-  	this.torusNode = new Node(
+  	this.cubeNode = new Node(
   		new ArrayBuffer( geometry ),
   	);
-
-  	this.torusNode.transform.position = vec3.fromValues( 0, 0, 0 );
-  	this.torusNode.transform.scale = vec3.fromValues( 1, 1, 1 );
 
   	this.resize();
 
@@ -104,6 +115,7 @@ export default class extends Base {
   	}
 
   	this.camera.resize( this.bolt.gl.canvas.width, this.bolt.gl.canvas.height );
+  	this.post.resize( this.bolt.gl.canvas.width, this.bolt.gl.canvas.height );
 
   }
 
@@ -119,15 +131,21 @@ export default class extends Base {
 
   	super.update( elapsed, delta );
 
+  	this.post.begin();
   	this.camera.update();
 
+  	const bgColor = 211 / 255;
+
   	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-  	this.bolt.clear( 1, 1, 1, 1 );
+  	this.bolt.clear( bgColor, bgColor, bgColor, 1 );
 
   	this.shader.activate();
   	this.shader.setVector3( "viewPosition", this.camera.position );
   	this.shader.setFloat( "time", elapsed );
-  	this.torusNode.drawTriangles( this.shader, this.camera );
+
+  	this.bolt.draw( this.shader, [ this.cubeNode ] );
+
+  	this.post.end();
 
   }
 

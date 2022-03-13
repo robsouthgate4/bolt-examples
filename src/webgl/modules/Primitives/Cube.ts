@@ -7,7 +7,7 @@ export default class Cube {
   normals: number[];
   uvs: number[];
 
-  constructor( { width = 1, height = 1, depth = 1, widthSegments = 1, heightSegments = 1, depthSegments = 1 } ) {
+  constructor( { width = 1, height = 1, depth = 1, widthSegments = 1, heightSegments = 1, depthSegments = 1 } = {} ) {
 
 
   	widthSegments = Math.floor( widthSegments );

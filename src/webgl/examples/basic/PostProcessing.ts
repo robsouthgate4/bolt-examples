@@ -1,8 +1,8 @@
 import Base from "@webgl/Base";
 import Shader from "../../core/Shader";
 
-import defaultVertex from "../../core/shaders/default/default.vert";
-import defaultFragment from "../../core/shaders/default/default.frag";
+import defaultVertex from "../../examples/shaders/default/default.vert";
+import defaultFragment from "../../examples/shaders/default/default.frag";
 
 import { vec3, } from "gl-matrix";
 import Node from "../../core/Node";
