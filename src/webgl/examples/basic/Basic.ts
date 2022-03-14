@@ -77,16 +77,10 @@ export default class extends Base {
     	this.shader.setVector3( "objectColor", vec3.fromValues( 1.0, 0.0, 0.0 ) );
     	this.shader.setVector3( "lightColor", vec3.fromValues( 0.95, 1.0, 1.0 ) );
 
-    	// creat empty node
-    	this.root = new Node();
-    	this.root.transform.scale = vec3.fromValues( 1, 1, 1 );
-
     	// setup nodes
     	this.torusNode = new Node(
     		new ArrayBuffer( geometry ),
     	);
-
-    	this.torusNode.setParent( this.root );
 
     	this.torusNode.transform.position = vec3.fromValues( 0, 0, 0 );
     	this.torusNode.transform.scale = vec3.fromValues( 1, 1, 1 );
@@ -122,7 +116,7 @@ export default class extends Base {
     	this.shader.setVector3( "viewPosition", this.camera.position );
     	this.shader.setFloat( "time", elapsed );
 
-    	this.bolt.draw( this.shader, [ this.root, this.torusNode ] );
+    	this.bolt.draw( this.shader, [ this.torusNode ] );
 
     }
 

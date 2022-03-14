@@ -106,6 +106,7 @@ export default class CameraArcball extends Camera {
 
     	const direction = Math.sign( ev.deltaY );
     	this.radius -= direction * this.scrollSpeed;
+    	this.radius = Math.max( this.radius, 0 );
 
     }
 

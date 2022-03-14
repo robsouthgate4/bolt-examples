@@ -62,9 +62,6 @@ export default class Texture {
 
     	}
 
-
-
-
     }
 
     textureUnit( shader: Shader, uniformName: string, unit: number ) {

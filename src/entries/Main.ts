@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/basic/PostProcessing";
+import Example from "@/webgl/examples/basic/Basic";
 
 export default class Main {
 

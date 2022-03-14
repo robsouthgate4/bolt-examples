@@ -16,7 +16,7 @@ export abstract class Pass {
     	height = 256
     } ) {
 
-    	this.fbo = new FBO( { width, height, depth: true } );
+    	this.fbo = new FBO( { width, height } );
     	this.fbo.bind();
 
     	this.rbo = new RBO( { width, height } );
