@@ -9,6 +9,7 @@ export abstract class Pass {
     rbo: RBO;
     fullScreenTriangle: ArrayBuffer;
     private _renderToScreen = false;
+    _enabled = true;
 
     constructor( bolt: Bolt, {
     	width = 256,
@@ -33,6 +34,20 @@ export abstract class Pass {
     		positions: triangleVertices,
     		indices: triangleIndices
     	} );
+
+    }
+
+    setEnabled( val: boolean ) {
+
+    	this._enabled = val;
+
+    	return this;
+
+    }
+
+    get enabled( ) {
+
+    	return this._enabled;
 
     }
 

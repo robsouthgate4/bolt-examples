@@ -26,6 +26,8 @@ export default class Post {
   	pass.renderToScreen = renderToScreen;
   	this._passes.push( pass );
 
+  	return this;
+
   }
 
   resize( width: number, height: number ) {
@@ -41,7 +43,11 @@ export default class Post {
 
   begin() {
 
-  	this._passes.forEach( ( pass: Pass ) => {
+  	const enabledPasses = this._passes.filter( pass => pass.enabled );
+
+  	enabledPasses.forEach( ( pass: Pass ) => {
+
+  		if ( ! pass.enabled ) return;
 
   		if ( pass instanceof RenderPass ) {
 
@@ -65,7 +71,9 @@ export default class Post {
 
   	this.bolt.disableDepth();
 
-  	this._passes.forEach( ( pass: Pass, index: number ) => {
+  	const enabledPasses = this._passes.filter( pass => pass.enabled );
+
+  	enabledPasses.forEach( ( pass: Pass, index: number ) => {
 
   		if ( pass instanceof RenderPass ) {
 
@@ -73,7 +81,7 @@ export default class Post {
 
   		} else {
 
-  			pass.draw( this._passes[ index - 1 ].fbo, pass.renderToScreen );
+  			pass.draw( enabledPasses[ index - 1 ].fbo, pass.renderToScreen );
 
   		}
 

@@ -85,28 +85,29 @@ export default class extends Base {
     	this.renderPass = new RenderPass( this.bolt, {
     		width: this.width,
     		height: this.height
-    	} );
+    	} ).setEnabled( true );
 
-    	this.fxaa = new FXAAPass( this.bolt, {
-    		width: this.width,
-    		height: this.height
-    	} );
 
     	this.rbgSplit = new RGBSplitPass( this.bolt, {
     		width: this.width,
     		height: this.height
-    	} );
+    	} ).setEnabled( false );
 
     	this.pixelate = new PixelatePass( this.bolt, {
     		width: this.width,
     		height: this.height,
     		xPixels: 30,
     		yPixels: 30
-    	} );
+    	} ).setEnabled( true );
+
+    	this.fxaa = new FXAAPass( this.bolt, {
+    		width: this.width,
+    		height: this.height
+    	} ).setEnabled( true );
 
     	this.post.add( this.renderPass );
     	this.post.add( this.rbgSplit );
-    	//this.post.add( this.pixelate );
+    	this.post.add( this.pixelate );
     	this.post.add( this.fxaa, true );
 
     	const sphereGeometry = new Sphere( { radius: 1, widthSegments: 64, heightSegments: 64 } );
