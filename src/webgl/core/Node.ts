@@ -11,11 +11,11 @@ export default class Node {
   modelMatrix: mat4;
   children: Node[];
   parent: Node | null;
-  arrayBuffer: ArrayBuffer | ArrayBufferInterleaved;
+  arrayBuffer?: ArrayBuffer | ArrayBufferInterleaved;
   transform: Transform;
   autoUpdate: boolean;
 
-  constructor( arrayBuffer: ArrayBuffer | ArrayBufferInterleaved ) {
+  constructor( arrayBuffer?: ArrayBuffer | ArrayBufferInterleaved ) {
 
   	this.localMatrix = mat4.create();
   	this.modelMatrix = mat4.create();
@@ -53,6 +53,8 @@ export default class Node {
   }
 
   setDrawType( value: number ) {
+
+  	if ( ! this.arrayBuffer ) return;
 
   	this.arrayBuffer.setDrawType( value );
 
@@ -101,6 +103,7 @@ export default class Node {
   drawTriangles( shader: Shader, camera: Camera ) {
 
   	this.updateMatrices( shader, camera );
+  	if ( ! this.arrayBuffer ) return;
   	this.arrayBuffer.drawTriangles( shader );
 
   }
@@ -108,6 +111,7 @@ export default class Node {
   drawLines( shader: Shader, camera: Camera ) {
 
   	this.updateMatrices( shader, camera );
+  	if ( ! this.arrayBuffer ) return;
   	this.arrayBuffer.drawLines( shader );
 
   }
@@ -115,6 +119,7 @@ export default class Node {
   drawPoints( shader: Shader, camera: Camera ) {
 
   	this.updateMatrices( shader, camera );
+  	if ( ! this.arrayBuffer ) return;
   	this.arrayBuffer.drawPoints( shader );
 
   }

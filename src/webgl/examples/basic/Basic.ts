@@ -20,7 +20,8 @@ export default class extends Base {
   assetsLoaded!: boolean;
   torusTransform!: Transform;
   torusNode!: Node;
-  bolt: any;
+  bolt: Bolt;
+  root!: Node;
 
   constructor() {
 
@@ -42,7 +43,7 @@ export default class extends Base {
   	this.camera = new CameraArcball(
   		this.width,
   		this.height,
-  		vec3.fromValues( 0, 0, 3 ),
+  		vec3.fromValues( 0, 3, 3 ),
   		vec3.fromValues( 0, 0, 0 ),
   		45,
   		0.01,
@@ -51,6 +52,7 @@ export default class extends Base {
   		2
   	);
 
+  	this.bolt.setCamera( this.camera );
   	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
   	this.bolt.enableDepth();
 
@@ -75,10 +77,16 @@ export default class extends Base {
   	this.shader.setVector3( "objectColor", vec3.fromValues( 1.0, 0.0, 0.0 ) );
   	this.shader.setVector3( "lightColor", vec3.fromValues( 0.95, 1.0, 1.0 ) );
 
+  	// creat empty node
+  	this.root = new Node( );
+  	this.root.transform.scale = vec3.fromValues( 1, 1, 1 );
+
   	// setup nodes
   	this.torusNode = new Node(
   		new ArrayBuffer( geometry ),
   	);
+
+  	this.torusNode.setParent( this.root );
 
   	this.torusNode.transform.position = vec3.fromValues( 0, 0, 0 );
   	this.torusNode.transform.scale = vec3.fromValues( 1, 1, 1 );
@@ -127,7 +135,8 @@ export default class extends Base {
   	this.shader.activate();
   	this.shader.setVector3( "viewPosition", this.camera.position );
   	this.shader.setFloat( "time", elapsed );
-  	this.torusNode.drawTriangles( this.shader, this.camera );
+
+  	this.bolt.draw( this.shader, [ this.root, this.torusNode ] );
 
   }
 

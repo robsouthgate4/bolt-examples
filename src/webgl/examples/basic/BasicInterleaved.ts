@@ -70,7 +70,7 @@ export default class extends Base {
 	torusNode!: Node;
 	cubeMinimal!: ArrayBufferInterleaved;
 	fbo!: FBO;
-  bolt: any;
+  bolt: Bolt;
 
   constructor() {
 

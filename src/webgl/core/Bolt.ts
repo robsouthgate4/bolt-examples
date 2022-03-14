@@ -75,7 +75,12 @@ export default class Bolt {
 
   		if ( drawable instanceof Node ) {
 
-  			drawType = drawable.arrayBuffer.drawType;
+  			if ( drawable.arrayBuffer ) {
+
+  				drawType = drawable.arrayBuffer.drawType;
+
+  			}
+
 
   		} else {
 
@@ -83,19 +88,29 @@ export default class Bolt {
 
   		}
 
-  		if ( drawType === this.gl.POINTS ) {
+  		if ( drawType ) {
 
-  			drawable.drawPoints( shader, this._camera );
+  			if ( drawType === this.gl.POINTS ) {
 
-  		} else if ( drawType === this.gl.LINES ) {
+  				drawable.drawPoints( shader, this._camera );
 
-  			drawable.drawLines( shader, this._camera );
+  			} else if ( drawType === this.gl.LINES ) {
 
-  		} else if ( drawType === this.gl.TRIANGLES ) {
+  				drawable.drawLines( shader, this._camera );
+
+  			} else if ( drawType === this.gl.TRIANGLES ) {
+
+  				drawable.drawTriangles( shader, this._camera );
+
+  			}
+
+  		} else {
 
   			drawable.drawTriangles( shader, this._camera );
 
   		}
+
+
 
   	} );
 
