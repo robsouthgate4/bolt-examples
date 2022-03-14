@@ -1,26 +1,26 @@
 
-import Example from "@/webgl/examples/basic/Basic";
+import Example from "@/webgl/examples/basic/PostProcessing";
 
 export default class Main {
 
-  loading: boolean;
+    loading: boolean;
 
-  constructor() {
+    constructor() {
 
-  	this.loading = false;
+    	this.loading = false;
 
-  }
-  _start() {
+    }
+    _start() {
 
-  	const example = new Example();
-  	example.start();
+    	const example = new Example();
+    	example.start();
 
-  	window.addEventListener( "resize", () => {
+    	window.addEventListener( "resize", () => {
 
-  		example.resize( );
+    		example.resize();
 
-  	} );
+    	} );
 
-  }
+    }
 
 }

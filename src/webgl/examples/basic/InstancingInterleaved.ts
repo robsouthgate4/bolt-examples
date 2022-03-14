@@ -164,21 +164,7 @@ export default class extends Base {
 
   resize() {
 
-  	const displayWidth = this.bolt.gl.canvas.clientWidth;
-  	const displayHeight = this.bolt.gl.canvas.clientHeight;
-
-  	// Check if the this.bolt.gl.canvas is not the same size.
-  	const needResize = this.bolt.gl.canvas.width !== displayWidth ||
-                     this.bolt.gl.canvas.height !== displayHeight;
-
-  	if ( needResize ) {
-
-  		this.bolt.gl.canvas.width = displayWidth;
-  		this.bolt.gl.canvas.height = displayHeight;
-
-  	}
-
-  	this.camera.resize( this.bolt.gl.canvas.width, this.bolt.gl.canvas.height );
+  	this.bolt.resizeFullScreen();
 
   }
 

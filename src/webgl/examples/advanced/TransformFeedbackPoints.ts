@@ -18,236 +18,224 @@ import Bolt from "@/webgl/core/Bolt";
 
 export default class extends Base {
 
-  canvas: HTMLCanvasElement;
-  gl: WebGL2RenderingContext;
-  particleShader!: Shader;
-  lightPosition: vec3;
-  camera: CameraFPS;
-  assetsLoaded!: boolean;
-  cubeTransform!: Transform;
-  torusBuffer!: ArrayBufferInterleaved;
-  simulationShader!: Shader;
-  simulationShaderLocations!: { tfOldPosition: number; tfOldVelocity: number; };
-  particleShaderLocations!: { aPosition: number; };
-  tf1?: WebGLTransformFeedback;
-  tf2?: WebGLTransformFeedback;
-  current!: { updateVAO: VAO; tf: WebGLTransformFeedback; drawVAO: VAO; };
-  next!: { updateVAO: VAO; tf: WebGLTransformFeedback; drawVAO: VAO; };
-  instanceCount = 10000;
-  bolt: Bolt;
+    canvas: HTMLCanvasElement;
+    gl: WebGL2RenderingContext;
+    particleShader!: Shader;
+    lightPosition: vec3;
+    camera: CameraFPS;
+    assetsLoaded!: boolean;
+    cubeTransform!: Transform;
+    torusBuffer!: ArrayBufferInterleaved;
+    simulationShader!: Shader;
+    simulationShaderLocations!: { tfOldPosition: number; tfOldVelocity: number; };
+    particleShaderLocations!: { aPosition: number; };
+    tf1?: WebGLTransformFeedback;
+    tf2?: WebGLTransformFeedback;
+    current!: { updateVAO: VAO; tf: WebGLTransformFeedback; drawVAO: VAO; };
+    next!: { updateVAO: VAO; tf: WebGLTransformFeedback; drawVAO: VAO; };
+    instanceCount = 10000;
+    bolt: Bolt;
 
-  constructor() {
+    constructor() {
 
-  	super();
+    	super();
 
-  	const devicePixelRatio = Math.min( 2, window.devicePixelRatio || 1 );
+    	const devicePixelRatio = Math.min( 2, window.devicePixelRatio || 1 );
 
-  	this.width = window.innerWidth * devicePixelRatio;
-  	this.height = window.innerHeight * devicePixelRatio;
+    	this.width = window.innerWidth * devicePixelRatio;
+    	this.height = window.innerHeight * devicePixelRatio;
 
-  	this.canvas = <HTMLCanvasElement>document.getElementById( "experience" );
-  	this.canvas.width = this.width;
-  	this.canvas.height = this.height;
+    	this.canvas = <HTMLCanvasElement>document.getElementById( "experience" );
+    	this.canvas.width = this.width;
+    	this.canvas.height = this.height;
 
-  	this.bolt = Bolt.getInstance();
-  	this.bolt.init( this.canvas, { antialias: true } );
+    	this.bolt = Bolt.getInstance();
+    	this.bolt.init( this.canvas, { antialias: true } );
 
-  	this.gl = this.bolt.getContext();
+    	this.gl = this.bolt.getContext();
 
-  	this.particleShader = new Shader( particlesVertexInstanced, particlesFragmentInstanced );
+    	this.particleShader = new Shader( particlesVertexInstanced, particlesFragmentInstanced );
 
-  	const transformFeedbackVaryings = [
-  		"tfNewPosition",
-  	];
+    	const transformFeedbackVaryings = [
+    		"tfNewPosition",
+    	];
 
-  	this.simulationShader = new Shader( simulationVertex, simulationFragment,
-  		{
-  			transformFeedbackVaryings
-  		} );
+    	this.simulationShader = new Shader( simulationVertex, simulationFragment,
+    		{
+    			transformFeedbackVaryings
+    		} );
 
-  	this.simulationShaderLocations = {
-  		"tfOldPosition": 0,
-  		"tfOldVelocity": 1
-  	};
+    	this.simulationShaderLocations = {
+    		"tfOldPosition": 0,
+    		"tfOldVelocity": 1
+    	};
 
-  	this.particleShaderLocations = {
-  		"aPosition": 0
-  	};
+    	this.particleShaderLocations = {
+    		"aPosition": 0
+    	};
 
-  	this.lightPosition = vec3.fromValues( 0, 10, 0 );
+    	this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
-  	this.camera = new CameraFPS(
-  		this.width,
-  		this.height,
-  		vec3.fromValues( 0, 0, 20 ),
-  		45,
-  		0.01,
-  		1000,
-  	);
+    	this.camera = new CameraFPS(
+    		this.width,
+    		this.height,
+    		vec3.fromValues( 0, 0, 20 ),
+    		45,
+    		0.01,
+    		1000,
+    	);
 
-  	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-  	this.bolt.enableDepth();
+    	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+    	this.bolt.enableDepth();
 
-  	this.init();
+    	this.init();
 
 
-  }
+    }
 
-  createTransformFeedback( buffer: WebGLBuffer ) {
+    createTransformFeedback( buffer: WebGLBuffer ) {
 
-  	const tf = this.gl.createTransformFeedback();
-  	this.gl.bindTransformFeedback( this.gl.TRANSFORM_FEEDBACK, tf );
-  	this.gl.bindBufferBase( this.gl.TRANSFORM_FEEDBACK_BUFFER, 0, buffer );
-  	return tf;
+    	const tf = this.gl.createTransformFeedback();
+    	this.gl.bindTransformFeedback( this.gl.TRANSFORM_FEEDBACK, tf );
+    	this.gl.bindBufferBase( this.gl.TRANSFORM_FEEDBACK_BUFFER, 0, buffer );
+    	return tf;
 
-  }
+    }
 
-  async init() {
+    async init() {
 
-  	this.assetsLoaded = true;
+    	this.assetsLoaded = true;
 
-  	const positions: number[] = [];
-  	const velocities: number[] = [];
+    	const positions: number[] = [];
+    	const velocities: number[] = [];
 
-  	for ( let i = 0; i < this.instanceCount; i ++ ) {
+    	for ( let i = 0; i < this.instanceCount; i ++ ) {
 
-  		positions.push( ( Math.random() * 2 - 1 ) * 100 );
-  		positions.push( ( Math.random() * 2 - 1 ) * 100 );
-  		positions.push( - Math.random() * 100 );
+    		positions.push( ( Math.random() * 2 - 1 ) * 100 );
+    		positions.push( ( Math.random() * 2 - 1 ) * 100 );
+    		positions.push( - Math.random() * 100 );
 
-  		velocities.push( ( Math.random() * 2 - 1 ) * 1 );
-  		velocities.push( ( Math.random() * 2 - 1 ) * 1 );
-  		velocities.push( - Math.random() * 1 );
+    		velocities.push( ( Math.random() * 2 - 1 ) * 1 );
+    		velocities.push( ( Math.random() * 2 - 1 ) * 1 );
+    		velocities.push( - Math.random() * 1 );
 
-  	}
+    	}
 
-  	const position1VBO = new VBO( positions, this.gl.DYNAMIC_DRAW );
-  	const position2VBO = new VBO( positions, this.gl.DYNAMIC_DRAW );
-  	const velocityBuffer = new VBO( velocities, this.gl.STATIC_DRAW );
+    	const position1VBO = new VBO( positions, this.gl.DYNAMIC_DRAW );
+    	const position2VBO = new VBO( positions, this.gl.DYNAMIC_DRAW );
+    	const velocityBuffer = new VBO( velocities, this.gl.STATIC_DRAW );
 
 
-  	const vaoUpdate1 = new VAO();
-  	vaoUpdate1.bind();
-  	vaoUpdate1.linkAttrib( position1VBO, this.simulationShaderLocations.tfOldPosition, 3, this.gl.FLOAT );
-  	vaoUpdate1.linkAttrib( velocityBuffer, this.simulationShaderLocations.tfOldVelocity, 3, this.gl.FLOAT );
-  	vaoUpdate1.unbind();
+    	const vaoUpdate1 = new VAO();
+    	vaoUpdate1.bind();
+    	vaoUpdate1.linkAttrib( position1VBO, this.simulationShaderLocations.tfOldPosition, 3, this.gl.FLOAT );
+    	vaoUpdate1.linkAttrib( velocityBuffer, this.simulationShaderLocations.tfOldVelocity, 3, this.gl.FLOAT );
+    	vaoUpdate1.unbind();
 
-  	const vaoUpdate2 = new VAO();
-  	vaoUpdate2.bind();
-  	vaoUpdate2.linkAttrib( position2VBO, this.simulationShaderLocations.tfOldPosition, 3, this.gl.FLOAT );
-  	vaoUpdate2.linkAttrib( velocityBuffer, this.simulationShaderLocations.tfOldVelocity, 3, this.gl.FLOAT );
-  	vaoUpdate2.unbind();
+    	const vaoUpdate2 = new VAO();
+    	vaoUpdate2.bind();
+    	vaoUpdate2.linkAttrib( position2VBO, this.simulationShaderLocations.tfOldPosition, 3, this.gl.FLOAT );
+    	vaoUpdate2.linkAttrib( velocityBuffer, this.simulationShaderLocations.tfOldVelocity, 3, this.gl.FLOAT );
+    	vaoUpdate2.unbind();
 
-  	const vaoDraw1 = new VAO();
-  	vaoDraw1.bind();
-  	vaoDraw1.linkAttrib( position1VBO, this.particleShaderLocations.aPosition, 3, this.gl.FLOAT );
-  	vaoDraw1.unbind();
+    	const vaoDraw1 = new VAO();
+    	vaoDraw1.bind();
+    	vaoDraw1.linkAttrib( position1VBO, this.particleShaderLocations.aPosition, 3, this.gl.FLOAT );
+    	vaoDraw1.unbind();
 
-  	const vaoDraw2 = new VAO();
-  	vaoDraw2.bind();
-  	vaoDraw2.linkAttrib( position2VBO, this.particleShaderLocations.aPosition, 3, this.gl.FLOAT );
-  	vaoDraw2.unbind();
+    	const vaoDraw2 = new VAO();
+    	vaoDraw2.bind();
+    	vaoDraw2.linkAttrib( position2VBO, this.particleShaderLocations.aPosition, 3, this.gl.FLOAT );
+    	vaoDraw2.unbind();
 
-  	this.tf1 = <WebGLTransformFeedback> this.createTransformFeedback( position1VBO.buffer );
-  	this.tf2 = <WebGLTransformFeedback> this.createTransformFeedback( position2VBO.buffer );
+    	this.tf1 = <WebGLTransformFeedback> this.createTransformFeedback( position1VBO.buffer );
+    	this.tf2 = <WebGLTransformFeedback> this.createTransformFeedback( position2VBO.buffer );
 
-  	this.gl.bindBuffer( this.gl.ARRAY_BUFFER, null );
-  	this.gl.bindBuffer( this.gl.TRANSFORM_FEEDBACK_BUFFER, null );
+    	this.gl.bindBuffer( this.gl.ARRAY_BUFFER, null );
+    	this.gl.bindBuffer( this.gl.TRANSFORM_FEEDBACK_BUFFER, null );
 
-  	this.current = {
-  		updateVAO: vaoUpdate1,
-  		tf: this.tf2,
-  		drawVAO: vaoDraw2
-  	};
+    	this.current = {
+    		updateVAO: vaoUpdate1,
+    		tf: this.tf2,
+    		drawVAO: vaoDraw2
+    	};
 
-  	this.next = {
-  		updateVAO: vaoUpdate2,
-  		tf: this.tf1,
-  		drawVAO: vaoDraw1
-  	};
+    	this.next = {
+    		updateVAO: vaoUpdate2,
+    		tf: this.tf1,
+    		drawVAO: vaoDraw1
+    	};
 
-  	this.resize();
+    	this.resize();
 
-  }
+    }
 
-  resize() {
+    resize() {
 
-  	const displayWidth = this.bolt.gl.canvas.clientWidth;
-  	const displayHeight = this.bolt.gl.canvas.clientHeight;
+    	this.bolt.resizeFullScreen();
 
-  	// Check if the this.bolt.gl.canvas is not the same size.
-  	const needResize = this.bolt.gl.canvas.width !== displayWidth ||
-                     this.bolt.gl.canvas.height !== displayHeight;
+    	this.camera.resize( this.bolt.gl.canvas.width, this.bolt.gl.canvas.height );
 
-  	if ( needResize ) {
+    }
 
-  		this.bolt.gl.canvas.width = displayWidth;
-  		this.bolt.gl.canvas.height = displayHeight;
+    earlyUpdate( elapsed: number, delta: number ) {
 
-  	}
+    	super.earlyUpdate( elapsed, delta );
 
-  	this.camera.resize( this.bolt.gl.canvas.width, this.bolt.gl.canvas.height );
+    }
 
-  }
+    update( elapsed: number, delta: number ) {
 
-  earlyUpdate( elapsed: number, delta: number ) {
+    	if ( ! this.assetsLoaded ) return;
 
-  	super.earlyUpdate( elapsed, delta );
+    	super.update( elapsed, delta );
 
-  }
+    	this.camera.update( delta );
 
-  update( elapsed: number, delta: number ) {
+    	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+    	this.bolt.clear( 1, 1, 1, 1 );
 
-  	if ( ! this.assetsLoaded ) return;
+    	this.gl.useProgram( this.simulationShader.program );
+    	this.gl.bindVertexArray( this.current.updateVAO.arrayObject );
 
-  	super.update( elapsed, delta );
+    	this.gl.enable( this.gl.RASTERIZER_DISCARD );
 
-  	this.camera.update( delta );
+    	this.gl.bindTransformFeedback( this.gl.TRANSFORM_FEEDBACK, this.current.tf );
+    	this.gl.beginTransformFeedback( this.gl.POINTS );
 
-  	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-  	this.bolt.clear( 1, 1, 1, 1 );
+    	this.gl.drawArrays( this.gl.POINTS, 0, this.instanceCount );
 
-  	this.gl.useProgram( this.simulationShader.program );
-  	this.gl.bindVertexArray( this.current.updateVAO.arrayObject );
+    	this.gl.endTransformFeedback();
+    	this.gl.bindTransformFeedback( this.gl.TRANSFORM_FEEDBACK, null );
 
-  	this.gl.enable( this.gl.RASTERIZER_DISCARD );
+    	this.gl.disable( this.gl.RASTERIZER_DISCARD );
 
-  	this.gl.bindTransformFeedback( this.gl.TRANSFORM_FEEDBACK, this.current.tf );
-  	this.gl.beginTransformFeedback( this.gl.POINTS );
+    	const model = mat4.create();
 
-  	this.gl.drawArrays( this.gl.POINTS, 0, this.instanceCount );
+    	this.particleShader.activate();
+    	this.gl.bindVertexArray( this.current.drawVAO.arrayObject );
 
-  	this.gl.endTransformFeedback();
-  	this.gl.bindTransformFeedback( this.gl.TRANSFORM_FEEDBACK, null );
+    	this.particleShader.setMatrix4( "projection", this.camera.getProjectionMatrix() );
+    	this.particleShader.setMatrix4( "view", this.camera.getViewMatrix() );
+    	this.particleShader.setMatrix4( "model", model );
 
-  	this.gl.disable( this.gl.RASTERIZER_DISCARD );
+    	this.gl.drawArrays( this.gl.POINTS, 0, this.instanceCount );
 
-  	const model = mat4.create();
 
-  	this.particleShader.activate();
-  	this.gl.bindVertexArray( this.current.drawVAO.arrayObject );
+    	{
 
-  	this.particleShader.setMatrix4( "projection", this.camera.getProjectionMatrix() );
-  	this.particleShader.setMatrix4( "view", this.camera.getViewMatrix() );
-  	this.particleShader.setMatrix4( "model", model );
+    		const temp = this.current;
+    		this.current = this.next;
+    		this.next = temp;
 
-  	this.gl.drawArrays( this.gl.POINTS, 0, this.instanceCount );
+    	}
 
+    }
 
-  	{
+    lateUpdate( elapsed: number, delta: number ) {
 
-  		const temp = this.current;
-  		this.current = this.next;
-  		this.next = temp;
+    	super.lateUpdate( elapsed, delta );
 
-  	}
-
-  }
-
-  lateUpdate( elapsed: number, delta: number ) {
-
-  	super.lateUpdate( elapsed, delta );
-
-  }
+    }
 
 }

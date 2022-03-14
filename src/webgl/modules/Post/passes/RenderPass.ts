@@ -6,24 +6,24 @@ import Bolt from "@/webgl/core/Bolt";
 
 export default class RenderPass extends Pass {
 
-  shader!: Shader;
+    shader!: Shader;
 
-  constructor( bolt: Bolt, {
-  	width = 256,
-  	height = 256
-  } ) {
+    constructor( bolt: Bolt, {
+    	width = 256,
+    	height = 256
+    } ) {
 
-  	super( bolt, {
-  		width,
-  		height
-  	} );
+    	super( bolt, {
+    		width,
+    		height
+    	} );
 
-  }
+    }
 
-  draw( ) {
+    draw() {
 
-  	return;
+    	return;
 
-  }
+    }
 
 }

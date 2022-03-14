@@ -4,50 +4,50 @@ import Bolt from "./Bolt";
 
 export default class VAO {
 
-  arrayObject: WebGLVertexArrayObject;
-  gl: WebGL2RenderingContext;
+    arrayObject: WebGLVertexArrayObject;
+    gl: WebGL2RenderingContext;
 
-  constructor( ) {
+    constructor() {
 
-  	this.gl = Bolt.getInstance().gl;
-  	this.arrayObject = <WebGLVertexArrayObject>( this.gl.createVertexArray() );
+    	this.gl = Bolt.getInstance().gl;
+    	this.arrayObject = <WebGLVertexArrayObject>( this.gl.createVertexArray() );
 
-  }
+    }
 
-  linkVBO( vbo: VBO, layoutID: number ) {
+    linkVBO( vbo: VBO, layoutID: number ) {
 
-  	vbo.bind();
-  	this.gl.enableVertexAttribArray( layoutID );
-  	this.gl.vertexAttribPointer( layoutID, 3, this.gl.FLOAT, false, 0, 0 );
-  	vbo.unbind();
+    	vbo.bind();
+    	this.gl.enableVertexAttribArray( layoutID );
+    	this.gl.vertexAttribPointer( layoutID, 3, this.gl.FLOAT, false, 0, 0 );
+    	vbo.unbind();
 
-  }
+    }
 
-  linkAttrib( vbo: VBO, layoutID: number, numComponents: number, type: number, stride = 0, offset = 0 ) {
+    linkAttrib( vbo: VBO, layoutID: number, numComponents: number, type: number, stride = 0, offset = 0 ) {
 
-  	vbo.bind();
-  	this.gl.enableVertexAttribArray( layoutID );
-  	this.gl.vertexAttribPointer( layoutID, numComponents, type, false, stride, offset );
-  	vbo.unbind();
+    	vbo.bind();
+    	this.gl.enableVertexAttribArray( layoutID );
+    	this.gl.vertexAttribPointer( layoutID, numComponents, type, false, stride, offset );
+    	vbo.unbind();
 
-  }
+    }
 
-  bind() {
+    bind() {
 
-  	this.gl.bindVertexArray( this.arrayObject );
+    	this.gl.bindVertexArray( this.arrayObject );
 
-  }
+    }
 
-  unbind() {
+    unbind() {
 
-  	this.gl.bindVertexArray( null );
+    	this.gl.bindVertexArray( null );
 
-  }
+    }
 
-  delete() {
+    delete() {
 
-  	this.gl.deleteVertexArray( this.arrayObject );
+    	this.gl.deleteVertexArray( this.arrayObject );
 
-  }
+    }
 
 }

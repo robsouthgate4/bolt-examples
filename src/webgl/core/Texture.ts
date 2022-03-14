@@ -2,121 +2,121 @@ import Shader from "./Shader";
 
 export default class Texture {
 
-  imagePath: string;
-  pixelType: number;
-  format: number;
-  gl: WebGL2RenderingContext;
-  texture: WebGLTexture;
-  wrapT!: number;
-  wrapS!: number;
+    imagePath: string;
+    pixelType: number;
+    format: number;
+    gl: WebGL2RenderingContext;
+    texture: WebGLTexture;
+    wrapT!: number;
+    wrapS!: number;
 
-  constructor(
-  	gl: WebGL2RenderingContext,
-  	{
-  		imagePath = "",
-  		wrapS = gl.CLAMP_TO_EDGE,
-  		wrapT = gl.CLAMP_TO_EDGE,
-  		width = 256,
-  		height = 256
-  	} = {}
-  ) {
+    constructor(
+    	gl: WebGL2RenderingContext,
+    	{
+    		imagePath = "",
+    		wrapS = gl.CLAMP_TO_EDGE,
+    		wrapT = gl.CLAMP_TO_EDGE,
+    		width = 256,
+    		height = 256
+    	} = {}
+    ) {
 
-  	this.gl = gl;
-  	this.format = this.gl.RGBA;
-  	this.pixelType = this.gl.UNSIGNED_BYTE;
-  	this.imagePath = imagePath;
+    	this.gl = gl;
+    	this.format = this.gl.RGBA;
+    	this.pixelType = this.gl.UNSIGNED_BYTE;
+    	this.imagePath = imagePath;
 
-  	this.wrapT = wrapT || this.gl.CLAMP_TO_EDGE;
-  	this.wrapS = wrapS || this.gl.CLAMP_TO_EDGE;
+    	this.wrapT = wrapT || this.gl.CLAMP_TO_EDGE;
+    	this.wrapS = wrapS || this.gl.CLAMP_TO_EDGE;
 
-  	this.texture = <WebGLTexture>( this.gl.createTexture() );
+    	this.texture = <WebGLTexture>( this.gl.createTexture() );
 
-  	this.gl.bindTexture( this.gl.TEXTURE_2D, this.texture );
-  	this.gl.texImage2D( this.gl.TEXTURE_2D, 0, this.format, width, height, 0, this.format, this.gl.UNSIGNED_BYTE, null );
-  	this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST );
-  	this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR );
+    	this.gl.bindTexture( this.gl.TEXTURE_2D, this.texture );
+    	this.gl.texImage2D( this.gl.TEXTURE_2D, 0, this.format, width, height, 0, this.format, this.gl.UNSIGNED_BYTE, null );
+    	this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST );
+    	this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR );
 
-  	this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.wrapS );
-  	this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.wrapT );
+    	this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.wrapS );
+    	this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.wrapT );
 
-  }
+    }
 
-  textureUnit( shader: Shader, uniformName: string, unit: number ) {
-
-
-  	shader.activate();
-  	const textureUnit = this.gl.getUniformLocation( shader.program, uniformName );
-  	this.gl.activeTexture( this.gl.TEXTURE0 + unit );
-  	this.bind();
-  	this.gl.uniform1i( textureUnit, unit );
+    textureUnit( shader: Shader, uniformName: string, unit: number ) {
 
 
-  }
+    	shader.activate();
+    	const textureUnit = this.gl.getUniformLocation( shader.program, uniformName );
+    	this.gl.activeTexture( this.gl.TEXTURE0 + unit );
+    	this.bind();
+    	this.gl.uniform1i( textureUnit, unit );
 
-  setWrapS( value: number ) {
 
-  	this.bind();
-  	this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, value );
-  	this.unbind();
+    }
 
-  }
+    setWrapS( value: number ) {
 
-  setWrapT( value: number ) {
+    	this.bind();
+    	this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, value );
+    	this.unbind();
 
-  	this.bind();
-  	this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, value );
-  	this.unbind();
+    }
 
-  }
+    setWrapT( value: number ) {
 
-  bind() {
+    	this.bind();
+    	this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, value );
+    	this.unbind();
 
-  	this.gl.bindTexture( this.gl.TEXTURE_2D, this.texture );
+    }
 
-  }
+    bind() {
 
-  unbind() {
+    	this.gl.bindTexture( this.gl.TEXTURE_2D, this.texture );
 
-  	this.gl.bindTexture( this.gl.TEXTURE_2D, null );
+    }
 
-  }
+    unbind() {
 
-  delete() {
+    	this.gl.bindTexture( this.gl.TEXTURE_2D, null );
 
-  	this.gl.deleteTexture( this.texture );
+    }
 
-  }
+    delete() {
 
-  isPowerOf2( value: number ) {
+    	this.gl.deleteTexture( this.texture );
 
-  	return ( value & ( value - 1 ) ) == 0;
+    }
 
-  }
+    isPowerOf2( value: number ) {
 
-  loadImage() {
+    	return ( value & ( value - 1 ) ) == 0;
 
-  	const image = new Image();
-  	image.src = this.imagePath;
+    }
 
-  	image.addEventListener( "load", () => {
+    loadImage() {
 
-  		this.gl.bindTexture( this.gl.TEXTURE_2D, this.texture );
-  		this.gl.texImage2D( this.gl.TEXTURE_2D, 0, this.format, this.format, this.pixelType, image );
+    	const image = new Image();
+    	image.src = this.imagePath;
 
-  		this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.wrapS );
-  		this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.wrapT );
-  		this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR );
+    	image.addEventListener( "load", () => {
 
-  		if ( this.isPowerOf2( image.width ) && this.isPowerOf2( image.height ) ) {
+    		this.gl.bindTexture( this.gl.TEXTURE_2D, this.texture );
+    		this.gl.texImage2D( this.gl.TEXTURE_2D, 0, this.format, this.format, this.pixelType, image );
 
-  			this.gl.generateMipmap( this.gl.TEXTURE_2D );
+    		this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.wrapS );
+    		this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.wrapT );
+    		this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR );
 
-  		}
+    		if ( this.isPowerOf2( image.width ) && this.isPowerOf2( image.height ) ) {
 
-  		this.gl.bindTexture( this.gl.TEXTURE_2D, null );
+    			this.gl.generateMipmap( this.gl.TEXTURE_2D );
 
-  	} );
+    		}
 
-  }
+    		this.gl.bindTexture( this.gl.TEXTURE_2D, null );
+
+    	} );
+
+    }
 
 }

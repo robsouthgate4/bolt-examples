@@ -16,137 +16,123 @@ import Bolt from "@/webgl/core/Bolt";
 
 export default class extends Base {
 
-  canvas: HTMLCanvasElement;
-  shader: Shader;
-  lightPosition: vec3;
-  camera: CameraArcball;
-  assetsLoaded?: boolean;
-  torusTransform!: Transform;
-  sphereNode!: Node;
-  cubeNode!: Node;
-  planeNode!: Node;
-  bolt: Bolt;
+    canvas: HTMLCanvasElement;
+    shader: Shader;
+    lightPosition: vec3;
+    camera: CameraArcball;
+    assetsLoaded?: boolean;
+    torusTransform!: Transform;
+    sphereNode!: Node;
+    cubeNode!: Node;
+    planeNode!: Node;
+    bolt: Bolt;
 
-  constructor() {
+    constructor() {
 
-  	super();
+    	super();
 
-  	this.width = window.innerWidth;
-  	this.height = window.innerHeight;
+    	this.width = window.innerWidth;
+    	this.height = window.innerHeight;
 
-  	this.canvas = <HTMLCanvasElement>document.getElementById( "experience" );
-  	this.canvas.width = this.width;
-  	this.canvas.height = this.height;
+    	this.canvas = <HTMLCanvasElement>document.getElementById( "experience" );
+    	this.canvas.width = this.width;
+    	this.canvas.height = this.height;
 
-  	this.bolt = Bolt.getInstance();
-  	this.bolt.init( this.canvas, { antialias: true } );
+    	this.bolt = Bolt.getInstance();
+    	this.bolt.init( this.canvas, { antialias: true } );
 
-  	this.shader = new Shader( defaultVertex, defaultFragment );
-  	this.lightPosition = vec3.fromValues( 0, 10, 0 );
+    	this.shader = new Shader( defaultVertex, defaultFragment );
+    	this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
-  	this.camera = new CameraArcball(
-  		this.width,
-  		this.height,
-  		vec3.fromValues( 0, 2, 6 ),
-  		vec3.fromValues( 0, 0, 0 ),
-  		45,
-  		0.01,
-  		1000,
-  		0.2,
-  		2
-  	);
+    	this.camera = new CameraArcball(
+    		this.width,
+    		this.height,
+    		vec3.fromValues( 0, 2, 6 ),
+    		vec3.fromValues( 0, 0, 0 ),
+    		45,
+    		0.01,
+    		1000,
+    		0.2,
+    		2
+    	);
 
-  	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-  	this.bolt.enableDepth();
+    	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+    	this.bolt.enableDepth();
 
-  	this.init();
-
-
-  }
-
-  async init() {
-
-  	const sphereGeometry = new Sphere( { radius: 1, widthSegments: 32, heightSegments: 32 } );
-  	const cubeGeometry = new Cube( { widthSegments: 1, heightSegments: 1 } );
-  	const planeGeometry = new Plane( { widthSegments: 10, heightSegments: 10 } );
-
-  	this.sphereNode = new Node(
-  		new ArrayBuffer( sphereGeometry ),
-  	);
-
-  	this.cubeNode = new Node(
-  		new ArrayBuffer( cubeGeometry ),
-  	);
-
-  	this.cubeNode.autoUpdate = false;
-  	this.cubeNode.transform.position[ 0 ] = 1.5;
-  	this.cubeNode.updateModelMatrix();
-
-  	this.planeNode = new Node(
-  		new ArrayBuffer( planeGeometry ),
-  	);
-
-  	this.planeNode.transform.position[ 0 ] = - 1.5;
-
-  	this.resize();
-
-  }
-
-  resize() {
-
-  	const displayWidth = this.bolt.gl.canvas.clientWidth;
-  	const displayHeight = this.bolt.gl.canvas.clientHeight;
-
-  	// Check if the this.bolt.gl.canvas is not the same size.
-  	const needResize = this.bolt.gl.canvas.width !== displayWidth ||
-                     this.bolt.gl.canvas.height !== displayHeight;
-
-  	if ( needResize ) {
-
-  		this.bolt.gl.canvas.width = displayWidth;
-  		this.bolt.gl.canvas.height = displayHeight;
-
-  	}
-
-  	this.camera.resize( this.bolt.gl.canvas.width, this.bolt.gl.canvas.height );
-
-  }
-
-  earlyUpdate( elapsed: number, delta: number ) {
-
-  	super.earlyUpdate( elapsed, delta );
-
-  }
-
-  update( elapsed: number, delta: number ) {
-
-  	super.update( elapsed, delta );
-
-  	this.camera.update();
-
-  	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-  	this.bolt.clear( 1, 1, 1, 1 );
-
-  	this.shader.activate();
-  	this.shader.setVector3( "viewPosition", this.camera.position );
-  	this.shader.setFloat( "time", elapsed );
-
-  	this.cubeNode.transform.rotation[ 1 ] += 0.01;
-  	this.cubeNode.updateModelMatrix();
-
-  	this.sphereNode.transform.rotation[ 1 ] = this.planeNode.transform.rotation[ 1 ] += 0.01;
-
-  	this.sphereNode.drawTriangles( this.shader, this.camera );
-  	this.cubeNode.drawTriangles( this.shader, this.camera );
-  	this.planeNode.drawTriangles( this.shader, this.camera );
+    	this.init();
 
 
-  }
+    }
 
-  lateUpdate( elapsed: number, delta: number ) {
+    async init() {
 
-  	super.lateUpdate( elapsed, delta );
+    	const sphereGeometry = new Sphere( { radius: 1, widthSegments: 32, heightSegments: 32 } );
+    	const cubeGeometry = new Cube( { widthSegments: 1, heightSegments: 1 } );
+    	const planeGeometry = new Plane( { widthSegments: 10, heightSegments: 10 } );
 
-  }
+    	this.sphereNode = new Node(
+    		new ArrayBuffer( sphereGeometry ),
+    	);
+
+    	this.cubeNode = new Node(
+    		new ArrayBuffer( cubeGeometry ),
+    	);
+
+    	this.cubeNode.autoUpdate = false;
+    	this.cubeNode.transform.position[ 0 ] = 1.5;
+    	this.cubeNode.updateModelMatrix();
+
+    	this.planeNode = new Node(
+    		new ArrayBuffer( planeGeometry ),
+    	);
+
+    	this.planeNode.transform.position[ 0 ] = - 1.5;
+
+    	this.resize();
+
+    }
+
+    resize() {
+
+    	this.bolt.resizeFullScreen();
+
+    }
+
+    earlyUpdate( elapsed: number, delta: number ) {
+
+    	super.earlyUpdate( elapsed, delta );
+
+    }
+
+    update( elapsed: number, delta: number ) {
+
+    	super.update( elapsed, delta );
+
+    	this.camera.update();
+
+    	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+    	this.bolt.clear( 1, 1, 1, 1 );
+
+    	this.shader.activate();
+    	this.shader.setVector3( "viewPosition", this.camera.position );
+    	this.shader.setFloat( "time", elapsed );
+
+    	this.cubeNode.transform.rotation[ 1 ] += 0.01;
+    	this.cubeNode.updateModelMatrix();
+
+    	this.sphereNode.transform.rotation[ 1 ] = this.planeNode.transform.rotation[ 1 ] += 0.01;
+
+    	this.sphereNode.drawTriangles( this.shader, this.camera );
+    	this.cubeNode.drawTriangles( this.shader, this.camera );
+    	this.planeNode.drawTriangles( this.shader, this.camera );
+
+
+    }
+
+    lateUpdate( elapsed: number, delta: number ) {
+
+    	super.lateUpdate( elapsed, delta );
+
+    }
 
 }

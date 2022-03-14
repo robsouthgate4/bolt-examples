@@ -9,47 +9,47 @@ import Bolt from "@/webgl/core/Bolt";
 
 export default class FXAAPass extends Pass {
 
-  shader!: Shader;
+    shader!: Shader;
 
-  constructor( bolt: Bolt, {
-  	width = 256,
-  	height = 256
-  } ) {
+    constructor( bolt: Bolt, {
+    	width = 256,
+    	height = 256
+    } ) {
 
-  	super( bolt, {
-  		width,
-  		height
-  	} );
+    	super( bolt, {
+    		width,
+    		height
+    	} );
 
-  	this.shader = new Shader( vertexShader, fragmentShader );
-  	this.shader.activate();
-  	this.shader.setVector2( "resolution", vec2.fromValues( width, height ) );
+    	this.shader = new Shader( vertexShader, fragmentShader );
+    	this.shader.activate();
+    	this.shader.setVector2( "resolution", vec2.fromValues( width, height ) );
 
-  }
+    }
 
-  draw( readFBO?: FBO, renderToScreen?: boolean ) {
+    draw( readFBO?: FBO, renderToScreen?: boolean ) {
 
-  	if ( ! renderToScreen ) {
+    	if ( ! renderToScreen ) {
 
-  		this.fbo.bind();
+    		this.fbo.bind();
 
-  	}
+    	}
 
-  	if ( ! readFBO ) {
+    	if ( ! readFBO ) {
 
-  		this.shader.setTexture( "map", this.fbo.targetTexture );
+    		this.shader.setTexture( "map", this.fbo.targetTexture );
 
-  	} else {
+    	} else {
 
-  		this.shader.setTexture( "map", readFBO.targetTexture );
+    		this.shader.setTexture( "map", readFBO.targetTexture );
 
-  	}
+    	}
 
-  	this.fullScreenTriangle.drawTriangles( this.shader );
+    	this.fullScreenTriangle.drawTriangles( this.shader );
 
-  	this.fbo.unbind();
+    	this.fbo.unbind();
 
 
-  }
+    }
 
 }

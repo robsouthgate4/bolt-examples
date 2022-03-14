@@ -7,121 +7,121 @@ import Transform from "./Transform";
 
 export default class Node {
 
-  localMatrix: mat4;
-  modelMatrix: mat4;
-  children: Node[];
-  parent: Node | null;
-  arrayBuffer?: ArrayBuffer | ArrayBufferInterleaved;
-  transform: Transform;
-  autoUpdate: boolean;
+    localMatrix: mat4;
+    modelMatrix: mat4;
+    children: Node[];
+    parent: Node | null;
+    arrayBuffer?: ArrayBuffer | ArrayBufferInterleaved;
+    transform: Transform;
+    autoUpdate: boolean;
 
-  constructor( arrayBuffer?: ArrayBuffer | ArrayBufferInterleaved ) {
+    constructor( arrayBuffer?: ArrayBuffer | ArrayBufferInterleaved ) {
 
-  	this.localMatrix = mat4.create();
-  	this.modelMatrix = mat4.create();
-  	this.children = [];
-  	this.parent = null;
-  	this.arrayBuffer = arrayBuffer;
-  	this.transform = new Transform();
+    	this.localMatrix = mat4.create();
+    	this.modelMatrix = mat4.create();
+    	this.children = [];
+    	this.parent = null;
+    	this.arrayBuffer = arrayBuffer;
+    	this.transform = new Transform();
 
-  	this.autoUpdate = true;
+    	this.autoUpdate = true;
 
-  }
+    }
 
-  setParent( parent: Node ) {
+    setParent( parent: Node ) {
 
-  	if ( this.parent ) {
+    	if ( this.parent ) {
 
-  		const index = this.parent.children.indexOf( this );
+    		const index = this.parent.children.indexOf( this );
 
-  		if ( index >= 0 ) {
+    		if ( index >= 0 ) {
 
-  			this.parent.children.slice( index, 1 );
+    			this.parent.children.slice( index, 1 );
 
-  		}
+    		}
 
-  	}
+    	}
 
-  	if ( parent ) {
+    	if ( parent ) {
 
-  		parent.children.push( this );
+    		parent.children.push( this );
 
-  	}
+    	}
 
-  	this.parent = parent;
+    	this.parent = parent;
 
-  }
+    }
 
-  setDrawType( value: number ) {
+    setDrawType( value: number ) {
 
-  	if ( ! this.arrayBuffer ) return;
+    	if ( ! this.arrayBuffer ) return;
 
-  	this.arrayBuffer.setDrawType( value );
+    	this.arrayBuffer.setDrawType( value );
 
-  }
+    }
 
-  updateModelMatrix( parentModelMatrix?: mat4 ) {
+    updateModelMatrix( parentModelMatrix?: mat4 ) {
 
-  	const transform = this.transform;
-  	if ( transform ) {
+    	const transform = this.transform;
+    	if ( transform ) {
 
-  		transform.getMatrix( this.localMatrix );
+    		transform.getMatrix( this.localMatrix );
 
-  	}
+    	}
 
-  	if ( parentModelMatrix ) {
+    	if ( parentModelMatrix ) {
 
-  		mat4.multiply( this.modelMatrix, parentModelMatrix, this.localMatrix );
+    		mat4.multiply( this.modelMatrix, parentModelMatrix, this.localMatrix );
 
-  	} else {
+    	} else {
 
-  		mat4.copy( this.modelMatrix, this.localMatrix );
+    		mat4.copy( this.modelMatrix, this.localMatrix );
 
-  	}
+    	}
 
-  	const modelMatrix = this.modelMatrix;
+    	const modelMatrix = this.modelMatrix;
 
-  	this.children.forEach( child => child.updateModelMatrix( modelMatrix ) );
+    	this.children.forEach( child => child.updateModelMatrix( modelMatrix ) );
 
-  }
+    }
 
-  updateMatrices( shader: Shader, camera: Camera ) {
+    updateMatrices( shader: Shader, camera: Camera ) {
 
-  	shader.activate();
-  	shader.setMatrix4( "view", camera.getViewMatrix() );
-  	shader.setMatrix4( "projection", camera.getProjectionMatrix() );
-  	shader.setMatrix4( "model", this.modelMatrix );
+    	shader.activate();
+    	shader.setMatrix4( "view", camera.getViewMatrix() );
+    	shader.setMatrix4( "projection", camera.getProjectionMatrix() );
+    	shader.setMatrix4( "model", this.modelMatrix );
 
-  	if ( this.autoUpdate ) {
+    	if ( this.autoUpdate ) {
 
-  		this.updateModelMatrix();
+    		this.updateModelMatrix();
 
-  	}
+    	}
 
-  }
+    }
 
-  drawTriangles( shader: Shader, camera: Camera ) {
+    drawTriangles( shader: Shader, camera: Camera ) {
 
-  	this.updateMatrices( shader, camera );
-  	if ( ! this.arrayBuffer ) return;
-  	this.arrayBuffer.drawTriangles( shader );
+    	this.updateMatrices( shader, camera );
+    	if ( ! this.arrayBuffer ) return;
+    	this.arrayBuffer.drawTriangles( shader );
 
-  }
+    }
 
-  drawLines( shader: Shader, camera: Camera ) {
+    drawLines( shader: Shader, camera: Camera ) {
 
-  	this.updateMatrices( shader, camera );
-  	if ( ! this.arrayBuffer ) return;
-  	this.arrayBuffer.drawLines( shader );
+    	this.updateMatrices( shader, camera );
+    	if ( ! this.arrayBuffer ) return;
+    	this.arrayBuffer.drawLines( shader );
 
-  }
+    }
 
-  drawPoints( shader: Shader, camera: Camera ) {
+    drawPoints( shader: Shader, camera: Camera ) {
 
-  	this.updateMatrices( shader, camera );
-  	if ( ! this.arrayBuffer ) return;
-  	this.arrayBuffer.drawPoints( shader );
+    	this.updateMatrices( shader, camera );
+    	if ( ! this.arrayBuffer ) return;
+    	this.arrayBuffer.drawPoints( shader );
 
-  }
+    }
 
 }

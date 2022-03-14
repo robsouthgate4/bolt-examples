@@ -13,137 +13,123 @@ import Bolt from "@/webgl/core/Bolt";
 
 export default class extends Base {
 
-  canvas: HTMLCanvasElement;
-  shader: Shader;
-  lightPosition: vec3;
-  camera: CameraArcball;
-  assetsLoaded!: boolean;
-  torusTransform!: Transform;
-  torusNode!: Node;
-  bolt: Bolt;
-  root!: Node;
+    canvas: HTMLCanvasElement;
+    shader: Shader;
+    lightPosition: vec3;
+    camera: CameraArcball;
+    assetsLoaded!: boolean;
+    torusTransform!: Transform;
+    torusNode!: Node;
+    bolt: Bolt;
+    root!: Node;
 
-  constructor() {
+    constructor() {
 
-  	super();
+    	super();
 
-  	this.width = window.innerWidth;
-  	this.height = window.innerHeight;
+    	this.width = window.innerWidth;
+    	this.height = window.innerHeight;
 
-  	this.canvas = <HTMLCanvasElement>document.getElementById( "experience" );
-  	this.canvas.width = this.width;
-  	this.canvas.height = this.height;
+    	this.canvas = <HTMLCanvasElement>document.getElementById( "experience" );
+    	this.canvas.width = this.width;
+    	this.canvas.height = this.height;
 
-  	this.bolt = Bolt.getInstance();
-  	this.bolt.init( this.canvas, { antialias: true } );
+    	this.bolt = Bolt.getInstance();
+    	this.bolt.init( this.canvas, { antialias: true } );
 
-  	this.shader = new Shader( defaultVertex, defaultFragment );
-  	this.lightPosition = vec3.fromValues( 0, 10, 0 );
+    	this.shader = new Shader( defaultVertex, defaultFragment );
+    	this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
-  	this.camera = new CameraArcball(
-  		this.width,
-  		this.height,
-  		vec3.fromValues( 0, 3, 3 ),
-  		vec3.fromValues( 0, 0, 0 ),
-  		45,
-  		0.01,
-  		1000,
-  		0.2,
-  		2
-  	);
+    	this.camera = new CameraArcball(
+    		this.width,
+    		this.height,
+    		vec3.fromValues( 0, 3, 3 ),
+    		vec3.fromValues( 0, 0, 0 ),
+    		45,
+    		0.01,
+    		1000,
+    		0.2,
+    		2
+    	);
 
-  	this.bolt.setCamera( this.camera );
-  	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-  	this.bolt.enableDepth();
+    	this.bolt.setCamera( this.camera );
+    	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+    	this.bolt.enableDepth();
 
-  	this.init();
-
-
-  }
-
-  async init() {
+    	this.init();
 
 
-  	const gltfLoader = new GLTFParser( "/static/models/gltf/torus.gltf" );
+    }
 
-  	const geometry = await gltfLoader.loadGLTF();
+    async init() {
 
-  	if ( ! geometry ) return;
 
-  	this.assetsLoaded = true;
+    	const gltfLoader = new GLTFParser( "/static/models/gltf/torus.gltf" );
 
-  	// set shader uniforms
-  	this.shader.activate();
-  	this.shader.setVector3( "objectColor", vec3.fromValues( 1.0, 0.0, 0.0 ) );
-  	this.shader.setVector3( "lightColor", vec3.fromValues( 0.95, 1.0, 1.0 ) );
+    	const geometry = await gltfLoader.loadGLTF();
 
-  	// creat empty node
-  	this.root = new Node( );
-  	this.root.transform.scale = vec3.fromValues( 1, 1, 1 );
+    	if ( ! geometry ) return;
 
-  	// setup nodes
-  	this.torusNode = new Node(
-  		new ArrayBuffer( geometry ),
-  	);
+    	this.assetsLoaded = true;
 
-  	this.torusNode.setParent( this.root );
+    	// set shader uniforms
+    	this.shader.activate();
+    	this.shader.setVector3( "objectColor", vec3.fromValues( 1.0, 0.0, 0.0 ) );
+    	this.shader.setVector3( "lightColor", vec3.fromValues( 0.95, 1.0, 1.0 ) );
 
-  	this.torusNode.transform.position = vec3.fromValues( 0, 0, 0 );
-  	this.torusNode.transform.scale = vec3.fromValues( 1, 1, 1 );
+    	// creat empty node
+    	this.root = new Node();
+    	this.root.transform.scale = vec3.fromValues( 1, 1, 1 );
 
-  	this.resize();
+    	// setup nodes
+    	this.torusNode = new Node(
+    		new ArrayBuffer( geometry ),
+    	);
 
-  }
+    	this.torusNode.setParent( this.root );
 
-  resize() {
+    	this.torusNode.transform.position = vec3.fromValues( 0, 0, 0 );
+    	this.torusNode.transform.scale = vec3.fromValues( 1, 1, 1 );
 
-  	const displayWidth = this.bolt.gl.canvas.clientWidth;
-  	const displayHeight = this.bolt.gl.canvas.clientHeight;
+    	this.resize();
 
-  	// Check if the this.bolt.gl.canvas is not the same size.
-  	const needResize = this.bolt.gl.canvas.width !== displayWidth ||
-                     this.bolt.gl.canvas.height !== displayHeight;
+    }
 
-  	if ( needResize ) {
+    resize() {
 
-  		this.bolt.gl.canvas.width = displayWidth;
-  		this.bolt.gl.canvas.height = displayHeight;
+    	this.bolt.resizeFullScreen();
 
-  	}
+    }
 
-  	this.camera.resize( this.bolt.gl.canvas.width, this.bolt.gl.canvas.height );
+    earlyUpdate( elapsed: number, delta: number ) {
 
-  }
+    	super.earlyUpdate( elapsed, delta );
 
-  earlyUpdate( elapsed: number, delta: number ) {
+    }
 
-  	super.earlyUpdate( elapsed, delta );
+    update( elapsed: number, delta: number ) {
 
-  }
+    	if ( ! this.assetsLoaded ) return;
 
-  update( elapsed: number, delta: number ) {
+    	super.update( elapsed, delta );
 
-  	if ( ! this.assetsLoaded ) return;
+    	this.camera.update();
 
-  	super.update( elapsed, delta );
+    	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+    	this.bolt.clear( 1, 1, 1, 1 );
 
-  	this.camera.update();
+    	this.shader.activate();
+    	this.shader.setVector3( "viewPosition", this.camera.position );
+    	this.shader.setFloat( "time", elapsed );
 
-  	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-  	this.bolt.clear( 1, 1, 1, 1 );
+    	this.bolt.draw( this.shader, [ this.root, this.torusNode ] );
 
-  	this.shader.activate();
-  	this.shader.setVector3( "viewPosition", this.camera.position );
-  	this.shader.setFloat( "time", elapsed );
+    }
 
-  	this.bolt.draw( this.shader, [ this.root, this.torusNode ] );
+    lateUpdate( elapsed: number, delta: number ) {
 
-  }
+    	super.lateUpdate( elapsed, delta );
 
-  lateUpdate( elapsed: number, delta: number ) {
-
-  	super.lateUpdate( elapsed, delta );
-
-  }
+    }
 
 }
