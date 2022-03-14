@@ -17,7 +17,8 @@ export default class Texture {
     		wrapS = gl.CLAMP_TO_EDGE,
     		wrapT = gl.CLAMP_TO_EDGE,
     		width = 256,
-    		height = 256
+    		height = 256,
+    		depth = false
     	} = {}
     ) {
 
@@ -30,14 +31,39 @@ export default class Texture {
     	this.wrapS = wrapS || this.gl.CLAMP_TO_EDGE;
 
     	this.texture = <WebGLTexture>( this.gl.createTexture() );
-
     	this.gl.bindTexture( this.gl.TEXTURE_2D, this.texture );
-    	this.gl.texImage2D( this.gl.TEXTURE_2D, 0, this.format, width, height, 0, this.format, this.gl.UNSIGNED_BYTE, null );
-    	this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST );
-    	this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR );
 
-    	this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.wrapS );
-    	this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.wrapT );
+    	if ( ! depth ) {
+
+    		this.gl.texImage2D( this.gl.TEXTURE_2D, 0, this.format, width, height, 0, this.format, this.gl.UNSIGNED_BYTE, null );
+    		this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST );
+    		this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR );
+
+    		this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.wrapS );
+    		this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.wrapT );
+
+    	} else {
+
+    		const level = 0;
+    		const internalFormat = this.gl.DEPTH_COMPONENT24;
+    		const border = 0;
+    		const format = this.gl.DEPTH_COMPONENT;
+    		const type = this.gl.UNSIGNED_INT;
+    		const data = null;
+
+    		this.gl.texImage2D( this.gl.TEXTURE_2D, level, internalFormat,
+    			width, height, border,
+    			format, type, data );
+
+    		this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST );
+    		this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST );
+    		this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.REPEAT );
+    		this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.REPEAT );
+
+    	}
+
+
+
 
     }
 
