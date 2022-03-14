@@ -25,20 +25,6 @@ export default class RGBSplitPass extends Pass {
     	this.shader.activate();
     	this.shader.setTexture( "map", this.fbo.targetTexture );
 
-
-    	const triangleVertices = [
-    		- 1, - 1, 0, - 1, 4, 0, 4, - 1, 0
-    	];
-
-    	const triangleIndices = [
-    		2, 1, 0
-    	];
-
-    	this.fullScreenTriangle = new ArrayBuffer( {
-    		positions: triangleVertices,
-    		indices: triangleIndices
-    	} );
-
     }
 
     draw( readFBO?: FBO, renderToScreen?: boolean ) {

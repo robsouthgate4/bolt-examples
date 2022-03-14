@@ -34,20 +34,6 @@ export default class PixelatePass extends Pass {
     	this.shader.setFloat( "yPixels", this._yPixels );
     	this.shader.setTexture( "map", this.fbo.targetTexture );
 
-
-    	const triangleVertices = [
-    		- 1, - 1, 0, - 1, 4, 0, 4, - 1, 0
-    	];
-
-    	const triangleIndices = [
-    		2, 1, 0
-    	];
-
-    	this.fullScreenTriangle = new ArrayBuffer( {
-    		positions: triangleVertices,
-    		indices: triangleIndices
-    	} );
-
     }
 
     set pixelCountX( x: number ) {
