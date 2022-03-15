@@ -9,6 +9,9 @@ export default class Texture {
     texture: WebGLTexture;
     wrapT!: number;
     wrapS!: number;
+    depth?: boolean;
+    height!: number;
+    width!: number;
 
     constructor(
     	gl: WebGL2RenderingContext,
@@ -23,6 +26,9 @@ export default class Texture {
     ) {
 
     	this.gl = gl;
+    	this.width = width;
+    	this.height = height;
+    	this.depth = depth;
     	this.format = this.gl.RGBA;
     	this.pixelType = this.gl.UNSIGNED_BYTE;
     	this.imagePath = imagePath;
@@ -61,6 +67,34 @@ export default class Texture {
     		this.gl.texParameteri( this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.REPEAT );
 
     	}
+
+    }
+
+    resize( width: number, height: number ) {
+
+    	this.bind();
+
+    	if ( this.depth ) {
+
+    		const level = 0;
+    		const internalFormat = this.gl.DEPTH_COMPONENT24;
+    		const border = 0;
+    		const format = this.gl.DEPTH_COMPONENT;
+    		const type = this.gl.UNSIGNED_INT;
+    		const data = null;
+
+    		this.gl.texImage2D( this.gl.TEXTURE_2D, level, internalFormat,
+    			width, height, border,
+    			format, type, data );
+
+    	} else {
+
+    		this.gl.texImage2D( this.gl.TEXTURE_2D, 0, this.format, width, height, 0, this.format, this.gl.UNSIGNED_BYTE, null );
+
+    	}
+
+    	this.unbind();
+
 
     }
 

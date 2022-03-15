@@ -18,7 +18,7 @@ out vec4 FragColor;
 
 #define FXAA_REDUCE_MIN   (1.0/128.0)
 #define FXAA_REDUCE_MUL   (1.0/8.0)
-#define FXAA_SPAN_MAX     6.0
+#define FXAA_SPAN_MAX     8.0
 
 
 mediump float when_gt(float x, float y) {

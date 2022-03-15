@@ -49,6 +49,12 @@ export default class Bolt {
 
     }
 
+    getCamera() {
+
+    	return this._camera;
+
+    }
+
     enableDepth() {
 
     	this.gl.enable( this.gl.DEPTH_TEST );
@@ -69,8 +75,10 @@ export default class Bolt {
 
     resizeFullScreen() {
 
-    	const displayWidth = this.gl.canvas.clientWidth;
-    	const displayHeight = this.gl.canvas.clientHeight;
+    	const dpi = Math.min( 2, window.devicePixelRatio || 1 );
+
+    	const displayWidth = this.gl.canvas.clientWidth * dpi;
+    	const displayHeight = this.gl.canvas.clientHeight * dpi;
 
     	// Check if the this.gl.canvas is not the same size.
     	const needResize = this.gl.canvas.width !== displayWidth ||

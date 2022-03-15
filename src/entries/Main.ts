@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/basic/Basic";
+import Example from "@/webgl/examples/advanced/DepthOfField";
 
 export default class Main {
 

@@ -13,7 +13,7 @@ export abstract class Pass {
 
     constructor( bolt: Bolt, {
     	width = 256,
-    	height = 256
+    	height = 256,
     } ) {
 
     	this.fbo = new FBO( { width, height } );

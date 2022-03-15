@@ -4,7 +4,6 @@ import { Pass } from "./Pass";
 import vertexShader from "./shaders/pixelate/pixelate.vert";
 import fragmentShader from "./shaders/pixelate/pixelate.frag";
 import FBO from "@/webgl/core/FBO";
-import ArrayBuffer from "@/webgl/core/ArrayBuffer";
 import Bolt from "@/webgl/core/Bolt";
 
 export default class PixelatePass extends Pass {

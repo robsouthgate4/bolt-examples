@@ -7,7 +7,7 @@ uniform vec3 viewPosition;
 
 out vec4 FragColor;
 
-in vec3 vColor;
+in vec3 Color;
 in vec3 vNormal;
 
 void main()

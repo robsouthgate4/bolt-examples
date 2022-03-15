@@ -51,9 +51,12 @@ export default class FBO {
 
     resize( width: number, height: number ) {
 
-    	this.gl.bindTexture( this.gl.TEXTURE_2D, this.targetTexture.texture );
-    	this.gl.texImage2D( this.gl.TEXTURE_2D, 0, this.gl.RGBA, width, height, 0, this.gl.RGBA, this.gl.UNSIGNED_BYTE, null );
-    	this.gl.bindTexture( this.gl.TEXTURE_2D, null );
+    	this.targetTexture.resize( width, height );
+    	if ( this.depthTexture ) {
+
+    		this.depthTexture.resize( width, height );
+
+    	}
 
     }
 

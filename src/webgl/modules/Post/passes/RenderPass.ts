@@ -10,7 +10,7 @@ export default class RenderPass extends Pass {
 
     constructor( bolt: Bolt, {
     	width = 256,
-    	height = 256
+    	height = 256,
     } ) {
 
     	super( bolt, {

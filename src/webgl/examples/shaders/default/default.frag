@@ -11,7 +11,7 @@ out vec4 FragColor;
 
 in vec3 Normal;
 
-in vec3 vColor;
+in vec3 Color;
 
 void main()
 {
