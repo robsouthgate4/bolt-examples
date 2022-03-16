@@ -65,7 +65,6 @@ export default class extends Base {
 
 
     	const gltfLoader = new GLTFParser( "/static/models/gltf/torus.gltf" );
-
     	const geometry = await gltfLoader.loadGLTF();
 
     	if ( ! geometry ) return;

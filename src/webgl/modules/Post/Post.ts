@@ -1,92 +1,109 @@
 
 import Bolt from "@/webgl/core/Bolt";
+import FBO from "@/webgl/core/FBO";
 import { Pass } from "./passes/Pass";
 import RenderPass from "./passes/RenderPass";
 
 export default class Post {
 
-  _height: number;
-  _width: number;
-  _passes: Pass[] = [];
-  bolt: Bolt;
+    _height: number;
+    _width: number;
+    _passes: Pass[] = [];
+    bolt: Bolt;
+    private _readFbo!: FBO;
+    private _writeFbo!: FBO;
 
-  constructor( bolt: Bolt ) {
+    constructor( bolt: Bolt ) {
 
-  	this.bolt = bolt;
+    	this.bolt = bolt;
 
-  	this._width = window.innerWidth;
-  	this._height = window.innerHeight;
+    	this._width = window.innerWidth;
+    	this._height = window.innerHeight;
 
-  	this._passes = [];
+    	// TODO: convert to read and write buffer logic
 
-  }
 
-  add( pass: Pass, renderToScreen = false ) {
+    	this._readFbo = new FBO( { width: this._width, height: this._height } );
+    	this._writeFbo = new FBO( { width: this._width, height: this._height } );
 
-  	pass.renderToScreen = renderToScreen;
-  	this._passes.push( pass );
+    	this._passes = [];
 
-  	return this;
+    }
 
-  }
+    add( pass: Pass, renderToScreen = false ) {
 
-  resize( width: number, height: number ) {
+    	pass.renderToScreen = renderToScreen;
+    	this._passes.push( pass );
 
-  	this._passes.forEach( ( pass: Pass ) => {
+    	return this;
 
-  		pass.fbo.resize( width, height );
-  		pass.rbo.resize( width, height );
+    }
 
-  	} );
+    resize( width: number, height: number ) {
 
-  }
+    	this._passes.forEach( ( pass: Pass ) => {
 
-  begin() {
+    		pass.fbo.resize( width, height );
+    		pass.rbo.resize( width, height );
 
-  	const enabledPasses = this._passes.filter( pass => pass.enabled );
+    	} );
 
-  	enabledPasses.forEach( ( pass: Pass ) => {
+    }
 
-  		if ( ! pass.enabled ) return;
+    swap() {
 
-  		if ( pass instanceof RenderPass ) {
+    	let temp = this._readFbo;
+    	this._readFbo = this._writeFbo;
+    	this._writeFbo = temp;
 
-  			pass.fbo.bind();
+    }
 
-  			if ( pass.renderToScreen ) {
+    begin() {
 
-  				pass.fbo.unbind();
+    	const enabledPasses = this._passes.filter( pass => pass.enabled );
 
-  			}
+    	enabledPasses.forEach( ( pass: Pass ) => {
 
-  		}
+    		if ( ! pass.enabled ) return;
 
-  	} );
+    		if ( pass instanceof RenderPass ) {
 
-  	this.bolt.enableDepth();
+    			pass.fbo.bind();
 
-  }
+    			if ( pass.renderToScreen ) {
 
-  end() {
+    				pass.fbo.unbind();
 
-  	this.bolt.disableDepth();
+    			}
 
-  	const enabledPasses = this._passes.filter( pass => pass.enabled );
+    		}
 
-  	enabledPasses.forEach( ( pass: Pass, index: number ) => {
+    	} );
 
-  		if ( pass instanceof RenderPass ) {
+    	this.bolt.enableDepth();
 
-  			pass.fbo.unbind();
+    }
 
-  		} else {
+    end() {
 
-  			pass.draw( enabledPasses[ index - 1 ].fbo, pass.renderToScreen );
+    	this.bolt.disableDepth();
 
-  		}
+    	const enabledPasses = this._passes.filter( pass => pass.enabled );
 
-  	} );
+    	enabledPasses.forEach( ( pass: Pass, index: number ) => {
 
-  }
+    		if ( pass instanceof RenderPass ) {
+
+    			pass.fbo.unbind();
+
+    		} else {
+
+    			pass.draw( enabledPasses[ index - 1 ].fbo, pass.renderToScreen );
+
+    		}
+
+    	} );
+
+    }
 
 }
