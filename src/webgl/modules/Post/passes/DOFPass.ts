@@ -30,7 +30,6 @@ export default class DOFPass extends Pass {
     	this.shader.setFloat( "focus", 610 );
     	this.shader.setFloat( "aperture", 2.1 * 0.0001 );
     	this.shader.setFloat( "maxBlur", 0.005 );
-
     	this.shader.setFloat( "aspect", this.bolt.gl.canvas.width / this.bolt.gl.canvas.height );
 
     	this.t = 0;

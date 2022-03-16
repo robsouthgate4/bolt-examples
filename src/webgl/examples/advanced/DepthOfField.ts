@@ -112,7 +112,13 @@ export default class extends Base {
 
     	this.depthShader.activate();
     	this.depthShader.setVector2( "cameraPlanes", vec2.fromValues( this.camera.near, this.camera.far ) );
+
+    	this.dofPass.shader.activate();
     	this.dofPass.shader.setTexture( "depthMap", this.depthFBO.targetTexture );
+    	this.dofPass.shader.setFloat( "focus", 610 );
+    	this.dofPass.shader.setFloat( "aperture", 2.1 * 0.0001 );
+    	this.dofPass.shader.setFloat( "maxBlur", 0.005 );
+    	this.dofPass.shader.setFloat( "aspect", this.bolt.gl.canvas.width / this.bolt.gl.canvas.height );
 
     	const instanceCount = 1000;
 
