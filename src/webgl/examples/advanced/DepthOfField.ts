@@ -102,14 +102,8 @@ export default class extends Base {
     		height: this.height
     	} ).setEnabled( true );
 
-    	this.fxaa = new FXAAPass( this.bolt, {
-    		width: this.width,
-    		height: this.height
-    	} ).setEnabled( true );
-
     	this.post.add( this.renderPass );
-    	this.post.add( this.dofPass, false );
-    	this.post.add( this.fxaa, true );
+    	this.post.add( this.dofPass, true );
 
     	// set shader uniforms
     	this.colorShader.activate();
