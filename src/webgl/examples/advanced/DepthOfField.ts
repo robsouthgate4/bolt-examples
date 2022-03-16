@@ -203,7 +203,7 @@ export default class extends Base {
     	super.update( elapsed, delta );
     	this.camera.update( delta );
 
-    	{ // Draw depth to depth framebuffer
+    	{ // Draw depth shaded to depth framebuffer
 
     		this.depthFBO.bind();
 
@@ -222,8 +222,6 @@ export default class extends Base {
     		this.post.begin();
 
     		this.drawInstances( this.colorShader, elapsed );
-
-
 
     		this.torusBuffer.drawTriangles( this.colorShader );
 
