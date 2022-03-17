@@ -1,7 +1,7 @@
 
 import Bolt from "../../core/Bolt";
 
-import { GlTf, Mesh } from "./types/GLTF";
+import { GlTf, Mesh, MeshPrimitive } from "./types/GLTF";
 
 interface AccessorDict {
     [id: string]: number;
@@ -50,7 +50,11 @@ export default class GLTFLoader {
 
     		gltf.meshes.forEach( ( mesh: Mesh ) => {
 
-    			console.log( mesh );
+    			mesh.primitives.forEach( ( primitive: MeshPrimitive ) => {
+
+    				console.log( primitive );
+
+    			} );
 
     		} );
 
