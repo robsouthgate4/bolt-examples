@@ -5,11 +5,13 @@ export default class Transform {
     position: vec3;
     rotation: vec3;
     scale: vec3;
+    quaternion: quat;
 
     constructor() {
 
     	this.position = vec3.fromValues( 0, 0, 0 );
     	this.rotation = vec3.fromValues( 0, 0, 0 );
+    	this.quaternion = quat.fromValues( 0, 0, 0, 1 );
     	this.scale = vec3.fromValues( 1, 1, 1 );
 
     }
@@ -20,9 +22,7 @@ export default class Transform {
     	const r = this.rotation;
     	const s = this.scale;
 
-    	const q = quat.create();
-
-    	mat4.fromRotationTranslationScale( localMatrix, q, t, s );
+    	mat4.fromRotationTranslationScale( localMatrix, this.quaternion, t, s );
 
     	mat4.translate( localMatrix, localMatrix, t );
     	mat4.rotateX( localMatrix, localMatrix, r[ 0 ] );

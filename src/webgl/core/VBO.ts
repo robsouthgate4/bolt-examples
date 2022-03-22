@@ -5,7 +5,7 @@ export default class VBO {
     gl: WebGL2RenderingContext;
     buffer: WebGLBuffer;
 
-    constructor( data: Float32Array | number[], drawType = Bolt.getInstance().gl.STATIC_DRAW ) {
+    constructor( data: Float32Array | Uint8Array | number[], drawType = Bolt.getInstance().gl.STATIC_DRAW ) {
 
     	this.gl = Bolt.getInstance().gl;
     	this.buffer = <WebGLBuffer>( this.gl.createBuffer() );

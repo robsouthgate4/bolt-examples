@@ -37,8 +37,6 @@ export default class extends Base {
     	this.canvas.width = this.width;
     	this.canvas.height = this.height;
 
-
-
     	this.camera = new CameraArcball(
     		this.width,
     		this.height,

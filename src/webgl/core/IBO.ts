@@ -6,7 +6,7 @@ export default class IBO {
     indicesBuffer: WebGLBuffer | null;
     count: number;
 
-    constructor( indices: Uint16Array | number[], ) {
+    constructor( indices: Uint16Array | Uint8Array | number[], ) {
 
     	this.gl = Bolt.getInstance().gl;
     	this.count = indices.length;

@@ -1,5 +1,10 @@
 
 
+import IBO from "@/webgl/core/IBO";
+import Transform from "@/webgl/core/Transform";
+import VAO from "@/webgl/core/VAO";
+import VBO from "@/webgl/core/VBO";
+import { quat, vec3 } from "gl-matrix";
 import Bolt from "../../core/Bolt";
 
 import { GlTf, Mesh, MeshPrimitive } from "./types/GLTF";
@@ -9,7 +14,7 @@ interface AccessorDict {
 }
 
 interface AttributeInfo {
-    buffer: WebGLBuffer;
+    vbo: VBO;
     type: number;
     numComponents: number;
     stride: number;
@@ -71,7 +76,7 @@ export default class GLTFLoader {
 
     				for ( const [ attribName, index ] of Object.entries( primitive.attributes ) ) {
 
-    					const { accessor, buffer, stride } = this._getAccessorAndWebGLBuffer( this.gl, gltf, index );
+    					const { accessor, stride, vbo } = this._getAccessorAndVBO( this.gl, gltf, index );
 
     					const capitalise = ( string: string ) =>
     						string.replaceAll( /\S*/g, word =>
@@ -79,12 +84,12 @@ export default class GLTFLoader {
     						);
 
     					attributes[ `a${capitalise( attribName )}` ] = {
-    						buffer,
+    						vbo,
     						type: accessor.componentType,
     						numComponents: this._accessorTypeToNumComponents( accessor.type ),
     						stride,
     						offset: accessor.byteOffset | 0
-    					};
+    					} as AttributeInfo;
 
     				}
 
@@ -97,27 +102,32 @@ export default class GLTFLoader {
 
     				if ( primitive.indices !== undefined ) {
 
-    					const { accessor, buffer } = this._getAccessorAndWebGLBuffer( this.gl, gltf, primitive.indices );
+    					const { accessor, ibo } = this._getAccessorAndIBO( this.gl, gltf, primitive.indices );
     					bufferInfo.numElements = accessor.count;
-    					bufferInfo.indices = buffer;
+    					bufferInfo.indices = ibo;
     					bufferInfo.elementType = accessor.componentType;
 
     				}
 
     				primitive.bufferInfo = bufferInfo;
 
+    				const vao = new VAO();
+
+    				let index = 0;
+
     				for ( const [ key, value ] of Object.entries( attributes ) ) {
 
-    					console.log( `${key}: ${value}` );
-    					console.log( value.buffer );
-    					console.log( value.numComponents );
-    					//this.gl.bindBuffer( this.gl.ARRAY_BUFFER, value );
-    					//this.gl.enableVertexAttribArray( layoutID );
-    					// vao.linkAttrib(new)
+    					index ++;
+
+    					vao.linkAttrib( value.vbo, index, value.numComponents, this.gl.FLOAT, value.stride, value.offset );
 
     				}
 
+    				if ( primitive.material ) {
 
+    					primitive.materialBolt = gltf.materials && gltf.materials[ primitive.material ] || undefined;
+
+    				}
 
     			} );
 
@@ -125,29 +135,70 @@ export default class GLTFLoader {
 
     	}
 
+    	const originalNodes = gltf.nodes;
+    	//TODO: complete
+
+    	gltf.nodes = gltf.nodes?.map( ( node ) => {
+
+    		const { name, translation, rotation, scale } = node;
+
+    		console.log( translation );
+
+    		const transfrom = new Transform();
+    		transfrom.position = translation ? vec3.fromValues( translation[ 0 ], translation[ 1 ], translation[ 2 ] ) : vec3.create();
+    		transfrom.quaternion = rotation ? quat.fromValues( rotation[ 0 ], rotation[ 1 ], rotation[ 2 ], rotation[ 3 ] ) : quat.create();
+    		transfrom.scale = scale ? vec3.fromValues( scale[ 0 ], scale[ 1 ], scale[ 2 ] ) : vec3.create();
+
+    		return node;
+
+    	} );
+
 
     }
 
-    private _getAccessorAndWebGLBuffer( gl: WebGL2RenderingContext, gltf: any, accessorIndex: number ) {
+    private _getAccessorAndVBO( gl: WebGL2RenderingContext, gltf: any, accessorIndex: number ) {
 
     	const accessor = gltf.accessors[ accessorIndex ];
     	const bufferView = gltf.bufferViews[ accessor.bufferView ];
+
     	if ( ! bufferView.webglBuffer ) {
 
-    		const buffer = gl.createBuffer();
-    		const target = bufferView.target || gl.ARRAY_BUFFER;
+    		const arrayBuffer = gltf.buffers[ bufferView.buffer ];
+
+    		const data = new Uint8Array( arrayBuffer, bufferView.byteOffset, bufferView.byteLength );
+
+    		const vbo = new VBO( data );
+    		bufferView.vbo = vbo;
+
+    	}
+
+    	return {
+    		accessor,
+    		vbo: bufferView.vbo,
+    		stride: bufferView.stride || 0,
+    	};
+
+    }
+
+    private _getAccessorAndIBO( gl: WebGL2RenderingContext, gltf: any, accessorIndex: number ) {
+
+    	const accessor = gltf.accessors[ accessorIndex ];
+    	const bufferView = gltf.bufferViews[ accessor.bufferView ];
+
+    	if ( ! bufferView.webglBuffer ) {
+
     		const arrayBuffer = gltf.buffers[ bufferView.buffer ];
     		const data = new Uint8Array( arrayBuffer, bufferView.byteOffset, bufferView.byteLength );
 
-    		gl.bindBuffer( target, buffer );
-    		gl.bufferData( target, data, gl.STATIC_DRAW );
-    		bufferView.webglBuffer = buffer;
+    		const ibo = new IBO( data );
+    		bufferView.ibo = ibo;
 
     	}
 
     	return {
     		accessor,
     		buffer: bufferView.webglBuffer,
+    		ibo: bufferView.ibo,
     		stride: bufferView.stride || 0,
     	};
 

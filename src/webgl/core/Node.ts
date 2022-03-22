@@ -52,6 +52,17 @@ export default class Node {
 
     }
 
+    traverse( fn: Function ) {
+
+    	fn( this );
+    	for ( const child of this.children ) {
+
+    		child.traverse( fn );
+
+    	}
+
+    }
+
     setDrawType( value: number ) {
 
     	if ( ! this.arrayBuffer ) return;
@@ -82,6 +93,18 @@ export default class Node {
     	const modelMatrix = this.modelMatrix;
 
     	this.children.forEach( child => child.updateModelMatrix( modelMatrix ) );
+
+    }
+
+    _addChild( child: Node ) {
+
+    	this.children.push( child );
+
+    }
+    _removeChild( child: Node ) {
+
+    	const ndx = this.children.indexOf( child );
+    	this.children.splice( ndx, 1 );
 
     }
 
