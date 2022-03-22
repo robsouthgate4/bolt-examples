@@ -1,4 +1,5 @@
 
+
 import Bolt from "../../core/Bolt";
 
 import { GlTf, Mesh, MeshPrimitive } from "./types/GLTF";
@@ -7,10 +8,21 @@ interface AccessorDict {
     [id: string]: number;
 }
 
+interface AttributeInfo {
+    buffer: WebGLBuffer;
+    type: number;
+    numComponents: number;
+    stride: number;
+    offset: number;
+}
+interface AttribName {
+    [id: string]: AttributeInfo;
+}
 
 export default class GLTFLoader {
 
     bolt: Bolt;
+    gl: WebGL2RenderingContext;
 
     private _accessorTypeToNumComponentsMap: AccessorDict = {
     	'SCALAR': 1,
@@ -25,6 +37,7 @@ export default class GLTFLoader {
     constructor( bolt: Bolt ) {
 
     	this.bolt = bolt;
+    	this.gl = bolt.getContext();
 
     }
 
@@ -52,7 +65,59 @@ export default class GLTFLoader {
 
     			mesh.primitives.forEach( ( primitive: MeshPrimitive ) => {
 
-    				console.log( primitive );
+    				const attributes: AttribName = {};
+
+    				let numElements = 0;
+
+    				for ( const [ attribName, index ] of Object.entries( primitive.attributes ) ) {
+
+    					const { accessor, buffer, stride } = this._getAccessorAndWebGLBuffer( this.gl, gltf, index );
+
+    					const capitalise = ( string: string ) =>
+    						string.replaceAll( /\S*/g, word =>
+    							`${word.slice( 0, 1 )}${word.slice( 1 ).toLowerCase()}`
+    						);
+
+    					attributes[ `a${capitalise( attribName )}` ] = {
+    						buffer,
+    						type: accessor.componentType,
+    						numComponents: this._accessorTypeToNumComponents( accessor.type ),
+    						stride,
+    						offset: accessor.byteOffset | 0
+    					};
+
+    				}
+
+    				const bufferInfo = {
+    					attributes,
+    					numElements,
+    					indices: [],
+    					elementType: 0
+    				};
+
+    				if ( primitive.indices !== undefined ) {
+
+    					const { accessor, buffer } = this._getAccessorAndWebGLBuffer( this.gl, gltf, primitive.indices );
+    					bufferInfo.numElements = accessor.count;
+    					bufferInfo.indices = buffer;
+    					bufferInfo.elementType = accessor.componentType;
+
+    				}
+
+    				primitive.bufferInfo = bufferInfo;
+
+    				for ( const [ key, value ] of Object.entries( attributes ) ) {
+
+    					console.log( `${key}: ${value}` );
+    					console.log( value.buffer );
+    					console.log( value.numComponents );
+    					//this.gl.bindBuffer( this.gl.ARRAY_BUFFER, value );
+    					//this.gl.enableVertexAttribArray( layoutID );
+    					// vao.linkAttrib(new)
+
+    				}
+
+
 
     			} );
 
@@ -63,7 +128,7 @@ export default class GLTFLoader {
 
     }
 
-    _getAccessorAndWebGLBuffer( gl: WebGL2RenderingContext, gltf: any, accessorIndex: number ) {
+    private _getAccessorAndWebGLBuffer( gl: WebGL2RenderingContext, gltf: any, accessorIndex: number ) {
 
     	const accessor = gltf.accessors[ accessorIndex ];
     	const bufferView = gltf.bufferViews[ accessor.bufferView ];

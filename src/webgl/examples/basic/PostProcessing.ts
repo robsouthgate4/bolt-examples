@@ -121,9 +121,7 @@ export default class extends Base {
     		new ArrayBuffer( planeGeometry ),
     	);
 
-    	this.planeNode.transform.scale[ 0 ] = 3;
-    	this.planeNode.transform.scale[ 1 ] = 3;
-    	this.planeNode.transform.scale[ 2 ] = 3;
+    	this.planeNode.transform.scale = vec3.fromValues( 3, 3, 3 );
 
     	this.planeNode.transform.rotation[ 0 ] = Math.PI * 0.5;
     	this.planeNode.transform.position[ 1 ] = - 0.25;
