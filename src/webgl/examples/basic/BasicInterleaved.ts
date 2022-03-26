@@ -1,17 +1,12 @@
 import Base from "@webgl/Base";
-import Shader from "../../core/Shader";
 
 import defaultVertex from "../../examples/shaders/default/default.vert";
 import defaultFragment from "../../examples/shaders/default/default.frag";
 
 import { vec3, } from "gl-matrix";
-import Node from "../../core/Node";
-import Transform from "../../core/Transform";
-import ArrayBufferInterleaved from "../../core/ArrayBufferInterleaved";
 import CameraArcball from "../../modules/CameraArcball";
 import CameraFPS from "../../modules/CameraFPS";
-import FBO from "../../core/FBO";
-import Bolt from "@/webgl/core/Bolt";
+import Bolt, { ArrayBufferInterleaved, FBO, Shader, Transform, Node } from "@robsouthgate/bolt-core";
 
 const buffer = [
 	- 0.5, - 0.5, - 0.5, 0.0, 0.0, - 1.0,

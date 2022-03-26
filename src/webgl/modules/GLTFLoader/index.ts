@@ -1,13 +1,9 @@
 
-
-import IBO from "@/webgl/core/IBO";
-import Transform from "@/webgl/core/Transform";
-import VAO from "@/webgl/core/VAO";
-import VBO from "@/webgl/core/VBO";
 import { quat, vec3 } from "gl-matrix";
-import Bolt from "../../core/Bolt";
+import Bolt, { VBO, VAO, Transform, ArrayBuffer, Node } from "@robsouthgate/bolt-core";
 
 import { GlTf, Mesh, MeshPrimitive } from "./types/GLTF";
+import { GeometryBuffers } from "@robsouthgate/bolt-core/lib/ArrayBuffer";
 
 interface AccessorDict {
     [id: string]: number;
@@ -56,7 +52,7 @@ export default class GLTFLoader {
     	}
 
     	const gltf = await response.json() as GlTf;
-    	let bin;
+    	let bin: ArrayBufferLike;
 
     	if ( gltf.buffers ) {
 
@@ -76,7 +72,7 @@ export default class GLTFLoader {
 
     				for ( const [ attribName, index ] of Object.entries( primitive.attributes ) ) {
 
-    					const { accessor, stride, vbo } = this._getAccessorAndVBO( this.gl, gltf, index );
+    					const { accessor, stride, vbo, buffer } = this._getAccessorAndBuffer( this.gl, gltf, index, bin );
 
     					const capitalise = ( string: string ) =>
     						string.replaceAll( /\S*/g, word =>
@@ -85,6 +81,7 @@ export default class GLTFLoader {
 
     					attributes[ `a${capitalise( attribName )}` ] = {
     						vbo,
+    						buffer,
     						type: accessor.componentType,
     						numComponents: this._accessorTypeToNumComponents( accessor.type ),
     						stride,
@@ -96,15 +93,15 @@ export default class GLTFLoader {
     				const bufferInfo = {
     					attributes,
     					numElements,
-    					indices: [],
+    					indices: new Uint16Array(),
     					elementType: 0
     				};
 
     				if ( primitive.indices !== undefined ) {
 
-    					const { accessor, ibo } = this._getAccessorAndIBO( this.gl, gltf, primitive.indices );
+    					const { accessor, buffer } = this._getAccessorAndIndices( this.gl, gltf, primitive.indices, bin );
     					bufferInfo.numElements = accessor.count;
-    					bufferInfo.indices = ibo;
+    					bufferInfo.indices = buffer;
     					bufferInfo.elementType = accessor.componentType;
 
     				}
@@ -123,6 +120,8 @@ export default class GLTFLoader {
 
     				}
 
+    				primitive.vao = vao;
+
     				if ( primitive.material ) {
 
     					primitive.materialBolt = gltf.materials && gltf.materials[ primitive.material ] || undefined;
@@ -135,70 +134,88 @@ export default class GLTFLoader {
 
     	}
 
-    	const originalNodes = gltf.nodes;
-    	//TODO: complete
+    	const nodes = gltf.nodes?.map( ( node ) => {
 
-    	gltf.nodes = gltf.nodes?.map( ( node ) => {
+    		const { name, translation, rotation, scale, mesh } = node;
+    		const rootTransform = new Transform();
+    		rootTransform.position = translation ? vec3.fromValues( translation[ 0 ], translation[ 1 ], translation[ 2 ] ) : vec3.create();
+    		rootTransform.quaternion = rotation ? quat.fromValues( rotation[ 0 ], rotation[ 1 ], rotation[ 2 ], rotation[ 3 ] ) : quat.create();
+    		rootTransform.scale = scale ? vec3.fromValues( scale[ 0 ], scale[ 1 ], scale[ 2 ] ) : vec3.create();
 
-    		const { name, translation, rotation, scale } = node;
+    		const rootNode = new Node();
+    		rootNode.transform = rootTransform;
 
-    		console.log( translation );
+    		if ( gltf.meshes && gltf.meshes.length > 0 ) {
 
-    		const transfrom = new Transform();
-    		transfrom.position = translation ? vec3.fromValues( translation[ 0 ], translation[ 1 ], translation[ 2 ] ) : vec3.create();
-    		transfrom.quaternion = rotation ? quat.fromValues( rotation[ 0 ], rotation[ 1 ], rotation[ 2 ], rotation[ 3 ] ) : quat.create();
-    		transfrom.scale = scale ? vec3.fromValues( scale[ 0 ], scale[ 1 ], scale[ 2 ] ) : vec3.create();
+    			if ( mesh != undefined ) {
 
-    		return node;
+    				const gltfMesh = gltf.meshes[ mesh ];
+
+    				gltfMesh.primitives.forEach( ( primitive ) => {
+
+    					console.log( primitive.bufferInfo );
+
+    					const attribs = primitive.bufferInfo.attributes;
+
+    					const geometry: GeometryBuffers = {
+    						positions: attribs.aPosition ? attribs.aPosition.buffer : new Float32Array(),
+    						normals: attribs.aNormal ? attribs.aNormal.buffer : new Float32Array(),
+    						uvs: attribs.aTexcoord_0 ? attribs.aTexcoord_0.buffer : new Float32Array(),
+    						indices: primitive.bufferInfo.indices
+    					};
+
+    					const arrayBuffer = new ArrayBuffer( geometry );
+
+    					const childNode = new Node( arrayBuffer );
+    					childNode.setParent( rootNode );
+
+    				} );
+
+    			}
+
+    		}
+
+    		return rootNode;
 
     	} );
+
+    	return nodes;
 
 
     }
 
-    private _getAccessorAndVBO( gl: WebGL2RenderingContext, gltf: any, accessorIndex: number ) {
+    private _getAccessorAndBuffer( gl: WebGL2RenderingContext, gltf: any, accessorIndex: number, bin: ArrayBufferLike ) {
 
     	const accessor = gltf.accessors[ accessorIndex ];
     	const bufferView = gltf.bufferViews[ accessor.bufferView ];
 
-    	if ( ! bufferView.webglBuffer ) {
+    	const buffer = new Float32Array(
+    		bin,
+    		bufferView.byteOffset,
+    		bufferView.byteLength / Float32Array.BYTES_PER_ELEMENT );
 
-    		const arrayBuffer = gltf.buffers[ bufferView.buffer ];
 
-    		const data = new Uint8Array( arrayBuffer, bufferView.byteOffset, bufferView.byteLength );
-
-    		const vbo = new VBO( data );
-    		bufferView.vbo = vbo;
-
-    	}
+    	bufferView.vbo = new VBO( buffer );
 
     	return {
     		accessor,
     		vbo: bufferView.vbo,
+    		buffer,
     		stride: bufferView.stride || 0,
     	};
 
     }
 
-    private _getAccessorAndIBO( gl: WebGL2RenderingContext, gltf: any, accessorIndex: number ) {
+    private _getAccessorAndIndices( gl: WebGL2RenderingContext, gltf: any, accessorIndex: number, bin: ArrayBufferLike ) {
 
     	const accessor = gltf.accessors[ accessorIndex ];
     	const bufferView = gltf.bufferViews[ accessor.bufferView ];
 
-    	if ( ! bufferView.webglBuffer ) {
-
-    		const arrayBuffer = gltf.buffers[ bufferView.buffer ];
-    		const data = new Uint8Array( arrayBuffer, bufferView.byteOffset, bufferView.byteLength );
-
-    		const ibo = new IBO( data );
-    		bufferView.ibo = ibo;
-
-    	}
+    	const buffer = new Uint16Array( bin, bufferView.byteOffset, bufferView.byteLength / Uint16Array.BYTES_PER_ELEMENT );
 
     	return {
     		accessor,
-    		buffer: bufferView.webglBuffer,
-    		ibo: bufferView.ibo,
+    		buffer,
     		stride: bufferView.stride || 0,
     	};
 

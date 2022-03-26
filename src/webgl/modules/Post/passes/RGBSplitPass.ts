@@ -1,10 +1,8 @@
-import Shader from "@/webgl/core/Shader";
+import Bolt, { Shader, FBO } from "@robsouthgate/bolt-core";
 import { Pass } from "./Pass";
 
 import vertexShader from "./shaders/rgbSplit/rgbSplit.vert";
 import fragmentShader from "./shaders/rgbSplit/rgbSplit.frag";
-import FBO from "@/webgl/core/FBO";
-import Bolt from "@/webgl/core/Bolt";
 
 export default class RGBSplitPass extends Pass {
 

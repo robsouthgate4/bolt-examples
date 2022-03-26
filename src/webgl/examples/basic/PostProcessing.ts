@@ -1,14 +1,11 @@
 import Base from "@webgl/Base";
-import Shader from "../../core/Shader";
+import Bolt, { Shader, Node, Transform, ArrayBuffer } from "@robsouthgate/bolt-core";
 
 import defaultVertex from "../../examples/shaders/default/default.vert";
 import defaultFragment from "../../examples/shaders/default/default.frag";
 
 import { vec3, } from "gl-matrix";
-import Node from "../../core/Node";
-import Transform from "../../core/Transform";
 import CameraArcball from "../../modules/CameraArcball";
-import ArrayBuffer from "../../core/ArrayBuffer";
 import Sphere from "../../modules/Primitives/Sphere";
 import Post from "@/webgl/modules/Post/Post";
 import Plane from "@/webgl/modules/Primitives/Plane";
@@ -16,9 +13,6 @@ import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
 import RGBSplitPass from "@/webgl/modules/Post/passes/RGBSplitPass";
 import PixelatePass from "@/webgl/modules/Post/passes/PixelatePass";
 import RenderPass from "@/webgl/modules/Post/passes/RenderPass";
-
-import Bolt from "@/webgl/core/Bolt";
-
 export default class extends Base {
 
     canvas: HTMLCanvasElement;
@@ -35,7 +29,7 @@ export default class extends Base {
     rbgSplit!: RGBSplitPass;
     renderPass!: RenderPass;
     pixelate!: PixelatePass;
-    bolt: Bolt;
+    bolt = Bolt.getInstance();
     gl: WebGL2RenderingContext;
 
     constructor() {
@@ -61,7 +55,6 @@ export default class extends Base {
     		2
     	);
 
-    	this.bolt = Bolt.getInstance();
     	this.bolt.init( this.canvas, { antialias: true } );
     	this.bolt.setCamera( this.camera );
 

@@ -1,5 +1,5 @@
 import { mat4, vec3 } from "gl-matrix";
-import Camera from "../core/Camera";
+import { Camera } from "@robsouthgate/bolt-core";
 
 export default class CameraArcball extends Camera {
 

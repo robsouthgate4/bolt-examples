@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Shader from "../../core/Shader";
+import Bolt, { ArrayBufferInterleaved, Shader, Transform, VAO, VBO } from "@robsouthgate/bolt-core";
 
 import particlesVertexInstanced from "../../examples/shaders/gpgpu/particles.vert";
 import particlesFragmentInstanced from "../../examples/shaders/gpgpu/particles.frag";
@@ -8,13 +8,7 @@ import simulationVertex from "../../examples/shaders/gpgpu/simulation/simulation
 import simulationFragment from "../../examples/shaders/gpgpu/simulation/simulation.frag";
 
 import { mat4, vec3, } from "gl-matrix";
-
-import Transform from "../../core/Transform";
-import ArrayBufferInterleaved from "../../core/ArrayBufferInterleaved";
 import CameraFPS from "../../modules/CameraFPS";
-import VBO from "../../core/VBO";
-import VAO from "../../core/VAO";
-import Bolt from "@/webgl/core/Bolt";
 
 export default class extends Base {
 

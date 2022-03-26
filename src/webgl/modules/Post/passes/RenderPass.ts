@@ -1,8 +1,5 @@
-import Shader from "@/webgl/core/Shader";
 import { Pass } from "./Pass";
-
-
-import Bolt from "@/webgl/core/Bolt";
+import Bolt, { Shader } from "@robsouthgate/bolt-core";
 
 export default class RenderPass extends Pass {
 

@@ -1,6 +1,6 @@
 
-import Bolt from "@/webgl/core/Bolt";
-import FBO from "@/webgl/core/FBO";
+
+import Bolt, { FBO } from "@robsouthgate/bolt-core";
 import { Pass } from "./passes/Pass";
 import RenderPass from "./passes/RenderPass";
 

@@ -1,18 +1,14 @@
 import Base from "@webgl/Base";
-import Shader from "../../core/Shader";
+import Bolt, { Shader, Node, ArrayBuffer, Transform } from "@robsouthgate/bolt-core";
 
 import defaultVertex from "../../examples/shaders/default/default.vert";
 import defaultFragment from "../../examples/shaders/default/default.frag";
 
 import { vec3, } from "gl-matrix";
-import Node from "../../core/Node";
-import Transform from "../../core/Transform";
 import CameraArcball from "../../modules/CameraArcball";
-import ArrayBuffer from "../../core/ArrayBuffer";
 import Sphere from "../../modules/Primitives/Sphere";
 import Cube from "../../modules/Primitives/Cube";
 import Plane from "../../modules/Primitives/Plane";
-import Bolt from "@/webgl/core/Bolt";
 
 export default class extends Base {
 

@@ -1,16 +1,12 @@
 import Base from "@webgl/Base";
-import Shader from "../../core/Shader";
+import Bolt, { Shader, Node, Transform, ArrayBuffer } from "@robsouthgate/bolt-core";
 
 import defaultVertex from "../../examples/shaders/default/default.vert";
 import defaultFragment from "../../examples/shaders/default/default.frag";
 
 import { vec3, } from "gl-matrix";
-import Node from "../../core/Node";
-import Transform from "../../core/Transform";
 import CameraArcball from "../../modules/CameraArcball";
-import ArrayBuffer from "../../core/ArrayBuffer";
 import Sphere from "../../modules/Primitives/Sphere";
-import Bolt from "@/webgl/core/Bolt";
 import GLTFLoader from "@/webgl/modules/GLTFLoader";
 
 export default class extends Base {
@@ -25,6 +21,7 @@ export default class extends Base {
     cubeNode!: Node;
     planeNode!: Node;
     bolt: Bolt;
+    _loadedNodes: Node[] = []
 
     constructor() {
 
@@ -40,8 +37,8 @@ export default class extends Base {
     	this.camera = new CameraArcball(
     		this.width,
     		this.height,
-    		vec3.fromValues( 0, 2, 6 ),
-    		vec3.fromValues( 0, 0, 0 ),
+    		vec3.fromValues( 0, 1, 2 ),
+    		vec3.fromValues( 0, 1, 0 ),
     		45,
     		0.01,
     		1000,
@@ -67,13 +64,23 @@ export default class extends Base {
     async init() {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
-    	gltfLoader.loadGLTF( "/static/models/gltf/", "phantom.gltf" );
+    	const nodes = await gltfLoader.loadGLTF( "/static/models/gltf", "phantom.gltf" );
+
+    	if ( nodes ) {
+
+    		this._loadedNodes.push( ...nodes );
+
+    		this.assetsLoaded = true;
+
+    	}
+
 
     	const sphereGeometry = new Sphere( { radius: 1, widthSegments: 32, heightSegments: 32 } );
 
     	this.sphereNode = new Node(
     		new ArrayBuffer( sphereGeometry ),
     	);
+
 
     	this.resize();
 
@@ -93,6 +100,8 @@ export default class extends Base {
 
     update( elapsed: number, delta: number ) {
 
+    	if ( ! this.assetsLoaded ) return;
+
     	super.update( elapsed, delta );
 
     	this.camera.update();
@@ -103,9 +112,7 @@ export default class extends Base {
     	this.shader.activate();
     	this.shader.setFloat( "time", elapsed );
 
-    	this.sphereNode.transform.rotation[ 1 ] += 0.01;
-
-    	this.bolt.draw( this.shader, [ this.sphereNode ] );
+    	this.bolt.draw( this.shader, [ ...this._loadedNodes[ 0 ].children ] );
 
     }
 

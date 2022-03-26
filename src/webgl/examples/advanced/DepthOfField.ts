@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Shader from "../../core/Shader";
+import Bolt, { Shader, Transform, ArrayBuffer, FBO, Camera } from "@robsouthgate/bolt-core";
 
 import defaultVertexInstanced from "../../examples/shaders/defaultInstanced/defaultInstanced.vert";
 import defaultFragmentInstanced from "../../examples/shaders/defaultInstanced/defaultInstanced.frag";
@@ -9,16 +9,12 @@ import depthFragmentInstanced from "../../examples/shaders/depth/depth.frag";
 
 import { mat4, quat, vec2, vec3, } from "gl-matrix";
 
-import Transform from "../../core/Transform";
-import ArrayBuffer from "../../core/ArrayBuffer";
 import GLTFParser from "../../modules/GLTFParser";
-import Bolt from "@/webgl/core/Bolt";
 import CameraFPS from "@/webgl/modules/CameraFPS";
 import Post from "@/webgl/modules/Post/Post";
 import RenderPass from "@/webgl/modules/Post/passes/RenderPass";
 import DOFPass from "@/webgl/modules/Post/passes/DOFPass";
 import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
-import FBO from "@/webgl/core/FBO";
 
 export default class extends Base {
 

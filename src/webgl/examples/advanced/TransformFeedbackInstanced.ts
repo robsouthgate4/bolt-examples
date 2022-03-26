@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Shader from "../../core/Shader";
+import Bolt, { Camera, IBO, Shader, VAO, VBO } from "@robsouthgate/bolt-core";
 
 import particlesVertexInstanced from "../../examples/shaders/gpgpuInstanced/particles.vert";
 import particlesFragmentInstanced from "../../examples/shaders/gpgpuInstanced/particles.frag";
@@ -9,12 +9,7 @@ import simulationFragment from "../../examples/shaders/gpgpuInstanced/simulation
 
 import { mat4, vec3, } from "gl-matrix";
 
-import VBO from "../../core/VBO";
-import VAO from "../../core/VAO";
 import Sphere from "@/webgl/modules/Primitives/Sphere";
-import IBO from "@/webgl/core/IBO";
-import Camera from "@/webgl/core/Camera";
-import Bolt from "@/webgl/core/Bolt";
 
 interface TransformFeedbackObject {
     updateVAO: VAO;

@@ -82,14 +82,14 @@
         {
             "bufferView" : 0,
             "componentType" : 5126,
-            "count" : 13344,
+            "count" : 3344,
             "max" : [
-                0.5735918879508972,
+                0.5733816027641296,
                 1.9809372425079346,
-                0.34285515546798706
+                0.34250926971435547
             ],
             "min" : [
-                -0.573591947555542,
+                -0.5733816623687744,
                 0.0331248864531517,
                 -0.3648300766944885
             ],
@@ -98,26 +98,26 @@
         {
             "bufferView" : 1,
             "componentType" : 5126,
-            "count" : 13344,
+            "count" : 3344,
             "type" : "VEC3"
         },
         {
             "bufferView" : 2,
             "componentType" : 5123,
-            "count" : 13344,
+            "count" : 3344,
             "normalized" : true,
             "type" : "VEC4"
         },
         {
             "bufferView" : 3,
             "componentType" : 5123,
-            "count" : 79872,
+            "count" : 19968,
             "type" : "SCALAR"
         },
         {
             "bufferView" : 4,
             "componentType" : 5126,
-            "count" : 674,
+            "count" : 178,
             "max" : [
                 0.08994778990745544,
                 1.8679450750350952,
@@ -126,75 +126,75 @@
             "min" : [
                 -0.08994778990745544,
                 1.7895482778549194,
-                0.08454500883817673
+                0.08524327725172043
             ],
             "type" : "VEC3"
         },
         {
             "bufferView" : 5,
             "componentType" : 5126,
-            "count" : 674,
+            "count" : 178,
             "type" : "VEC3"
         },
         {
             "bufferView" : 6,
             "componentType" : 5123,
-            "count" : 674,
+            "count" : 178,
             "normalized" : true,
             "type" : "VEC4"
         },
         {
             "bufferView" : 7,
             "componentType" : 5123,
-            "count" : 3840,
+            "count" : 960,
             "type" : "SCALAR"
         }
     ],
     "bufferViews" : [
         {
             "buffer" : 0,
-            "byteLength" : 160128,
+            "byteLength" : 40128,
             "byteOffset" : 0
         },
         {
             "buffer" : 0,
-            "byteLength" : 160128,
-            "byteOffset" : 160128
+            "byteLength" : 40128,
+            "byteOffset" : 40128
         },
         {
             "buffer" : 0,
-            "byteLength" : 106752,
-            "byteOffset" : 320256
+            "byteLength" : 26752,
+            "byteOffset" : 80256
         },
         {
             "buffer" : 0,
-            "byteLength" : 159744,
-            "byteOffset" : 427008
+            "byteLength" : 39936,
+            "byteOffset" : 107008
         },
         {
             "buffer" : 0,
-            "byteLength" : 8088,
-            "byteOffset" : 586752
+            "byteLength" : 2136,
+            "byteOffset" : 146944
         },
         {
             "buffer" : 0,
-            "byteLength" : 8088,
-            "byteOffset" : 594840
+            "byteLength" : 2136,
+            "byteOffset" : 149080
         },
         {
             "buffer" : 0,
-            "byteLength" : 5392,
-            "byteOffset" : 602928
+            "byteLength" : 1424,
+            "byteOffset" : 151216
         },
         {
             "buffer" : 0,
-            "byteLength" : 7680,
-            "byteOffset" : 608320
+            "byteLength" : 1920,
+            "byteOffset" : 152640
         }
     ],
     "buffers" : [
         {
-            "byteLength" : 616000,
+            "byteLength" : 154560,
             "uri" : "phantom.bin"
         }
     ]

@@ -1,11 +1,8 @@
-import Shader from "@/webgl/core/Shader";
 import { Pass } from "./Pass";
 
 import vertexShader from "./shaders/dof/dof.vert";
 import fragmentShader from "./shaders/dof/dof.frag";
-import FBO from "@/webgl/core/FBO";
-import Bolt from "@/webgl/core/Bolt";
-
+import Bolt, { Shader, FBO } from "@robsouthgate/bolt-core";
 export default class DOFPass extends Pass {
 
     shader!: Shader;

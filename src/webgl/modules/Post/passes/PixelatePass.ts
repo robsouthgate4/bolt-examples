@@ -1,10 +1,8 @@
-import Shader from "@/webgl/core/Shader";
 import { Pass } from "./Pass";
 
 import vertexShader from "./shaders/pixelate/pixelate.vert";
 import fragmentShader from "./shaders/pixelate/pixelate.frag";
-import FBO from "@/webgl/core/FBO";
-import Bolt from "@/webgl/core/Bolt";
+import Bolt, { Shader, FBO } from "@robsouthgate/bolt-core";
 
 export default class PixelatePass extends Pass {
 

@@ -1,8 +1,5 @@
-import ArrayBuffer from "@/webgl/core/ArrayBuffer";
-import Bolt from "@/webgl/core/Bolt";
-import FBO from "@/webgl/core/FBO";
-import RBO from "@/webgl/core/RBO";
 
+import Bolt, { FBO, ArrayBuffer, RBO } from "@robsouthgate/bolt-core";
 export abstract class Pass {
 
     fbo: FBO;
