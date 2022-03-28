@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Transform, ArrayBuffer, FBO, Camera } from "@robsouthgate/bolt-core";
+import Bolt, { Shader, Transform, ArrayBuffer, FBO, Camera, Node } from "@robsouthgate/bolt-core";
 
 import defaultVertexInstanced from "../../examples/shaders/defaultInstanced/defaultInstanced.vert";
 import defaultFragmentInstanced from "../../examples/shaders/defaultInstanced/defaultInstanced.frag";
@@ -8,13 +8,12 @@ import depthVertexInstanced from "../../examples/shaders/depth/depth.vert";
 import depthFragmentInstanced from "../../examples/shaders/depth/depth.frag";
 
 import { mat4, quat, vec2, vec3, } from "gl-matrix";
-
-import GLTFParser from "../../modules/GLTFParser";
 import CameraFPS from "@/webgl/modules/CameraFPS";
 import Post from "@/webgl/modules/Post/Post";
 import RenderPass from "@/webgl/modules/Post/passes/RenderPass";
 import DOFPass from "@/webgl/modules/Post/passes/DOFPass";
 import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
+import GLTFLoader from "@/webgl/modules/GLTFLoader";
 
 export default class extends Base {
 
@@ -25,6 +24,7 @@ export default class extends Base {
     assetsLoaded!: boolean;
     cubeTransform!: Transform;
     torusBuffer!: ArrayBuffer;
+    toruseGLTFBuffer!: ArrayBuffer;
     bolt: Bolt;
     post: Post;
     renderPass!: RenderPass;
@@ -78,13 +78,7 @@ export default class extends Base {
 
     async init() {
 
-    	const gltfLoader = new GLTFParser( "/static/models/gltf/torus.gltf" );
 
-    	const geometry = await gltfLoader.loadGLTF();
-
-    	if ( ! geometry ) return;
-
-    	this.assetsLoaded = true;
 
     	this.depthFBO = new FBO( { width: this.canvas.width, height: this.canvas.height, depth: true } );
 
@@ -149,15 +143,42 @@ export default class extends Base {
 
     	}
 
-    	// setup nodes
-    	this.torusBuffer = new ArrayBuffer(
-    		geometry,
-    		{
-    			instanced: true,
-    			instanceCount,
-    			instanceMatrices
+    	const gltfLoader = new GLTFLoader( this.bolt );
+
+    	const gltf = await gltfLoader.loadGLTF( "/static/models/gltf", "torus.gltf" );
+
+    	if ( ! gltf ) return;
+
+    	this.assetsLoaded = true;
+
+    	if ( gltf.scenes ) {
+
+    		for ( const scene of gltf.scenes ) {
+
+    			scene.root.traverse( ( node: Node ) => {
+
+    				if ( node.name === "Torus" ) {
+
+    					const buffer = node.drawables[ 0 ];
+
+    				    this.torusBuffer = new ArrayBuffer( {
+    						positions: buffer.positions,
+    						normals: buffer.normals,
+    						uvs: buffer.uvs,
+    						indices: buffer.indices
+    					}, {
+    						instanceCount,
+    						instanced: true,
+    						instanceMatrices
+    					} );
+
+    				}
+
+    			} );
+
     		}
-    	),
+
+    	}
 
     	this.resize();
 

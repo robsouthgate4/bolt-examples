@@ -134,16 +134,19 @@ export default class GLTFLoader {
 
     	}
 
+    	const originalNodes = gltf.nodes;
+
     	const nodes = gltf.nodes?.map( ( node ) => {
 
     		const { name, translation, rotation, scale, mesh } = node;
     		const rootTransform = new Transform();
-    		rootTransform.position = translation ? vec3.fromValues( translation[ 0 ], translation[ 1 ], translation[ 2 ] ) : vec3.create();
-    		rootTransform.quaternion = rotation ? quat.fromValues( rotation[ 0 ], rotation[ 1 ], rotation[ 2 ], rotation[ 3 ] ) : quat.create();
-    		rootTransform.scale = scale ? vec3.fromValues( scale[ 0 ], scale[ 1 ], scale[ 2 ] ) : vec3.create();
+    		rootTransform.position = translation ? vec3.fromValues( translation[ 0 ], translation[ 1 ], translation[ 2 ] ) : vec3.fromValues( 0, 0, 0 );
+    		rootTransform.quaternion = rotation ? quat.fromValues( rotation[ 0 ], rotation[ 1 ], rotation[ 2 ], rotation[ 3 ] ) : quat.fromValues( 0, 0, 0, 1 );
+    		rootTransform.scale = scale ? vec3.fromValues( scale[ 0 ], scale[ 1 ], scale[ 2 ] ) : vec3.fromValues( 1, 1, 1 );
 
     		const rootNode = new Node();
     		rootNode.transform = rootTransform;
+    		rootNode.name = name;
 
     		if ( gltf.meshes && gltf.meshes.length > 0 ) {
 
@@ -151,25 +154,25 @@ export default class GLTFLoader {
 
     				const gltfMesh = gltf.meshes[ mesh ];
 
-    				gltfMesh.primitives.forEach( ( primitive ) => {
+    				if ( gltfMesh ) {
 
-    					console.log( primitive.bufferInfo );
+    					gltfMesh.primitives.forEach( ( primitive ) => {
 
-    					const attribs = primitive.bufferInfo.attributes;
+    						const attribs = primitive.bufferInfo.attributes;
 
-    					const geometry: GeometryBuffers = {
-    						positions: attribs.aPosition ? attribs.aPosition.buffer : new Float32Array(),
-    						normals: attribs.aNormal ? attribs.aNormal.buffer : new Float32Array(),
-    						uvs: attribs.aTexcoord_0 ? attribs.aTexcoord_0.buffer : new Float32Array(),
-    						indices: primitive.bufferInfo.indices
-    					};
+    						const geometry: GeometryBuffers = {
+    							positions: attribs.aPosition ? attribs.aPosition.buffer : new Float32Array(),
+    							normals: attribs.aNormal ? attribs.aNormal.buffer : new Float32Array(),
+    							uvs: attribs.aTexcoord_0 ? attribs.aTexcoord_0.buffer : new Float32Array(),
+    							indices: primitive.bufferInfo.indices
+    						};
 
-    					const arrayBuffer = new ArrayBuffer( geometry );
+    						const arrayBuffer = new ArrayBuffer( geometry );
+    						rootNode.drawables.push( arrayBuffer );
 
-    					const childNode = new Node( arrayBuffer );
-    					childNode.setParent( rootNode );
+    					} );
 
-    				} );
+    				}
 
     			}
 
@@ -179,7 +182,59 @@ export default class GLTFLoader {
 
     	} );
 
-    	return nodes;
+    	if ( originalNodes ) {
+
+    		gltf.nodes?.forEach( ( node, index ) => {
+
+    			const children = originalNodes[ index ].children;
+
+    			if ( children ) {
+
+    				children.forEach( ( childNdx ) => {
+
+    					if ( ! gltf.nodes ) return;
+
+    					const child = gltf.nodes[ childNdx ];
+    					child.setParent( node );
+
+    				} );
+
+    			}
+
+
+    		} );
+
+    	}
+
+
+    	if ( gltf.scenes ) {
+
+    		for ( const scene of gltf.scenes ) {
+
+    			scene.root = new Node();
+    			scene.root.name = scene.name;
+
+    			if ( scene.nodes ) {
+
+    				scene.nodes.forEach( ( childNdx ) => {
+
+    					if ( ! nodes ) return;
+
+    					const child = nodes[ childNdx ];
+    					child.setParent( scene.root );
+
+    				} );
+
+    			}
+
+
+
+    		}
+
+    	}
+
+    	return gltf;
+
 
 
     }

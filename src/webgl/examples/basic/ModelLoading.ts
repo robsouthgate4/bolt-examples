@@ -6,8 +6,9 @@ import defaultFragment from "../../examples/shaders/default/default.frag";
 
 import { vec3, } from "gl-matrix";
 import CameraArcball from "../../modules/CameraArcball";
-import Sphere from "../../modules/Primitives/Sphere";
 import GLTFLoader from "@/webgl/modules/GLTFLoader";
+import { GlTf } from "@/webgl/modules/GLTFLoader/types/GLTF";
+import Sphere from "../../modules/Primitives/Sphere";
 
 export default class extends Base {
 
@@ -18,10 +19,10 @@ export default class extends Base {
     assetsLoaded?: boolean;
     torusTransform!: Transform;
     sphereNode!: Node;
-    cubeNode!: Node;
     planeNode!: Node;
     bolt: Bolt;
     _loadedNodes: Node[] = []
+    gltf!: GlTf
 
     constructor() {
 
@@ -37,7 +38,7 @@ export default class extends Base {
     	this.camera = new CameraArcball(
     		this.width,
     		this.height,
-    		vec3.fromValues( 0, 1, 2 ),
+    		vec3.fromValues( 0, 2, 5 ),
     		vec3.fromValues( 0, 1, 0 ),
     		45,
     		0.01,
@@ -51,7 +52,7 @@ export default class extends Base {
     	this.bolt.setCamera( this.camera );
 
     	this.shader = new Shader( defaultVertex, defaultFragment );
-    	this.lightPosition = vec3.fromValues( 0, 10, 0 );
+    	this.lightPosition = vec3.fromValues( 0, 0, 2 );
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.enableDepth();
@@ -64,23 +65,16 @@ export default class extends Base {
     async init() {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
-    	const nodes = await gltfLoader.loadGLTF( "/static/models/gltf", "phantom.gltf" );
+    	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf", "phantom_objects.gltf" );
+    	this.assetsLoaded = true;
 
-    	if ( nodes ) {
+    	console.log( this.gltf );
 
-    		this._loadedNodes.push( ...nodes );
-
-    		this.assetsLoaded = true;
-
-    	}
-
-
-    	const sphereGeometry = new Sphere( { radius: 1, widthSegments: 32, heightSegments: 32 } );
+    	const geometry = new Sphere( { widthSegments: 32, heightSegments: 32 } );
 
     	this.sphereNode = new Node(
-    		new ArrayBuffer( sphereGeometry ),
+    		new ArrayBuffer( geometry ),
     	);
-
 
     	this.resize();
 
@@ -109,10 +103,28 @@ export default class extends Base {
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 1, 1, 1, 1 );
 
-    	this.shader.activate();
     	this.shader.setFloat( "time", elapsed );
 
-    	this.bolt.draw( this.shader, [ ...this._loadedNodes[ 0 ].children ] );
+    	if ( this.gltf.scenes ) {
+
+    		for ( const scene of this.gltf.scenes ) {
+
+    			scene.root.updateModelMatrix();
+    			scene.root.traverse( ( node: Node ) => {
+
+    				for ( const drawable of node.drawables ) {
+
+    					node.updateMatrices( this.shader, this.camera );
+    					drawable.drawTriangles( this.shader );
+
+    				}
+
+    			} );
+
+    		}
+
+    	}
+
 
     }
 

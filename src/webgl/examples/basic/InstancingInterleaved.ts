@@ -139,9 +139,6 @@ export default class extends Base {
 
   	}
 
-  	// setup transforms
-  	this.cubeTransform = new Transform();
-
   	// setup nodes
   	this.cubeNode = new ArrayBufferInterleaved(
   		6,

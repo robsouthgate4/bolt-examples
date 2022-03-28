@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/basic/Instancing";
+import Example from "@/webgl/examples/basic/ModelLoading";
 
 export default class Main {
 
