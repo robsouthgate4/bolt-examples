@@ -182,9 +182,9 @@ export default class GLTFLoader {
 
     	} );
 
-    	if ( originalNodes ) {
+    	if ( originalNodes && nodes ) {
 
-    		gltf.nodes?.forEach( ( node, index ) => {
+    		nodes.forEach( ( node, index ) => {
 
     			const children = originalNodes[ index ].children;
 
@@ -192,9 +192,7 @@ export default class GLTFLoader {
 
     				children.forEach( ( childNdx ) => {
 
-    					if ( ! gltf.nodes ) return;
-
-    					const child = gltf.nodes[ childNdx ];
+    					const child = nodes[ childNdx ];
     					child.setParent( node );
 
     				} );

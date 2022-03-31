@@ -38,8 +38,8 @@ export default class extends Base {
     	this.camera = new CameraArcball(
     		this.width,
     		this.height,
-    		vec3.fromValues( 0, 2, 5 ),
-    		vec3.fromValues( 0, 1, 0 ),
+    		vec3.fromValues( 0, 3, 5 ),
+    		vec3.fromValues( 0, 0, 0 ),
     		45,
     		0.01,
     		1000,
@@ -67,15 +67,6 @@ export default class extends Base {
     	const gltfLoader = new GLTFLoader( this.bolt );
     	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf", "phantom_objects.gltf" );
     	this.assetsLoaded = true;
-
-    	console.log( this.gltf );
-
-    	const geometry = new Sphere( { widthSegments: 32, heightSegments: 32 } );
-
-    	this.sphereNode = new Node(
-    		new ArrayBuffer( geometry ),
-    	);
-
     	this.resize();
 
     }

@@ -31,6 +31,7 @@ export default class extends Base {
     pixelate!: PixelatePass;
     bolt = Bolt.getInstance();
     gl: WebGL2RenderingContext;
+    root!: Node;
 
     constructor() {
 
@@ -91,7 +92,7 @@ export default class extends Base {
     		height: this.height,
     		xPixels: 30,
     		yPixels: 30
-    	} ).setEnabled( true );
+    	} ).setEnabled( false );
 
     	this.fxaa = new FXAAPass( this.bolt, {
     		width: this.width,
@@ -106,18 +107,25 @@ export default class extends Base {
     	const sphereGeometry = new Sphere( { radius: 1, widthSegments: 64, heightSegments: 64 } );
     	const planeGeometry = new Plane( { widthSegments: 64, heightSegments: 64 } );
 
+    	this.root = new Node();
+    	this.root.transform.scale = vec3.fromValues( 1, 1, 1 );
+
     	this.sphereNode = new Node(
     		new ArrayBuffer( sphereGeometry ),
     	);
+
+    	this.sphereNode.setParent( this.root );
 
     	this.planeNode = new Node(
     		new ArrayBuffer( planeGeometry ),
     	);
 
-    	this.planeNode.transform.scale = vec3.fromValues( 3, 3, 3 );
+    	this.planeNode.setParent( this.root );
+
+    	this.planeNode.transform.scale = vec3.fromValues( 10, 10, 10 );
 
     	this.planeNode.transform.rotation[ 0 ] = Math.PI * 0.5;
-    	this.planeNode.transform.position[ 1 ] = - 0.25;
+    	this.planeNode.transform.position[ 1 ] = - 1;
 
     	this.resize();
 
@@ -148,7 +156,7 @@ export default class extends Base {
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 1, 1, 1, 1 );
 
-    	this.bolt.draw( this.shader, [ this.sphereNode, this.planeNode ] );
+    	this.bolt.draw( this.shader, [ this.root, this.sphereNode, this.planeNode ] );
 
     	this.post.end();
 
