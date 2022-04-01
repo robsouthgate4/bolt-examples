@@ -2,11 +2,12 @@ import Base from "@webgl/Base";
 import defaultVertex from "../../examples/shaders/default/default.vert";
 import defaultFragment from "../../examples/shaders/default/default.frag";
 
-import Bolt, { Shader, Transform, Node, ArrayBuffer } from "@robsouthgate/bolt-core";
+import Bolt, { Shader, Transform, Node, Mesh } from "@robsouthgate/bolt-core";
 
 import { vec3, } from "gl-matrix";
 import CameraArcball from "../../modules/CameraArcball";
 import GLTFParser from "../../modules/GLTFParser";
+import Batch from "@robsouthgate/bolt-core/lib/Batch";
 
 export default class extends Base {
 
@@ -16,7 +17,7 @@ export default class extends Base {
     camera: CameraArcball;
     assetsLoaded!: boolean;
     torusTransform!: Transform;
-    torusNode!: Node;
+    torusBatch!: Batch;
     bolt: Bolt;
     root!: Node;
 
@@ -74,12 +75,13 @@ export default class extends Base {
     	this.shader.setVector3( "lightColor", vec3.fromValues( 0.95, 1.0, 1.0 ) );
 
     	// setup nodes
-    	this.torusNode = new Node(
-    		new ArrayBuffer( geometry ),
+    	this.torusBatch = new Batch(
+    		new Mesh( geometry ),
+    		this.shader
     	);
 
-    	this.torusNode.transform.position = vec3.fromValues( 0, 0, 0 );
-    	this.torusNode.transform.scale = vec3.fromValues( 1, 1, 1 );
+    	this.torusBatch.transform.position = vec3.fromValues( 0, 0, 0 );
+    	this.torusBatch.transform.scale = vec3.fromValues( 1, 1, 1 );
 
     	this.resize();
 
@@ -112,7 +114,7 @@ export default class extends Base {
     	this.shader.setVector3( "viewPosition", this.camera.position );
     	this.shader.setFloat( "time", elapsed );
 
-    	this.bolt.draw( this.shader, [ this.torusNode ] );
+    	this.bolt.draw( this.torusBatch );
 
     }
 

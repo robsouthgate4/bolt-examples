@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Transform, ArrayBuffer, FBO, Camera, Node } from "@robsouthgate/bolt-core";
+import Bolt, { Shader, Transform, Mesh, FBO, Camera, Node } from "@robsouthgate/bolt-core";
 
 import defaultVertexInstanced from "../../examples/shaders/defaultInstanced/defaultInstanced.vert";
 import defaultFragmentInstanced from "../../examples/shaders/defaultInstanced/defaultInstanced.frag";
@@ -23,8 +23,8 @@ export default class extends Base {
     camera: CameraFPS;
     assetsLoaded!: boolean;
     cubeTransform!: Transform;
-    torusBuffer!: ArrayBuffer;
-    toruseGLTFBuffer!: ArrayBuffer;
+    torusBuffer!: Mesh;
+    toruseGLTFBuffer!: Mesh;
     bolt: Bolt;
     post: Post;
     renderPass!: RenderPass;
@@ -161,7 +161,7 @@ export default class extends Base {
 
     					const buffer = node.drawables[ 0 ];
 
-    				    this.torusBuffer = new ArrayBuffer( {
+    				    this.torusBuffer = new Mesh( {
     						positions: buffer.positions,
     						normals: buffer.normals,
     						uvs: buffer.uvs,

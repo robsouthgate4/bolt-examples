@@ -6,7 +6,7 @@ import defaultFragment from "../../examples/shaders/default/default.frag";
 import { vec3, } from "gl-matrix";
 import CameraArcball from "../../modules/CameraArcball";
 import CameraFPS from "../../modules/CameraFPS";
-import Bolt, { ArrayBufferInterleaved, FBO, Shader, Transform, Node } from "@robsouthgate/bolt-core";
+import Bolt, { MeshInterleaved, FBO, Shader, Transform, Node } from "@robsouthgate/bolt-core";
 
 const buffer = [
 	- 0.5, - 0.5, - 0.5, 0.0, 0.0, - 1.0,
@@ -63,7 +63,7 @@ export default class extends Base {
     cubeNode!: Node;
     boxTransform!: Transform;
     torusNode!: Node;
-    cubeMinimal!: ArrayBufferInterleaved;
+    cubeMinimal!: MeshInterleaved;
     fbo!: FBO;
     bolt: Bolt;
 
@@ -115,7 +115,7 @@ export default class extends Base {
 
     	// setup nodes
     	this.cubeNode = new Node(
-    		new ArrayBufferInterleaved(
+    		new MeshInterleaved(
     			6,
     			buffer,
     		),

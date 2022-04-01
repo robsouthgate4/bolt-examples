@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { ArrayBuffer, Shader, Transform } from "@robsouthgate/bolt-core";
+import Bolt, { Mesh, Shader, Transform } from "@robsouthgate/bolt-core";
 
 import GLTFLoader from "@/webgl/modules/GLTFLoader";
 
@@ -16,7 +16,7 @@ export default class extends Base {
     camera: CameraFPS;
     assetsLoaded!: boolean;
     cubeTransform!: Transform;
-    torusBuffer!: ArrayBuffer;
+    torusBuffer!: Mesh;
     bolt: Bolt;
 
     constructor() {
@@ -53,74 +53,8 @@ export default class extends Base {
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.enableDepth();
 
-    	//this.init();
-
 
     }
-
-    // async init() {
-
-    // 	const gltfLoader = new GLTFLoader( this.bolt );
-
-    // 	const nodes = await gltfLoader.loadGLTF( "/static/models/gltf", "phantom.gltf" );
-
-    // 	if ( ! nodes ) return;
-
-    // 	const arrayBuffer = nodes[ 0 ].children[ 0 ].arrayBuffer as ArrayBuffer;
-
-    // 	const { positions, normals, uvs, indices } = arrayBuffer;
-
-    // 	this.assetsLoaded = true;
-
-    // 	// set shader uniforms
-    // 	this.shader.activate();
-    // 	this.shader.setVector3( "objectColor", vec3.fromValues( 1.0, 0.0, 0.0 ) );
-    // 	this.shader.setVector3( "lightColor", vec3.fromValues( 0.95, 1.0, 1.0 ) );
-
-    // 	const instanceCount = 3000;
-
-    // 	const instanceMatrices: mat4[] = [];
-
-    // 	for ( let i = 0; i < instanceCount; i ++ ) {
-
-    // 		const x = ( Math.random() * 2 - 1 ) * 50;
-    // 		const y = 0;
-    // 		const z = Math.random() * 500;
-
-    // 		const tempTranslation = vec3.fromValues( x, y, - z );
-    // 		const tempRotation = quat.fromValues( 0, 0, 0, 0 );
-    // 		const tempScale = vec3.fromValues( 1, 1, 1 );
-
-    // 		const translation = mat4.create();
-    // 		mat4.fromTranslation( translation, tempTranslation );
-
-    // 		const rotation = mat4.create();
-    // 		mat4.fromQuat( rotation, tempRotation );
-
-    // 		const scale = mat4.create();
-    // 		mat4.fromScaling( scale, tempScale );
-
-    // 		const combined = mat4.create();
-    // 		mat4.multiply( combined, translation, rotation );
-    // 		mat4.multiply( combined, combined, scale );
-
-    // 		instanceMatrices.push( combined );
-
-    // 	}
-
-    // 	// setup nodes
-    // 	this.torusBuffer = new ArrayBuffer(
-    // 		{ positions, normals, uvs, indices },
-    // 		{
-    // 			instanced: true,
-    // 			instanceCount,
-    // 			instanceMatrices
-    // 		}
-    // 	),
-
-    // 	this.resize();
-
-    // }
 
     resize() {
 

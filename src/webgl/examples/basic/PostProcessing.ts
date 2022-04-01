@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Node, Transform, ArrayBuffer } from "@robsouthgate/bolt-core";
+import Bolt, { Shader, Batch, Transform, Mesh, Node } from "@robsouthgate/bolt-core";
 
 import defaultVertex from "../../examples/shaders/default/default.vert";
 import defaultFragment from "../../examples/shaders/default/default.frag";
@@ -21,9 +21,8 @@ export default class extends Base {
     camera: CameraArcball;
     assetsLoaded?: boolean;
     torusTransform!: Transform;
-    sphereNode!: Node;
-    cubeNode!: Node;
-    planeNode!: Node;
+    sphereBatch!: Batch;
+    planeBatch!: Batch;
     post: Post;
     fxaa!: FXAAPass;
     rbgSplit!: RGBSplitPass;
@@ -48,7 +47,7 @@ export default class extends Base {
     		this.width,
     		this.height,
     		vec3.fromValues( 0, 2, 6 ),
-    		vec3.fromValues( 0, 0, 0 ),
+    		vec3.fromValues( 0, 2, 0 ),
     		45,
     		0.01,
     		1000,
@@ -110,22 +109,24 @@ export default class extends Base {
     	this.root = new Node();
     	this.root.transform.scale = vec3.fromValues( 1, 1, 1 );
 
-    	this.sphereNode = new Node(
-    		new ArrayBuffer( sphereGeometry ),
+    	this.sphereBatch = new Batch(
+    		new Mesh( sphereGeometry ),
+    		this.shader
     	);
 
-    	this.sphereNode.setParent( this.root );
+    	this.sphereBatch.setParent( this.root );
 
-    	this.planeNode = new Node(
-    		new ArrayBuffer( planeGeometry ),
+    	this.planeBatch = new Batch(
+    		new Mesh( planeGeometry ),
+    		this.shader
     	);
 
-    	this.planeNode.setParent( this.root );
+    	this.planeBatch.setParent( this.root );
 
-    	this.planeNode.transform.scale = vec3.fromValues( 10, 10, 10 );
+    	this.planeBatch.transform.scale = vec3.fromValues( 10, 10, 10 );
 
-    	this.planeNode.transform.rotation[ 0 ] = Math.PI * 0.5;
-    	this.planeNode.transform.position[ 1 ] = - 1;
+    	this.planeBatch.transform.rotation[ 0 ] = Math.PI * 0.5;
+    	this.planeBatch.transform.position[ 1 ] = - 1;
 
     	this.resize();
 
@@ -156,7 +157,7 @@ export default class extends Base {
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 1, 1, 1, 1 );
 
-    	this.bolt.draw( this.shader, [ this.root, this.sphereNode, this.planeNode ] );
+    	this.bolt.draw( [ this.sphereBatch, this.planeBatch ] );
 
     	this.post.end();
 

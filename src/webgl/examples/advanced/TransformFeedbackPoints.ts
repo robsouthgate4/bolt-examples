@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { ArrayBufferInterleaved, Shader, Transform, VAO, VBO } from "@robsouthgate/bolt-core";
+import Bolt, { MeshInterleaved, Shader, Transform, VAO, VBO } from "@robsouthgate/bolt-core";
 
 import particlesVertexInstanced from "../../examples/shaders/gpgpu/particles.vert";
 import particlesFragmentInstanced from "../../examples/shaders/gpgpu/particles.frag";
@@ -19,7 +19,7 @@ export default class extends Base {
     camera: CameraFPS;
     assetsLoaded!: boolean;
     cubeTransform!: Transform;
-    torusBuffer!: ArrayBufferInterleaved;
+    torusBuffer!: MeshInterleaved;
     simulationShader!: Shader;
     simulationShaderLocations!: { tfOldPosition: number; tfOldVelocity: number; };
     particleShaderLocations!: { aPosition: number; };

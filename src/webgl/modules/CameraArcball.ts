@@ -172,9 +172,9 @@ export default class CameraArcball extends Camera {
     	const sineElevation = Math.sin( this.elevation );
     	const cosineElevation = Math.cos( this.elevation );
 
-    	direction[ 0 ] = this.radius * cosineElevation * cosineAzimuth;
-    	direction[ 1 ] = this.radius * sineElevation;
-    	direction[ 2 ] = this.radius * cosineElevation * sineAzimuth;
+    	direction[ 0 ] = ( this.radius * cosineElevation * cosineAzimuth ) + this.target[ 0 ];
+    	direction[ 1 ] = this.radius * sineElevation + this.target[ 1 ];
+    	direction[ 2 ] = this.radius * cosineElevation * sineAzimuth + this.target[ 2 ];
 
     	return direction;
 

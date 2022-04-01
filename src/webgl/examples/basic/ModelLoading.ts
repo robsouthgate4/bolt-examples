@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Node, Transform, ArrayBuffer } from "@robsouthgate/bolt-core";
+import Bolt, { Shader, Node, Transform } from "@robsouthgate/bolt-core";
 
 import defaultVertex from "../../examples/shaders/default/default.vert";
 import defaultFragment from "../../examples/shaders/default/default.frag";
@@ -8,7 +8,6 @@ import { vec3, } from "gl-matrix";
 import CameraArcball from "../../modules/CameraArcball";
 import GLTFLoader from "@/webgl/modules/GLTFLoader";
 import { GlTf } from "@/webgl/modules/GLTFLoader/types/GLTF";
-import Sphere from "../../modules/Primitives/Sphere";
 
 export default class extends Base {
 
@@ -38,8 +37,8 @@ export default class extends Base {
     	this.camera = new CameraArcball(
     		this.width,
     		this.height,
-    		vec3.fromValues( 0, 3, 5 ),
-    		vec3.fromValues( 0, 0, 0 ),
+    		vec3.fromValues( 0, 1, 5 ),
+    		vec3.fromValues( 0, 2, 0 ),
     		45,
     		0.01,
     		1000,

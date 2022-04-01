@@ -1,9 +1,9 @@
 
 import { quat, vec3 } from "gl-matrix";
-import Bolt, { VBO, VAO, Transform, ArrayBuffer, Node } from "@robsouthgate/bolt-core";
+import Bolt, { VBO, VAO, Transform, Mesh as BoltMesh, Node } from "@robsouthgate/bolt-core";
 
 import { GlTf, Mesh, MeshPrimitive } from "./types/GLTF";
-import { GeometryBuffers } from "@robsouthgate/bolt-core/lib/ArrayBuffer";
+import { GeometryBuffers } from "@robsouthgate/bolt-core/lib/Mesh";
 
 interface AccessorDict {
     [id: string]: number;
@@ -167,7 +167,7 @@ export default class GLTFLoader {
     							indices: primitive.bufferInfo.indices
     						};
 
-    						const arrayBuffer = new ArrayBuffer( geometry );
+    						const arrayBuffer = new BoltMesh( geometry );
     						rootNode.drawables.push( arrayBuffer );
 
     					} );

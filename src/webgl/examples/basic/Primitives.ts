@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Node, ArrayBuffer, Transform } from "@robsouthgate/bolt-core";
+import Bolt, { Shader, Node, Mesh, Transform } from "@robsouthgate/bolt-core";
 
 import defaultVertex from "../../examples/shaders/default/default.vert";
 import defaultFragment from "../../examples/shaders/default/default.frag";
@@ -67,11 +67,11 @@ export default class extends Base {
     	const planeGeometry = new Plane( { widthSegments: 10, heightSegments: 10 } );
 
     	this.sphereNode = new Node(
-    		new ArrayBuffer( sphereGeometry ),
+    		new Mesh( sphereGeometry ),
     	);
 
     	this.cubeNode = new Node(
-    		new ArrayBuffer( cubeGeometry ),
+    		new Mesh( cubeGeometry ),
     	);
 
     	this.cubeNode.autoUpdate = false;
@@ -79,7 +79,7 @@ export default class extends Base {
     	this.cubeNode.updateModelMatrix();
 
     	this.planeNode = new Node(
-    		new ArrayBuffer( planeGeometry ),
+    		new Mesh( planeGeometry ),
     	);
 
     	this.planeNode.transform.position[ 0 ] = - 1.5;

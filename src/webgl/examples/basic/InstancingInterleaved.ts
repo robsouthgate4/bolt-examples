@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { ArrayBufferInterleaved, FBO, Shader, Transform } from "@robsouthgate/bolt-core";
+import Bolt, { MeshInterleaved, FBO, Shader, Transform } from "@robsouthgate/bolt-core";
 
 
 import defaultVertexInstanced from "../../examples/shaders/defaultInstanced/defaultInstanced.vert";
@@ -61,7 +61,7 @@ export default class extends Base {
   camera: CameraArcball | CameraFPS;
   assetsLoaded!: boolean;
   cubeTransform!: Transform;
-  cubeNode!: ArrayBufferInterleaved;
+  cubeNode!: MeshInterleaved;
   fbo!: FBO;
   bolt: Bolt;
 
@@ -140,7 +140,7 @@ export default class extends Base {
   	}
 
   	// setup nodes
-  	this.cubeNode = new ArrayBufferInterleaved(
+  	this.cubeNode = new MeshInterleaved(
   		6,
   		buffer,
   		{

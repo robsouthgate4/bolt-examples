@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Transform, Node, ArrayBuffer, Texture } from "@robsouthgate/bolt-core";
+import Bolt, { Shader, Transform, Node, Mesh, Texture } from "@robsouthgate/bolt-core";
 import vertexShader from "../../examples/shaders/raymarch/raymarch.vert";
 import fragmentShader from "../../examples/shaders/raymarch/raymarch.frag";
 
@@ -9,6 +9,7 @@ import Cube from "@/webgl/modules/Primitives/Cube";
 import Post from "@/webgl/modules/Post/Post";
 import RenderPass from "@/webgl/modules/Post/passes/RenderPass";
 import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
+import Batch from "@robsouthgate/bolt-core/lib/Batch";
 
 export default class extends Base {
 
@@ -18,7 +19,7 @@ export default class extends Base {
     camera: CameraArcball;
     assetsLoaded!: boolean;
     torusTransform!: Transform;
-    cubeNode!: Node;
+    cubeBatch!: Batch;
     bolt: Bolt;
     post: Post;
 
@@ -85,8 +86,9 @@ export default class extends Base {
     	this.shader.setTexture( "mapEqui", equiTexture );
 
     	// setup nodes
-    	this.cubeNode = new Node(
-    		new ArrayBuffer( geometry ),
+    	this.cubeBatch = new Batch(
+    		new Mesh( geometry ),
+    		this.shader
     	);
 
     	this.resize();
@@ -124,7 +126,7 @@ export default class extends Base {
     	this.shader.setVector3( "viewPosition", this.camera.position );
     	this.shader.setFloat( "time", elapsed );
 
-    	this.bolt.draw( this.shader, [ this.cubeNode ] );
+    	this.bolt.draw( this.cubeBatch );
 
     	this.post.end();
 
