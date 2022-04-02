@@ -37,7 +37,7 @@ export default class extends Base {
     	this.camera = new CameraArcball(
     		this.width,
     		this.height,
-    		vec3.fromValues( 0, 1, 5 ),
+    		vec3.fromValues( 0, 0, 5 ),
     		vec3.fromValues( 0, 2, 0 ),
     		45,
     		0.01,
@@ -66,6 +66,17 @@ export default class extends Base {
     	const gltfLoader = new GLTFLoader( this.bolt );
     	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf", "phantom_objects.gltf" );
     	this.assetsLoaded = true;
+
+    	if ( this.gltf.scenes ) {
+
+    		for ( const scene of this.gltf.scenes ) {
+
+    			console.log( scene.root );
+
+    		}
+
+    	}
+
     	this.resize();
 
     }
@@ -99,13 +110,11 @@ export default class extends Base {
 
     		for ( const scene of this.gltf.scenes ) {
 
-    			scene.root.updateModelMatrix();
     			scene.root.traverse( ( node: Node ) => {
 
-    				for ( const drawable of node.drawables ) {
+    				for ( const batch of node.batches ) {
 
-    					node.updateMatrices( this.shader, this.camera );
-    					drawable.drawTriangles( this.shader );
+    					this.bolt.draw( batch );
 
     				}
 

@@ -1,9 +1,12 @@
 
 import { quat, vec3 } from "gl-matrix";
-import Bolt, { VBO, VAO, Transform, Mesh as BoltMesh, Node } from "@robsouthgate/bolt-core";
+import Bolt, { VBO, VAO, Transform, Mesh, Node, Batch, Shader } from "@robsouthgate/bolt-core";
 
-import { GlTf, Mesh, MeshPrimitive } from "./types/GLTF";
+import { GlTf, Mesh as GLTFMesh, MeshPrimitive } from "./types/GLTF";
 import { GeometryBuffers } from "@robsouthgate/bolt-core/lib/Mesh";
+
+import vertexShader from "../../examples/shaders/default/default.vert";
+import fragmentShader from "../../examples/shaders/default/default.frag";
 
 interface AccessorDict {
     [id: string]: number;
@@ -62,7 +65,7 @@ export default class GLTFLoader {
 
     	if ( gltf.meshes ) {
 
-    		gltf.meshes.forEach( ( mesh: Mesh ) => {
+    		gltf.meshes.forEach( ( mesh: GLTFMesh ) => {
 
     			mesh.primitives.forEach( ( primitive: MeshPrimitive ) => {
 
@@ -167,8 +170,14 @@ export default class GLTFLoader {
     							indices: primitive.bufferInfo.indices
     						};
 
-    						const arrayBuffer = new BoltMesh( geometry );
-    						rootNode.drawables.push( arrayBuffer );
+    						const mesh = new Mesh( geometry );
+    						const batch = new Batch( mesh, new Shader( vertexShader, fragmentShader ) );
+    						batch.transform = new Transform();
+    						batch.transform.position = rootNode.transform.position;
+    						batch.transform.rotation = rootNode.transform.rotation;
+    						batch.transform.scale = rootNode.transform.scale;
+
+    						rootNode.batches.push( batch );
 
     					} );
 
