@@ -21,7 +21,7 @@ export default class extends Base {
     cubeTransform!: Transform;
     torusBuffer!: MeshInterleaved;
     simulationShader!: Shader;
-    simulationShaderLocations!: { tfOldPosition: number; tfOldVelocity: number; };
+    simulationShaderLocations!: { oldPosition: number; oldVelocity: number; };
     particleShaderLocations!: { aPosition: number; };
     tf1?: WebGLTransformFeedback;
     tf2?: WebGLTransformFeedback;
@@ -51,7 +51,7 @@ export default class extends Base {
     	this.particleShader = new Shader( particlesVertexInstanced, particlesFragmentInstanced );
 
     	const transformFeedbackVaryings = [
-    		"tfNewPosition",
+    		"newPosition",
     	];
 
     	this.simulationShader = new Shader( simulationVertex, simulationFragment,
@@ -60,8 +60,8 @@ export default class extends Base {
     		} );
 
     	this.simulationShaderLocations = {
-    		"tfOldPosition": 0,
-    		"tfOldVelocity": 1
+    		"oldPosition": 0,
+    		"oldVelocity": 1
     	};
 
     	this.particleShaderLocations = {
@@ -122,14 +122,14 @@ export default class extends Base {
 
     	const vaoUpdate1 = new VAO();
     	vaoUpdate1.bind();
-    	vaoUpdate1.linkAttrib( position1VBO, this.simulationShaderLocations.tfOldPosition, 3, this.gl.FLOAT );
-    	vaoUpdate1.linkAttrib( velocityBuffer, this.simulationShaderLocations.tfOldVelocity, 3, this.gl.FLOAT );
+    	vaoUpdate1.linkAttrib( position1VBO, this.simulationShaderLocations.oldPosition, 3, this.gl.FLOAT );
+    	vaoUpdate1.linkAttrib( velocityBuffer, this.simulationShaderLocations.oldVelocity, 3, this.gl.FLOAT );
     	vaoUpdate1.unbind();
 
     	const vaoUpdate2 = new VAO();
     	vaoUpdate2.bind();
-    	vaoUpdate2.linkAttrib( position2VBO, this.simulationShaderLocations.tfOldPosition, 3, this.gl.FLOAT );
-    	vaoUpdate2.linkAttrib( velocityBuffer, this.simulationShaderLocations.tfOldVelocity, 3, this.gl.FLOAT );
+    	vaoUpdate2.linkAttrib( position2VBO, this.simulationShaderLocations.oldPosition, 3, this.gl.FLOAT );
+    	vaoUpdate2.linkAttrib( velocityBuffer, this.simulationShaderLocations.oldVelocity, 3, this.gl.FLOAT );
     	vaoUpdate2.unbind();
 
     	const vaoDraw1 = new VAO();

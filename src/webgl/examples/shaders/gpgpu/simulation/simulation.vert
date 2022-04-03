@@ -1,12 +1,12 @@
 #version 300 es
 
-layout (location = 0) in vec3 tfOldPosition;
-layout (location = 1) in vec3 tfOldVelocity;
+layout (location = 0) in vec3 oldPosition;
+layout (location = 1) in vec3 oldVelocity;
 
-out vec3 tfNewPosition;
+out vec3 newPosition;
 
 void main() {
 
-  tfNewPosition = tfOldPosition + ( tfOldVelocity * 0.01 );
+  newPosition = oldPosition + ( oldVelocity * 0.01 );
 
 }

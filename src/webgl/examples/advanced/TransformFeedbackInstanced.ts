@@ -9,7 +9,8 @@ import simulationFragment from "../../examples/shaders/gpgpuInstanced/simulation
 
 import { mat4, vec3, } from "gl-matrix";
 
-import Sphere from "@/webgl/modules/Primitives/Sphere";
+import Plane from "@/webgl/modules/Primitives/Plane";
+import CameraFPS from "@/webgl/modules/CameraFPS";
 
 interface TransformFeedbackObject {
     updateVAO: VAO;
@@ -23,16 +24,16 @@ export default class extends Base {
     gl: WebGL2RenderingContext;
     particleShader!: Shader;
     lightPosition: vec3;
-    camera: Camera;
+    camera: CameraFPS;
     assetsLoaded!: boolean;
     simulationShader!: Shader;
-    simulationShaderLocations!: { tfOldPosition: number; tfOldVelocity: number; };
-    particleShaderLocations!: { aPosition: number; aOffset: number; aNormal: number; };
+    simulationShaderLocations!: { oldPosition: number; oldVelocity: number; startTime: number; };
+    particleShaderLocations!: { aPosition: number; aOffset: number; aNormal: number; aUV: number; };
     tf1?: WebGLTransformFeedback;
     tf2?: WebGLTransformFeedback;
     current!: TransformFeedbackObject;
     next!: TransformFeedbackObject;
-    instanceCount = 5000;
+    instanceCount = 50000;
     tfVelocity1?: WebGLTransformFeedback;
     tfVelocity2?: WebGLTransformFeedback;
     meshIBO!: IBO;
@@ -59,8 +60,8 @@ export default class extends Base {
     	this.particleShader = new Shader( particlesVertexInstanced, particlesFragmentInstanced );
 
     	const transformFeedbackVaryings = [
-    		"tfNewPosition",
-    		"tfNewVelocity",
+    		"newPosition",
+    		"newVelocity",
     	];
 
     	this.simulationShader = new Shader( simulationVertex, simulationFragment,
@@ -68,29 +69,38 @@ export default class extends Base {
     			transformFeedbackVaryings
     		} );
 
+    	this.simulationShader.activate();
+
+    	this.simulationShader.setFloat( "lifeTime", 4 );
+    	this.simulationShader.setFloat( "time", 0 );
+
     	this.simulationShaderLocations = {
-    		"tfOldPosition": 0,
-    		"tfOldVelocity": 1
+    		"oldPosition": 0,
+    		"oldVelocity": 1,
+    		"startTime": 2
     	};
 
     	this.particleShaderLocations = {
     		"aPosition": 0,
     		"aOffset": 1,
-    		"aNormal": 2
+    		"aNormal": 2,
+    		"aUV": 3
     	};
 
     	this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
-    	this.camera = new Camera(
+    	this.camera = new CameraFPS(
     		this.width,
     		this.height,
-    		vec3.fromValues( 0, 5, 30 ),
+    		vec3.fromValues( 0, 0, 25 ),
     		45,
     		0.01,
     		1000
     	);
 
     	this.camera.lookAt( vec3.fromValues( 0, 0, 0 ) );
+
+    	this.bolt.setCamera( this.camera );
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.enableDepth();
@@ -100,12 +110,13 @@ export default class extends Base {
 
     }
 
-    createTransformFeedback( buffer1: WebGLBuffer, buffer2: WebGLBuffer ) {
+    createTransformFeedback( buffer1: WebGLBuffer, buffer2: WebGLBuffer, buffer3: WebGLBuffer ) {
 
     	const tf = this.gl.createTransformFeedback();
     	this.gl.bindTransformFeedback( this.gl.TRANSFORM_FEEDBACK, tf );
     	this.gl.bindBufferBase( this.gl.TRANSFORM_FEEDBACK_BUFFER, 0, buffer1 );
     	this.gl.bindBufferBase( this.gl.TRANSFORM_FEEDBACK_BUFFER, 1, buffer2 );
+    	this.gl.bindBufferBase( this.gl.TRANSFORM_FEEDBACK_BUFFER, 2, buffer3 );
     	return tf;
 
     }
@@ -116,44 +127,54 @@ export default class extends Base {
 
     	const offsets: number[] = [];
     	const velocities: number[] = [];
+    	const startTimes: number[] = [];
 
     	for ( let i = 0; i < this.instanceCount; i ++ ) {
 
-    		offsets.push( ( Math.random() * 10 ) - 5 );
-    		offsets.push( 0 );
-    		offsets.push( ( Math.random() * 50 ) - 25 );
+    		startTimes.push( Math.random() * 100 );
 
-    		velocities.push( Math.random() * 2 - 1 );
-    		velocities.push( Math.random() );
-    		velocities.push( 0 );
+    		offsets.push( Math.random() );
+    		offsets.push( Math.random() );
+    		offsets.push( Math.random() );
+
+    		velocities.push( Math.random() * 0.01 );
+    		velocities.push( Math.random() * 0.01 );
+    		velocities.push( Math.random() * 0.01 );
 
     	}
 
     	// create vbos
-    	const sphereGeometry = new Sphere( { radius: 0.6, widthSegments: 6, heightSegments: 6 } );
+    	const particleGeometry = new Plane( { width: 0.5, height: 0.5 } );
 
     	// mesh vbo
-    	const meshPositionVBO = new VBO( sphereGeometry.positions, this.gl.STATIC_DRAW );
-    	const meshNormalVBO = new VBO( sphereGeometry.normals, this.gl.STATIC_DRAW );
-    	this.meshIBO = new IBO( sphereGeometry.indices );
+    	const meshPositionVBO = new VBO( particleGeometry.positions, this.gl.STATIC_DRAW );
+    	const meshNormalVBO = new VBO( particleGeometry.normals, this.gl.STATIC_DRAW );
+    	const meshUVVBO = new VBO( particleGeometry.uvs, this.gl.STATIC_DRAW );
+    	this.meshIBO = new IBO( particleGeometry.indices );
 
-    	// buffers for position and velocity
+    	// buffers
     	const offset1VBO = new VBO( offsets, this.gl.DYNAMIC_DRAW );
     	const offset2VBO = new VBO( offsets, this.gl.DYNAMIC_DRAW );
+
     	const velocity1VBO = new VBO( velocities, this.gl.DYNAMIC_DRAW );
     	const velocity2VBO = new VBO( velocities, this.gl.DYNAMIC_DRAW );
+
+    	const startTime1VBO = new VBO( startTimes, this.gl.DYNAMIC_DRAW );
+    	const startTime2VBO = new VBO( startTimes, this.gl.DYNAMIC_DRAW );
 
     	// create simulation vaos
     	const vaoSim1 = new VAO();
     	vaoSim1.bind();
-    	vaoSim1.linkAttrib( offset1VBO, this.simulationShaderLocations.tfOldPosition, 3, this.gl.FLOAT );
-    	vaoSim1.linkAttrib( velocity1VBO, this.simulationShaderLocations.tfOldVelocity, 3, this.gl.FLOAT );
+    	vaoSim1.linkAttrib( offset1VBO, this.simulationShaderLocations.oldPosition, 3, this.gl.FLOAT );
+    	vaoSim1.linkAttrib( velocity1VBO, this.simulationShaderLocations.oldVelocity, 3, this.gl.FLOAT );
+    	vaoSim1.linkAttrib( startTime1VBO, this.simulationShaderLocations.startTime, 1, this.gl.FLOAT );
     	vaoSim1.unbind();
 
     	const vaoSim2 = new VAO();
     	vaoSim2.bind();
-    	vaoSim2.linkAttrib( offset2VBO, this.simulationShaderLocations.tfOldPosition, 3, this.gl.FLOAT );
-    	vaoSim2.linkAttrib( velocity2VBO, this.simulationShaderLocations.tfOldVelocity, 3, this.gl.FLOAT );
+    	vaoSim2.linkAttrib( offset2VBO, this.simulationShaderLocations.oldPosition, 3, this.gl.FLOAT );
+    	vaoSim2.linkAttrib( velocity2VBO, this.simulationShaderLocations.oldVelocity, 3, this.gl.FLOAT );
+    	vaoSim1.linkAttrib( startTime2VBO, this.simulationShaderLocations.startTime, 1, this.gl.FLOAT );
     	vaoSim2.unbind();
 
     	// create draw vaos
@@ -162,6 +183,7 @@ export default class extends Base {
     	vaoDraw1.linkAttrib( meshPositionVBO, this.particleShaderLocations.aPosition, 3, this.gl.FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
     	vaoDraw1.linkAttrib( meshNormalVBO, this.particleShaderLocations.aNormal, 3, this.gl.FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
     	vaoDraw1.linkAttrib( offset1VBO, this.particleShaderLocations.aOffset, 3, this.gl.FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
+    	vaoDraw1.linkAttrib( meshUVVBO, this.particleShaderLocations.aUV, 2, this.gl.FLOAT, 2 * Float32Array.BYTES_PER_ELEMENT, 0 );
     	this.gl.vertexAttribDivisor( 1, 1 );
     	vaoDraw1.unbind();
 
@@ -170,12 +192,13 @@ export default class extends Base {
     	vaoDraw2.linkAttrib( meshPositionVBO, this.particleShaderLocations.aPosition, 3, this.gl.FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
     	vaoDraw1.linkAttrib( meshPositionVBO, this.particleShaderLocations.aNormal, 3, this.gl.FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
     	vaoDraw2.linkAttrib( offset2VBO, this.particleShaderLocations.aOffset, 3, this.gl.FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
+    	vaoDraw2.linkAttrib( meshUVVBO, this.particleShaderLocations.aUV, 2, this.gl.FLOAT, 2 * Float32Array.BYTES_PER_ELEMENT, 0 );
     	this.gl.vertexAttribDivisor( 1, 1 );
     	vaoDraw2.unbind();
 
     	// create transform feedback objects
-    	this.tf1 = <WebGLTransformFeedback> this.createTransformFeedback( offset1VBO.buffer, velocity1VBO.buffer );
-    	this.tf2 = <WebGLTransformFeedback> this.createTransformFeedback( offset2VBO.buffer, velocity2VBO.buffer );
+    	this.tf1 = <WebGLTransformFeedback> this.createTransformFeedback( offset1VBO.buffer, velocity1VBO.buffer, startTime1VBO.buffer );
+    	this.tf2 = <WebGLTransformFeedback> this.createTransformFeedback( offset2VBO.buffer, velocity2VBO.buffer, startTime2VBO.buffer );
     	this.gl.bindBuffer( this.gl.TRANSFORM_FEEDBACK_BUFFER, null );
 
     	// create current / next ojects ready for swap
@@ -215,7 +238,7 @@ export default class extends Base {
 
     	super.update( elapsed, delta );
 
-    	this.camera.update();
+    	this.camera.update( delta );
 
     	this.gl.viewport( 0, 0, this.gl.canvas.width, this.gl.canvas.height );
     	this.gl.clearColor( 0, 0, 0, 0 );
@@ -223,7 +246,9 @@ export default class extends Base {
 
     	{
 
-    		this.gl.useProgram( this.simulationShader.program );
+    		this.simulationShader.activate();
+    		this.simulationShader.setFloat( "time", elapsed );
+
     		this.gl.bindVertexArray( this.current.updateVAO.arrayObject );
 
     		this.gl.enable( this.gl.RASTERIZER_DISCARD );
