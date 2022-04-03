@@ -33,7 +33,7 @@ export default class extends Base {
     tf2?: WebGLTransformFeedback;
     current!: TransformFeedbackObject;
     next!: TransformFeedbackObject;
-    instanceCount = 50000;
+    instanceCount = 80000;
     tfVelocity1?: WebGLTransformFeedback;
     tfVelocity2?: WebGLTransformFeedback;
     meshIBO!: IBO;
@@ -70,7 +70,6 @@ export default class extends Base {
     		} );
 
     	this.simulationShader.activate();
-
     	this.simulationShader.setFloat( "lifeTime", 4 );
     	this.simulationShader.setFloat( "time", 0 );
 
@@ -133,23 +132,24 @@ export default class extends Base {
 
     		startTimes.push( Math.random() * 100 );
 
-    		offsets.push( Math.random() );
-    		offsets.push( Math.random() );
-    		offsets.push( Math.random() );
+    		offsets.push( ( Math.random() * 2 - 1 ) * 3 );
+    		offsets.push( ( Math.random() * 2 - 1 ) * 3 );
+    		offsets.push( ( Math.random() * 2 - 1 ) * 3 );
 
-    		velocities.push( Math.random() * 0.01 );
-    		velocities.push( Math.random() * 0.01 );
-    		velocities.push( Math.random() * 0.01 );
+    		velocities.push( 0 );
+    		velocities.push( 0 );
+    		velocities.push( 0 );
 
     	}
 
     	// create vbos
-    	const particleGeometry = new Plane( { width: 0.5, height: 0.5 } );
+    	const particleGeometry = new Plane( { width: 0.03, height: 0.03 } );
 
     	// mesh vbo
     	const meshPositionVBO = new VBO( particleGeometry.positions, this.gl.STATIC_DRAW );
     	const meshNormalVBO = new VBO( particleGeometry.normals, this.gl.STATIC_DRAW );
     	const meshUVVBO = new VBO( particleGeometry.uvs, this.gl.STATIC_DRAW );
+
     	this.meshIBO = new IBO( particleGeometry.indices );
 
     	// buffers
@@ -180,8 +180,8 @@ export default class extends Base {
     	// create draw vaos
     	const vaoDraw1 = new VAO();
     	vaoDraw1.bind();
-    	vaoDraw1.linkAttrib( meshPositionVBO, this.particleShaderLocations.aPosition, 3, this.gl.FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
-    	vaoDraw1.linkAttrib( meshNormalVBO, this.particleShaderLocations.aNormal, 3, this.gl.FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
+    	vaoDraw1.linkAttrib( meshPositionVBO, this.particleShaderLocations.aPosition, 3, this.gl.FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
+    	vaoDraw1.linkAttrib( meshNormalVBO, this.particleShaderLocations.aNormal, 3, this.gl.FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
     	vaoDraw1.linkAttrib( offset1VBO, this.particleShaderLocations.aOffset, 3, this.gl.FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
     	vaoDraw1.linkAttrib( meshUVVBO, this.particleShaderLocations.aUV, 2, this.gl.FLOAT, 2 * Float32Array.BYTES_PER_ELEMENT, 0 );
     	this.gl.vertexAttribDivisor( 1, 1 );
@@ -190,7 +190,7 @@ export default class extends Base {
     	const vaoDraw2 = new VAO();
     	vaoDraw2.bind();
     	vaoDraw2.linkAttrib( meshPositionVBO, this.particleShaderLocations.aPosition, 3, this.gl.FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
-    	vaoDraw1.linkAttrib( meshPositionVBO, this.particleShaderLocations.aNormal, 3, this.gl.FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT );
+    	vaoDraw1.linkAttrib( meshPositionVBO, this.particleShaderLocations.aNormal, 3, this.gl.FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
     	vaoDraw2.linkAttrib( offset2VBO, this.particleShaderLocations.aOffset, 3, this.gl.FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
     	vaoDraw2.linkAttrib( meshUVVBO, this.particleShaderLocations.aUV, 2, this.gl.FLOAT, 2 * Float32Array.BYTES_PER_ELEMENT, 0 );
     	this.gl.vertexAttribDivisor( 1, 1 );

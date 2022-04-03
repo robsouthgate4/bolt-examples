@@ -1,5 +1,7 @@
 #version 300 es
 
+precision highp float;
+
 layout (location = 0) in vec3 oldPosition;
 layout (location = 1) in vec3 oldVelocity;
 layout (location = 2) in float startTime;
@@ -141,42 +143,55 @@ void main() {
 
   vec3 gravity = vec3( 0.0, 0.1, 0.0 );
 
-    float st = startTime;
+//     float st = startTime;
 
-  if( time >= st ) {
+//   if( time >= st ) {
 
-      float age = time - st;
+//       float age = time - st;
 
-      if( age > lifeTime  ) {
+//       if( age > lifeTime  ) {
 
-        //   newPosition = vec3( 0.0 );
-        //   newVelocity = vec3( 0.0 );
+//         //   newPosition = vec3( 0.0 );
+//         //   newVelocity = vec3( 0.0 );
 
-        //   st = time;
+//         //   st = time;
 
-      } else {
+//       } else {
 
-        // vec3 vel = oldVelocity + ( curlNoise( oldPosition * 0.2 ) * 0.01 );
+//         // vec3 vel = oldVelocity + ( curlNoise( oldPosition * 0.2 ) * 0.01 );
 
-        // vel *= 0.75;
+//         // vel *= 0.75;
 
-        // vec3 pos = oldPosition + vel;
+//         // vec3 pos = oldPosition + vel;
 
-        // newPosition = pos;
-        // newVelocity = vel;
+//         // newPosition = pos;
+//         // newVelocity = vel;
 
-      }
+//       }
 
-  }
+//   }
 
-  vec3 vel = oldVelocity + ( curlNoise( oldPosition * 0.2 ) * 0.01 );
+    vec3 vel = oldVelocity + gravity * 0.01; //( curlNoise( oldPosition * 0.1 ) * 0.02 );
 
-        vel *= 0.75;
 
-        vec3 pos = oldPosition + vel;
 
-        newPosition = pos;
-        newVelocity = vel;
+    vec3 pos = oldPosition + vel;
+
+    // vec3 direction = pos - vec3( 0.0 );
+
+    // float d = distance( pos, vec3( 0.0 ) );
+
+    // if(  d >= 8.0 ) {
+
+    //    //vel -= normalize( direction ) * 0.009;
+
+    // }
+
+    //vel *= 0.7;
+
+
+    newPosition = pos;
+    newVelocity = vel;
 
   //newVelocity = velnew;
 

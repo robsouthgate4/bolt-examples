@@ -22,7 +22,7 @@ void main()
 
   Uv =  aUv;
 
-  vec3 pos = aPosition * 0.2;
+  vec3 pos = aPosition;
 
   vec4 mvPosition = model * view * vec4( pos + aOffset, 1.0 );
 
