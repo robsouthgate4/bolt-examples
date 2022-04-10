@@ -64,8 +64,6 @@ export default class Post {
 
     	enabledPasses.forEach( ( pass: Pass ) => {
 
-    		if ( ! pass.enabled ) return;
-
     		if ( pass instanceof RenderPass ) {
 
     			pass.fbo.bind();

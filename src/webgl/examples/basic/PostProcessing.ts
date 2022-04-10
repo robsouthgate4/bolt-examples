@@ -47,7 +47,7 @@ export default class extends Base {
     		this.width,
     		this.height,
     		vec3.fromValues( 0, 2, 6 ),
-    		vec3.fromValues( 0, 2, 0 ),
+    		vec3.fromValues( 0, 0, 0 ),
     		45,
     		0.01,
     		1000,
@@ -84,13 +84,13 @@ export default class extends Base {
     	this.rbgSplit = new RGBSplitPass( this.bolt, {
     		width: this.width,
     		height: this.height
-    	} ).setEnabled( false );
+    	} ).setEnabled( true );
 
     	this.pixelate = new PixelatePass( this.bolt, {
     		width: this.width,
     		height: this.height,
-    		xPixels: 30,
-    		yPixels: 30
+    		xPixels: 80,
+    		yPixels: 80
     	} ).setEnabled( false );
 
     	this.fxaa = new FXAAPass( this.bolt, {
@@ -99,15 +99,12 @@ export default class extends Base {
     	} ).setEnabled( true );
 
     	this.post.add( this.renderPass );
-    	this.post.add( this.rbgSplit );
-    	this.post.add( this.pixelate );
-    	this.post.add( this.fxaa, true );
+    	this.post.add( this.rbgSplit, true );
 
     	const sphereGeometry = new Sphere( { radius: 1, widthSegments: 64, heightSegments: 64 } );
     	const planeGeometry = new Plane( { widthSegments: 64, heightSegments: 64 } );
 
     	this.root = new Node();
-    	this.root.transform.scale = vec3.fromValues( 1, 1, 1 );
 
     	this.sphereBatch = new Batch(
     		new Mesh( sphereGeometry ),
@@ -124,7 +121,6 @@ export default class extends Base {
     	this.planeBatch.setParent( this.root );
 
     	this.planeBatch.transform.scale = vec3.fromValues( 10, 10, 10 );
-
     	this.planeBatch.transform.rotation[ 0 ] = Math.PI * 0.5;
     	this.planeBatch.transform.position[ 1 ] = - 1;
 
@@ -136,19 +132,17 @@ export default class extends Base {
 
     	this.bolt.resizeFullScreen();
 
-    	this.post.resize( this.bolt.gl.canvas.width, this.bolt.gl.canvas.height );
+    	this.post.resize( this.gl.canvas.width, this.gl.canvas.height );
 
     }
 
     earlyUpdate( elapsed: number, delta: number ) {
 
-    	super.earlyUpdate( elapsed, delta );
+    	return;
 
     }
 
     update( elapsed: number, delta: number ) {
-
-    	super.update( elapsed, delta );
 
     	this.post.begin();
 
@@ -157,16 +151,20 @@ export default class extends Base {
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 1, 1, 1, 1 );
 
-    	this.bolt.draw( [ this.sphereBatch, this.planeBatch ] );
+    	this.root.traverse( ( node: Node ) => {
+
+    		this.bolt.draw( node );
+
+    	} );
 
     	this.post.end();
 
 
     }
 
-    lateUpdate( elapsed: number, delta: number ) {
+    lateUpdate( elapsed: number, delta: number ): void {
 
-    	super.lateUpdate( elapsed, delta );
+    	return;
 
     }
 

@@ -3,26 +3,21 @@ import { Camera } from "@robsouthgate/bolt-core";
 
 export default class CameraArcball extends Camera {
 
-    firstMouse: boolean;
-    mouseDown: boolean;
-    mouseX: number;
-    lastX: number;
-    azimuth: number;
-    elevation: number;
-    rotateAmountX: number;
-    mouseXOnMouseDown: number;
-    targetXOnMouseDown: number;
-    targetX: number;
-    targetY: number;
-    radius: number;
-    damping: number;
-    mouseYOnMouseDown!: number;
-    rotateAmountY!: number;
-    targetYOnMouseDown!: number;
-    mouseY: number;
-    lastY: number;
-    initialPositionSpherical: number[];
-    scrollSpeed: number;
+    private _mouseDown: boolean;
+    private _azimuth: number;
+    private _elevation: number;
+    private _rotateAmountX: number;
+    private _mouseXOnMouseDown: number;
+    private _targetXOnMouseDown: number;
+    private _targetX: number;
+    private _targetY: number;
+    private _radius: number;
+    private _damping: number;
+    private _mouseYOnMouseDown!: number;
+    private _rotateAmountY!: number;
+    private _targetYOnMouseDown!: number;
+    private _initialPositionSpherical: number[];
+    private _scrollSpeed: number;
 
     constructor(
     	width: number,
@@ -47,36 +42,31 @@ export default class CameraArcball extends Camera {
 
     	this.position = position;
 
-    	this.initialPositionSpherical = this.cartesianToSpherical( this.position[ 0 ], this.position[ 1 ], this.position[ 2 ] );
+    	this._initialPositionSpherical = this.cartesianToSpherical( this.position[ 0 ], this.position[ 1 ], this.position[ 2 ] );
 
     	this.target = target || vec3.fromValues( 0, 0, 0 );
 
-    	this.firstMouse = true;
-    	this.mouseDown = false;
-    	this.mouseX = 0;
-    	this.mouseY = 0;
-    	this.lastX = 0;
-    	this.lastY = 0;
+    	this._mouseDown = false;
 
-    	this.azimuth = this.initialPositionSpherical[ 0 ];
-    	this.elevation = this.initialPositionSpherical[ 1 ];
-    	this.radius = this.initialPositionSpherical[ 2 ];
+    	this._azimuth = this._initialPositionSpherical[ 0 ];
+    	this._elevation = this._initialPositionSpherical[ 1 ];
+    	this._radius = this._initialPositionSpherical[ 2 ];
 
-    	this.scrollSpeed = scrollSpeed;
+    	this._scrollSpeed = scrollSpeed;
 
-    	this.rotateAmountX = speed || 1;
-    	this.rotateAmountY = speed || 1;
+    	this._rotateAmountX = speed || 1;
+    	this._rotateAmountY = speed || 1;
 
-    	this.mouseXOnMouseDown = 0;
-    	this.mouseYOnMouseDown = 0;
+    	this._mouseXOnMouseDown = 0;
+    	this._mouseYOnMouseDown = 0;
 
-    	this.targetXOnMouseDown = 0;
-    	this.targetYOnMouseDown = 0;
+    	this._targetXOnMouseDown = 0;
+    	this._targetYOnMouseDown = 0;
 
-    	this.targetX = this.azimuth;
-    	this.targetY = this.elevation;
+    	this._targetX = this._azimuth;
+    	this._targetY = this._elevation;
 
-    	this.damping = damping || 1;
+    	this._damping = damping || 1;
 
     	this.resize( window.innerWidth, window.innerHeight );
 
@@ -105,39 +95,41 @@ export default class CameraArcball extends Camera {
     handleWheel( ev: WheelEvent ) {
 
     	const direction = Math.sign( ev.deltaY );
-    	this.radius -= direction * this.scrollSpeed;
-    	this.radius = Math.max( this.radius, 0 );
+    	this.fov -= ( direction * this._scrollSpeed ) * 0.1;
+    	this.fov = Math.min( 45, this.fov );
+
+    	mat4.perspective( this.projection, this.fov, this.width / this.height, this.near, this.far );
 
     }
 
     handleMouseDown( ev: MouseEvent ) {
 
-    	this.mouseDown = true;
+    	this._mouseDown = true;
 
-    	this.mouseXOnMouseDown = this.getMousePosition( ev ).x * this.rotateAmountX;
-    	this.mouseYOnMouseDown = this.getMousePosition( ev ).y * this.rotateAmountY;
+    	this._mouseXOnMouseDown = this.getMousePosition( ev ).x * this._rotateAmountX;
+    	this._mouseYOnMouseDown = this.getMousePosition( ev ).y * this._rotateAmountY;
 
-    	this.targetXOnMouseDown = this.targetX;
-    	this.targetYOnMouseDown = this.targetY;
+    	this._targetXOnMouseDown = this._targetX;
+    	this._targetYOnMouseDown = this._targetY;
 
     }
 
     handleMouseMove( ev: MouseEvent ) {
 
-    	if ( ! this.mouseDown ) return;
+    	if ( ! this._mouseDown ) return;
 
-    	const mouseX = this.getMousePosition( ev ).x * this.rotateAmountX;
-    	const mouseY = this.getMousePosition( ev ).y * this.rotateAmountY;
+    	const mouseX = this.getMousePosition( ev ).x * this._rotateAmountX;
+    	const mouseY = this.getMousePosition( ev ).y * this._rotateAmountY;
 
-    	this.targetX = this.targetXOnMouseDown + ( mouseX - this.mouseXOnMouseDown );
-    	this.targetY = this.targetYOnMouseDown - ( mouseY - this.mouseYOnMouseDown );
+    	this._targetX = this._targetXOnMouseDown + ( mouseX - this._mouseXOnMouseDown );
+    	this._targetY = this._targetYOnMouseDown - ( mouseY - this._mouseYOnMouseDown );
 
 
     }
 
     handleMouseUp() {
 
-    	this.mouseDown = false;
+    	this._mouseDown = false;
 
     }
 
@@ -147,7 +139,7 @@ export default class CameraArcball extends Camera {
     	let elevation;
     	let azimuth;
 
-    	if ( this.radius === 0 ) {
+    	if ( this._radius === 0 ) {
 
     		elevation = 0;
     		azimuth = 0;
@@ -167,14 +159,16 @@ export default class CameraArcball extends Camera {
 
     	const direction = vec3.create();
 
-    	const sineAzimuth = Math.sin( this.azimuth );
-    	const cosineAzimuth = Math.cos( this.azimuth );
-    	const sineElevation = Math.sin( this.elevation );
-    	const cosineElevation = Math.cos( this.elevation );
+    	const sineAzimuth = Math.sin( this._azimuth );
+    	const cosineAzimuth = Math.cos( this._azimuth );
+    	const sineElevation = Math.sin( this._elevation );
+    	const cosineElevation = Math.cos( this._elevation );
 
-    	direction[ 0 ] = ( this.radius * cosineElevation * cosineAzimuth ) + this.target[ 0 ];
-    	direction[ 1 ] = this.radius * sineElevation + this.target[ 1 ];
-    	direction[ 2 ] = this.radius * cosineElevation * sineAzimuth + this.target[ 2 ];
+    	direction[ 0 ] = ( this._radius * cosineElevation * cosineAzimuth );
+    	direction[ 1 ] = this._radius * sineElevation;
+    	direction[ 2 ] = this._radius * cosineElevation * sineAzimuth;
+
+    	this.forward = direction;
 
     	return direction;
 
@@ -184,17 +178,20 @@ export default class CameraArcball extends Camera {
 
     	mat4.perspective( this.projection, this.fov, width / height, this.near, this.far );
 
+    	this.width = width;
+    	this.height = height;
+
     }
 
 
 
     update() {
 
-    	this.azimuth += ( this.targetX - this.azimuth ) * this.damping;
-    	this.elevation += ( this.targetY - this.elevation ) * this.damping;
+    	this._azimuth += ( this._targetX - this._azimuth ) * this._damping;
+    	this._elevation += ( this._targetY - this._elevation ) * this._damping;
 
-    	this.elevation = Math.max( this.elevation, 0 );
-    	this.elevation = Math.min( Math.PI / 2, this.elevation );
+    	this._elevation = Math.max( this._elevation, 0 );
+    	this._elevation = Math.min( Math.PI / 2, this._elevation );
 
     	// generate spherical coordinates for new position
     	this.position[ 0 ] = this.spherialToCartesian()[ 0 ];
@@ -203,6 +200,38 @@ export default class CameraArcball extends Camera {
 
     	mat4.lookAt( this.view, this.position, this.target, this.up );
     	mat4.multiply( this.camera, this.projection, this.view );
+
+    }
+
+    public get radius(): number {
+
+    	return this._radius;
+
+    }
+    public set radius( value: number ) {
+
+    	this._radius = value;
+
+    }
+
+    public get scrollSpeed(): number {
+
+    	return this._scrollSpeed;
+
+    }
+    public set scrollSpeed( value: number ) {
+
+    	this._scrollSpeed = value;
+
+    }
+    public get damping(): number {
+
+    	return this._damping;
+
+    }
+    public set damping( value: number ) {
+
+    	this._damping = value;
 
     }
 

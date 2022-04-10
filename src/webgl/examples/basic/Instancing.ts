@@ -1,22 +1,24 @@
 import Base from "@webgl/Base";
-import Bolt, { Mesh, Shader, Transform } from "@robsouthgate/bolt-core";
-
-import GLTFLoader from "@/webgl/modules/GLTFLoader";
+import Bolt, { Shader, Transform, Mesh, Node } from "@robsouthgate/bolt-core";
 
 import defaultVertexInstanced from "../../examples/shaders/defaultInstanced/defaultInstanced.vert";
 import defaultFragmentInstanced from "../../examples/shaders/defaultInstanced/defaultInstanced.frag";
 
 import { mat4, quat, vec3, } from "gl-matrix";
 import CameraFPS from "@/webgl/modules/CameraFPS";
+import Post from "@/webgl/modules/Post/Post";
+import GLTFLoader from "@/webgl/modules/GLTFLoader";
+
 export default class extends Base {
 
     canvas: HTMLCanvasElement;
-    shader: Shader;
+    colorShader: Shader;
     lightPosition: vec3;
     camera: CameraFPS;
     assetsLoaded!: boolean;
     cubeTransform!: Transform;
     torusBuffer!: Mesh;
+    toruseGLTFBuffer!: Mesh;
     bolt: Bolt;
 
     constructor() {
@@ -35,17 +37,18 @@ export default class extends Base {
     	this.camera = new CameraFPS(
     		this.width,
     		this.height,
-    		vec3.fromValues( 0, 15, 10 ),
+    		vec3.fromValues( 0, 5, - 5 ),
     		45,
-    		0.01,
-    		1000,
+    		0.1,
+    		500,
     	);
 
     	this.bolt = Bolt.getInstance();
     	this.bolt.init( this.canvas, { antialias: true } );
     	this.bolt.setCamera( this.camera );
 
-    	this.shader = new Shader( defaultVertexInstanced, defaultFragmentInstanced );
+    	this.colorShader = new Shader( defaultVertexInstanced, defaultFragmentInstanced );
+
     	this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
     	this.camera.lookAt( vec3.fromValues( 0, 0, - 50 ) );
@@ -53,6 +56,84 @@ export default class extends Base {
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.enableDepth();
 
+    	this.init();
+
+
+    }
+
+    async init() {
+
+    	const instanceCount = 1000;
+
+    	const instanceMatrices: mat4[] = [];
+
+    	for ( let i = 0; i < instanceCount; i ++ ) {
+
+    		const x = ( Math.random() * 2 - 1 ) * 50;
+    		const y = ( Math.random() * 2 - 1 ) * 20;
+    		const z = Math.random() * 200;
+
+    		const tempTranslation = vec3.fromValues( x, y, - z );
+
+    		const tempQuat = quat.create();
+    		const tempRotation = quat.fromEuler( tempQuat, Math.random() * 360, Math.random() * 360, Math.random() * 360 );
+    		const tempScale = vec3.fromValues( 1, 1, 1 );
+
+    		const translation = mat4.create();
+    		mat4.fromTranslation( translation, tempTranslation );
+
+    		const rotation = mat4.create();
+    		mat4.fromQuat( rotation, tempRotation );
+
+    		const scale = mat4.create();
+    		mat4.fromScaling( scale, tempScale );
+
+    		const combined = mat4.create();
+    		mat4.multiply( combined, translation, rotation );
+    		mat4.multiply( combined, combined, scale );
+
+    		instanceMatrices.push( combined );
+
+    	}
+
+    	const gltfLoader = new GLTFLoader( this.bolt );
+
+    	const gltf = await gltfLoader.loadGLTF( "/static/models/gltf", "torus.gltf" );
+
+    	if ( ! gltf ) return;
+
+    	this.assetsLoaded = true;
+
+    	if ( gltf.scenes ) {
+
+    		for ( const scene of gltf.scenes ) {
+
+    			scene.root.traverse( ( node: Node ) => {
+
+    				if ( node.name === "Torus" ) {
+
+    					const buffer = node.batches[ 0 ].mesh;
+
+    				    this.torusBuffer = new Mesh( {
+    						positions: buffer.positions,
+    						normals: buffer.normals,
+    						uvs: buffer.uvs,
+    						indices: buffer.indices
+    					}, {
+    						instanceCount,
+    						instanced: true,
+    						instanceMatrices
+    					} );
+
+    				}
+
+    			} );
+
+    		}
+
+    	}
+
+    	this.resize();
 
     }
 
@@ -64,7 +145,22 @@ export default class extends Base {
 
     earlyUpdate( elapsed: number, delta: number ) {
 
-    	super.earlyUpdate( elapsed, delta );
+    	return;
+
+    }
+
+    drawInstances( shader: Shader, elapsed: number ) {
+
+    	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+    	this.bolt.clear( 1, 1, 1, 1 );
+
+    	shader.activate();
+    	shader.setVector3( "viewPosition", this.camera.position );
+    	shader.setFloat( "time", elapsed );
+    	shader.setMatrix4( "projection", this.camera.getProjectionMatrix() );
+    	shader.setMatrix4( "view", this.camera.getViewMatrix() );
+
+    	this.torusBuffer.drawTriangles( shader );
 
     }
 
@@ -72,26 +168,18 @@ export default class extends Base {
 
     	if ( ! this.assetsLoaded ) return;
 
-    	super.update( elapsed, delta );
 
     	this.camera.update( delta );
 
-    	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-    	this.bolt.clear( 1, 1, 1, 1 );
+    	this.drawInstances( this.colorShader, elapsed );
 
-    	this.shader.activate();
-    	this.shader.setVector3( "viewPosition", this.camera.position );
-    	this.shader.setFloat( "time", elapsed );
-    	this.shader.setMatrix4( "projection", this.camera.getProjectionMatrix() );
-    	this.shader.setMatrix4( "view", this.camera.getViewMatrix() );
 
-    	this.torusBuffer.drawTriangles( this.shader );
 
     }
 
     lateUpdate( elapsed: number, delta: number ) {
 
-    	super.lateUpdate( elapsed, delta );
+    	return;
 
     }
 

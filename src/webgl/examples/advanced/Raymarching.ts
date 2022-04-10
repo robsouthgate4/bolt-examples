@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Transform, Node, Mesh, Texture } from "@robsouthgate/bolt-core";
+import Bolt, { Shader, Transform, Mesh, Texture } from "@robsouthgate/bolt-core";
 import vertexShader from "../../examples/shaders/raymarch/raymarch.vert";
 import fragmentShader from "../../examples/shaders/raymarch/raymarch.frag";
 
@@ -8,7 +8,7 @@ import CameraArcball from "../../modules/CameraArcball";
 import Cube from "@/webgl/modules/Primitives/Cube";
 import Post from "@/webgl/modules/Post/Post";
 import RenderPass from "@/webgl/modules/Post/passes/RenderPass";
-import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
+//import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
 import Batch from "@robsouthgate/bolt-core/lib/Batch";
 
 export default class extends Base {
@@ -59,10 +59,10 @@ export default class extends Base {
     		height: this.height
     	} ) );
 
-    	this.post.add( new FXAAPass( this.bolt, {
-    		width: this.width,
-    		height: this.height,
-    	} ), true );
+    	// this.post.add( new FXAAPass( this.bolt, {
+    	// 	width: this.width,
+    	// 	height: this.height,
+    	// } ), true );
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.setCamera( this.camera );
@@ -98,13 +98,13 @@ export default class extends Base {
     resize() {
 
     	this.bolt.resizeFullScreen();
-    	this.post.resize( this.bolt.gl.canvas.width, this.bolt.gl.canvas.height );
+    	this.post.resize( this.bolt.getContext().canvas.width, this.bolt.getContext().canvas.height );
 
     }
 
     earlyUpdate( elapsed: number, delta: number ) {
 
-    	super.earlyUpdate( elapsed, delta );
+    	return;
 
     }
 
@@ -112,7 +112,7 @@ export default class extends Base {
 
     	if ( ! this.assetsLoaded ) return;
 
-    	super.update( elapsed, delta );
+
 
     	this.post.begin();
     	this.camera.update();
@@ -134,7 +134,7 @@ export default class extends Base {
 
     lateUpdate( elapsed: number, delta: number ) {
 
-    	super.lateUpdate( elapsed, delta );
+    	return;
 
     }
 

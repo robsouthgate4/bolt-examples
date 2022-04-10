@@ -95,15 +95,13 @@ export default class extends Base {
 
     earlyUpdate( elapsed: number, delta: number ) {
 
-    	super.earlyUpdate( elapsed, delta );
+    	return;
 
     }
 
     update( elapsed: number, delta: number ) {
 
     	if ( ! this.assetsLoaded ) return;
-
-    	super.update( elapsed, delta );
 
     	this.camera.update();
 
@@ -114,13 +112,17 @@ export default class extends Base {
     	this.shader.setVector3( "viewPosition", this.camera.position );
     	this.shader.setFloat( "time", elapsed );
 
+    	this.torusBatch.transform.rotation[ 0 ] += 2 * delta;
+    	this.torusBatch.transform.rotation[ 1 ] -= 1 * delta;
+    	this.torusBatch.transform.rotation[ 2 ] -= 3 * delta;
+
     	this.bolt.draw( this.torusBatch );
 
     }
 
     lateUpdate( elapsed: number, delta: number ) {
 
-    	super.lateUpdate( elapsed, delta );
+    	return;
 
     }
 

@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Transform, Mesh, FBO, Camera, Node } from "@robsouthgate/bolt-core";
+import Bolt, { Shader, Transform, Mesh, FBO, Node } from "@robsouthgate/bolt-core";
 
 import defaultVertexInstanced from "../../examples/shaders/defaultInstanced/defaultInstanced.vert";
 import defaultFragmentInstanced from "../../examples/shaders/defaultInstanced/defaultInstanced.frag";
@@ -11,8 +11,8 @@ import { mat4, quat, vec2, vec3, } from "gl-matrix";
 import CameraFPS from "@/webgl/modules/CameraFPS";
 import Post from "@/webgl/modules/Post/Post";
 import RenderPass from "@/webgl/modules/Post/passes/RenderPass";
-import DOFPass from "@/webgl/modules/Post/passes/DOFPass";
-import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
+// import DOFPass from "@/webgl/modules/Post/passes/DOFPass";
+// import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
 import GLTFLoader from "@/webgl/modules/GLTFLoader";
 
 export default class extends Base {
@@ -28,10 +28,11 @@ export default class extends Base {
     bolt: Bolt;
     post: Post;
     renderPass!: RenderPass;
-    fxaa!: FXAAPass;
-    dofPass!: DOFPass;
+    // fxaa!: FXAAPass;
+    // dofPass!: DOFPass;
     depthShader: Shader;
     depthFBO!: FBO;
+    gl: WebGL2RenderingContext;
 
     constructor() {
 
@@ -58,6 +59,7 @@ export default class extends Base {
     	this.bolt = Bolt.getInstance();
     	this.bolt.init( this.canvas, { antialias: true } );
     	this.bolt.setCamera( this.camera );
+    	this.gl = this.bolt.getContext();
 
     	this.post = new Post( this.bolt );
 
@@ -87,13 +89,13 @@ export default class extends Base {
     		height: this.height,
     	} ).setEnabled( true );
 
-    	this.dofPass = new DOFPass( this.bolt, {
-    		width: this.width,
-    		height: this.height
-    	} ).setEnabled( true );
+    	// this.dofPass = new DOFPass( this.bolt, {
+    	// 	width: this.width,
+    	// 	height: this.height
+    	// } ).setEnabled( true );
 
     	this.post.add( this.renderPass );
-    	this.post.add( this.dofPass, true );
+    	//this.post.add( this.dofPass, true );
 
     	// set shader uniforms
     	this.colorShader.activate();
@@ -103,12 +105,12 @@ export default class extends Base {
     	this.depthShader.activate();
     	this.depthShader.setVector2( "cameraPlanes", vec2.fromValues( this.camera.near, this.camera.far ) );
 
-    	this.dofPass.shader.activate();
-    	this.dofPass.shader.setTexture( "depthMap", this.depthFBO.targetTexture );
-    	this.dofPass.shader.setFloat( "focus", 7 );
-    	this.dofPass.shader.setFloat( "aperture", 4.0 * 0.0001 );
-    	this.dofPass.shader.setFloat( "maxBlur", 0.1 );
-    	this.dofPass.shader.setFloat( "aspect", this.bolt.gl.canvas.width / this.bolt.gl.canvas.height );
+    	// this.dofPass.shader.activate();
+    	// this.dofPass.shader.setTexture( "depthMap", this.depthFBO.targetTexture );
+    	// this.dofPass.shader.setFloat( "focus", 20 );
+    	// this.dofPass.shader.setFloat( "aperture", 2.0 * 0.0001 );
+    	// this.dofPass.shader.setFloat( "maxBlur", 0.3 );
+    	// this.dofPass.shader.setFloat( "aspect", this.gl.canvas.width / this.gl.canvas.height );
 
     	const instanceCount = 1000;
 
@@ -159,7 +161,7 @@ export default class extends Base {
 
     				if ( node.name === "Torus" ) {
 
-    					const buffer = node.drawables[ 0 ];
+    					const buffer = node.batches[ 0 ].mesh;
 
     				    this.torusBuffer = new Mesh( {
     						positions: buffer.positions,
@@ -187,14 +189,14 @@ export default class extends Base {
     resize() {
 
     	this.bolt.resizeFullScreen();
-    	this.post.resize( this.bolt.gl.canvas.width, this.bolt.gl.canvas.height );
-    	this.depthFBO.resize( this.bolt.gl.canvas.width, this.bolt.gl.canvas.height );
+    	this.post.resize( this.gl.canvas.width, this.gl.canvas.height );
+    	this.depthFBO.resize( this.gl.canvas.width, this.gl.canvas.height );
 
     }
 
     earlyUpdate( elapsed: number, delta: number ) {
 
-    	super.earlyUpdate( elapsed, delta );
+    	return;
 
     }
 
@@ -217,7 +219,7 @@ export default class extends Base {
 
     	if ( ! this.assetsLoaded ) return;
 
-    	super.update( elapsed, delta );
+
     	this.camera.update( delta );
 
     	{ // Draw depth shaded to depth framebuffer
@@ -252,7 +254,7 @@ export default class extends Base {
 
     lateUpdate( elapsed: number, delta: number ) {
 
-    	super.lateUpdate( elapsed, delta );
+    	return;
 
     }
 

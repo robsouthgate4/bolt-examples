@@ -4,13 +4,15 @@ precision highp float;
 
 layout (location = 0) in vec3 oldPosition;
 layout (location = 1) in vec3 oldVelocity;
-layout (location = 2) in float startTime;
+layout (location = 2) in float oldLifeTime;
+
+layout (location = 3) in vec3 initPosition;
+layout (location = 4) in float initLife;
 
 out vec3 newPosition;
 out vec3 newVelocity;
-out float newStartTime;
+out float newLifeTime;
 
-uniform float lifeTime;
 uniform float time;
 
 vec3 mod289(vec3 x) {
@@ -141,58 +143,38 @@ vec3 curlNoise( vec3 p ){
 
 void main() {
 
-  vec3 gravity = vec3( 0.0, 0.1, 0.0 );
+    vec3 gravity = vec3( 0.0, 0.1, 0.0 );
 
-//     float st = startTime;
+    vec3 pos = oldPosition;
+    vec3 vel = oldVelocity;
 
-//   if( time >= st ) {
+    vel += curlNoise( ( pos * 0.1 ) + (time * 0.01) ) * 0.02;
+    vel *= 0.7;
+    pos += vel;
 
-//       float age = time - st;
+    vec3 dir = pos - vec3( 0.0 );
 
-//       if( age > lifeTime  ) {
+    if( distance( pos, vec3( 0.0 ) ) > 7.0 ) {
 
-//         //   newPosition = vec3( 0.0 );
-//         //   newVelocity = vec3( 0.0 );
+        vel -= normalize( dir ) * 0.004;
 
-//         //   st = time;
+    }
 
-//       } else {
+    float life = oldLifeTime;
 
-//         // vec3 vel = oldVelocity + ( curlNoise( oldPosition * 0.2 ) * 0.01 );
+    life -= 0.1;
 
-//         // vel *= 0.75;
+    if( life <= 0.0 ) {
 
-//         // vec3 pos = oldPosition + vel;
+        pos = initPosition;
+        life = initLife;
 
-//         // newPosition = pos;
-//         // newVelocity = vel;
-
-//       }
-
-//   }
-
-    vec3 vel = oldVelocity + gravity * 0.01; //( curlNoise( oldPosition * 0.1 ) * 0.02 );
-
-
-
-    vec3 pos = oldPosition + vel;
-
-    // vec3 direction = pos - vec3( 0.0 );
-
-    // float d = distance( pos, vec3( 0.0 ) );
-
-    // if(  d >= 8.0 ) {
-
-    //    //vel -= normalize( direction ) * 0.009;
-
-    // }
-
-    //vel *= 0.7;
+    }
 
 
     newPosition = pos;
     newVelocity = vel;
+    newLifeTime = life;
 
-  //newVelocity = velnew;
 
 }

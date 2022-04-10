@@ -172,12 +172,8 @@ export default class GLTFLoader {
 
     						const mesh = new Mesh( geometry );
     						const batch = new Batch( mesh, new Shader( vertexShader, fragmentShader ) );
-    						batch.transform = new Transform();
-    						batch.transform.position = rootNode.transform.position;
-    						batch.transform.rotation = rootNode.transform.rotation;
-    						batch.transform.scale = rootNode.transform.scale;
 
-    						rootNode.batches.push( batch );
+    						rootNode.children.push( batch );
 
     					} );
 
@@ -233,8 +229,6 @@ export default class GLTFLoader {
     				} );
 
     			}
-
-
 
     		}
 

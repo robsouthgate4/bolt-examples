@@ -5,9 +5,9 @@ import Stats from "stats.js";
 
 import { glSettings } from "@webgl/globals/constants";
 
-const { DEBUG_FPS, USE_ORBIT_CONTROLS, DEBUG_DRAW_COUNT } = glSettings;
+const { DEBUG_FPS } = glSettings;
 
-export default class Base {
+export default abstract class Base {
 
     isRunning = false;
     requestFrame?: number;
@@ -81,14 +81,11 @@ export default class Base {
 
     }
 
-    earlyUpdate( elapsed: number, delta: number ) {
-    }
+    abstract earlyUpdate( elapsed: number, delta: number ): void;
 
-    update( elapsed: number, delta: number ) {
-    }
+    abstract update( elapsed: number, delta: number ): void;
 
-    lateUpdate( elapsed: number, delta: number ) {
-    }
+    abstract lateUpdate( elapsed: number, delta: number ): void;
 
     run( timestamp: number ) {
 
@@ -98,7 +95,6 @@ export default class Base {
     	this.elapsed = timestamp * 0.001;
     	this.delta = this.elapsed - this.lastTime;
     	this.lastTime = this.elapsed;
-
 
     	this.earlyUpdate( this.elapsed, this.delta );
     	this.update( this.elapsed, this.delta );

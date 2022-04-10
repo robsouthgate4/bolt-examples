@@ -8,6 +8,7 @@ export default class DOFPass extends Pass {
     shader!: Shader;
     bolt!: Bolt;
     t: number;
+    gl: WebGL2RenderingContext;
 
     constructor( bolt: Bolt, {
     	width = 256,
@@ -21,13 +22,16 @@ export default class DOFPass extends Pass {
 
     	this.bolt = bolt;
 
+    	this.gl = this.bolt.getContext();
+
     	this.shader = new Shader( vertexShader, fragmentShader );
     	this.shader.activate();
     	this.shader.setTexture( "map", this.fbo.targetTexture );
     	this.shader.setFloat( "focus", 610 );
     	this.shader.setFloat( "aperture", 3.1 * 0.0001 );
     	this.shader.setFloat( "maxBlur", 0.005 );
-    	this.shader.setFloat( "aspect", this.bolt.gl.canvas.width / this.bolt.gl.canvas.height );
+
+    	this.shader.setFloat( "aspect", this.gl.canvas.width / this.gl.canvas.height );
 
     	this.t = 0;
 
@@ -54,8 +58,6 @@ export default class DOFPass extends Pass {
     	this.t ++;
 
     	this.shader.activate();
-    	//this.shader.setFloat( "focus", ( Math.sin( this.t * 0.01 ) ) * 500 );
-
     	this.fullScreenTriangle.drawTriangles( this.shader );
 
     	this.fbo.unbind();

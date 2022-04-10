@@ -1,27 +1,30 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES, POINTS, LINE_LOOP, LINES } from "@robsouthgate/bolt-core";
+import Bolt, { Shader, Mesh, Transform, Batch, FBO } from "@robsouthgate/bolt-core";
 
 import defaultVertex from "../../examples/shaders/default/default.vert";
 import defaultFragment from "../../examples/shaders/default/default.frag";
 
-import { vec3, } from "gl-matrix";
+import { mat4, vec3, } from "gl-matrix";
 import CameraArcball from "../../modules/CameraArcball";
-import Sphere from "../../modules/Primitives/Sphere";
 import Cube from "../../modules/Primitives/Cube";
 import Plane from "../../modules/Primitives/Plane";
+
 export default class extends Base {
 
     canvas: HTMLCanvasElement;
     shader: Shader;
+    lightPosition: vec3;
     camera: CameraArcball;
     assetsLoaded?: boolean;
     torusTransform!: Transform;
-    sphereBatch!: Batch;
     cubeBatch!: Batch;
     planeBatch!: Batch;
     bolt: Bolt;
-    gl: WebGL2RenderingContext;
-    root!: Node;
+    shadowMapSize!: number;
+    depthFBO!: FBO;
+    lightProjection: mat4;
+    lightView: mat4;
+    lightSpaceMatrix: mat4;
 
     constructor() {
 
@@ -37,14 +40,13 @@ export default class extends Base {
     	this.bolt = Bolt.getInstance();
     	this.bolt.init( this.canvas, { antialias: true } );
 
-    	this.gl = this.bolt.getContext();
-
     	this.shader = new Shader( defaultVertex, defaultFragment );
+    	this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
     	this.camera = new CameraArcball(
     		this.width,
     		this.height,
-    		vec3.fromValues( 0, 2, 6 ),
+    		vec3.fromValues( 0, 3, 6 ),
     		vec3.fromValues( 0, 0, 0 ),
     		45,
     		0.01,
@@ -53,9 +55,28 @@ export default class extends Base {
     		2
     	);
 
-    	this.bolt.setCamera( this.camera );
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+    	this.bolt.setCamera( this.camera );
     	this.bolt.enableDepth();
+
+    	// shadow mapping
+
+    	const nearPlane = 1;
+    	const farPlane = 7.5;
+
+    	//TODO: use a ortho camera
+
+    	this.lightProjection = mat4.create();
+    	mat4.ortho( this.lightProjection, - 10, 10, - 10, 10, nearPlane, farPlane );
+
+    	this.lightView = mat4.create();
+    	mat4.lookAt( this.lightView, vec3.fromValues( - 2, 4, - 1 ), vec3.fromValues( 0, 0, 0 ), vec3.fromValues( 0, 1, 0 ) );
+
+    	this.lightSpaceMatrix = mat4.create();
+    	mat4.multiply( this.lightSpaceMatrix, this.lightProjection, this.lightView );
+
+    	this.shadowMapSize = 1024;
+    	this.depthFBO = new FBO( { width: this.shadowMapSize, height: this.shadowMapSize, depth: true } );
 
     	this.init();
 
@@ -64,36 +85,24 @@ export default class extends Base {
 
     async init() {
 
-    	const sphereGeometry = new Sphere( { radius: 1, widthSegments: 32, heightSegments: 32 } );
     	const cubeGeometry = new Cube( { widthSegments: 1, heightSegments: 1 } );
     	const planeGeometry = new Plane( { widthSegments: 10, heightSegments: 10 } );
 
-    	this.root = new Node();
-
-    	this.sphereBatch = new Batch(
-    		new Mesh( sphereGeometry ).setDrawType( TRIANGLES ),
-    		this.shader
-    	);
-
-    	this.sphereBatch.setParent( this.root );
-
     	this.cubeBatch = new Batch(
-    		new Mesh( cubeGeometry ).setDrawType( TRIANGLES ),
+    		new Mesh( cubeGeometry ),
     		this.shader
     	);
 
-    	this.cubeBatch.setParent( this.root );
-
+    	this.cubeBatch.transform.position[ 1 ] = 0.5;
+    	this.cubeBatch.transform.rotation[ 1 ] = Math.PI * 0.5;
 
     	this.planeBatch = new Batch(
-    		new Mesh( planeGeometry ).setDrawType( TRIANGLES ),
+    		new Mesh( planeGeometry ),
     		this.shader
     	);
 
-    	this.planeBatch.setParent( this.root );
-
-    	this.planeBatch.transform.x = - 2;
-    	this.cubeBatch.transform.x = 2;
+    	this.planeBatch.transform.rotation[ 0 ] = Math.PI * 0.5;
+    	this.planeBatch.transform.scale = vec3.fromValues( 10, 10, 10 );
 
     	this.resize();
 
@@ -113,19 +122,15 @@ export default class extends Base {
 
     update( elapsed: number, delta: number ) {
 
+
+
     	this.camera.update();
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 1, 1, 1, 1 );
 
-    	this.cubeBatch.transform.rotationY += 0.01;
-    	this.sphereBatch.transform.rotationY = this.planeBatch.transform.rotationY += 0.01;
+    	this.bolt.draw( [ this.planeBatch, this.cubeBatch ] );
 
-    	this.root.traverse( ( node: Node ) => {
-
-    		this.bolt.draw( node );
-
-    	} );
 
     }
 

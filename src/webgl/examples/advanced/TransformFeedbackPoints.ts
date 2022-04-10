@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { MeshInterleaved, Shader, Transform, VAO, VBO } from "@robsouthgate/bolt-core";
+import Bolt, { Shader, Transform, VAO, VBO } from "@robsouthgate/bolt-core";
 
 import particlesVertexInstanced from "../../examples/shaders/gpgpu/particles.vert";
 import particlesFragmentInstanced from "../../examples/shaders/gpgpu/particles.frag";
@@ -19,7 +19,6 @@ export default class extends Base {
     camera: CameraFPS;
     assetsLoaded!: boolean;
     cubeTransform!: Transform;
-    torusBuffer!: MeshInterleaved;
     simulationShader!: Shader;
     simulationShaderLocations!: { oldPosition: number; oldVelocity: number; };
     particleShaderLocations!: { aPosition: number; };
@@ -168,13 +167,13 @@ export default class extends Base {
 
     	this.bolt.resizeFullScreen();
 
-    	this.camera.resize( this.bolt.gl.canvas.width, this.bolt.gl.canvas.height );
+    	this.camera.resize( this.gl.canvas.width, this.gl.canvas.height );
 
     }
 
     earlyUpdate( elapsed: number, delta: number ) {
 
-    	super.earlyUpdate( elapsed, delta );
+    	return;
 
     }
 
@@ -182,7 +181,7 @@ export default class extends Base {
 
     	if ( ! this.assetsLoaded ) return;
 
-    	super.update( elapsed, delta );
+
 
     	this.camera.update( delta );
 
@@ -228,7 +227,7 @@ export default class extends Base {
 
     lateUpdate( elapsed: number, delta: number ) {
 
-    	super.lateUpdate( elapsed, delta );
+    	return;
 
     }
 

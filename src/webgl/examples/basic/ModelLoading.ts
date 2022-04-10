@@ -20,8 +20,7 @@ export default class extends Base {
     sphereNode!: Node;
     planeNode!: Node;
     bolt: Bolt;
-    _loadedNodes: Node[] = []
-    gltf!: GlTf
+    gltf!: GlTf;
 
     constructor() {
 
@@ -37,7 +36,7 @@ export default class extends Base {
     	this.camera = new CameraArcball(
     		this.width,
     		this.height,
-    		vec3.fromValues( 0, 0, 5 ),
+    		vec3.fromValues( 0, 2, 6 ),
     		vec3.fromValues( 0, 2, 0 ),
     		45,
     		0.01,
@@ -64,18 +63,8 @@ export default class extends Base {
     async init() {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
-    	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf", "phantom_objects.gltf" );
+    	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf", "phantom_objects2.gltf" );
     	this.assetsLoaded = true;
-
-    	if ( this.gltf.scenes ) {
-
-    		for ( const scene of this.gltf.scenes ) {
-
-    			console.log( scene.root );
-
-    		}
-
-    	}
 
     	this.resize();
 
@@ -89,15 +78,13 @@ export default class extends Base {
 
     earlyUpdate( elapsed: number, delta: number ) {
 
-    	super.earlyUpdate( elapsed, delta );
+    	return;
 
     }
 
     update( elapsed: number, delta: number ) {
 
     	if ( ! this.assetsLoaded ) return;
-
-    	super.update( elapsed, delta );
 
     	this.camera.update();
 
@@ -112,11 +99,9 @@ export default class extends Base {
 
     			scene.root.traverse( ( node: Node ) => {
 
-    				for ( const batch of node.batches ) {
+    				node.transform.rotationY += 0.001;
 
-    					this.bolt.draw( batch );
-
-    				}
+    				this.bolt.draw( node );
 
     			} );
 
@@ -129,7 +114,7 @@ export default class extends Base {
 
     lateUpdate( elapsed: number, delta: number ) {
 
-    	super.lateUpdate( elapsed, delta );
+    	return;
 
     }
 
