@@ -8,7 +8,7 @@ import CameraArcball from "../../modules/CameraArcball";
 import Cube from "@/webgl/modules/Primitives/Cube";
 import Post from "@/webgl/modules/Post/Post";
 import RenderPass from "@/webgl/modules/Post/passes/RenderPass";
-//import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
+import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
 import Batch from "@robsouthgate/bolt-core/lib/Batch";
 
 export default class extends Base {
@@ -59,10 +59,10 @@ export default class extends Base {
     		height: this.height
     	} ) );
 
-    	// this.post.add( new FXAAPass( this.bolt, {
-    	// 	width: this.width,
-    	// 	height: this.height,
-    	// } ), true );
+    	this.post.add( new FXAAPass( this.bolt, {
+    		width: this.width,
+    		height: this.height,
+    	} ), true );
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.setCamera( this.camera );
@@ -78,7 +78,7 @@ export default class extends Base {
     	const geometry = new Cube();
 
     	const equiTexture = new Texture( this.bolt.getContext(), { imagePath: "/static/textures/equi-studio.jpg" } );
-    	equiTexture.loadImage();
+    	await equiTexture.loadImage();
 
     	this.assetsLoaded = true;
 
@@ -111,8 +111,6 @@ export default class extends Base {
     update( elapsed: number, delta: number ) {
 
     	if ( ! this.assetsLoaded ) return;
-
-
 
     	this.post.begin();
     	this.camera.update();

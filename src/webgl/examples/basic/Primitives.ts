@@ -4,6 +4,9 @@ import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES, POINTS, LINE_LOO
 import defaultVertex from "../../examples/shaders/default/default.vert";
 import defaultFragment from "../../examples/shaders/default/default.frag";
 
+import colorVertex from "../../examples/shaders/color/color.vert";
+import colorFragment from "../../examples/shaders/color/color.frag";
+
 import { vec3, } from "gl-matrix";
 import CameraArcball from "../../modules/CameraArcball";
 import Sphere from "../../modules/Primitives/Sphere";
@@ -37,7 +40,7 @@ export default class extends Base {
     	this.canvas.height = this.height;
 
     	this.bolt = Bolt.getInstance();
-    	this.bolt.init( this.canvas, { antialias: true } );
+    	this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
 
     	this.gl = this.bolt.getContext();
 
@@ -88,9 +91,11 @@ export default class extends Base {
 
     	const triangleMesh = new Mesh( triangleGeo ).setDrawType( TRIANGLES );
 
+    	const triShader = new Shader( colorVertex, colorFragment );
+
     	this.triangleBatch = new Batch(
     		triangleMesh,
-    		this.shader
+    		triShader
     	);
 
     	this.triangleBatch.setParent( this.root );
