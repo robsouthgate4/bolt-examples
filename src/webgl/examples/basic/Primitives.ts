@@ -9,6 +9,7 @@ import CameraArcball from "../../modules/CameraArcball";
 import Sphere from "../../modules/Primitives/Sphere";
 import Cube from "../../modules/Primitives/Cube";
 import Plane from "../../modules/Primitives/Plane";
+import { GeometryBuffers } from "@robsouthgate/bolt-core/lib/Mesh";
 export default class extends Base {
 
     canvas: HTMLCanvasElement;
@@ -19,6 +20,7 @@ export default class extends Base {
     sphereBatch!: Batch;
     cubeBatch!: Batch;
     planeBatch!: Batch;
+    triangleBatch!: Batch;
     bolt: Bolt;
     gl: WebGL2RenderingContext;
     root!: Node;
@@ -70,6 +72,31 @@ export default class extends Base {
 
     	this.root = new Node();
 
+    	const triangleGeo: GeometryBuffers = {
+    		positions: [
+    			- 0.5, - 0.5, 0,
+    			0.5, - 0.5, 0,
+    			0.5, 0.5, 0,
+    		],
+    		indices: [ 0, 1, 2 ],
+    		normals: [
+    			0, 0, - 1,
+    			0, 0, - 1,
+    			0, 0, - 1
+    		]
+    	};
+
+    	const triangleMesh = new Mesh( triangleGeo ).setDrawType( TRIANGLES );
+
+    	this.triangleBatch = new Batch(
+    		triangleMesh,
+    		this.shader
+    	);
+
+    	this.triangleBatch.setParent( this.root );
+    	this.triangleBatch.transform.y = 2.5;
+    	this.triangleBatch.transform.scale = vec3.fromValues( 1, 1, 1 );
+
     	this.sphereBatch = new Batch(
     		new Mesh( sphereGeometry ).setDrawType( TRIANGLES ),
     		this.shader
@@ -118,8 +145,7 @@ export default class extends Base {
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 1, 1, 1, 1 );
 
-    	this.cubeBatch.transform.rotationY += 0.01;
-    	this.sphereBatch.transform.rotationY = this.planeBatch.transform.rotationY += 0.01;
+    	this.root.transform.rotationY += 0.01;
 
     	this.root.traverse( ( node: Node ) => {
 

@@ -208,8 +208,8 @@ export default class extends Base {
     	this.particleShader.activate();
     	this.gl.bindVertexArray( this.current.drawVAO.arrayObject );
 
-    	this.particleShader.setMatrix4( "projection", this.camera.getProjectionMatrix() );
-    	this.particleShader.setMatrix4( "view", this.camera.getViewMatrix() );
+    	this.particleShader.setMatrix4( "projection", this.camera.projection );
+    	this.particleShader.setMatrix4( "view", this.camera.view );
     	this.particleShader.setMatrix4( "model", model );
 
     	this.gl.drawArrays( this.gl.POINTS, 0, this.instanceCount );

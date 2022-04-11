@@ -1,12 +1,11 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Transform, Mesh, Node } from "@robsouthgate/bolt-core";
+import Bolt, { Shader, Transform, Mesh, Node, Batch } from "@robsouthgate/bolt-core";
 
 import defaultVertexInstanced from "../../examples/shaders/defaultInstanced/defaultInstanced.vert";
 import defaultFragmentInstanced from "../../examples/shaders/defaultInstanced/defaultInstanced.frag";
 
 import { mat4, quat, vec3, } from "gl-matrix";
 import CameraFPS from "@/webgl/modules/CameraFPS";
-import Post from "@/webgl/modules/Post/Post";
 import GLTFLoader from "@/webgl/modules/GLTFLoader";
 
 export default class extends Base {
@@ -112,13 +111,14 @@ export default class extends Base {
 
     				if ( node.name === "Torus" ) {
 
-    					const buffer = node.batches[ 0 ].mesh;
+    					const batch = <Batch>node.children[ 0 ];
+    					const { positions, normals, uvs, indices } = batch.mesh;
 
     				    this.torusBuffer = new Mesh( {
-    						positions: buffer.positions,
-    						normals: buffer.normals,
-    						uvs: buffer.uvs,
-    						indices: buffer.indices
+    						positions,
+    						normals,
+    						uvs,
+    						indices,
     					}, {
     						instanceCount,
     						instanced: true,
@@ -157,8 +157,8 @@ export default class extends Base {
     	shader.activate();
     	shader.setVector3( "viewPosition", this.camera.position );
     	shader.setFloat( "time", elapsed );
-    	shader.setMatrix4( "projection", this.camera.getProjectionMatrix() );
-    	shader.setMatrix4( "view", this.camera.getViewMatrix() );
+    	shader.setMatrix4( "projection", this.camera.projection );
+    	shader.setMatrix4( "view", this.camera.view );
 
     	this.torusBuffer.drawTriangles( shader );
 

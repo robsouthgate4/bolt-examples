@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Transform, Mesh, FBO, Node } from "@robsouthgate/bolt-core";
+import Bolt, { Shader, Transform, Mesh, FBO, Node, Batch } from "@robsouthgate/bolt-core";
 
 import defaultVertexInstanced from "../../examples/shaders/defaultInstanced/defaultInstanced.vert";
 import defaultFragmentInstanced from "../../examples/shaders/defaultInstanced/defaultInstanced.frag";
@@ -11,8 +11,8 @@ import { mat4, quat, vec2, vec3, } from "gl-matrix";
 import CameraFPS from "@/webgl/modules/CameraFPS";
 import Post from "@/webgl/modules/Post/Post";
 import RenderPass from "@/webgl/modules/Post/passes/RenderPass";
-// import DOFPass from "@/webgl/modules/Post/passes/DOFPass";
-// import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
+import DOFPass from "@/webgl/modules/Post/passes/DOFPass";
+import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
 import GLTFLoader from "@/webgl/modules/GLTFLoader";
 
 export default class extends Base {
@@ -28,8 +28,8 @@ export default class extends Base {
     bolt: Bolt;
     post: Post;
     renderPass!: RenderPass;
-    // fxaa!: FXAAPass;
-    // dofPass!: DOFPass;
+    fxaa!: FXAAPass;
+    dofPass!: DOFPass;
     depthShader: Shader;
     depthFBO!: FBO;
     gl: WebGL2RenderingContext;
@@ -80,8 +80,6 @@ export default class extends Base {
 
     async init() {
 
-
-
     	this.depthFBO = new FBO( { width: this.canvas.width, height: this.canvas.height, depth: true } );
 
     	this.renderPass = new RenderPass( this.bolt, {
@@ -89,13 +87,13 @@ export default class extends Base {
     		height: this.height,
     	} ).setEnabled( true );
 
-    	// this.dofPass = new DOFPass( this.bolt, {
-    	// 	width: this.width,
-    	// 	height: this.height
-    	// } ).setEnabled( true );
+    	this.dofPass = new DOFPass( this.bolt, {
+    		width: this.width,
+    		height: this.height
+    	} ).setEnabled( true );
 
     	this.post.add( this.renderPass );
-    	//this.post.add( this.dofPass, true );
+    	this.post.add( this.dofPass, true );
 
     	// set shader uniforms
     	this.colorShader.activate();
@@ -105,12 +103,12 @@ export default class extends Base {
     	this.depthShader.activate();
     	this.depthShader.setVector2( "cameraPlanes", vec2.fromValues( this.camera.near, this.camera.far ) );
 
-    	// this.dofPass.shader.activate();
-    	// this.dofPass.shader.setTexture( "depthMap", this.depthFBO.targetTexture );
-    	// this.dofPass.shader.setFloat( "focus", 20 );
-    	// this.dofPass.shader.setFloat( "aperture", 2.0 * 0.0001 );
-    	// this.dofPass.shader.setFloat( "maxBlur", 0.3 );
-    	// this.dofPass.shader.setFloat( "aspect", this.gl.canvas.width / this.gl.canvas.height );
+    	this.dofPass.shader.activate();
+    	this.dofPass.shader.setTexture( "depthMap", this.depthFBO.targetTexture );
+    	this.dofPass.shader.setFloat( "focus", 20 );
+    	this.dofPass.shader.setFloat( "aperture", 2.0 * 0.0001 );
+    	this.dofPass.shader.setFloat( "maxBlur", 0.3 );
+    	this.dofPass.shader.setFloat( "aspect", this.gl.canvas.width / this.gl.canvas.height );
 
     	const instanceCount = 1000;
 
@@ -161,13 +159,15 @@ export default class extends Base {
 
     				if ( node.name === "Torus" ) {
 
-    					const buffer = node.batches[ 0 ].mesh;
+    					const batch = <Batch>node.children[ 0 ];
+
+    					const { positions, normals, uvs, indices } = batch.mesh;
 
     				    this.torusBuffer = new Mesh( {
-    						positions: buffer.positions,
-    						normals: buffer.normals,
-    						uvs: buffer.uvs,
-    						indices: buffer.indices
+    						positions,
+    						normals,
+    						uvs,
+    						indices,
     					}, {
     						instanceCount,
     						instanced: true,
@@ -208,8 +208,8 @@ export default class extends Base {
     	shader.activate();
     	shader.setVector3( "viewPosition", this.camera.position );
     	shader.setFloat( "time", elapsed );
-    	shader.setMatrix4( "projection", this.camera.getProjectionMatrix() );
-    	shader.setMatrix4( "view", this.camera.getViewMatrix() );
+    	shader.setMatrix4( "projection", this.camera.projection );
+    	shader.setMatrix4( "view", this.camera.view );
 
     	this.torusBuffer.drawTriangles( shader );
 
