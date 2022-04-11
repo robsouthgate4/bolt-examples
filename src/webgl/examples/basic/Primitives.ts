@@ -1,31 +1,29 @@
 import Base from "@webgl/Base";
-import Shader from "../../core/Shader";
+import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES, POINTS, LINE_LOOP, LINES } from "@robsouthgate/bolt-core";
 
 import defaultVertex from "../../examples/shaders/default/default.vert";
 import defaultFragment from "../../examples/shaders/default/default.frag";
 
 import { vec3, } from "gl-matrix";
-import Node from "../../core/Node";
-import Transform from "../../core/Transform";
 import CameraArcball from "../../modules/CameraArcball";
-import ArrayBuffer from "../../core/ArrayBuffer";
 import Sphere from "../../modules/Primitives/Sphere";
 import Cube from "../../modules/Primitives/Cube";
 import Plane from "../../modules/Primitives/Plane";
-import Bolt from "@/webgl/core/Bolt";
-
+import { GeometryBuffers } from "@robsouthgate/bolt-core/lib/Mesh";
 export default class extends Base {
 
     canvas: HTMLCanvasElement;
     shader: Shader;
-    lightPosition: vec3;
     camera: CameraArcball;
     assetsLoaded?: boolean;
     torusTransform!: Transform;
-    sphereNode!: Node;
-    cubeNode!: Node;
-    planeNode!: Node;
+    sphereBatch!: Batch;
+    cubeBatch!: Batch;
+    planeBatch!: Batch;
+    triangleBatch!: Batch;
     bolt: Bolt;
+    gl: WebGL2RenderingContext;
+    root!: Node;
 
     constructor() {
 
@@ -41,8 +39,9 @@ export default class extends Base {
     	this.bolt = Bolt.getInstance();
     	this.bolt.init( this.canvas, { antialias: true } );
 
+    	this.gl = this.bolt.getContext();
+
     	this.shader = new Shader( defaultVertex, defaultFragment );
-    	this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
     	this.camera = new CameraArcball(
     		this.width,
@@ -56,6 +55,7 @@ export default class extends Base {
     		2
     	);
 
+    	this.bolt.setCamera( this.camera );
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.enableDepth();
 
@@ -70,23 +70,57 @@ export default class extends Base {
     	const cubeGeometry = new Cube( { widthSegments: 1, heightSegments: 1 } );
     	const planeGeometry = new Plane( { widthSegments: 10, heightSegments: 10 } );
 
-    	this.sphereNode = new Node(
-    		new ArrayBuffer( sphereGeometry ),
+    	this.root = new Node();
+
+    	const triangleGeo: GeometryBuffers = {
+    		positions: [
+    			- 0.5, - 0.5, 0,
+    			0.5, - 0.5, 0,
+    			0.5, 0.5, 0,
+    		],
+    		indices: [ 0, 1, 2 ],
+    		normals: [
+    			0, 0, - 1,
+    			0, 0, - 1,
+    			0, 0, - 1
+    		]
+    	};
+
+    	const triangleMesh = new Mesh( triangleGeo ).setDrawType( TRIANGLES );
+
+    	this.triangleBatch = new Batch(
+    		triangleMesh,
+    		this.shader
     	);
 
-    	this.cubeNode = new Node(
-    		new ArrayBuffer( cubeGeometry ),
+    	this.triangleBatch.setParent( this.root );
+    	this.triangleBatch.transform.y = 2.5;
+    	this.triangleBatch.transform.scale = vec3.fromValues( 1, 1, 1 );
+
+    	this.sphereBatch = new Batch(
+    		new Mesh( sphereGeometry ).setDrawType( TRIANGLES ),
+    		this.shader
     	);
 
-    	this.cubeNode.autoUpdate = false;
-    	this.cubeNode.transform.position[ 0 ] = 1.5;
-    	this.cubeNode.updateModelMatrix();
+    	this.sphereBatch.setParent( this.root );
 
-    	this.planeNode = new Node(
-    		new ArrayBuffer( planeGeometry ),
+    	this.cubeBatch = new Batch(
+    		new Mesh( cubeGeometry ).setDrawType( TRIANGLES ),
+    		this.shader
     	);
 
-    	this.planeNode.transform.position[ 0 ] = - 1.5;
+    	this.cubeBatch.setParent( this.root );
+
+
+    	this.planeBatch = new Batch(
+    		new Mesh( planeGeometry ).setDrawType( TRIANGLES ),
+    		this.shader
+    	);
+
+    	this.planeBatch.setParent( this.root );
+
+    	this.planeBatch.transform.x = - 2;
+    	this.cubeBatch.transform.x = 2;
 
     	this.resize();
 
@@ -100,38 +134,30 @@ export default class extends Base {
 
     earlyUpdate( elapsed: number, delta: number ) {
 
-    	super.earlyUpdate( elapsed, delta );
+    	return;
 
     }
 
     update( elapsed: number, delta: number ) {
-
-    	super.update( elapsed, delta );
 
     	this.camera.update();
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 1, 1, 1, 1 );
 
-    	this.shader.activate();
-    	this.shader.setVector3( "viewPosition", this.camera.position );
-    	this.shader.setFloat( "time", elapsed );
+    	this.root.transform.rotationY += 0.01;
 
-    	this.cubeNode.transform.rotation[ 1 ] += 0.01;
-    	this.cubeNode.updateModelMatrix();
+    	this.root.traverse( ( node: Node ) => {
 
-    	this.sphereNode.transform.rotation[ 1 ] = this.planeNode.transform.rotation[ 1 ] += 0.01;
+    		this.bolt.draw( node );
 
-    	this.sphereNode.drawTriangles( this.shader, this.camera );
-    	this.cubeNode.drawTriangles( this.shader, this.camera );
-    	this.planeNode.drawTriangles( this.shader, this.camera );
-
+    	} );
 
     }
 
     lateUpdate( elapsed: number, delta: number ) {
 
-    	super.lateUpdate( elapsed, delta );
+    	return;
 
     }
 

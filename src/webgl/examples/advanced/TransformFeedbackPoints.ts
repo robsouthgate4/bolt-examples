@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Shader from "../../core/Shader";
+import Bolt, { Shader, Transform, VAO, VBO } from "@robsouthgate/bolt-core";
 
 import particlesVertexInstanced from "../../examples/shaders/gpgpu/particles.vert";
 import particlesFragmentInstanced from "../../examples/shaders/gpgpu/particles.frag";
@@ -8,13 +8,7 @@ import simulationVertex from "../../examples/shaders/gpgpu/simulation/simulation
 import simulationFragment from "../../examples/shaders/gpgpu/simulation/simulation.frag";
 
 import { mat4, vec3, } from "gl-matrix";
-
-import Transform from "../../core/Transform";
-import ArrayBufferInterleaved from "../../core/ArrayBufferInterleaved";
 import CameraFPS from "../../modules/CameraFPS";
-import VBO from "../../core/VBO";
-import VAO from "../../core/VAO";
-import Bolt from "@/webgl/core/Bolt";
 
 export default class extends Base {
 
@@ -25,9 +19,8 @@ export default class extends Base {
     camera: CameraFPS;
     assetsLoaded!: boolean;
     cubeTransform!: Transform;
-    torusBuffer!: ArrayBufferInterleaved;
     simulationShader!: Shader;
-    simulationShaderLocations!: { tfOldPosition: number; tfOldVelocity: number; };
+    simulationShaderLocations!: { oldPosition: number; oldVelocity: number; };
     particleShaderLocations!: { aPosition: number; };
     tf1?: WebGLTransformFeedback;
     tf2?: WebGLTransformFeedback;
@@ -57,7 +50,7 @@ export default class extends Base {
     	this.particleShader = new Shader( particlesVertexInstanced, particlesFragmentInstanced );
 
     	const transformFeedbackVaryings = [
-    		"tfNewPosition",
+    		"newPosition",
     	];
 
     	this.simulationShader = new Shader( simulationVertex, simulationFragment,
@@ -66,8 +59,8 @@ export default class extends Base {
     		} );
 
     	this.simulationShaderLocations = {
-    		"tfOldPosition": 0,
-    		"tfOldVelocity": 1
+    		"oldPosition": 0,
+    		"oldVelocity": 1
     	};
 
     	this.particleShaderLocations = {
@@ -128,14 +121,14 @@ export default class extends Base {
 
     	const vaoUpdate1 = new VAO();
     	vaoUpdate1.bind();
-    	vaoUpdate1.linkAttrib( position1VBO, this.simulationShaderLocations.tfOldPosition, 3, this.gl.FLOAT );
-    	vaoUpdate1.linkAttrib( velocityBuffer, this.simulationShaderLocations.tfOldVelocity, 3, this.gl.FLOAT );
+    	vaoUpdate1.linkAttrib( position1VBO, this.simulationShaderLocations.oldPosition, 3, this.gl.FLOAT );
+    	vaoUpdate1.linkAttrib( velocityBuffer, this.simulationShaderLocations.oldVelocity, 3, this.gl.FLOAT );
     	vaoUpdate1.unbind();
 
     	const vaoUpdate2 = new VAO();
     	vaoUpdate2.bind();
-    	vaoUpdate2.linkAttrib( position2VBO, this.simulationShaderLocations.tfOldPosition, 3, this.gl.FLOAT );
-    	vaoUpdate2.linkAttrib( velocityBuffer, this.simulationShaderLocations.tfOldVelocity, 3, this.gl.FLOAT );
+    	vaoUpdate2.linkAttrib( position2VBO, this.simulationShaderLocations.oldPosition, 3, this.gl.FLOAT );
+    	vaoUpdate2.linkAttrib( velocityBuffer, this.simulationShaderLocations.oldVelocity, 3, this.gl.FLOAT );
     	vaoUpdate2.unbind();
 
     	const vaoDraw1 = new VAO();
@@ -174,13 +167,13 @@ export default class extends Base {
 
     	this.bolt.resizeFullScreen();
 
-    	this.camera.resize( this.bolt.gl.canvas.width, this.bolt.gl.canvas.height );
+    	this.camera.resize( this.gl.canvas.width, this.gl.canvas.height );
 
     }
 
     earlyUpdate( elapsed: number, delta: number ) {
 
-    	super.earlyUpdate( elapsed, delta );
+    	return;
 
     }
 
@@ -188,7 +181,7 @@ export default class extends Base {
 
     	if ( ! this.assetsLoaded ) return;
 
-    	super.update( elapsed, delta );
+
 
     	this.camera.update( delta );
 
@@ -215,8 +208,8 @@ export default class extends Base {
     	this.particleShader.activate();
     	this.gl.bindVertexArray( this.current.drawVAO.arrayObject );
 
-    	this.particleShader.setMatrix4( "projection", this.camera.getProjectionMatrix() );
-    	this.particleShader.setMatrix4( "view", this.camera.getViewMatrix() );
+    	this.particleShader.setMatrix4( "projection", this.camera.projection );
+    	this.particleShader.setMatrix4( "view", this.camera.view );
     	this.particleShader.setMatrix4( "model", model );
 
     	this.gl.drawArrays( this.gl.POINTS, 0, this.instanceCount );
@@ -234,7 +227,7 @@ export default class extends Base {
 
     lateUpdate( elapsed: number, delta: number ) {
 
-    	super.lateUpdate( elapsed, delta );
+    	return;
 
     }
 

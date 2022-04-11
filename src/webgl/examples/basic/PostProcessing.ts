@@ -1,14 +1,11 @@
 import Base from "@webgl/Base";
-import Shader from "../../core/Shader";
+import Bolt, { Shader, Batch, Transform, Mesh, Node } from "@robsouthgate/bolt-core";
 
 import defaultVertex from "../../examples/shaders/default/default.vert";
 import defaultFragment from "../../examples/shaders/default/default.frag";
 
 import { vec3, } from "gl-matrix";
-import Node from "../../core/Node";
-import Transform from "../../core/Transform";
 import CameraArcball from "../../modules/CameraArcball";
-import ArrayBuffer from "../../core/ArrayBuffer";
 import Sphere from "../../modules/Primitives/Sphere";
 import Post from "@/webgl/modules/Post/Post";
 import Plane from "@/webgl/modules/Primitives/Plane";
@@ -16,9 +13,6 @@ import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
 import RGBSplitPass from "@/webgl/modules/Post/passes/RGBSplitPass";
 import PixelatePass from "@/webgl/modules/Post/passes/PixelatePass";
 import RenderPass from "@/webgl/modules/Post/passes/RenderPass";
-
-import Bolt from "@/webgl/core/Bolt";
-
 export default class extends Base {
 
     canvas: HTMLCanvasElement;
@@ -27,16 +21,16 @@ export default class extends Base {
     camera: CameraArcball;
     assetsLoaded?: boolean;
     torusTransform!: Transform;
-    sphereNode!: Node;
-    cubeNode!: Node;
-    planeNode!: Node;
+    sphereBatch!: Batch;
+    planeBatch!: Batch;
     post: Post;
     fxaa!: FXAAPass;
     rbgSplit!: RGBSplitPass;
     renderPass!: RenderPass;
     pixelate!: PixelatePass;
-    bolt: Bolt;
+    bolt = Bolt.getInstance();
     gl: WebGL2RenderingContext;
+    root!: Node;
 
     constructor() {
 
@@ -61,7 +55,6 @@ export default class extends Base {
     		2
     	);
 
-    	this.bolt = Bolt.getInstance();
     	this.bolt.init( this.canvas, { antialias: true } );
     	this.bolt.setCamera( this.camera );
 
@@ -91,14 +84,14 @@ export default class extends Base {
     	this.rbgSplit = new RGBSplitPass( this.bolt, {
     		width: this.width,
     		height: this.height
-    	} ).setEnabled( false );
+    	} ).setEnabled( true );
 
     	this.pixelate = new PixelatePass( this.bolt, {
     		width: this.width,
     		height: this.height,
-    		xPixels: 30,
-    		yPixels: 30
-    	} ).setEnabled( true );
+    		xPixels: 80,
+    		yPixels: 80
+    	} ).setEnabled( false );
 
     	this.fxaa = new FXAAPass( this.bolt, {
     		width: this.width,
@@ -106,27 +99,30 @@ export default class extends Base {
     	} ).setEnabled( true );
 
     	this.post.add( this.renderPass );
-    	this.post.add( this.rbgSplit );
-    	this.post.add( this.pixelate );
-    	this.post.add( this.fxaa, true );
+    	this.post.add( this.rbgSplit, true );
 
     	const sphereGeometry = new Sphere( { radius: 1, widthSegments: 64, heightSegments: 64 } );
     	const planeGeometry = new Plane( { widthSegments: 64, heightSegments: 64 } );
 
-    	this.sphereNode = new Node(
-    		new ArrayBuffer( sphereGeometry ),
+    	this.root = new Node();
+
+    	this.sphereBatch = new Batch(
+    		new Mesh( sphereGeometry ),
+    		this.shader
     	);
 
-    	this.planeNode = new Node(
-    		new ArrayBuffer( planeGeometry ),
+    	this.sphereBatch.setParent( this.root );
+
+    	this.planeBatch = new Batch(
+    		new Mesh( planeGeometry ),
+    		this.shader
     	);
 
-    	this.planeNode.transform.scale[ 0 ] = 3;
-    	this.planeNode.transform.scale[ 1 ] = 3;
-    	this.planeNode.transform.scale[ 2 ] = 3;
+    	this.planeBatch.setParent( this.root );
 
-    	this.planeNode.transform.rotation[ 0 ] = Math.PI * 0.5;
-    	this.planeNode.transform.position[ 1 ] = - 0.25;
+    	this.planeBatch.transform.scale = vec3.fromValues( 10, 10, 10 );
+    	this.planeBatch.transform.rotation[ 0 ] = Math.PI * 0.5;
+    	this.planeBatch.transform.position[ 1 ] = - 1;
 
     	this.resize();
 
@@ -136,19 +132,17 @@ export default class extends Base {
 
     	this.bolt.resizeFullScreen();
 
-    	this.post.resize( this.bolt.gl.canvas.width, this.bolt.gl.canvas.height );
+    	this.post.resize( this.gl.canvas.width, this.gl.canvas.height );
 
     }
 
     earlyUpdate( elapsed: number, delta: number ) {
 
-    	super.earlyUpdate( elapsed, delta );
+    	return;
 
     }
 
     update( elapsed: number, delta: number ) {
-
-    	super.update( elapsed, delta );
 
     	this.post.begin();
 
@@ -157,16 +151,20 @@ export default class extends Base {
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 1, 1, 1, 1 );
 
-    	this.bolt.draw( this.shader, [ this.sphereNode, this.planeNode ] );
+    	this.root.traverse( ( node: Node ) => {
+
+    		this.bolt.draw( node );
+
+    	} );
 
     	this.post.end();
 
 
     }
 
-    lateUpdate( elapsed: number, delta: number ) {
+    lateUpdate( elapsed: number, delta: number ): void {
 
-    	super.lateUpdate( elapsed, delta );
+    	return;
 
     }
 

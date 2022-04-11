@@ -1,6 +1,6 @@
 
-import Bolt from "@/webgl/core/Bolt";
-import FBO from "@/webgl/core/FBO";
+
+import Bolt, { FBO } from "@robsouthgate/bolt-core";
 import { Pass } from "./passes/Pass";
 import RenderPass from "./passes/RenderPass";
 
@@ -63,8 +63,6 @@ export default class Post {
     	const enabledPasses = this._passes.filter( pass => pass.enabled );
 
     	enabledPasses.forEach( ( pass: Pass ) => {
-
-    		if ( ! pass.enabled ) return;
 
     		if ( pass instanceof RenderPass ) {
 

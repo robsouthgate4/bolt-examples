@@ -41,7 +41,7 @@ float convCoord(float depth, float offset){
 void main()
 {
 
-    float depthOffset = 0.0;
+    float depthOffset = -0.5;
 
     float linearDepth = 1.0 / ( cameraPlanes.y - cameraPlanes.x );
 

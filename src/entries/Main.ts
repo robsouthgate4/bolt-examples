@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/advanced/DepthOfField";
+import Example from "@/webgl/examples/basic/Viewport";
 
 export default class Main {
 
@@ -10,6 +10,7 @@ export default class Main {
     	this.loading = false;
 
     }
+
     _start() {
 
     	const example = new Example();

@@ -1,19 +1,15 @@
 import Base from "@webgl/Base";
-import Shader from "../../core/Shader";
+import Bolt, { Shader, Transform, Mesh, Texture } from "@robsouthgate/bolt-core";
 import vertexShader from "../../examples/shaders/raymarch/raymarch.vert";
 import fragmentShader from "../../examples/shaders/raymarch/raymarch.frag";
 
 import { vec3, } from "gl-matrix";
-import Node from "../../core/Node";
-import Transform from "../../core/Transform";
 import CameraArcball from "../../modules/CameraArcball";
-import ArrayBuffer from "../../core/ArrayBuffer";
-import Bolt from "@/webgl/core/Bolt";
 import Cube from "@/webgl/modules/Primitives/Cube";
-import Texture from "@/webgl/core/Texture";
 import Post from "@/webgl/modules/Post/Post";
 import RenderPass from "@/webgl/modules/Post/passes/RenderPass";
-import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
+//import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
+import Batch from "@robsouthgate/bolt-core/lib/Batch";
 
 export default class extends Base {
 
@@ -23,7 +19,7 @@ export default class extends Base {
     camera: CameraArcball;
     assetsLoaded!: boolean;
     torusTransform!: Transform;
-    cubeNode!: Node;
+    cubeBatch!: Batch;
     bolt: Bolt;
     post: Post;
 
@@ -63,10 +59,10 @@ export default class extends Base {
     		height: this.height
     	} ) );
 
-    	this.post.add( new FXAAPass( this.bolt, {
-    		width: this.width,
-    		height: this.height,
-    	} ), true );
+    	// this.post.add( new FXAAPass( this.bolt, {
+    	// 	width: this.width,
+    	// 	height: this.height,
+    	// } ), true );
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.setCamera( this.camera );
@@ -90,8 +86,9 @@ export default class extends Base {
     	this.shader.setTexture( "mapEqui", equiTexture );
 
     	// setup nodes
-    	this.cubeNode = new Node(
-    		new ArrayBuffer( geometry ),
+    	this.cubeBatch = new Batch(
+    		new Mesh( geometry ),
+    		this.shader
     	);
 
     	this.resize();
@@ -101,13 +98,13 @@ export default class extends Base {
     resize() {
 
     	this.bolt.resizeFullScreen();
-    	this.post.resize( this.bolt.gl.canvas.width, this.bolt.gl.canvas.height );
+    	this.post.resize( this.bolt.getContext().canvas.width, this.bolt.getContext().canvas.height );
 
     }
 
     earlyUpdate( elapsed: number, delta: number ) {
 
-    	super.earlyUpdate( elapsed, delta );
+    	return;
 
     }
 
@@ -115,7 +112,7 @@ export default class extends Base {
 
     	if ( ! this.assetsLoaded ) return;
 
-    	super.update( elapsed, delta );
+
 
     	this.post.begin();
     	this.camera.update();
@@ -129,7 +126,7 @@ export default class extends Base {
     	this.shader.setVector3( "viewPosition", this.camera.position );
     	this.shader.setFloat( "time", elapsed );
 
-    	this.bolt.draw( this.shader, [ this.cubeNode ] );
+    	this.bolt.draw( this.cubeBatch );
 
     	this.post.end();
 
@@ -137,7 +134,7 @@ export default class extends Base {
 
     lateUpdate( elapsed: number, delta: number ) {
 
-    	super.lateUpdate( elapsed, delta );
+    	return;
 
     }
 
