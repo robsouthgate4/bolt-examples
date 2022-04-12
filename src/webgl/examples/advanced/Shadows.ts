@@ -94,14 +94,14 @@ export default class extends Base {
     	);
 
     	this.cubeBatch.transform.position[ 1 ] = 0.5;
-    	this.cubeBatch.transform.rotation[ 1 ] = Math.PI * 0.5;
+    	this.cubeBatch.transform.rotateY = Math.PI * 0.5;
 
     	this.planeBatch = new Batch(
     		new Mesh( planeGeometry ),
     		this.shader
     	);
 
-    	this.planeBatch.transform.rotation[ 0 ] = Math.PI * 0.5;
+    	this.planeBatch.transform.rotateX = Math.PI * 0.5;
     	this.planeBatch.transform.scale = vec3.fromValues( 10, 10, 10 );
 
     	this.resize();

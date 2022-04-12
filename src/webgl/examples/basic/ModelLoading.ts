@@ -4,7 +4,7 @@ import Bolt, { Shader, Node, Transform } from "@robsouthgate/bolt-core";
 import defaultVertex from "../../examples/shaders/default/default.vert";
 import defaultFragment from "../../examples/shaders/default/default.frag";
 
-import { vec3, } from "gl-matrix";
+import { mat3, vec3, } from "gl-matrix";
 import CameraArcball from "../../modules/CameraArcball";
 import GLTFLoader from "@/webgl/modules/GLTFLoader";
 import { GlTf } from "@/webgl/modules/GLTFLoader/types/GLTF";
@@ -45,6 +45,8 @@ export default class extends Base {
     		2
     	);
 
+    	console.log( mat3.create() );
+
     	this.bolt = Bolt.getInstance();
     	this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
     	this.bolt.setCamera( this.camera );
@@ -63,7 +65,7 @@ export default class extends Base {
     async init() {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
-    	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf", "phantom_objects.gltf" );
+    	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf", "phantom_objects2.gltf" );
     	this.assetsLoaded = true;
 
     	this.resize();
@@ -98,8 +100,6 @@ export default class extends Base {
     		for ( const scene of this.gltf.scenes ) {
 
     			scene.root.traverse( ( node: Node ) => {
-
-    				node.transform.rotationY += 0.001;
 
     				this.bolt.draw( node );
 

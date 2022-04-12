@@ -121,8 +121,8 @@ export default class extends Base {
     	this.planeBatch.setParent( this.root );
 
     	this.planeBatch.transform.scale = vec3.fromValues( 10, 10, 10 );
-    	this.planeBatch.transform.rotation[ 0 ] = Math.PI * 0.5;
-    	this.planeBatch.transform.position[ 1 ] = - 1;
+    	this.planeBatch.transform.rotateX = Math.PI * 0.5;
+    	this.planeBatch.transform.x = - 1;
 
     	this.resize();
 

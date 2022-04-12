@@ -112,9 +112,9 @@ export default class extends Base {
     	this.shader.setVector3( "viewPosition", this.camera.position );
     	this.shader.setFloat( "time", elapsed );
 
-    	this.torusBatch.transform.rotation[ 0 ] += 2 * delta;
-    	this.torusBatch.transform.rotation[ 1 ] -= 1 * delta;
-    	this.torusBatch.transform.rotation[ 2 ] -= 3 * delta;
+    	this.torusBatch.transform.rotateX = 2 * delta;
+    	this.torusBatch.transform.rotateY = 1 * delta;
+    	this.torusBatch.transform.rotateZ = 3 * delta;
 
     	this.bolt.draw( this.torusBatch );
 

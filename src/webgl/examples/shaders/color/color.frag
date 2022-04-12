@@ -11,13 +11,14 @@ uniform vec3 viewPosition;
 
 out vec4 FragColor;
 
-in vec2 vUv;
+in vec2 Uv;
 in vec3 Normal;
 in vec3 FragPosition;
+in vec3 Color;
 
 void main()
 {
 
-  FragColor = vec4( vec3( 1.0, 0.0, 0.0 ), 1.0 );
+  FragColor = vec4( Color, 1.0 );
 
 }

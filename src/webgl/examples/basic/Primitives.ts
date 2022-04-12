@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES, POINTS, LINE_LOOP, LINES } from "@robsouthgate/bolt-core";
+import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES } from "@robsouthgate/bolt-core";
 
 import defaultVertex from "../../examples/shaders/default/default.vert";
 import defaultFragment from "../../examples/shaders/default/default.frag";
@@ -81,15 +81,18 @@ export default class extends Base {
     			0.5, - 0.5, 0,
     			0.5, 0.5, 0,
     		],
-    		indices: [ 0, 1, 2 ],
-    		normals: [
-    			0, 0, - 1,
-    			0, 0, - 1,
-    			0, 0, - 1
-    		]
+    		indices: [ 0, 1, 2 ]
     	};
 
     	const triangleMesh = new Mesh( triangleGeo ).setDrawType( TRIANGLES );
+
+    	const colours = [
+    		1, 0, 0,
+    		0, 1, 0,
+    		0, 0, 1
+    	];
+
+    	triangleMesh.addAttribute( colours, 3, 3 );
 
     	const triShader = new Shader( colorVertex, colorFragment );
 
@@ -115,7 +118,6 @@ export default class extends Base {
     	);
 
     	this.cubeBatch.setParent( this.root );
-
 
     	this.planeBatch = new Batch(
     		new Mesh( planeGeometry ).setDrawType( TRIANGLES ),
@@ -149,8 +151,6 @@ export default class extends Base {
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 1, 1, 1, 1 );
-
-    	this.root.transform.rotationY += 0.01;
 
     	this.root.traverse( ( node: Node ) => {
 
