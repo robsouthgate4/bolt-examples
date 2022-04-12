@@ -1,4 +1,4 @@
-# Bolt WebGL library
+# Bolt WebGL examples repo
 
 ## Getting Started
 
