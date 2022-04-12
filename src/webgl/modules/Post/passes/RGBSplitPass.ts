@@ -1,4 +1,4 @@
-import Bolt, { Shader, FBO } from "@robsouthgate/bolt-core";
+import Bolt, { Shader, FBO } from "@bolt-webgl/core";
 import { Pass } from "./Pass";
 
 import vertexShader from "./shaders/rgbSplit/rgbSplit.vert";

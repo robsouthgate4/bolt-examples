@@ -1,6 +1,6 @@
 
 import { Pass } from "./Pass";
-import Bolt, { Shader, FBO } from "@robsouthgate/bolt-core";
+import Bolt, { Shader, FBO } from "@bolt-webgl/core";
 
 interface ShaderPassParams {
     width: number;

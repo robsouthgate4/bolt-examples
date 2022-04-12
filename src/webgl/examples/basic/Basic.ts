@@ -2,12 +2,12 @@ import Base from "@webgl/Base";
 import defaultVertex from "../../examples/shaders/default/default.vert";
 import defaultFragment from "../../examples/shaders/default/default.frag";
 
-import Bolt, { Shader, Transform, Node, Mesh } from "@robsouthgate/bolt-core";
+import Bolt, { Shader, Transform, Node, Mesh } from "@bolt-webgl/core";
 
 import { vec3, } from "gl-matrix";
 import CameraArcball from "../../modules/CameraArcball";
 import GLTFParser from "../../modules/GLTFParser";
-import Batch from "@robsouthgate/bolt-core/lib/Batch";
+import Batch from "@bolt-webgl/core/lib/Batch";
 
 export default class extends Base {
 

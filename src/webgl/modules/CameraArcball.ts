@@ -1,5 +1,5 @@
 import { mat4, vec3 } from "gl-matrix";
-import { Camera } from "@robsouthgate/bolt-core";
+import { Camera } from "@bolt-webgl/core";
 
 export default class CameraArcball extends Camera {
 

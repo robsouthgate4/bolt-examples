@@ -1,5 +1,5 @@
 import { glMatrix, mat4, vec3 } from "gl-matrix";
-import { Camera } from "@robsouthgate/bolt-core";
+import { Camera } from "@bolt-webgl/core";
 
 export default class CameraFPS extends Camera {
 

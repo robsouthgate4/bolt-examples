@@ -1,9 +1,9 @@
 
 import { quat, vec3 } from "gl-matrix";
-import Bolt, { VBO, VAO, Transform, Mesh, Node, Batch, Shader } from "@robsouthgate/bolt-core";
+import Bolt, { VBO, VAO, Transform, Mesh, Node, Batch, Shader } from "@bolt-webgl/core";
 
 import { GlTf, Mesh as GLTFMesh, MeshPrimitive } from "./types/GLTF";
-import { GeometryBuffers } from "@robsouthgate/bolt-core/lib/Mesh";
+import { GeometryBuffers } from "@bolt-webgl/core/lib/Mesh";
 
 import vertexShader from "../../examples/shaders/default/default.vert";
 import fragmentShader from "../../examples/shaders/default/default.frag";

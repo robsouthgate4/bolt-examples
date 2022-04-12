@@ -4,7 +4,7 @@ import { Pass } from "./Pass";
 import vertexShader from "./shaders/fxaa/fxaa.vert";
 import fragmentShader from "./shaders/fxaa/fxaa.frag";
 import { vec2 } from "gl-matrix";
-import Bolt, { Shader, FBO } from "@robsouthgate/bolt-core";
+import Bolt, { Shader, FBO } from "@bolt-webgl/core";
 
 export default class FXAAPass extends Pass {
 

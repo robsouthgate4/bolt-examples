@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES } from "@robsouthgate/bolt-core";
+import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES } from "@bolt-webgl/core";
 
 import defaultVertex from "../../examples/shaders/default/default.vert";
 import defaultFragment from "../../examples/shaders/default/default.frag";
@@ -12,7 +12,7 @@ import CameraArcball from "../../modules/CameraArcball";
 import Sphere from "../../modules/Primitives/Sphere";
 import Cube from "../../modules/Primitives/Cube";
 import Plane from "../../modules/Primitives/Plane";
-import { GeometryBuffers } from "@robsouthgate/bolt-core/lib/Mesh";
+import { GeometryBuffers } from "@bolt-webgl/core/lib/Mesh";
 export default class extends Base {
 
     canvas: HTMLCanvasElement;
@@ -81,6 +81,16 @@ export default class extends Base {
     			0.5, - 0.5, 0,
     			0.5, 0.5, 0,
     		],
+    		normals: [
+    			0, 0, 0,
+    			0, 0, 0,
+    			0, 0, 0
+    		],
+    		uvs: [
+    			0, 0,
+    			0, 0,
+    			0, 0
+    		],
     		indices: [ 0, 1, 2 ]
     	};
 
@@ -92,9 +102,21 @@ export default class extends Base {
     		0, 0, 1
     	];
 
-    	triangleMesh.addAttribute( colours, 3, 3 );
-
+    	//triangleMesh.addAttribute( colours, 3, 3 );
     	const triShader = new Shader( colorVertex, colorFragment );
+
+    	const colours2 = [
+    		1, 1, 0,
+    		0, 1, 1,
+    		0, 0, 1
+    	];
+
+    	// attributes can be added with a named var and shader
+    	triangleMesh.addAttribute( colours, 3, { shader: triShader, attributeName: "aColor" } );
+    	triangleMesh.addAttribute( colours2, 3, { shader: triShader, attributeName: "aColor2" } );
+
+    	// attributes can be added with a layout id
+    	triangleMesh.addAttribute( colours2, 3, 4 );
 
     	this.triangleBatch = new Batch(
     		triangleMesh,
@@ -103,7 +125,7 @@ export default class extends Base {
 
     	this.triangleBatch.setParent( this.root );
     	this.triangleBatch.transform.y = 2.5;
-    	this.triangleBatch.transform.scale = vec3.fromValues( 1, 1, 1 );
+    	this.triangleBatch.transform.scale = vec3.fromValues( 1.5, 1.5, 1.5 );
 
     	this.sphereBatch = new Batch(
     		new Mesh( sphereGeometry ).setDrawType( TRIANGLES ),

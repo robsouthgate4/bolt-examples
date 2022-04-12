@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { DYNAMIC_DRAW, FLOAT, IBO, POINTS, Shader, STATIC_DRAW, TRIANGLES, UNSIGNED_SHORT, VAO, VBO } from "@robsouthgate/bolt-core";
+import Bolt, { DYNAMIC_DRAW, FLOAT, IBO, POINTS, Shader, STATIC_DRAW, TRIANGLES, UNSIGNED_SHORT, VAO, VBO } from "@bolt-webgl/core";
 
 import particlesVertexInstanced from "../../examples/shaders/gpgpuInstanced/particles.vert";
 import particlesFragmentInstanced from "../../examples/shaders/gpgpuInstanced/particles.frag";

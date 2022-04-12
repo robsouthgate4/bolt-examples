@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Mesh, Transform, Batch, Node, Camera } from "@robsouthgate/bolt-core";
+import Bolt, { Shader, Mesh, Transform, Batch, Node, Camera } from "@bolt-webgl/core";
 
 import defaultVertex from "../../examples/shaders/default/default.vert";
 import defaultFragment from "../../examples/shaders/default/default.frag";

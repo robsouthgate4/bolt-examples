@@ -1,5 +1,5 @@
 
-import Bolt, { FBO, Mesh, RBO } from "@robsouthgate/bolt-core";
+import Bolt, { FBO, Mesh, RBO } from "@bolt-webgl/core";
 export abstract class Pass {
 
     fbo: FBO;

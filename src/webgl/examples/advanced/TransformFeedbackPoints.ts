@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Transform, VAO, VBO } from "@robsouthgate/bolt-core";
+import Bolt, { Shader, Transform, VAO, VBO } from "@bolt-webgl/core";
 
 import particlesVertexInstanced from "../../examples/shaders/gpgpu/particles.vert";
 import particlesFragmentInstanced from "../../examples/shaders/gpgpu/particles.frag";
