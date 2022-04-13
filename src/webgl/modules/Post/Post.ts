@@ -1,6 +1,6 @@
 
 
-import Bolt, { BACK, FBO } from "@bolt-webgl/core";
+import Bolt, { FBO } from "@bolt-webgl/core";
 import { Pass } from "./passes/Pass";
 import RenderPass from "./passes/RenderPass";
 
@@ -19,6 +19,7 @@ export default class Post {
 
     	this._width = window.innerWidth;
     	this._height = window.innerHeight;
+
 
     	this._readFbo = new FBO( { width: this._width, height: this._height, depth: true } );
     	this._writeFbo = new FBO( { width: this._width, height: this._height, depth: true } );
@@ -41,13 +42,6 @@ export default class Post {
     	this._readFbo.resize( width, height );
     	this._writeFbo.resize( width, height );
 
-    	this._passes.forEach( ( pass: Pass ) => {
-
-    		pass.fbo.resize( width, height );
-    		pass.rbo.resize( width, height );
-
-    	} );
-
     }
 
     swap() {
@@ -61,7 +55,8 @@ export default class Post {
     begin() {
 
 
-    	this.bolt.enableDepth();
+    	// this.bolt.enableDepth();
+    	// this.bolt.enableCullFace();
 
     	const enabledPasses = this._passes.filter( pass => pass.enabled );
 
@@ -85,7 +80,8 @@ export default class Post {
 
     end() {
 
-    	this._readFbo.unbind();
+    	this.bolt.enableDepth();
+    	this.bolt.enableCullFace();
 
     	const enabledPasses = this._passes.filter( pass => pass.enabled );
 

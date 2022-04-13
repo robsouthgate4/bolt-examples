@@ -26,7 +26,7 @@ export default class DOFPass extends Pass {
 
     	this.shader = new Shader( vertexShader, fragmentShader );
     	this.shader.activate();
-    	this.shader.setTexture( "map", this.fbo.targetTexture );
+    	//this.shader.setTexture( "map", this.fbo.targetTexture );
     	this.shader.setFloat( "focus", 610 );
     	this.shader.setFloat( "aperture", 3.1 * 0.0001 );
     	this.shader.setFloat( "maxBlur", 0.005 );
@@ -39,28 +39,28 @@ export default class DOFPass extends Pass {
 
     draw( readFBO: FBO, writeFbo: FBO, renderToScreen?: boolean ) {
 
-    	if ( ! renderToScreen ) {
+    	// if ( ! renderToScreen ) {
 
-    		this.fbo.bind();
+    	// 	this.fbo.bind();
 
-    	}
+    	// }
 
-    	if ( ! readFBO ) {
+    	// if ( ! readFBO ) {
 
-    		this.shader.setTexture( "map", this.fbo.targetTexture );
+    	// 	this.shader.setTexture( "map", this.fbo.targetTexture );
 
-    	} else {
+    	// } else {
 
-    		this.shader.setTexture( "map", readFBO.targetTexture );
+    	// 	this.shader.setTexture( "map", readFBO.targetTexture );
 
-    	}
+    	// }
 
-    	this.t ++;
+    	// this.t ++;
 
-    	this.shader.activate();
-    	this.fullScreenTriangle.drawTriangles( this.shader );
+    	// this.shader.activate();
+    	// this.fullScreenTriangle.drawTriangles( this.shader );
 
-    	this.fbo.unbind();
+    	// this.fbo.unbind();
 
 
     }

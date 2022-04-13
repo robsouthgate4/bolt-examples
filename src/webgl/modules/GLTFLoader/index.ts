@@ -161,6 +161,7 @@ export default class GLTFLoader {
 
     					gltfMesh.primitives.forEach( ( primitive ) => {
 
+
     						const attribs = primitive.bufferInfo.attributes;
 
     						const geometry: GeometryBuffers = {

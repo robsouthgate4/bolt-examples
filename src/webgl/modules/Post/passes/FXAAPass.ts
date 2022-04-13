@@ -39,6 +39,7 @@ export default class FXAAPass extends Pass {
 
     	this.fullScreenTriangle.drawTriangles( this.shader );
 
+    	readFBO.unbind();
     	writeFbo.unbind();
 
     }

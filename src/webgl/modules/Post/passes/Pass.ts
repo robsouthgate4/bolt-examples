@@ -2,8 +2,6 @@
 import Bolt, { FBO, Mesh, RBO } from "@bolt-webgl/core";
 export abstract class Pass {
 
-    fbo: FBO;
-    rbo: RBO;
     fullScreenTriangle: Mesh;
     private _renderToScreen = false;
     _enabled = true;
@@ -12,12 +10,6 @@ export abstract class Pass {
     	width = 256,
     	height = 256,
     } ) {
-
-    	this.fbo = new FBO( { width, height } );
-    	this.fbo.bind();
-
-    	this.rbo = new RBO( { width, height } );
-    	this.fbo.unbind();
 
     	const triangleVertices = [
     		- 1, - 1, 0, - 1, 4, 0, 4, - 1, 0

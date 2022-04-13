@@ -29,7 +29,6 @@ export default class PixelatePass extends Pass {
     	this.shader.activate();
     	this.shader.setFloat( "xPixels", this._xPixels );
     	this.shader.setFloat( "yPixels", this._yPixels );
-    	this.shader.setTexture( "map", this.fbo.targetTexture );
 
     }
 

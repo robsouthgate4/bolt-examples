@@ -32,6 +32,10 @@ void main()
     Color2 = aColor2;
     Color3 = aColor3;
 
+    Uv = aUv;
+
+    Normal = aNormal;
+
     FragPosition = vec3( model * vec4( aPosition, 1.0 ) );
 
     gl_Position = projection * view * model * vec4( aPosition, 1.0 );

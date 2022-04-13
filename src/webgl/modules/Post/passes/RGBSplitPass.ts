@@ -19,8 +19,6 @@ export default class RGBSplitPass extends Pass {
     	} );
 
     	this.shader = new Shader( vertexShader, fragmentShader );
-    	this.shader.activate();
-    	this.shader.setTexture( "map", this.fbo.targetTexture );
 
     }
 
@@ -36,7 +34,7 @@ export default class RGBSplitPass extends Pass {
 
     	this.fullScreenTriangle.drawTriangles( this.shader );
 
-    	writeFbo.unbind();
+    	//writeFbo.unbind();
 
     }
 

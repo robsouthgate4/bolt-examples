@@ -1,34 +1,42 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Batch, Transform, Mesh, Node } from "@bolt-webgl/core";
+import Bolt, { Shader, Node, Transform, Batch, Camera, BACK } from "@bolt-webgl/core";
 
 import defaultVertex from "../../examples/shaders/default/default.vert";
 import defaultFragment from "../../examples/shaders/default/default.frag";
 
-import { vec3, } from "gl-matrix";
-import CameraArcball from "../../modules/CameraArcball";
-import Sphere from "../../modules/Primitives/Sphere";
-import Post from "@/webgl/modules/Post/Post";
 import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
 import RGBSplitPass from "@/webgl/modules/Post/passes/RGBSplitPass";
 import PixelatePass from "@/webgl/modules/Post/passes/PixelatePass";
 import RenderPass from "@/webgl/modules/Post/passes/RenderPass";
+
+
+import colorVertex from "../../examples/shaders/color/color.vert";
+import colorFragment from "../../examples/shaders/color/color.frag";
+
+import { mat3, vec3, } from "gl-matrix";
+import CameraArcball from "../../modules/CameraArcball";
+import GLTFLoader from "@/webgl/modules/GLTFLoader";
+import { GlTf } from "@/webgl/modules/GLTFLoader/types/GLTF";
+import Post from "@/webgl/modules/Post/Post";
+
 export default class extends Base {
 
     canvas: HTMLCanvasElement;
     shader: Shader;
-    camera: CameraArcball;
+    lightPosition: vec3;
+    camera: Camera;
     assetsLoaded?: boolean;
     torusTransform!: Transform;
-    sphereBatch!: Batch;
-    planeBatch!: Batch;
-    post: Post;
+    sphereNode!: Node;
+    planeNode!: Node;
+    bolt: Bolt;
+    gltf!: GlTf;
+    post!: Post;
     fxaa!: FXAAPass;
     rbgSplit!: RGBSplitPass;
     renderPass!: RenderPass;
     pixelate!: PixelatePass;
-    bolt = Bolt.getInstance();
     gl: WebGL2RenderingContext;
-    root!: Node;
 
     constructor() {
 
@@ -44,32 +52,28 @@ export default class extends Base {
     	this.camera = new CameraArcball(
     		this.width,
     		this.height,
-    		vec3.fromValues( 0, 0, 5 ),
-    		vec3.fromValues( 0, 0, 0 ),
+    		vec3.fromValues( 0, 0, 20 ),
+    		vec3.fromValues( 0, 2, 0 ),
     		45,
     		0.01,
     		1000,
-    		0.2,
-    		2
+    		0.1,
+    		2,
+    		0.6
     	);
 
-    	this.bolt.init( this.canvas, { antialias: false, dpi: 1 } );
+    	this.bolt = Bolt.getInstance();
+    	this.bolt.init( this.canvas, { antialias: false, dpi: 2 } );
     	this.bolt.setCamera( this.camera );
 
     	this.gl = this.bolt.getContext();
 
-    	this.post = new Post( this.bolt );
+    	this.shader = new Shader( colorVertex, colorFragment );
+    	this.lightPosition = vec3.fromValues( 0, 0, 2 );
 
-    	this.shader = new Shader( defaultVertex, defaultFragment );
-    	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.enableDepth();
 
-    	this.init();
-
-
-    }
-
-    async init() {
+    	this.post = new Post( this.bolt );
 
     	this.renderPass = new RenderPass( this.bolt, {
     		width: this.width,
@@ -80,14 +84,14 @@ export default class extends Base {
     	this.rbgSplit = new RGBSplitPass( this.bolt, {
     		width: this.width,
     		height: this.height
-    	} ).setEnabled( true );
+    	} ).setEnabled( false );
 
     	this.pixelate = new PixelatePass( this.bolt, {
     		width: this.width,
     		height: this.height,
     		xPixels: 80,
     		yPixels: 80
-    	} ).setEnabled( true );
+    	} ).setEnabled( false );
 
     	this.fxaa = new FXAAPass( this.bolt, {
     		width: this.width,
@@ -95,20 +99,42 @@ export default class extends Base {
     	} ).setEnabled( true );
 
     	this.post.add( this.renderPass );
+    	// this.post.add( this.pixelate );
+    	//this.post.add( this.rbgSplit, true );
     	this.post.add( this.fxaa, true );
 
-    	const sphereGeometry = new Sphere( { radius: 1, widthSegments: 64, heightSegments: 64 } );
+    	this.init();
 
-    	this.root = new Node();
 
-    	this.sphereBatch = new Batch(
-    		new Mesh( sphereGeometry ),
-    		this.shader
-    	);
+    }
 
-    	this.sphereBatch.transform.y = 0;
+    async init() {
 
-    	this.sphereBatch.setParent( this.root );
+    	const gltfLoader = new GLTFLoader( this.bolt );
+    	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf", "PhantomLogoPose.gltf" );
+    	this.assetsLoaded = true;
+
+    	if ( this.gltf.scenes ) {
+
+    		for ( const scene of this.gltf.scenes ) {
+
+    			scene.root.traverse( ( node: Node ) => {
+
+    				if ( node.name === "phantom_logoPose" ) {
+
+    					const batch1 = <Batch>node.children[ 0 ];
+    					batch1.shader = this.shader;
+
+    					const batch2 = <Batch>node.children[ 1 ];
+    					batch2.shader = this.shader;
+
+    				}
+
+    			} );
+
+    		}
+
+    	}
 
     	this.resize();
 
@@ -117,7 +143,6 @@ export default class extends Base {
     resize() {
 
     	this.bolt.resizeFullScreen();
-
     	this.post.resize( this.gl.canvas.width, this.gl.canvas.height );
 
     }
@@ -130,25 +155,38 @@ export default class extends Base {
 
     update( elapsed: number, delta: number ) {
 
-    	this.camera.update();
+    	if ( ! this.assetsLoaded ) return;
+
     	this.post.begin();
 
+    	this.camera.position[ 0 ] = Math.sin( elapsed ) * ( Math.PI * 2 );
 
+    	this.camera.update();
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-    	this.bolt.clear( 1, 1, 1, 1 );
+    	this.bolt.clear( 0, 0, 0, 1 );
 
-    	this.root.traverse( ( node: Node ) => {
+    	this.shader.setFloat( "time", elapsed );
 
-    		this.bolt.draw( node );
+    	if ( this.gltf.scenes ) {
 
-    	} );
+    		for ( const scene of this.gltf.scenes ) {
+
+    			scene.root.traverse( ( node: Node ) => {
+
+    				this.bolt.draw( node );
+
+    			} );
+
+    		}
+
+    	}
 
     	this.post.end();
 
 
     }
 
-    lateUpdate( elapsed: number, delta: number ): void {
+    lateUpdate( elapsed: number, delta: number ) {
 
     	return;
 
