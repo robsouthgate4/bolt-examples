@@ -13,7 +13,7 @@ module.exports = merge(common, {
     contentBase: paths.build,
     https: false,
     host: "0.0.0.0",
-    port: "8080",
+    port: "8888",
     hot: true,
     headers: {
       "Access-Control-Allow-Origin": "*",

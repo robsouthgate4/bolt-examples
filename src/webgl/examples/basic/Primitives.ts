@@ -54,8 +54,9 @@ export default class extends Base {
     		45,
     		0.01,
     		1000,
-    		0.2,
-    		2
+    		0.08,
+    		4,
+    		0.5
     	);
 
     	this.bolt.setCamera( this.camera );
@@ -141,6 +142,7 @@ export default class extends Base {
 
     	this.cubeBatch.setParent( this.root );
 
+
     	this.planeBatch = new Batch(
     		new Mesh( planeGeometry ).setDrawType( TRIANGLES ),
     		this.shader
@@ -173,6 +175,7 @@ export default class extends Base {
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 1, 1, 1, 1 );
+
 
     	this.root.traverse( ( node: Node ) => {
 
