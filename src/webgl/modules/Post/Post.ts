@@ -1,6 +1,6 @@
 
 
-import Bolt, { FBO } from "@bolt-webgl/core";
+import Bolt, { BACK, FBO } from "@bolt-webgl/core";
 import { Pass } from "./passes/Pass";
 import RenderPass from "./passes/RenderPass";
 
@@ -41,6 +41,9 @@ export default class Post {
 
     resize( width: number, height: number ) {
 
+    	this._readFbo.resize( width, height );
+    	this._writeFbo.resize( width, height );
+
     	this._passes.forEach( ( pass: Pass ) => {
 
     		pass.fbo.resize( width, height );
@@ -60,17 +63,21 @@ export default class Post {
 
     begin() {
 
+    	this.bolt.enableCullFace();
+    	this.bolt.cullFace( BACK );
+    	this.bolt.enableDepth();
+
     	const enabledPasses = this._passes.filter( pass => pass.enabled );
 
     	enabledPasses.forEach( ( pass: Pass ) => {
 
     		if ( pass instanceof RenderPass ) {
 
-    			pass.fbo.bind();
+    			this._readFbo.bind();
 
     			if ( pass.renderToScreen ) {
 
-    				pass.fbo.unbind();
+    				this._readFbo.unbind();
 
     			}
 
@@ -78,25 +85,21 @@ export default class Post {
 
     	} );
 
-    	this.bolt.enableDepth();
-
     }
 
     end() {
 
-    	this.bolt.disableDepth();
+    	this._readFbo.unbind();
 
     	const enabledPasses = this._passes.filter( pass => pass.enabled );
 
     	enabledPasses.forEach( ( pass: Pass, index: number ) => {
 
-    		if ( pass instanceof RenderPass ) {
+    		if ( pass instanceof RenderPass === false ) {
 
-    			pass.fbo.unbind();
+    			pass.draw( this._readFbo, this._writeFbo, pass.renderToScreen );
 
-    		} else {
-
-    			pass.draw( enabledPasses[ index - 1 ].fbo, pass.renderToScreen );
+    			this.swap();
 
     		}
 

@@ -24,33 +24,23 @@ export default class ShaderPass extends Pass {
     	} );
 
     	this.shader = shader;
-    	this.shader.activate();
-    	this.shader.setTexture( "map", this.fbo.targetTexture );
 
     }
 
-    draw( readFBO?: FBO, renderToScreen?: boolean ) {
+    draw( readFBO: FBO, writeFbo: FBO, renderToScreen?: boolean ) {
 
     	if ( ! renderToScreen ) {
 
-    		this.fbo.bind();
+    		writeFbo.bind();
 
     	}
 
-    	if ( ! readFBO ) {
-
-    		this.shader.setTexture( "map", this.fbo.targetTexture );
-
-    	} else {
-
-    		this.shader.setTexture( "map", readFBO.targetTexture );
-
-    	}
+    	this.shader.activate();
+    	this.shader.setTexture( "map", readFBO.targetTexture );
 
     	this.fullScreenTriangle.drawTriangles( this.shader );
 
-    	this.fbo.unbind();
-
+    	writeFbo.unbind();
 
     }
 

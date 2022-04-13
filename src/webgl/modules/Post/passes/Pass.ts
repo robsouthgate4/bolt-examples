@@ -60,6 +60,6 @@ export abstract class Pass {
 
     }
 
-    abstract draw( readFBO?: FBO, renderToScreen?: boolean ): void
+    abstract draw( readFBO: FBO, writeFbo: FBO, renderToScreen?: boolean ): void
 
 }

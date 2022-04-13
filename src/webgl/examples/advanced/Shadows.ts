@@ -64,8 +64,6 @@ export default class extends Base {
     	const nearPlane = 1;
     	const farPlane = 7.5;
 
-    	//TODO: use a ortho camera
-
     	this.lightProjection = mat4.create();
     	mat4.ortho( this.lightProjection, - 10, 10, - 10, 10, nearPlane, farPlane );
 

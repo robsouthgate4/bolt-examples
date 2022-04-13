@@ -37,7 +37,7 @@ export default class DOFPass extends Pass {
 
     }
 
-    draw( readFBO?: FBO, renderToScreen?: boolean ) {
+    draw( readFBO: FBO, writeFbo: FBO, renderToScreen?: boolean ) {
 
     	if ( ! renderToScreen ) {
 

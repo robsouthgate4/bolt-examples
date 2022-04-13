@@ -17,7 +17,6 @@ export default class extends Base {
 
     canvas: HTMLCanvasElement;
     shader: Shader;
-    lightPosition: vec3;
     camera: CameraArcball;
     assetsLoaded?: boolean;
     torusTransform!: Transform;
@@ -46,7 +45,7 @@ export default class extends Base {
     	this.camera = new CameraArcball(
     		this.width,
     		this.height,
-    		vec3.fromValues( 0, 2, 6 ),
+    		vec3.fromValues( 0, 0, 5 ),
     		vec3.fromValues( 0, 0, 0 ),
     		45,
     		0.01,
@@ -55,7 +54,7 @@ export default class extends Base {
     		2
     	);
 
-    	this.bolt.init( this.canvas, { antialias: true } );
+    	this.bolt.init( this.canvas, { antialias: false, dpi: 1 } );
     	this.bolt.setCamera( this.camera );
 
     	this.gl = this.bolt.getContext();
@@ -63,8 +62,6 @@ export default class extends Base {
     	this.post = new Post( this.bolt );
 
     	this.shader = new Shader( defaultVertex, defaultFragment );
-    	this.lightPosition = vec3.fromValues( 0, 10, 0 );
-
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.enableDepth();
 
@@ -84,7 +81,7 @@ export default class extends Base {
     	this.rbgSplit = new RGBSplitPass( this.bolt, {
     		width: this.width,
     		height: this.height
-    	} ).setEnabled( true );
+    	} ).setEnabled( false );
 
     	this.pixelate = new PixelatePass( this.bolt, {
     		width: this.width,
@@ -98,11 +95,12 @@ export default class extends Base {
     		height: this.height
     	} ).setEnabled( true );
 
-    	this.post.add( this.renderPass );
-    	this.post.add( this.rbgSplit, true );
+    	this.post.add( this.renderPass, false );
+    	this.post.add( this.rbgSplit, false );
+    	this.post.add( this.pixelate, false );
+    	this.post.add( this.fxaa, true );
 
     	const sphereGeometry = new Sphere( { radius: 1, widthSegments: 64, heightSegments: 64 } );
-    	const planeGeometry = new Plane( { widthSegments: 64, heightSegments: 64 } );
 
     	this.root = new Node();
 
@@ -111,18 +109,9 @@ export default class extends Base {
     		this.shader
     	);
 
+    	this.sphereBatch.transform.y = 0;
+
     	this.sphereBatch.setParent( this.root );
-
-    	this.planeBatch = new Batch(
-    		new Mesh( planeGeometry ),
-    		this.shader
-    	);
-
-    	this.planeBatch.setParent( this.root );
-
-    	this.planeBatch.transform.scale = vec3.fromValues( 10, 10, 10 );
-    	this.planeBatch.transform.rotateX = Math.PI * 0.5;
-    	this.planeBatch.transform.x = - 1;
 
     	this.resize();
 
