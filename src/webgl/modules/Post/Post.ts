@@ -20,11 +20,8 @@ export default class Post {
     	this._width = window.innerWidth;
     	this._height = window.innerHeight;
 
-    	// TODO: convert to read and write buffer logic
-
-
-    	this._readFbo = new FBO( { width: this._width, height: this._height } );
-    	this._writeFbo = new FBO( { width: this._width, height: this._height } );
+    	this._readFbo = new FBO( { width: this._width, height: this._height, depth: true } );
+    	this._writeFbo = new FBO( { width: this._width, height: this._height, depth: true } );
 
     	this._passes = [];
 
@@ -63,9 +60,12 @@ export default class Post {
 
     begin() {
 
-    	this.bolt.enableCullFace();
-    	this.bolt.cullFace( BACK );
+
     	this.bolt.enableDepth();
+
+
+    	// this.bolt.enableCullFace();
+    	// this.bolt.cullFace( BACK );
 
     	const enabledPasses = this._passes.filter( pass => pass.enabled );
 
@@ -90,7 +90,6 @@ export default class Post {
     end() {
 
     	this._readFbo.unbind();
-
     	const enabledPasses = this._passes.filter( pass => pass.enabled );
 
     	enabledPasses.forEach( ( pass: Pass, index: number ) => {
@@ -104,6 +103,8 @@ export default class Post {
     		}
 
     	} );
+
+    	//this.bolt.disableCullFace();
 
     }
 
