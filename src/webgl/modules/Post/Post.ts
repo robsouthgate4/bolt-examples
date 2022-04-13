@@ -63,10 +63,6 @@ export default class Post {
 
     	this.bolt.enableDepth();
 
-
-    	// this.bolt.enableCullFace();
-    	// this.bolt.cullFace( BACK );
-
     	const enabledPasses = this._passes.filter( pass => pass.enabled );
 
     	enabledPasses.forEach( ( pass: Pass ) => {
@@ -90,6 +86,7 @@ export default class Post {
     end() {
 
     	this._readFbo.unbind();
+
     	const enabledPasses = this._passes.filter( pass => pass.enabled );
 
     	enabledPasses.forEach( ( pass: Pass, index: number ) => {
@@ -103,8 +100,6 @@ export default class Post {
     		}
 
     	} );
-
-    	//this.bolt.disableCullFace();
 
     }
 
