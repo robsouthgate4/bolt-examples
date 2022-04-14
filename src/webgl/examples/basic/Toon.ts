@@ -65,7 +65,7 @@ export default class extends Base {
     	);
 
     	this.bolt = Bolt.getInstance();
-    	this.bolt.init( this.canvas, { antialias: false, dpi: 1 } );
+    	this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
     	this.bolt.setCamera( this.camera );
 
     	this.axis = new Axis();
@@ -140,7 +140,7 @@ export default class extends Base {
 
     	if ( ! this.assetsLoaded ) return;
 
-    	this.post.begin();
+    	//this.post.begin();
 
     	this.camera.update();
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
@@ -162,7 +162,7 @@ export default class extends Base {
 
     	this.bolt.draw( this.axis );
 
-    	this.post.end();
+    	//this.post.end();
 
 
     }
