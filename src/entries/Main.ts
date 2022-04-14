@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/basic/GlitchIntro";
+import Example from "@/webgl/examples/basic/Toon";
 
 export default class Main {
 

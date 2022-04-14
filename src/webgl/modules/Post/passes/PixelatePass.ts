@@ -60,6 +60,7 @@ export default class PixelatePass extends Pass {
 
     	this.fullScreenTriangle.drawTriangles( this.shader );
 
+    	readFBO.unbind();
     	writeFbo.unbind();
 
 

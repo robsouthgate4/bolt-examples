@@ -40,6 +40,7 @@ export default class ShaderPass extends Pass {
 
     	this.fullScreenTriangle.drawTriangles( this.shader );
 
+    	readFBO.unbind();
     	writeFbo.unbind();
 
     }

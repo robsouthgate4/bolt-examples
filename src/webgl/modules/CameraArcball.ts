@@ -198,6 +198,7 @@ export default class CameraArcball extends Camera {
     	this.position[ 1 ] = this.spherialToCartesian()[ 1 ];
     	this.position[ 2 ] = this.spherialToCartesian()[ 2 ];
 
+
     	mat4.lookAt( this.view, this.position, this.target, this.up );
     	mat4.multiply( this.camera, this.projection, this.view );
 

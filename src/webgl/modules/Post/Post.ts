@@ -1,8 +1,7 @@
 
 
-import Bolt, { FBO } from "@bolt-webgl/core";
+import Bolt, { FBO, RBO } from "@bolt-webgl/core";
 import { Pass } from "./passes/Pass";
-import RenderPass from "./passes/RenderPass";
 
 export default class Post {
 
@@ -12,6 +11,8 @@ export default class Post {
     bolt: Bolt;
     private _readFbo!: FBO;
     private _writeFbo!: FBO;
+    private _writeRBO: RBO;
+    private _readRBO: RBO;
 
     constructor( bolt: Bolt ) {
 
@@ -20,9 +21,15 @@ export default class Post {
     	this._width = window.innerWidth;
     	this._height = window.innerHeight;
 
+    	this._readFbo = new FBO( { width: this._width, height: this._height } );
+    	this._readFbo.bind();
+    	this._readRBO = new RBO( { width: this._width, height: this._height } );
+    	this._readFbo.unbind();
 
-    	this._readFbo = new FBO( { width: this._width, height: this._height, depth: true } );
-    	this._writeFbo = new FBO( { width: this._width, height: this._height, depth: true } );
+    	this._writeFbo = new FBO( { width: this._width, height: this._height } );
+    	this._writeFbo.bind();
+    	this._writeRBO = new RBO( { width: this._width, height: this._height } );
+    	this._writeFbo.unbind();
 
     	this._passes = [];
 
@@ -41,6 +48,8 @@ export default class Post {
 
     	this._readFbo.resize( width, height );
     	this._writeFbo.resize( width, height );
+    	this._readRBO.resize( width, height );
+    	this._writeRBO.resize( width, height );
 
     }
 
@@ -55,45 +64,26 @@ export default class Post {
     begin() {
 
 
-    	// this.bolt.enableDepth();
-    	// this.bolt.enableCullFace();
+    	this.bolt.enableDepth();
+    	this.bolt.enableCullFace();
 
-    	const enabledPasses = this._passes.filter( pass => pass.enabled );
-
-    	enabledPasses.forEach( ( pass: Pass ) => {
-
-    		if ( pass instanceof RenderPass ) {
-
-    			this._readFbo.bind();
-
-    			if ( pass.renderToScreen ) {
-
-    				this._readFbo.unbind();
-
-    			}
-
-    		}
-
-    	} );
+    	this._readFbo.bind();
 
     }
 
     end() {
 
-    	this.bolt.enableDepth();
-    	this.bolt.enableCullFace();
+    	this._readFbo.unbind();
+
+    	this.bolt.disableDepth();
+    	this.bolt.disableCullFace();
 
     	const enabledPasses = this._passes.filter( pass => pass.enabled );
+    	enabledPasses.forEach( ( pass: Pass ) => {
 
-    	enabledPasses.forEach( ( pass: Pass, index: number ) => {
+    		pass.draw( this._readFbo, this._writeFbo, pass.renderToScreen );
 
-    		if ( pass instanceof RenderPass === false ) {
-
-    			pass.draw( this._readFbo, this._writeFbo, pass.renderToScreen );
-
-    			this.swap();
-
-    		}
+    		this.swap();
 
     	} );
 

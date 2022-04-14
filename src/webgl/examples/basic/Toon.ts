@@ -1,8 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Node, Transform, Batch, Camera, BACK } from "@bolt-webgl/core";
-
-import defaultVertex from "../../examples/shaders/default/default.vert";
-import defaultFragment from "../../examples/shaders/default/default.frag";
+import Bolt, { Shader, Node, Transform, Batch, Camera } from "@bolt-webgl/core";
 
 import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
 import RGBSplitPass from "@/webgl/modules/Post/passes/RGBSplitPass";
@@ -10,20 +7,23 @@ import PixelatePass from "@/webgl/modules/Post/passes/PixelatePass";
 import RenderPass from "@/webgl/modules/Post/passes/RenderPass";
 
 
-import colorVertex from "../../examples/shaders/color/color.vert";
-import colorFragment from "../../examples/shaders/color/color.frag";
+import bodyVertex from "../../examples/shaders/phantom/body/body.vert";
+import bodyFragment from "../../examples/shaders/phantom/body/body.frag";
 
-import { mat3, vec3, } from "gl-matrix";
+import eyesVertex from "../../examples/shaders/phantom/eyes/eyes.vert";
+import eyesFragment from "../../examples/shaders/phantom/eyes/eyes.frag";
+
+import { vec3, } from "gl-matrix";
 import CameraArcball from "../../modules/CameraArcball";
 import GLTFLoader from "@/webgl/modules/GLTFLoader";
 import { GlTf } from "@/webgl/modules/GLTFLoader/types/GLTF";
 import Post from "@/webgl/modules/Post/Post";
+import Axis from "@/webgl/modules/Batches/Axis";
 
 export default class extends Base {
 
     canvas: HTMLCanvasElement;
-    shader: Shader;
-    lightPosition: vec3;
+    bodyShader: Shader;
     camera: Camera;
     assetsLoaded?: boolean;
     torusTransform!: Transform;
@@ -37,6 +37,8 @@ export default class extends Base {
     renderPass!: RenderPass;
     pixelate!: PixelatePass;
     gl: WebGL2RenderingContext;
+    axis: Axis;
+    eyesShader: Shader;
 
     constructor() {
 
@@ -52,8 +54,8 @@ export default class extends Base {
     	this.camera = new CameraArcball(
     		this.width,
     		this.height,
-    		vec3.fromValues( 0, 0, 20 ),
-    		vec3.fromValues( 0, 2, 0 ),
+    		vec3.fromValues( 4, 8, 10 ),
+    		vec3.fromValues( 0, 1, 0 ),
     		45,
     		0.01,
     		1000,
@@ -63,44 +65,25 @@ export default class extends Base {
     	);
 
     	this.bolt = Bolt.getInstance();
-    	this.bolt.init( this.canvas, { antialias: false, dpi: 2 } );
+    	this.bolt.init( this.canvas, { antialias: false, dpi: 1 } );
     	this.bolt.setCamera( this.camera );
+
+    	this.axis = new Axis();
 
     	this.gl = this.bolt.getContext();
 
-    	this.shader = new Shader( colorVertex, colorFragment );
-    	this.lightPosition = vec3.fromValues( 0, 0, 2 );
+    	this.bodyShader = new Shader( bodyVertex, bodyFragment );
+    	this.eyesShader = new Shader( eyesVertex, eyesFragment );
 
     	this.bolt.enableDepth();
 
     	this.post = new Post( this.bolt );
-
-    	this.renderPass = new RenderPass( this.bolt, {
-    		width: this.width,
-    		height: this.height
-    	} ).setEnabled( true );
-
-
-    	this.rbgSplit = new RGBSplitPass( this.bolt, {
-    		width: this.width,
-    		height: this.height
-    	} ).setEnabled( false );
-
-    	this.pixelate = new PixelatePass( this.bolt, {
-    		width: this.width,
-    		height: this.height,
-    		xPixels: 80,
-    		yPixels: 80
-    	} ).setEnabled( false );
 
     	this.fxaa = new FXAAPass( this.bolt, {
     		width: this.width,
     		height: this.height
     	} ).setEnabled( true );
 
-    	this.post.add( this.renderPass );
-    	// this.post.add( this.pixelate );
-    	//this.post.add( this.rbgSplit, true );
     	this.post.add( this.fxaa, true );
 
     	this.init();
@@ -123,10 +106,10 @@ export default class extends Base {
     				if ( node.name === "phantom_logoPose" ) {
 
     					const batch1 = <Batch>node.children[ 0 ];
-    					batch1.shader = this.shader;
+    					batch1.shader = this.bodyShader;
 
     					const batch2 = <Batch>node.children[ 1 ];
-    					batch2.shader = this.shader;
+    					batch2.shader = this.eyesShader;
 
     				}
 
@@ -159,13 +142,9 @@ export default class extends Base {
 
     	this.post.begin();
 
-    	this.camera.position[ 0 ] = Math.sin( elapsed ) * ( Math.PI * 2 );
-
     	this.camera.update();
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-    	this.bolt.clear( 0, 0, 0, 1 );
-
-    	this.shader.setFloat( "time", elapsed );
+    	this.bolt.clear( 0.9, 0.9, 0.9, 1 );
 
     	if ( this.gltf.scenes ) {
 
@@ -180,6 +159,8 @@ export default class extends Base {
     		}
 
     	}
+
+    	this.bolt.draw( this.axis );
 
     	this.post.end();
 
