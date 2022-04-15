@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Node, Transform, Batch, Camera } from "@bolt-webgl/core";
+import Bolt, { Shader, Node, Transform, Batch, Camera, FBO, Texture, RGBA16F } from "@bolt-webgl/core";
 
 import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
 import RGBSplitPass from "@/webgl/modules/Post/passes/RGBSplitPass";
@@ -19,6 +19,7 @@ import GLTFLoader from "@/webgl/modules/GLTFLoader";
 import { GlTf } from "@/webgl/modules/GLTFLoader/types/GLTF";
 import Post from "@/webgl/modules/Post/Post";
 import Axis from "@/webgl/modules/Batches/Axis";
+import Floor from "@/webgl/modules/Batches/Floor";
 
 export default class extends Base {
 
@@ -37,8 +38,12 @@ export default class extends Base {
     renderPass!: RenderPass;
     pixelate!: PixelatePass;
     gl: WebGL2RenderingContext;
-    axis: Axis;
+    axis!: Axis;
     eyesShader: Shader;
+    floor!: Floor;
+    gBuffer: FBO;
+    normalTexture: Texture;
+    depthTexture: Texture;
 
     constructor() {
 
@@ -55,7 +60,7 @@ export default class extends Base {
     		this.width,
     		this.height,
     		vec3.fromValues( 4, 8, 10 ),
-    		vec3.fromValues( 0, 1, 0 ),
+    		vec3.fromValues( 0, 3, 0 ),
     		45,
     		0.01,
     		1000,
@@ -68,14 +73,18 @@ export default class extends Base {
     	this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
     	this.bolt.setCamera( this.camera );
 
-    	this.axis = new Axis();
-
     	this.gl = this.bolt.getContext();
 
     	this.bodyShader = new Shader( bodyVertex, bodyFragment );
     	this.eyesShader = new Shader( eyesVertex, eyesFragment );
 
     	this.bolt.enableDepth();
+
+    	this.gBuffer = new FBO( { width: this.canvas.width, height: this.canvas.height } );
+    	this.normalTexture = new Texture( this.gl, { width: this.canvas.width, height: this.canvas.height } );
+    	this.depthTexture = new Texture( this.gl, { width: this.canvas.width, height: this.canvas.height, depth: true } );
+
+    	this.gBuffer.addAttachment( this.normalTexture, RGBA16F, 1 );
 
     	this.post = new Post( this.bolt );
 
@@ -97,6 +106,11 @@ export default class extends Base {
     	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf", "PhantomLogoPose.gltf" );
     	this.assetsLoaded = true;
 
+    	this.axis = new Axis();
+    	this.axis.transform.y = 0.01;
+
+    	this.floor = new Floor();
+
     	if ( this.gltf.scenes ) {
 
     		for ( const scene of this.gltf.scenes ) {
@@ -104,6 +118,8 @@ export default class extends Base {
     			scene.root.traverse( ( node: Node ) => {
 
     				if ( node.name === "phantom_logoPose" ) {
+
+    					node.transform.y = 2.8;
 
     					const batch1 = <Batch>node.children[ 0 ];
     					batch1.shader = this.bodyShader;
@@ -160,7 +176,7 @@ export default class extends Base {
 
     	}
 
-    	this.bolt.draw( this.axis );
+    	this.bolt.draw( [ this.axis, this.floor ] );
 
     	this.post.end();
 

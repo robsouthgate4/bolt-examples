@@ -7,17 +7,25 @@ export default class CameraArcball extends Camera {
     private _azimuth: number;
     private _elevation: number;
     private _rotateAmountX: number;
-    private _mouseXOnMouseDown: number;
-    private _targetXOnMouseDown: number;
-    private _targetX: number;
-    private _targetY: number;
+    private _rotationMouseXOnMouseDown: number;
+    private _rotationTargetXOnMouseDown: number;
+    private _rotateTargetX: number;
+    private _rotateTargetY: number;
     private _radius: number;
     private _damping: number;
-    private _mouseYOnMouseDown!: number;
+    private _rotationMouseYOnMouseDown!: number;
     private _rotateAmountY!: number;
-    private _targetYOnMouseDown!: number;
+    private _rotationTargetYOnMouseDown!: number;
     private _initialPositionSpherical: number[];
     private _scrollSpeed: number;
+    private _center: vec3;
+    private _shiftKeyDown: boolean;
+    private _translateMouseXOnMouseDown: number;
+    private _translateMouseYOnMouseDown: number;
+    private _translateTargetXOnMouseDown: number;
+    private _translateTargetYOnMouseDown: number;
+    _translateTargetX: number;
+    private _translateTargetY: number;
 
     constructor(
     	width: number,
@@ -41,6 +49,7 @@ export default class CameraArcball extends Camera {
     	);
 
     	this.position = position;
+    	this._center = vec3.fromValues( 0, 0, 0 );
 
     	this._initialPositionSpherical = this.cartesianToSpherical( this.position[ 0 ], this.position[ 1 ], this.position[ 2 ] );
 
@@ -57,16 +66,27 @@ export default class CameraArcball extends Camera {
     	this._rotateAmountX = speed || 1;
     	this._rotateAmountY = speed || 1;
 
-    	this._mouseXOnMouseDown = 0;
-    	this._mouseYOnMouseDown = 0;
+    	this._rotationMouseXOnMouseDown = 0;
+    	this._rotationMouseYOnMouseDown = 0;
 
-    	this._targetXOnMouseDown = 0;
-    	this._targetYOnMouseDown = 0;
+    	this._rotationTargetXOnMouseDown = 0;
+    	this._rotationTargetYOnMouseDown = 0;
 
-    	this._targetX = this._azimuth;
-    	this._targetY = this._elevation;
+    	this._rotateTargetX = this._azimuth;
+    	this._rotateTargetY = this._elevation;
+
+    	this._translateMouseXOnMouseDown = 0;
+    	this._translateMouseYOnMouseDown = 0;
+
+    	this._translateTargetXOnMouseDown = 0;
+    	this._translateTargetYOnMouseDown = 0;
+
+    	this._translateTargetX = 0;
+    	this._translateTargetY = 0;
 
     	this._damping = damping || 1;
+
+    	this._shiftKeyDown = false;
 
     	this.resize( window.innerWidth, window.innerHeight );
 
@@ -80,6 +100,8 @@ export default class CameraArcball extends Camera {
     	window.addEventListener( "mousedown", this.handleMouseDown.bind( this ) );
     	window.addEventListener( "mouseup", this.handleMouseUp.bind( this ) );
     	window.addEventListener( "wheel", this.handleWheel.bind( this ) );
+    	window.addEventListener( "keydown", this.handleKeyDown.bind( this ) );
+    	window.addEventListener( "keyup", this.handleKeyUp.bind( this ) );
 
     }
 
@@ -92,7 +114,29 @@ export default class CameraArcball extends Camera {
 
     }
 
+    handleKeyDown( ev: KeyboardEvent ) {
+
+    	if ( ev.shiftKey ) {
+
+    		this._shiftKeyDown = true;
+
+    	}
+
+    }
+
+    handleKeyUp() {
+
+    	if ( this._shiftKeyDown ) {
+
+    		this._shiftKeyDown = false;
+
+    	}
+
+    }
+
     handleWheel( ev: WheelEvent ) {
+
+    	if ( this._shiftKeyDown ) return;
 
     	const direction = Math.sign( ev.deltaY );
     	this.fov -= ( direction * this._scrollSpeed ) * 0.1;
@@ -106,11 +150,23 @@ export default class CameraArcball extends Camera {
 
     	this._mouseDown = true;
 
-    	this._mouseXOnMouseDown = this.getMousePosition( ev ).x * this._rotateAmountX;
-    	this._mouseYOnMouseDown = this.getMousePosition( ev ).y * this._rotateAmountY;
+    	if ( ! this._shiftKeyDown ) {
 
-    	this._targetXOnMouseDown = this._targetX;
-    	this._targetYOnMouseDown = this._targetY;
+    		this._rotationMouseXOnMouseDown = this.getMousePosition( ev ).x * this._rotateAmountX;
+    		this._rotationMouseYOnMouseDown = this.getMousePosition( ev ).y * this._rotateAmountY;
+
+    		this._rotationTargetXOnMouseDown = this._rotateTargetX;
+    		this._rotationTargetYOnMouseDown = this._rotateTargetY;
+
+    	} else {
+
+    		this._translateMouseXOnMouseDown = this.getMousePosition( ev ).x * 3;
+    		this._translateMouseYOnMouseDown = this.getMousePosition( ev ).y * 3;
+
+    		this._translateTargetXOnMouseDown = this._translateTargetX;
+    		this._translateTargetYOnMouseDown = this._translateTargetY;
+
+    	}
 
     }
 
@@ -118,11 +174,30 @@ export default class CameraArcball extends Camera {
 
     	if ( ! this._mouseDown ) return;
 
-    	const mouseX = this.getMousePosition( ev ).x * this._rotateAmountX;
-    	const mouseY = this.getMousePosition( ev ).y * this._rotateAmountY;
+    	if ( ! this._shiftKeyDown ) {
 
-    	this._targetX = this._targetXOnMouseDown + ( mouseX - this._mouseXOnMouseDown );
-    	this._targetY = this._targetYOnMouseDown - ( mouseY - this._mouseYOnMouseDown );
+    		const mouseX = this.getMousePosition( ev ).x * this._rotateAmountX;
+    		const mouseY = this.getMousePosition( ev ).y * this._rotateAmountY;
+
+    		this._rotateTargetX = this._rotationTargetXOnMouseDown + ( mouseX - this._rotationMouseXOnMouseDown );
+    		this._rotateTargetY = this._rotationTargetYOnMouseDown - ( mouseY - this._rotationMouseYOnMouseDown );
+
+    		this._rotateTargetX = this._rotationTargetXOnMouseDown + ( mouseX - this._rotationMouseXOnMouseDown );
+    		this._rotateTargetY = this._rotationTargetYOnMouseDown - ( mouseY - this._rotationMouseYOnMouseDown );
+
+    	} else {
+
+    		const mouseX = this.getMousePosition( ev ).x * 3;
+    		const mouseY = this.getMousePosition( ev ).y * 3;
+
+    		this._translateTargetX = this._translateTargetXOnMouseDown + ( mouseX - this._translateMouseXOnMouseDown );
+    		this._translateTargetY = this._translateTargetYOnMouseDown - ( mouseY - this._translateMouseYOnMouseDown );
+
+    		this._translateTargetX = this._translateTargetXOnMouseDown + ( mouseX - this._translateMouseXOnMouseDown );
+    		this._translateTargetY = this._translateTargetYOnMouseDown - ( mouseY - this._translateMouseYOnMouseDown );
+
+    	}
+
 
 
     }
@@ -164,9 +239,9 @@ export default class CameraArcball extends Camera {
     	const sineElevation = Math.sin( this._elevation );
     	const cosineElevation = Math.cos( this._elevation );
 
-    	direction[ 0 ] = ( this._radius * cosineElevation * cosineAzimuth );
-    	direction[ 1 ] = this._radius * sineElevation;
-    	direction[ 2 ] = this._radius * cosineElevation * sineAzimuth;
+    	direction[ 0 ] = this._center[ 0 ] + ( this._radius * cosineElevation * cosineAzimuth );
+    	direction[ 1 ] = this._center[ 1 ] + this._radius * sineElevation;
+    	direction[ 2 ] = this._center[ 2 ] + this._radius * cosineElevation * sineAzimuth;
 
     	this.forward = direction;
 
@@ -183,12 +258,15 @@ export default class CameraArcball extends Camera {
 
     }
 
-
-
     update() {
 
-    	this._azimuth += ( this._targetX - this._azimuth ) * this._damping;
-    	this._elevation += ( this._targetY - this._elevation ) * this._damping;
+
+    	this._center[ 0 ] += ( - this._translateTargetX - this._center[ 0 ] ) * this._damping;
+    	this._center[ 2 ] += ( - this._translateTargetY - this._center[ 2 ] ) * this._damping;
+    	//this._center[ 2 ] += ( 0 - this._center[ 2 ] ) * this._damping;
+
+    	this._azimuth += ( this._rotateTargetX - this._azimuth ) * this._damping;
+    	this._elevation += ( this._rotateTargetY - this._elevation ) * this._damping;
 
     	this._elevation = Math.max( this._elevation, 0 );
     	this._elevation = Math.min( Math.PI / 2, this._elevation );
@@ -198,8 +276,11 @@ export default class CameraArcball extends Camera {
     	this.position[ 1 ] = this.spherialToCartesian()[ 1 ];
     	this.position[ 2 ] = this.spherialToCartesian()[ 2 ];
 
+    	const target = vec3.create();
 
-    	mat4.lookAt( this.view, this.position, this.target, this.up );
+    	vec3.add( target, this.target, this._center );
+
+    	mat4.lookAt( this.view, this.position, target, this.up );
     	mat4.multiply( this.camera, this.projection, this.view );
 
     }

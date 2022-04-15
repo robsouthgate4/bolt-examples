@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Mesh, Transform, Batch, Node, Camera, LINES } from "@bolt-webgl/core";
+import Bolt, { Shader, Mesh, Transform, Batch, Node, Camera, LINES, TRIANGLES } from "@bolt-webgl/core";
 
 import defaultVertex from "../../examples/shaders/default/default.vert";
 import defaultFragment from "../../examples/shaders/default/default.frag";
@@ -73,7 +73,7 @@ export default class extends Base {
 
     	this.root.transform.scale = vec3.fromValues( 1, 1, 1 );
 
-    	const mesh = new Mesh( planeGeometry ).setDrawType( LINES );
+    	const mesh = new Mesh( planeGeometry ).setDrawType( TRIANGLES );
 
     	this.planeBatch = new Batch(
     		mesh,
