@@ -77,7 +77,7 @@ export default class extends Base {
 
     	const geometry = new Cube();
 
-    	const equiTexture = new Texture( this.bolt.getContext(), { imagePath: "/static/textures/equi-studio.jpg" } );
+    	const equiTexture = new Texture( { imagePath: "/static/textures/equi-studio.jpg" } );
     	await equiTexture.loadImage();
 
     	this.assetsLoaded = true;

@@ -3,7 +3,6 @@ import { Pass } from "./Pass";
 
 import vertexShader from "./shaders/copy/copy.vert";
 import fragmentShader from "./shaders/copy/copy.frag";
-import { vec2 } from "gl-matrix";
 import Bolt, { Shader, FBO } from "@bolt-webgl/core";
 
 export default class CopyPass extends Pass {

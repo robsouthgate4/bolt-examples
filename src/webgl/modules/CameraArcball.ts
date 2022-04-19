@@ -1,4 +1,4 @@
-import { mat4, vec3 } from "gl-matrix";
+import { mat4, vec2, vec3 } from "gl-matrix";
 import { Camera } from "@bolt-webgl/core";
 
 export default class CameraArcball extends Camera {
@@ -20,12 +20,7 @@ export default class CameraArcball extends Camera {
     private _scrollSpeed: number;
     private _center: vec3;
     private _shiftKeyDown: boolean;
-    private _translateMouseXOnMouseDown: number;
-    private _translateMouseYOnMouseDown: number;
-    private _translateTargetXOnMouseDown: number;
-    private _translateTargetYOnMouseDown: number;
-    _translateTargetX: number;
-    private _translateTargetY: number;
+    private _previousMouse = vec2.fromValues( 0, 0 );
 
     constructor(
     	width: number,
@@ -51,6 +46,7 @@ export default class CameraArcball extends Camera {
     	this.position = position;
     	this._center = vec3.fromValues( 0, 0, 0 );
 
+
     	this._initialPositionSpherical = this.cartesianToSpherical( this.position[ 0 ], this.position[ 1 ], this.position[ 2 ] );
 
     	this.target = target || vec3.fromValues( 0, 0, 0 );
@@ -74,16 +70,6 @@ export default class CameraArcball extends Camera {
 
     	this._rotateTargetX = this._azimuth;
     	this._rotateTargetY = this._elevation;
-
-    	this._translateMouseXOnMouseDown = 0;
-    	this._translateMouseYOnMouseDown = 0;
-
-    	this._translateTargetXOnMouseDown = 0;
-    	this._translateTargetYOnMouseDown = 0;
-
-    	this._translateTargetX = 0;
-    	this._translateTargetY = 0;
-
     	this._damping = damping || 1;
 
     	this._shiftKeyDown = false;
@@ -158,14 +144,6 @@ export default class CameraArcball extends Camera {
     		this._rotationTargetXOnMouseDown = this._rotateTargetX;
     		this._rotationTargetYOnMouseDown = this._rotateTargetY;
 
-    	} else {
-
-    		this._translateMouseXOnMouseDown = this.getMousePosition( ev ).x * 3;
-    		this._translateMouseYOnMouseDown = this.getMousePosition( ev ).y * 3;
-
-    		this._translateTargetXOnMouseDown = this._translateTargetX;
-    		this._translateTargetYOnMouseDown = this._translateTargetY;
-
     	}
 
     }
@@ -187,14 +165,17 @@ export default class CameraArcball extends Camera {
 
     	} else {
 
-    		const mouseX = this.getMousePosition( ev ).x * 3;
-    		const mouseY = this.getMousePosition( ev ).y * 3;
+    		const mouse = vec2.fromValues( this.getMousePosition( ev ).x * 3, this.getMousePosition( ev ).y * 3 );
 
-    		this._translateTargetX = this._translateTargetXOnMouseDown + ( mouseX - this._translateMouseXOnMouseDown );
-    		this._translateTargetY = this._translateTargetYOnMouseDown - ( mouseY - this._translateMouseYOnMouseDown );
+    		const newDirection = vec3.create();
 
-    		this._translateTargetX = this._translateTargetXOnMouseDown + ( mouseX - this._translateMouseXOnMouseDown );
-    		this._translateTargetY = this._translateTargetYOnMouseDown - ( mouseY - this._translateMouseYOnMouseDown );
+    		vec3.cross( newDirection, this.forward, this.up );
+    		vec3.normalize( newDirection, newDirection );
+    		vec3.multiply( newDirection, newDirection, vec3.fromValues( 0.1, 0.1, 0.1 ) );
+
+
+    		//vec3.sub( this._center, this._center, newDirection );
+
 
     	}
 
@@ -243,7 +224,8 @@ export default class CameraArcball extends Camera {
     	direction[ 1 ] = this._center[ 1 ] + this._radius * sineElevation;
     	direction[ 2 ] = this._center[ 2 ] + this._radius * cosineElevation * sineAzimuth;
 
-    	this.forward = direction;
+    	vec3.copy( this.forward, direction );
+    	vec3.normalize( this.forward, this.forward );
 
     	return direction;
 
@@ -259,11 +241,6 @@ export default class CameraArcball extends Camera {
     }
 
     update() {
-
-
-    	this._center[ 0 ] += ( - this._translateTargetX - this._center[ 0 ] ) * this._damping;
-    	this._center[ 2 ] += ( - this._translateTargetY - this._center[ 2 ] ) * this._damping;
-    	//this._center[ 2 ] += ( 0 - this._center[ 2 ] ) * this._damping;
 
     	this._azimuth += ( this._rotateTargetX - this._azimuth ) * this._damping;
     	this._elevation += ( this._rotateTargetY - this._elevation ) * this._damping;

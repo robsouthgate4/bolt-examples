@@ -1,7 +1,8 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Node, Transform, Batch, Camera, FBO, Texture, RGBA16F } from "@bolt-webgl/core";
+import Bolt, { Shader, Node, Transform, Batch, Camera, FBO, Texture, RGBA16F, COLOR_ATTACHMENT0, RBO } from "@bolt-webgl/core";
 
 import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
+import CopyPass from "@/webgl/modules/Post/passes/CopyPass";
 import RGBSplitPass from "@/webgl/modules/Post/passes/RGBSplitPass";
 import PixelatePass from "@/webgl/modules/Post/passes/PixelatePass";
 import RenderPass from "@/webgl/modules/Post/passes/RenderPass";
@@ -12,6 +13,10 @@ import bodyFragment from "../../examples/shaders/phantom/body/body.frag";
 
 import eyesVertex from "../../examples/shaders/phantom/eyes/eyes.vert";
 import eyesFragment from "../../examples/shaders/phantom/eyes/eyes.frag";
+
+
+import geometryVertex from "../../examples/shaders/phantom/geometry/geometry.vert";
+import geometryFragment from "../../examples/shaders/phantom/geometry/geometry.frag";
 
 import { vec3, } from "gl-matrix";
 import CameraArcball from "../../modules/CameraArcball";
@@ -43,7 +48,9 @@ export default class extends Base {
     floor!: Floor;
     gBuffer: FBO;
     normalTexture: Texture;
-    depthTexture: Texture;
+    geometryShader: Shader;
+    copyPass: CopyPass;
+    gBufferRBO: RBO;
 
     constructor() {
 
@@ -77,14 +84,23 @@ export default class extends Base {
 
     	this.bodyShader = new Shader( bodyVertex, bodyFragment );
     	this.eyesShader = new Shader( eyesVertex, eyesFragment );
+    	this.geometryShader = new Shader( geometryVertex, geometryFragment );
 
     	this.bolt.enableDepth();
 
     	this.gBuffer = new FBO( { width: this.canvas.width, height: this.canvas.height } );
-    	this.normalTexture = new Texture( this.gl, { width: this.canvas.width, height: this.canvas.height } );
-    	this.depthTexture = new Texture( this.gl, { width: this.canvas.width, height: this.canvas.height, depth: true } );
+    	this.gBuffer.bind();
+    	this.gBufferRBO = new RBO( { width: this.canvas.width, height: this.canvas.height } );
+    	this.gBuffer.unbind();
 
-    	this.gBuffer.addAttachment( this.normalTexture, RGBA16F, 1 );
+    	this.normalTexture = new Texture( { width: this.canvas.width, height: this.canvas.height } );
+
+    	this.gBuffer.bind();
+    	this.gBuffer.addAttachment( this.normalTexture, COLOR_ATTACHMENT0 + 1 );
+    	this.gBuffer.setDrawBuffers();
+    	this.gBuffer.unbind();
+
+    	this.copyPass = new CopyPass( this.bolt, { width: this.canvas.width, height: this.canvas.height } );
 
     	this.post = new Post( this.bolt );
 
@@ -143,6 +159,8 @@ export default class extends Base {
 
     	this.bolt.resizeFullScreen();
     	this.post.resize( this.gl.canvas.width, this.gl.canvas.height );
+    	this.gBuffer.resize( this.gl.canvas.width, this.gl.canvas.height );
+    	this.gBufferRBO.resize( this.gl.canvas.width, this.gl.canvas.height );
 
     }
 
@@ -152,11 +170,7 @@ export default class extends Base {
 
     }
 
-    update( elapsed: number, delta: number ) {
-
-    	if ( ! this.assetsLoaded ) return;
-
-    	this.post.begin();
+    drawScene( type = "normal" ) {
 
     	this.camera.update();
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
@@ -168,6 +182,33 @@ export default class extends Base {
 
     			scene.root.traverse( ( node: Node ) => {
 
+    				if ( node.name === "phantom_logoPose" ) {
+
+    					if ( type === "geometry" ) {
+
+    						node.children.forEach( ( batch: Node ) => {
+
+    							if ( type === "geometry" ) {
+
+    								const b = <Batch>batch;
+    								b.shader = this.geometryShader;
+
+    							}
+
+    						} );
+
+    					} else {
+
+    						const batch1 = <Batch>node.children[ 0 ];
+    						batch1.shader = this.bodyShader;
+
+    						const batch2 = <Batch>node.children[ 1 ];
+    						batch2.shader = this.eyesShader;
+
+    					}
+
+    				}
+
     				this.bolt.draw( node );
 
     			} );
@@ -176,8 +217,29 @@ export default class extends Base {
 
     	}
 
-    	this.bolt.draw( [ this.axis, this.floor ] );
+    	if ( type === "normal" ) {
 
+    		this.bolt.draw( [ this.axis, this.floor ] );
+
+    	}
+
+
+    }
+
+    update( elapsed: number, delta: number ) {
+
+    	if ( ! this.assetsLoaded ) return;
+
+    	this.gBuffer.bind();
+    	this.drawScene( "geometry" );
+    	this.gBuffer.unbind();
+
+    	this.copyPass.shader.setTexture( "map", this.normalTexture );
+    	this.copyPass.shader.activate();
+    	this.copyPass.fullScreenTriangle.drawTriangles( this.copyPass.shader );
+
+    	this.post.begin();
+    	this.drawScene( "normal" );
     	this.post.end();
 
 
