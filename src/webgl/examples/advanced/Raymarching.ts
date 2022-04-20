@@ -54,11 +54,6 @@ export default class extends Base {
 
     	this.post = new Post( this.bolt );
 
-    	this.post.add( new RenderPass( this.bolt, {
-    		width: this.width,
-    		height: this.height
-    	} ) );
-
     	this.post.add( new FXAAPass( this.bolt, {
     		width: this.width,
     		height: this.height,

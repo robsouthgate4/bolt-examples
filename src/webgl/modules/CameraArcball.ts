@@ -20,7 +20,7 @@ export default class CameraArcball extends Camera {
     private _scrollSpeed: number;
     private _center: vec3;
     private _shiftKeyDown: boolean;
-    private _previousMouse = vec2.fromValues( 0, 0 );
+    private _zoom = 0;
 
     constructor(
     	width: number,
@@ -44,12 +44,12 @@ export default class CameraArcball extends Camera {
     	);
 
     	this.position = position;
-    	this._center = vec3.fromValues( 0, 0, 0 );
 
 
     	this._initialPositionSpherical = this.cartesianToSpherical( this.position[ 0 ], this.position[ 1 ], this.position[ 2 ] );
 
     	this.target = target || vec3.fromValues( 0, 0, 0 );
+    	this._center = vec3.create();
 
     	this._mouseDown = false;
 
@@ -125,10 +125,7 @@ export default class CameraArcball extends Camera {
     	if ( this._shiftKeyDown ) return;
 
     	const direction = Math.sign( ev.deltaY );
-    	this.fov -= ( direction * this._scrollSpeed ) * 0.1;
-    	this.fov = Math.min( 45, this.fov );
-
-    	mat4.perspective( this.projection, this.fov, this.width / this.height, this.near, this.far );
+    	this._radius -= ( direction * this._scrollSpeed ) * 1;
 
     }
 
@@ -174,9 +171,6 @@ export default class CameraArcball extends Camera {
     		vec3.multiply( newDirection, newDirection, vec3.fromValues( 0.1, 0.1, 0.1 ) );
 
 
-    		//vec3.sub( this._center, this._center, newDirection );
-
-
     	}
 
 
@@ -220,9 +214,9 @@ export default class CameraArcball extends Camera {
     	const sineElevation = Math.sin( this._elevation );
     	const cosineElevation = Math.cos( this._elevation );
 
-    	direction[ 0 ] = this._center[ 0 ] + ( this._radius * cosineElevation * cosineAzimuth );
-    	direction[ 1 ] = this._center[ 1 ] + this._radius * sineElevation;
-    	direction[ 2 ] = this._center[ 2 ] + this._radius * cosineElevation * sineAzimuth;
+    	direction[ 0 ] = this.target[ 0 ] + this._radius * cosineElevation * cosineAzimuth;
+    	direction[ 1 ] = this.target[ 1 ] + this._radius * sineElevation;
+    	direction[ 2 ] = this.target[ 2 ] + this._radius * cosineElevation * sineAzimuth;
 
     	vec3.copy( this.forward, direction );
     	vec3.normalize( this.forward, this.forward );
@@ -248,17 +242,14 @@ export default class CameraArcball extends Camera {
     	this._elevation = Math.max( this._elevation, 0 );
     	this._elevation = Math.min( Math.PI / 2, this._elevation );
 
+    	const newPosition = this.spherialToCartesian();
+
     	// generate spherical coordinates for new position
-    	this.position[ 0 ] = this.spherialToCartesian()[ 0 ];
-    	this.position[ 1 ] = this.spherialToCartesian()[ 1 ];
-    	this.position[ 2 ] = this.spherialToCartesian()[ 2 ];
+    	this.position[ 0 ] = newPosition[ 0 ];
+    	this.position[ 1 ] = newPosition[ 1 ];
+    	this.position[ 2 ] = newPosition[ 2 ];
 
-    	const target = vec3.create();
-
-    	vec3.add( target, this.target, this._center );
-
-    	mat4.lookAt( this.view, this.position, target, this.up );
-    	mat4.multiply( this.camera, this.projection, this.view );
+    	mat4.lookAt( this.view, this.position, this.target, this.up );
 
     }
 

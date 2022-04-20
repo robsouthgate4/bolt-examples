@@ -11,12 +11,19 @@ uniform mat4 projection;
 out vec4 Position;
 out vec2 Uv;
 out vec3 Normal;
+out vec3 NormalEyeSpace;
 
 void main() {
 
     Normal = aNormal;
     Uv = aUv;
 
-    gl_Position = projection * view * model * vec4( aPosition, 1.0 );
+    mat4 modelView = view * model;
+
+    NormalEyeSpace = vec3( modelView * vec4( aNormal, 0.0 ) ).xyz;
+
+    Position = projection * modelView * vec4( aPosition, 1.0 );
+
+    gl_Position = Position;
 
 }

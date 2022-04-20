@@ -1,56 +1,51 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Node, Transform, Batch, Camera, FBO, Texture, RGBA16F, COLOR_ATTACHMENT0, RBO } from "@bolt-webgl/core";
+import Bolt, { Shader, Node, Transform, Batch, Camera, FBO, Texture, COLOR_ATTACHMENT0, RBO, Mesh } from "@bolt-webgl/core";
 
 import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
 import CopyPass from "@/webgl/modules/Post/passes/CopyPass";
-import RGBSplitPass from "@/webgl/modules/Post/passes/RGBSplitPass";
-import PixelatePass from "@/webgl/modules/Post/passes/PixelatePass";
-import RenderPass from "@/webgl/modules/Post/passes/RenderPass";
-
 
 import bodyVertex from "../../examples/shaders/phantom/body/body.vert";
 import bodyFragment from "../../examples/shaders/phantom/body/body.frag";
-
 import eyesVertex from "../../examples/shaders/phantom/eyes/eyes.vert";
 import eyesFragment from "../../examples/shaders/phantom/eyes/eyes.frag";
-
-
 import geometryVertex from "../../examples/shaders/phantom/geometry/geometry.vert";
 import geometryFragment from "../../examples/shaders/phantom/geometry/geometry.frag";
+import compositionVertex from "../../examples/shaders/phantom/composition/composition.vert";
+import compositionFragment from "../../examples/shaders/phantom/composition/composition.frag";
 
-import { vec3, } from "gl-matrix";
+import { vec2, vec3, } from "gl-matrix";
 import CameraArcball from "../../modules/CameraArcball";
 import GLTFLoader from "@/webgl/modules/GLTFLoader";
 import { GlTf } from "@/webgl/modules/GLTFLoader/types/GLTF";
 import Post from "@/webgl/modules/Post/Post";
 import Axis from "@/webgl/modules/Batches/Axis";
 import Floor from "@/webgl/modules/Batches/Floor";
+import Cube from "@/webgl/modules/Primitives/Cube";
+import ShaderPass from "@/webgl/modules/Post/passes/ShaderPass";
+import CameraFPS from "@/webgl/modules/CameraFPS";
 
 export default class extends Base {
 
     canvas: HTMLCanvasElement;
     bodyShader: Shader;
-    camera: Camera;
+    eyesShader: Shader;
+    camera: CameraArcball;
     assetsLoaded?: boolean;
-    torusTransform!: Transform;
-    sphereNode!: Node;
-    planeNode!: Node;
     bolt: Bolt;
     gltf!: GlTf;
     post!: Post;
     fxaa!: FXAAPass;
-    rbgSplit!: RGBSplitPass;
-    renderPass!: RenderPass;
-    pixelate!: PixelatePass;
     gl: WebGL2RenderingContext;
     axis!: Axis;
-    eyesShader: Shader;
     floor!: Floor;
     gBuffer: FBO;
     normalTexture: Texture;
     geometryShader: Shader;
-    copyPass: CopyPass;
     gBufferRBO: RBO;
+    depthTexture: Texture;
+    cubeBatch!: Batch;
+    comp: ShaderPass;
+    compShader: Shader;
 
     constructor() {
 
@@ -66,14 +61,11 @@ export default class extends Base {
     	this.camera = new CameraArcball(
     		this.width,
     		this.height,
-    		vec3.fromValues( 4, 8, 10 ),
-    		vec3.fromValues( 0, 3, 0 ),
+    		vec3.fromValues( 0, 0, 10 ),
+    		vec3.fromValues( 0, 2.8, 0 ),
     		45,
-    		0.01,
-    		1000,
     		0.1,
-    		2,
-    		0.6
+    		100
     	);
 
     	this.bolt = Bolt.getInstance();
@@ -84,7 +76,11 @@ export default class extends Base {
 
     	this.bodyShader = new Shader( bodyVertex, bodyFragment );
     	this.eyesShader = new Shader( eyesVertex, eyesFragment );
+
     	this.geometryShader = new Shader( geometryVertex, geometryFragment );
+    	this.geometryShader.activate();
+    	this.geometryShader.setVector2( "cameraPlanes", vec2.fromValues( this.camera.near, this.camera.far ) );
+
 
     	this.bolt.enableDepth();
 
@@ -94,21 +90,34 @@ export default class extends Base {
     	this.gBuffer.unbind();
 
     	this.normalTexture = new Texture( { width: this.canvas.width, height: this.canvas.height } );
+    	this.depthTexture = new Texture( { width: this.canvas.width, height: this.canvas.height } );
 
     	this.gBuffer.bind();
     	this.gBuffer.addAttachment( this.normalTexture, COLOR_ATTACHMENT0 + 1 );
+    	this.gBuffer.addAttachment( this.depthTexture, COLOR_ATTACHMENT0 + 2 );
     	this.gBuffer.setDrawBuffers();
     	this.gBuffer.unbind();
 
-    	this.copyPass = new CopyPass( this.bolt, { width: this.canvas.width, height: this.canvas.height } );
-
     	this.post = new Post( this.bolt );
+
+    	this.compShader = new Shader( compositionVertex, compositionFragment );
+    	this.compShader.activate();
+    	this.compShader.setVector2( "resolution", vec2.fromValues( this.canvas.width, this.canvas.height ) );
+    	this.compShader.setFloat( "thickness", 0.5 );
+
+    	this.comp = new ShaderPass( this.bolt, {
+    		width: this.width,
+    		height: this.height,
+    		shader: this.compShader
+    	} ).setEnabled( true );
 
     	this.fxaa = new FXAAPass( this.bolt, {
     		width: this.width,
     		height: this.height
     	} ).setEnabled( true );
 
+
+    	this.post.add( this.comp );
     	this.post.add( this.fxaa, true );
 
     	this.init();
@@ -127,6 +136,10 @@ export default class extends Base {
 
     	this.floor = new Floor();
 
+    	this.cubeBatch = new Batch( new Mesh( new Cube( { width: 3, height: 3, depth: 3 } ) ), this.bodyShader );
+    	this.cubeBatch.transform.y = 0;
+    	this.cubeBatch.transform.position = vec3.fromValues( 0, 0, 0 );
+
     	if ( this.gltf.scenes ) {
 
     		for ( const scene of this.gltf.scenes ) {
@@ -136,6 +149,7 @@ export default class extends Base {
     				if ( node.name === "phantom_logoPose" ) {
 
     					node.transform.y = 2.8;
+    					//node.transform.z = - 5;
 
     					const batch1 = <Batch>node.children[ 0 ];
     					batch1.shader = this.bodyShader;
@@ -170,9 +184,8 @@ export default class extends Base {
 
     }
 
-    drawScene( type = "normal" ) {
+    drawScene( type = "normal", delta: number ) {
 
-    	this.camera.update();
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 0.9, 0.9, 0.9, 1 );
 
@@ -217,11 +230,8 @@ export default class extends Base {
 
     	}
 
-    	if ( type === "normal" ) {
-
-    		this.bolt.draw( [ this.axis, this.floor ] );
-
-    	}
+    	this.cubeBatch.shader = this.geometryShader;
+    	this.bolt.draw( this.cubeBatch );
 
 
     }
@@ -230,18 +240,23 @@ export default class extends Base {
 
     	if ( ! this.assetsLoaded ) return;
 
+    	this.camera.update();
+
+    	this.bolt.enableDepth();
+    	this.bolt.enableCullFace();
+
     	this.gBuffer.bind();
-    	this.drawScene( "geometry" );
+    	this.drawScene( "geometry", delta );
     	this.gBuffer.unbind();
 
-    	this.copyPass.shader.setTexture( "map", this.normalTexture );
-    	this.copyPass.shader.activate();
-    	this.copyPass.fullScreenTriangle.drawTriangles( this.copyPass.shader );
-
     	this.post.begin();
-    	this.drawScene( "normal" );
+    	// this.cubeBatch.transform.rotateX = 0.02;
+    	// this.cubeBatch.transform.rotateZ = 0.02;
+    	this.comp.shader.activate();
+    	this.comp.shader.setTexture( "depth", this.depthTexture );
+    	this.comp.shader.setTexture( "normal", this.normalTexture );
+    	this.drawScene( "normal", delta );
     	this.post.end();
-
 
     }
 
