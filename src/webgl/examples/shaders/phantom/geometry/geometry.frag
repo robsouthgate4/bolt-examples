@@ -8,7 +8,6 @@ in vec3 NormalEyeSpace;
 
 layout( location = 0 ) out vec4 scene;
 layout( location = 1 ) out vec4 normal;
-layout( location = 2 ) out vec4 depth;
 
 uniform vec2 cameraPlanes;
 
@@ -40,12 +39,5 @@ void main() {
 
     scene = vec4( 1.0 );
     normal = vec4( NormalEyeSpace, 1.0 );
-
-    float depthOffset = 0.0;
-    float linearDepth = 1.0 / ( cameraPlanes.y - cameraPlanes.x );
-    float linear      = linearDepth * length( Position.xyz );
-    float d           = convRGBA( convCoord( linear, depthOffset ) ).r;
-
-    depth = vec4( vec3( d ), 1.0 );
 
 }

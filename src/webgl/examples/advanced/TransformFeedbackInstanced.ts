@@ -53,7 +53,7 @@ export default class extends Base {
     	this.canvas.height = this.height;
 
     	this.bolt = Bolt.getInstance();
-    	this.bolt.init( this.canvas, { antialias: true } );
+    	this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
 
     	this.gl = this.bolt.getContext();
 
@@ -253,7 +253,7 @@ export default class extends Base {
     	this.camera.update();
 
     	this.bolt.setViewPort( 0, 0, this.gl.canvas.width, this.gl.canvas.height );
-    	this.bolt.clear( 0, 0, 0, 0 );
+    	this.bolt.clear( 0, 0, 0, 1 );
 
     	{
 

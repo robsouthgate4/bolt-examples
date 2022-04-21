@@ -1,9 +1,7 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Node, Transform, Batch, Camera, FBO, Texture, COLOR_ATTACHMENT0, RBO, Mesh } from "@bolt-webgl/core";
+import Bolt, { Shader, Node, Batch, FBO, Texture, COLOR_ATTACHMENT0, RBO, Mesh, NEAREST } from "@bolt-webgl/core";
 
 import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
-import CopyPass from "@/webgl/modules/Post/passes/CopyPass";
-
 import bodyVertex from "../../examples/shaders/phantom/body/body.vert";
 import bodyFragment from "../../examples/shaders/phantom/body/body.frag";
 import eyesVertex from "../../examples/shaders/phantom/eyes/eyes.vert";
@@ -22,7 +20,6 @@ import Axis from "@/webgl/modules/Batches/Axis";
 import Floor from "@/webgl/modules/Batches/Floor";
 import Cube from "@/webgl/modules/Primitives/Cube";
 import ShaderPass from "@/webgl/modules/Post/passes/ShaderPass";
-import CameraFPS from "@/webgl/modules/CameraFPS";
 
 export default class extends Base {
 
@@ -42,7 +39,6 @@ export default class extends Base {
     normalTexture: Texture;
     geometryShader: Shader;
     gBufferRBO: RBO;
-    depthTexture: Texture;
     cubeBatch!: Batch;
     comp: ShaderPass;
     compShader: Shader;
@@ -81,7 +77,6 @@ export default class extends Base {
     	this.geometryShader.activate();
     	this.geometryShader.setVector2( "cameraPlanes", vec2.fromValues( this.camera.near, this.camera.far ) );
 
-
     	this.bolt.enableDepth();
 
     	this.gBuffer = new FBO( { width: this.canvas.width, height: this.canvas.height } );
@@ -90,11 +85,12 @@ export default class extends Base {
     	this.gBuffer.unbind();
 
     	this.normalTexture = new Texture( { width: this.canvas.width, height: this.canvas.height } );
-    	this.depthTexture = new Texture( { width: this.canvas.width, height: this.canvas.height } );
+    	this.normalTexture.minFilter = NEAREST;
+    	this.normalTexture.magFilter = NEAREST;
+
 
     	this.gBuffer.bind();
     	this.gBuffer.addAttachment( this.normalTexture, COLOR_ATTACHMENT0 + 1 );
-    	this.gBuffer.addAttachment( this.depthTexture, COLOR_ATTACHMENT0 + 2 );
     	this.gBuffer.setDrawBuffers();
     	this.gBuffer.unbind();
 
@@ -129,6 +125,7 @@ export default class extends Base {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
     	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf", "PhantomLogoPose.gltf" );
+
     	this.assetsLoaded = true;
 
     	this.axis = new Axis();
@@ -139,6 +136,8 @@ export default class extends Base {
     	this.cubeBatch = new Batch( new Mesh( new Cube( { width: 3, height: 3, depth: 3 } ) ), this.bodyShader );
     	this.cubeBatch.transform.y = 0;
     	this.cubeBatch.transform.position = vec3.fromValues( 0, 0, 0 );
+
+
 
     	if ( this.gltf.scenes ) {
 
@@ -184,7 +183,7 @@ export default class extends Base {
 
     }
 
-    drawScene( type = "normal", delta: number ) {
+    drawScene( sceneType = "normal", delta: number ) {
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 0.9, 0.9, 0.9, 1 );
@@ -197,11 +196,11 @@ export default class extends Base {
 
     				if ( node.name === "phantom_logoPose" ) {
 
-    					if ( type === "geometry" ) {
+    					if ( sceneType === "geometry" ) {
 
     						node.children.forEach( ( batch: Node ) => {
 
-    							if ( type === "geometry" ) {
+    							if ( sceneType === "geometry" ) {
 
     								const b = <Batch>batch;
     								b.shader = this.geometryShader;
@@ -250,10 +249,7 @@ export default class extends Base {
     	this.gBuffer.unbind();
 
     	this.post.begin();
-    	// this.cubeBatch.transform.rotateX = 0.02;
-    	// this.cubeBatch.transform.rotateZ = 0.02;
     	this.comp.shader.activate();
-    	this.comp.shader.setTexture( "depth", this.depthTexture );
     	this.comp.shader.setTexture( "normal", this.normalTexture );
     	this.drawScene( "normal", delta );
     	this.post.end();
