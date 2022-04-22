@@ -1,9 +1,11 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Node, Batch, FBO, Texture, COLOR_ATTACHMENT0, RBO, Mesh, NEAREST } from "@bolt-webgl/core";
+import Bolt, { Shader, Node, Batch, FBO, Texture, COLOR_ATTACHMENT0, RBO, Mesh, NEAREST, TextureCube } from "@bolt-webgl/core";
 
 import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
 import bodyVertex from "../../examples/shaders/phantom/body/body.vert";
 import bodyFragment from "../../examples/shaders/phantom/body/body.frag";
+import cubeVertex from "../../examples/shaders/phantom/cube/cube.vert";
+import cubeFragment from "../../examples/shaders/phantom/cube/cube.frag";
 import eyesVertex from "../../examples/shaders/phantom/eyes/eyes.vert";
 import eyesFragment from "../../examples/shaders/phantom/eyes/eyes.frag";
 import geometryVertex from "../../examples/shaders/phantom/geometry/geometry.vert";
@@ -42,6 +44,8 @@ export default class extends Base {
     cubeBatch!: Batch;
     comp: ShaderPass;
     compShader: Shader;
+    cubeShader: Shader;
+    cubeTexture!: TextureCube;
 
     constructor() {
 
@@ -77,6 +81,8 @@ export default class extends Base {
     	this.geometryShader.activate();
     	this.geometryShader.setVector2( "cameraPlanes", vec2.fromValues( this.camera.near, this.camera.far ) );
 
+    	this.cubeShader = new Shader( cubeVertex, cubeFragment );
+
     	this.bolt.enableDepth();
 
     	this.gBuffer = new FBO( { width: this.canvas.width, height: this.canvas.height } );
@@ -87,7 +93,6 @@ export default class extends Base {
     	this.normalTexture = new Texture( { width: this.canvas.width, height: this.canvas.height } );
     	this.normalTexture.minFilter = NEAREST;
     	this.normalTexture.magFilter = NEAREST;
-
 
     	this.gBuffer.bind();
     	this.gBuffer.addAttachment( this.normalTexture, COLOR_ATTACHMENT0 + 1 );
@@ -148,13 +153,6 @@ export default class extends Base {
     				if ( node.name === "phantom_logoPose" ) {
 
     					node.transform.y = 2.8;
-    					//node.transform.z = - 5;
-
-    					const batch1 = <Batch>node.children[ 0 ];
-    					batch1.shader = this.bodyShader;
-
-    					const batch2 = <Batch>node.children[ 1 ];
-    					batch2.shader = this.eyesShader;
 
     				}
 
@@ -229,7 +227,16 @@ export default class extends Base {
 
     	}
 
-    	this.cubeBatch.shader = this.geometryShader;
+    	if ( sceneType === "geometry" ) {
+
+    		this.cubeBatch.shader = this.geometryShader;
+
+    	} else {
+
+    		this.cubeBatch.shader = this.cubeShader;
+
+    	}
+
     	this.bolt.draw( this.cubeBatch );
 
 

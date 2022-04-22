@@ -1,5 +1,5 @@
 
-import { quat, vec3 } from "gl-matrix";
+import { quat, vec3, vec4 } from "gl-matrix";
 import Bolt, { VBO, VAO, Transform, Mesh, Node, Batch, Shader } from "@bolt-webgl/core";
 
 import { GlTf, Mesh as GLTFMesh, MeshPrimitive } from "./types/GLTF";
@@ -159,8 +159,7 @@ export default class GLTFLoader {
 
     				if ( gltfMesh ) {
 
-    					gltfMesh.primitives.forEach( ( primitive ) => {
-
+    					gltfMesh.primitives.forEach( ( primitive: MeshPrimitive ) => {
 
     						const attribs = primitive.bufferInfo.attributes;
 
@@ -173,6 +172,15 @@ export default class GLTFLoader {
 
     						const mesh = new Mesh( geometry );
     						const batch = new Batch( mesh, new Shader( vertexShader, fragmentShader ) );
+
+    						if ( primitive.materialBolt ) {
+
+    							batch.name = primitive.materialBolt.name;
+
+    							const { baseColorFactor } = primitive.materialBolt.pbrMetallicRoughness;
+    							batch.shader.setVector4( "baseColor", vec4.fromValues( baseColorFactor[ 1 ], baseColorFactor[ 2 ], baseColorFactor[ 3 ], baseColorFactor[ 4 ] ) );
+
+    						}
 
     						rootNode.children.push( batch );
 
