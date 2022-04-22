@@ -47,7 +47,7 @@ export default class GLTFLoader {
 
     async loadGLTF( basePath: string, url: string ) {
 
-    	const response = await fetch( `${basePath}/${url}` );
+    	const response = await fetch( `${basePath}${url}` );
     	if ( ! response.ok ) {
 
     		throw new Error( `could not load: ${url}` );
