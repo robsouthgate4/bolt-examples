@@ -125,7 +125,11 @@ export default class CameraArcball extends Camera {
     	if ( this._shiftKeyDown ) return;
 
     	const direction = Math.sign( ev.deltaY );
-    	this._radius -= ( direction * this._scrollSpeed ) * 1;
+    	this.fov -= ( direction * this._scrollSpeed ) * 0.1;
+
+    	console.log( this.aspect );
+
+    	this.updateProjection();
 
     }
 
@@ -214,9 +218,9 @@ export default class CameraArcball extends Camera {
     	const sineElevation = Math.sin( this._elevation );
     	const cosineElevation = Math.cos( this._elevation );
 
-    	direction[ 0 ] = this.target[ 0 ] + this._radius * cosineElevation * cosineAzimuth;
-    	direction[ 1 ] = this.target[ 1 ] + this._radius * sineElevation;
-    	direction[ 2 ] = this.target[ 2 ] + this._radius * cosineElevation * sineAzimuth;
+    	direction[ 0 ] = this._radius * cosineElevation * cosineAzimuth;
+    	direction[ 1 ] = this._radius * sineElevation;
+    	direction[ 2 ] = this._radius * cosineElevation * sineAzimuth;
 
     	vec3.copy( this.forward, direction );
     	vec3.normalize( this.forward, this.forward );

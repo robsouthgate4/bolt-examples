@@ -49,7 +49,7 @@ void main() {
     vec3 outColor = texture( map, Uv ).rgb;
 
     float sN = 1.0 - length( sobelNormal.rgb );
-    sN = pow( smoothstep( -1.0, 1.0, sN ), 0.01 );
+    sN = pow( smoothstep( 0.0, 1.0, sN ), 0.01 );
 
     float c = sN;
 

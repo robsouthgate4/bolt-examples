@@ -5,8 +5,8 @@ import Bolt, { VBO, VAO, Transform, Mesh, Node, Batch, Shader } from "@bolt-webg
 import { GlTf, Mesh as GLTFMesh, MeshPrimitive } from "./types/GLTF";
 import { GeometryBuffers } from "@bolt-webgl/core/lib/Mesh";
 
-import vertexShader from "../../examples/shaders/default/default.vert";
-import fragmentShader from "../../examples/shaders/default/default.frag";
+import vertexShader from "../../examples/shaders/color/color.vert";
+import fragmentShader from "../../examples/shaders/color/color.frag";
 
 interface AccessorDict {
     [id: string]: number;
@@ -125,7 +125,7 @@ export default class GLTFLoader {
 
     				primitive.vao = vao;
 
-    				if ( primitive.material ) {
+    				if ( primitive.material != undefined ) {
 
     					primitive.materialBolt = gltf.materials && gltf.materials[ primitive.material ] || undefined;
 
@@ -175,10 +175,11 @@ export default class GLTFLoader {
 
     						if ( primitive.materialBolt ) {
 
-    							batch.name = primitive.materialBolt.name;
-
     							const { baseColorFactor } = primitive.materialBolt.pbrMetallicRoughness;
-    							batch.shader.setVector4( "baseColor", vec4.fromValues( baseColorFactor[ 1 ], baseColorFactor[ 2 ], baseColorFactor[ 3 ], baseColorFactor[ 4 ] ) );
+
+    							const shader = batch.shader;
+    							shader.activate();
+    							shader.setVector4( "baseColor", baseColorFactor ? vec4.fromValues( baseColorFactor[ 0 ], baseColorFactor[ 1 ], baseColorFactor[ 2 ], baseColorFactor[ 3 ] ) : vec4.fromValues( 1, 1, 1, 1 ) );
 
     						}
 

@@ -13,9 +13,11 @@ in vec3 Color;
 in vec3 Color2;
 in vec3 Color3;
 
+uniform vec4 baseColor;
+
 void main()
 {
 
-  FragColor = vec4( vec3( 0.0 ), 1.0 );
+  FragColor = vec4( baseColor.rgb, 1.0 );
 
 }

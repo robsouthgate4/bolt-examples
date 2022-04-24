@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/basic/Toon";
+import Example from "@/webgl/examples/basic/ModelLoading";
 
 export default class Main {
 

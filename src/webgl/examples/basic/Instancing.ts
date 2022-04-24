@@ -97,7 +97,7 @@ export default class extends Base {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
 
-    	const gltf = await gltfLoader.loadGLTF( "/static/models/gltf", "torus.gltf" );
+    	const gltf = await gltfLoader.loadGLTF( "/static/models/gltf/", "torus.gltf" );
 
     	if ( ! gltf ) return;
 

@@ -1,10 +1,7 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Node, Transform } from "@bolt-webgl/core";
+import Bolt, { Node, Transform } from "@bolt-webgl/core";
 
-import defaultVertex from "../../examples/shaders/default/default.vert";
-import defaultFragment from "../../examples/shaders/default/default.frag";
-
-import { mat3, vec3, } from "gl-matrix";
+import { vec3 } from "gl-matrix";
 import CameraArcball from "../../modules/CameraArcball";
 import GLTFLoader from "@/webgl/modules/GLTFLoader";
 import { GlTf } from "@/webgl/modules/GLTFLoader/types/GLTF";
@@ -12,7 +9,7 @@ import { GlTf } from "@/webgl/modules/GLTFLoader/types/GLTF";
 export default class extends Base {
 
     canvas: HTMLCanvasElement;
-    shader: Shader;
+
     lightPosition: vec3;
     camera: CameraArcball;
     assetsLoaded?: boolean;
@@ -36,22 +33,19 @@ export default class extends Base {
     	this.camera = new CameraArcball(
     		this.width,
     		this.height,
-    		vec3.fromValues( 0, 2, 6 ),
+    		vec3.fromValues( 0, 2, 10 ),
     		vec3.fromValues( 0, 2, 0 ),
     		45,
     		0.01,
     		1000,
-    		0.2,
-    		2
+    		0.1,
+    		4
     	);
-
-    	console.log( mat3.create() );
 
     	this.bolt = Bolt.getInstance();
     	this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
     	this.bolt.setCamera( this.camera );
 
-    	this.shader = new Shader( defaultVertex, defaultFragment );
     	this.lightPosition = vec3.fromValues( 0, 0, 2 );
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
@@ -65,7 +59,7 @@ export default class extends Base {
     async init() {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
-    	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf", "phantom_objects2.gltf" );
+    	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf/", "PhantomLogoPose.gltf" );
     	this.assetsLoaded = true;
 
     	this.resize();
@@ -91,9 +85,7 @@ export default class extends Base {
     	this.camera.update();
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-    	this.bolt.clear( 1, 1, 1, 1 );
-
-    	this.shader.setFloat( "time", elapsed );
+    	this.bolt.clear( 0.95, 0.95, 0.95, 1 );
 
     	if ( this.gltf.scenes ) {
 

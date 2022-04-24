@@ -44,13 +44,13 @@ export default class extends Base {
     	this.camera = new CameraArcball(
     		this.width,
     		this.height,
-    		vec3.fromValues( 0, 0, 5 ),
+    		vec3.fromValues( 0, 0, 8 ),
     		vec3.fromValues( 0, 0, 0 ),
     		45,
     		0.01,
     		1000,
-    		0.2,
-    		2
+    		0.1,
+    		4
     	);
 
     	this.bolt.init( this.canvas, { antialias: false, dpi: 1 } );
@@ -61,7 +61,7 @@ export default class extends Base {
     	this.post = new Post( this.bolt );
 
     	this.shader = new Shader( defaultVertex, defaultFragment );
-    	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+    	this.bolt.setViewPort( 0, 0, this.canvas.clientWidth, this.canvas.clientHeight );
     	this.bolt.enableDepth();
 
     	this.init();
@@ -70,11 +70,6 @@ export default class extends Base {
     }
 
     async init() {
-
-    	this.renderPass = new RenderPass( this.bolt, {
-    		width: this.width,
-    		height: this.height
-    	} ).setEnabled( true );
 
 
     	this.rbgSplit = new RGBSplitPass( this.bolt, {
@@ -94,7 +89,7 @@ export default class extends Base {
     		height: this.height
     	} ).setEnabled( true );
 
-    	this.post.add( this.renderPass );
+    	this.post.add( this.rbgSplit );
     	this.post.add( this.fxaa, true );
 
     	const sphereGeometry = new Sphere( { radius: 1, widthSegments: 64, heightSegments: 64 } );
@@ -118,7 +113,7 @@ export default class extends Base {
 
     	this.bolt.resizeFullScreen();
 
-    	this.post.resize( this.gl.canvas.width, this.gl.canvas.height );
+    	this.post.resize( this.gl.canvas.clientWidth, this.gl.canvas.clientHeight );
 
     }
 
@@ -134,7 +129,7 @@ export default class extends Base {
     	this.post.begin();
 
 
-    	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+    	this.bolt.setViewPort( 0, 0, this.canvas.clientWidth, this.canvas.clientHeight );
     	this.bolt.clear( 1, 1, 1, 1 );
 
     	this.root.traverse( ( node: Node ) => {

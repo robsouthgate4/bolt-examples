@@ -27,11 +27,6 @@ uniform mat4 camera;
 
 void main()
 {
-
-    Color = aColor;
-    Color2 = aColor2;
-    Color3 = aColor3;
-
     Uv = aUv;
 
     Normal = aNormal;

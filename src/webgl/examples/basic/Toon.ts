@@ -2,18 +2,12 @@ import Base from "@webgl/Base";
 import Bolt, { Shader, Node, Batch, FBO, Texture, COLOR_ATTACHMENT0, RBO, Mesh, NEAREST, TextureCube } from "@bolt-webgl/core";
 
 import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
-import bodyVertex from "../../examples/shaders/phantom/body/body.vert";
-import bodyFragment from "../../examples/shaders/phantom/body/body.frag";
-import cubeVertex from "../../examples/shaders/phantom/cube/cube.vert";
-import cubeFragment from "../../examples/shaders/phantom/cube/cube.frag";
-import eyesVertex from "../../examples/shaders/phantom/eyes/eyes.vert";
-import eyesFragment from "../../examples/shaders/phantom/eyes/eyes.frag";
 import geometryVertex from "../../examples/shaders/phantom/geometry/geometry.vert";
 import geometryFragment from "../../examples/shaders/phantom/geometry/geometry.frag";
 import compositionVertex from "../../examples/shaders/phantom/composition/composition.vert";
 import compositionFragment from "../../examples/shaders/phantom/composition/composition.frag";
 
-import { vec2, vec3, } from "gl-matrix";
+import { vec2, vec3, vec4, } from "gl-matrix";
 import CameraArcball from "../../modules/CameraArcball";
 import GLTFLoader from "@/webgl/modules/GLTFLoader";
 import { GlTf } from "@/webgl/modules/GLTFLoader/types/GLTF";
@@ -26,8 +20,8 @@ import ShaderPass from "@/webgl/modules/Post/passes/ShaderPass";
 export default class extends Base {
 
     canvas: HTMLCanvasElement;
-    bodyShader: Shader;
-    eyesShader: Shader;
+    bodyShader!: Shader;
+    eyesShader!: Shader;
     camera: CameraArcball;
     assetsLoaded?: boolean;
     bolt: Bolt;
@@ -44,7 +38,6 @@ export default class extends Base {
     cubeBatch!: Batch;
     comp: ShaderPass;
     compShader: Shader;
-    cubeShader: Shader;
     cubeTexture!: TextureCube;
 
     constructor() {
@@ -61,11 +54,13 @@ export default class extends Base {
     	this.camera = new CameraArcball(
     		this.width,
     		this.height,
-    		vec3.fromValues( 0, 0, 10 ),
-    		vec3.fromValues( 0, 2.8, 0 ),
+    		vec3.fromValues( 0, 3, 20 ),
+    		vec3.fromValues( 0, 3, 0 ),
     		45,
+    		0.01,
+    		1000,
     		0.1,
-    		100
+    		4
     	);
 
     	this.bolt = Bolt.getInstance();
@@ -74,14 +69,9 @@ export default class extends Base {
 
     	this.gl = this.bolt.getContext();
 
-    	this.bodyShader = new Shader( bodyVertex, bodyFragment );
-    	this.eyesShader = new Shader( eyesVertex, eyesFragment );
-
     	this.geometryShader = new Shader( geometryVertex, geometryFragment );
     	this.geometryShader.activate();
     	this.geometryShader.setVector2( "cameraPlanes", vec2.fromValues( this.camera.near, this.camera.far ) );
-
-    	this.cubeShader = new Shader( cubeVertex, cubeFragment );
 
     	this.bolt.enableDepth();
 
@@ -134,15 +124,13 @@ export default class extends Base {
     	this.assetsLoaded = true;
 
     	this.axis = new Axis();
-    	this.axis.transform.y = 0.01;
+    	this.axis.transform.y = 8;
 
     	this.floor = new Floor();
 
     	this.cubeBatch = new Batch( new Mesh( new Cube( { width: 3, height: 3, depth: 3 } ) ), this.bodyShader );
     	this.cubeBatch.transform.y = 0;
     	this.cubeBatch.transform.position = vec3.fromValues( 0, 0, 0 );
-
-
 
     	if ( this.gltf.scenes ) {
 
@@ -153,6 +141,12 @@ export default class extends Base {
     				if ( node.name === "phantom_logoPose" ) {
 
     					node.transform.y = 2.8;
+
+    					const batch1 = <Batch>node.children[ 0 ];
+    					this.bodyShader = batch1.shader;
+
+    					const batch2 = <Batch>node.children[ 1 ];
+    					this.eyesShader = batch2.shader;
 
     				}
 
@@ -169,6 +163,8 @@ export default class extends Base {
     resize() {
 
     	this.bolt.resizeFullScreen();
+    	this.camera.resize( this.gl.canvas.width, this.gl.canvas.height );
+    	this.compShader.setVector2( "resolution", vec2.fromValues( this.gl.canvas.width, this.gl.canvas.height ) );
     	this.post.resize( this.gl.canvas.width, this.gl.canvas.height );
     	this.gBuffer.resize( this.gl.canvas.width, this.gl.canvas.height );
     	this.gBufferRBO.resize( this.gl.canvas.width, this.gl.canvas.height );
@@ -233,11 +229,11 @@ export default class extends Base {
 
     	} else {
 
-    		this.cubeBatch.shader = this.cubeShader;
+    		this.bolt.draw( [ this.floor, this.axis ] );
 
     	}
 
-    	this.bolt.draw( this.cubeBatch );
+
 
 
     }
