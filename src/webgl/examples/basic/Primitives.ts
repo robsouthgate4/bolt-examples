@@ -135,8 +135,6 @@ export default class extends Base {
     		this.shader
     	);
 
-
-
     	this.sphereBatch.setParent( this.root );
 
     	this.cubeBatch = new Batch(
