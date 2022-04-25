@@ -23,6 +23,19 @@ interface AttribName {
     [id: string]: AttributeInfo;
 }
 
+type TypedArray =
+Int8ArrayConstructor
+| Uint8ArrayConstructor // gl.UNSIGNED_BYTE
+| Int16ArrayConstructor // gl.SHORT
+| Uint16ArrayConstructor // gl.UNSIGNED_SHORT
+| Int32ArrayConstructor // gl.INT
+| Uint32ArrayConstructor // gl.UNSIGNED_INT
+| Float32ArrayConstructor
+
+interface TypedArrayDict {
+    [key: string]: TypedArray;
+}
+
 export default class GLTFLoader {
 
     bolt: Bolt;
@@ -37,6 +50,16 @@ export default class GLTFLoader {
     	'MAT3': 9,
     	'MAT4': 16,
     };
+
+    private _typedArrayMap: TypedArrayDict = {
+    	'5120': Int8Array, // gl.BYTE
+    	'5121': Uint8Array, // gl.UNSIGNED_BYTE
+    	'5122': Int16Array, // gl.SHORT
+    	'5123': Uint16Array, // gl.UNSIGNED_SHORT
+    	'5124': Int32Array, // gl.INT
+    	'5125': Uint32Array, // gl.UNSIGNED_INT
+    	'5126': Float32Array, // gl.FLOAT
+    }
 
     constructor( bolt: Bolt ) {
 
@@ -93,23 +116,25 @@ export default class GLTFLoader {
 
     				}
 
-    				const bufferInfo = {
-    					attributes,
-    					numElements,
-    					indices: new Uint16Array(),
-    					elementType: 0
-    				};
-
     				if ( primitive.indices !== undefined ) {
 
     					const { accessor, buffer } = this._getAccessorAndIndices( this.gl, gltf, primitive.indices, bin );
+
+    					const bufferInfo = {
+    						attributes,
+    						numElements,
+    						indices: new this._typedArrayMap[ accessor.componentType ](),
+    						elementType: 0
+    					};
+
     					bufferInfo.numElements = accessor.count;
     					bufferInfo.indices = buffer;
     					bufferInfo.elementType = accessor.componentType;
 
+    					primitive.bufferInfo = bufferInfo;
+
     				}
 
-    				primitive.bufferInfo = bufferInfo;
 
     				const vao = new VAO();
 
@@ -277,7 +302,9 @@ export default class GLTFLoader {
     	const accessor = gltf.accessors[ accessorIndex ];
     	const bufferView = gltf.bufferViews[ accessor.bufferView ];
 
-    	const buffer = new Uint16Array( bin, bufferView.byteOffset, bufferView.byteLength / Uint16Array.BYTES_PER_ELEMENT );
+    	const typedArray = this._typedArrayMap[ accessor.componentType ];
+
+    	const buffer = new typedArray( bin, bufferView.byteOffset, bufferView.byteLength / typedArray.BYTES_PER_ELEMENT );
 
     	return {
     		accessor,

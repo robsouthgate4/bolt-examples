@@ -164,6 +164,7 @@ export default class extends Base {
 
     	this.bolt.resizeFullScreen();
     	this.camera.resize( this.gl.canvas.width, this.gl.canvas.height );
+    	this.compShader.activate();
     	this.compShader.setVector2( "resolution", vec2.fromValues( this.gl.canvas.width, this.gl.canvas.height ) );
     	this.post.resize( this.gl.canvas.width, this.gl.canvas.height );
     	this.gBuffer.resize( this.gl.canvas.width, this.gl.canvas.height );
