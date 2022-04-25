@@ -13,6 +13,7 @@ import Sphere from "../../modules/Primitives/Sphere";
 import Cube from "../../modules/Primitives/Cube";
 import Plane from "../../modules/Primitives/Plane";
 import { GeometryBuffers } from "@bolt-webgl/core/lib/Mesh";
+import Floor from "@/webgl/modules/Batches/Floor";
 export default class extends Base {
 
     canvas: HTMLCanvasElement;
@@ -27,6 +28,7 @@ export default class extends Base {
     bolt: Bolt;
     gl: WebGL2RenderingContext;
     root!: Node;
+    floorBatch: any;
 
     constructor() {
 
@@ -125,13 +127,15 @@ export default class extends Base {
     	);
 
     	this.triangleBatch.setParent( this.root );
-    	this.triangleBatch.transform.y = 2.5;
+    	this.triangleBatch.transform.y = 3.5;
     	this.triangleBatch.transform.scale = vec3.fromValues( 1.5, 1.5, 1.5 );
 
     	this.sphereBatch = new Batch(
     		new Mesh( sphereGeometry ).setDrawType( TRIANGLES ),
     		this.shader
     	);
+
+
 
     	this.sphereBatch.setParent( this.root );
 
@@ -142,7 +146,6 @@ export default class extends Base {
 
     	this.cubeBatch.setParent( this.root );
 
-
     	this.planeBatch = new Batch(
     		new Mesh( planeGeometry ).setDrawType( TRIANGLES ),
     		this.shader
@@ -150,8 +153,13 @@ export default class extends Base {
 
     	this.planeBatch.setParent( this.root );
 
+    	this.floorBatch = new Floor();
+    	this.floorBatch.setParent( this.root );
+
     	this.planeBatch.transform.x = - 2;
     	this.cubeBatch.transform.x = 2;
+
+    	this.sphereBatch.transform.y = this.cubeBatch.transform.y = this.planeBatch.transform.y = 1;
 
     	this.resize();
 

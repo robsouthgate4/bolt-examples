@@ -12,6 +12,7 @@ import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
 import RGBSplitPass from "@/webgl/modules/Post/passes/RGBSplitPass";
 import PixelatePass from "@/webgl/modules/Post/passes/PixelatePass";
 import RenderPass from "@/webgl/modules/Post/passes/RenderPass";
+import Floor from "@/webgl/modules/Batches/Floor";
 export default class extends Base {
 
     canvas: HTMLCanvasElement;
@@ -29,6 +30,7 @@ export default class extends Base {
     bolt = Bolt.getInstance();
     gl: WebGL2RenderingContext;
     root!: Node;
+    floorBatch!: Floor;
 
     constructor() {
 
@@ -44,7 +46,7 @@ export default class extends Base {
     	this.camera = new CameraArcball(
     		this.width,
     		this.height,
-    		vec3.fromValues( 0, 0, 8 ),
+    		vec3.fromValues( 3, 3, 8 ),
     		vec3.fromValues( 0, 0, 0 ),
     		45,
     		0.01,
@@ -101,7 +103,10 @@ export default class extends Base {
     		this.shader
     	);
 
-    	this.sphereBatch.transform.y = 0;
+    	this.floorBatch = new Floor();
+    	this.floorBatch.setParent( this.root );
+
+    	this.sphereBatch.transform.y = 1;
 
     	this.sphereBatch.setParent( this.root );
 
