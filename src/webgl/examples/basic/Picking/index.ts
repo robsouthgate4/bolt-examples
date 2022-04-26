@@ -38,7 +38,7 @@ export default class extends Base {
     	this.canvas.height = this.height;
 
     	this.bolt = Bolt.getInstance();
-    	this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
+    	this.bolt.init( this.canvas, { antialias: true, dpi: 1 } );
 
     	this.gl = this.bolt.getContext();
 
@@ -117,21 +117,6 @@ export default class extends Base {
     	this.resize();
 
     	window.addEventListener( "click", ( ev ) => {
-
-
-    		const intersection = vec3.create();
-
-    		const ray = this.raycast.unproject( {
-    			x: ev.clientX,
-    			y: ev.clientY,
-    			viewport: this.bolt.viewport
-    		} );
-
-    		console.log( {
-    			x: ray[ 0 ],
-    			y: ray[ 1 ],
-    			z: ray[ 2 ],
-    		} );
 
     	} );
 

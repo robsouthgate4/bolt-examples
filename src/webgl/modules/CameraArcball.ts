@@ -42,8 +42,6 @@ export default class CameraArcball extends Camera {
     	);
 
     	this.position = position;
-
-
     	this._initialPositionSpherical = this.cartesianToSpherical( this.position[ 0 ], this.position[ 1 ], this.position[ 2 ] );
 
     	this.target = target || vec3.fromValues( 0, 0, 0 );
