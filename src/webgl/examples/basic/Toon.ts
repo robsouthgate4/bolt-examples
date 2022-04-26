@@ -66,14 +66,14 @@ export default class extends Base {
     	this.bolt = Bolt.getInstance();
     	this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
     	this.bolt.setCamera( this.camera );
-
+    	this.bolt.enableDepth();
     	this.gl = this.bolt.getContext();
+
 
     	this.geometryShader = new Shader( geometryVertex, geometryFragment );
     	this.geometryShader.activate();
     	this.geometryShader.setVector2( "cameraPlanes", vec2.fromValues( this.camera.near, this.camera.far ) );
 
-    	this.bolt.enableDepth();
 
     	this.gBuffer = new FBO( { width: this.canvas.width, height: this.canvas.height } );
     	this.gBuffer.bind();
@@ -164,9 +164,12 @@ export default class extends Base {
 
     	this.bolt.resizeFullScreen();
     	this.camera.resize( this.gl.canvas.width, this.gl.canvas.height );
+
     	this.compShader.activate();
     	this.compShader.setVector2( "resolution", vec2.fromValues( this.gl.canvas.width, this.gl.canvas.height ) );
+
     	this.post.resize( this.gl.canvas.width, this.gl.canvas.height );
+
     	this.gBuffer.resize( this.gl.canvas.width, this.gl.canvas.height );
     	this.gBufferRBO.resize( this.gl.canvas.width, this.gl.canvas.height );
 

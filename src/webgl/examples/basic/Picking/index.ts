@@ -1,23 +1,18 @@
 import Base from "@webgl/Base";
 import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES } from "@bolt-webgl/core";
 
-import defaultVertex from "../../examples/shaders/default/default.vert";
-import defaultFragment from "../../examples/shaders/default/default.frag";
+import colorVertex from "./shaders/color/color.vert";
+import colorFragment from "./shaders/color/color.frag";
 
-import colorVertex from "../../examples/shaders/color/color.vert";
-import colorFragment from "../../examples/shaders/color/color.frag";
-
-import { vec3, vec4, } from "gl-matrix";
-import CameraArcball from "../../modules/CameraArcball";
-import Sphere from "../../modules/Primitives/Sphere";
-import Cube from "../../modules/Primitives/Cube";
-import Plane from "../../modules/Primitives/Plane";
+import { vec3 } from "gl-matrix";
+import CameraArcball from "../../../modules/CameraArcball";
 import { GeometryBuffers } from "@bolt-webgl/core/lib/Mesh";
 import Floor from "@/webgl/modules/Batches/Floor";
+import Raycast from "@/webgl/modules/Raycast";
+
 export default class extends Base {
 
     canvas: HTMLCanvasElement;
-    shader: Shader;
     camera: CameraArcball;
     assetsLoaded?: boolean;
     torusTransform!: Transform;
@@ -29,6 +24,7 @@ export default class extends Base {
     gl: WebGL2RenderingContext;
     root!: Node;
     floorBatch: any;
+    raycast!: Raycast;
 
     constructor() {
 
@@ -46,13 +42,11 @@ export default class extends Base {
 
     	this.gl = this.bolt.getContext();
 
-    	this.shader = new Shader( defaultVertex, defaultFragment );
-
     	this.camera = new CameraArcball(
     		this.width,
     		this.height,
-    		vec3.fromValues( 0, 4, 6 ),
-    		vec3.fromValues( 0, 0, 0 ),
+    		vec3.fromValues( 0, 2, 6 ),
+    		vec3.fromValues( 0, 1, 0 ),
     		45,
     		0.01,
     		1000,
@@ -71,10 +65,6 @@ export default class extends Base {
     }
 
     async init() {
-
-    	const sphereGeometry = new Sphere( { radius: 1, widthSegments: 32, heightSegments: 32 } );
-    	const cubeGeometry = new Cube( { widthSegments: 1, heightSegments: 1 } );
-    	const planeGeometry = new Plane( { widthSegments: 10, heightSegments: 10 } );
 
     	this.root = new Node();
 
@@ -99,29 +89,16 @@ export default class extends Base {
 
     	const triangleMesh = new Mesh( triangleGeo ).setDrawType( TRIANGLES );
 
-    	const colours = [
-    		1, 0, 0,
-    		0, 1, 0,
-    		0, 0, 1
-    	];
-
-    	//triangleMesh.addAttribute( colours, 3, 3 );
     	const triShader = new Shader( colorVertex, colorFragment );
-    	triShader.activate();
-    	triShader.setVector4( "baseColor", vec4.fromValues( 1, 0, 0, 1 ) );
 
-    	const colours2 = [
+    	const colours = [
     		1, 1, 0,
     		0, 1, 1,
     		0, 0, 1
     	];
 
-    	// attributes can be added with a named var and shader
-    	triangleMesh.addAttribute( colours, 3, { shader: triShader, attributeName: "aColor" } );
-    	triangleMesh.addAttribute( colours2, 3, { shader: triShader, attributeName: "aColor2" } );
-
     	// attributes can be added with a layout id
-    	triangleMesh.addAttribute( colours2, 3, 4 );
+    	triangleMesh.addAttribute( colours, 3, 4 );
 
     	this.triangleBatch = new Batch(
     		triangleMesh,
@@ -129,39 +106,34 @@ export default class extends Base {
     	);
 
     	this.triangleBatch.setParent( this.root );
-    	this.triangleBatch.transform.y = 3.5;
+    	this.triangleBatch.transform.y = 1;
     	this.triangleBatch.transform.scale = vec3.fromValues( 1.5, 1.5, 1.5 );
-
-    	this.sphereBatch = new Batch(
-    		new Mesh( sphereGeometry ).setDrawType( TRIANGLES ),
-    		this.shader
-    	);
-
-    	this.sphereBatch.setParent( this.root );
-
-    	this.cubeBatch = new Batch(
-    		new Mesh( cubeGeometry ).setDrawType( TRIANGLES ),
-    		this.shader
-    	);
-
-    	this.cubeBatch.setParent( this.root );
-
-    	this.planeBatch = new Batch(
-    		new Mesh( planeGeometry ).setDrawType( TRIANGLES ),
-    		this.shader
-    	);
-
-    	this.planeBatch.setParent( this.root );
 
     	this.floorBatch = new Floor();
     	this.floorBatch.setParent( this.root );
 
-    	this.planeBatch.transform.x = - 2;
-    	this.cubeBatch.transform.x = 2;
-
-    	this.sphereBatch.transform.y = this.cubeBatch.transform.y = this.planeBatch.transform.y = 1;
+    	this.raycast = new Raycast( this.camera );
 
     	this.resize();
+
+    	window.addEventListener( "click", ( ev ) => {
+
+
+    		const intersection = vec3.create();
+
+    		const ray = this.raycast.unproject( {
+    			x: ev.clientX,
+    			y: ev.clientY,
+    			viewport: this.bolt.viewport
+    		} );
+
+    		console.log( {
+    			x: ray[ 0 ],
+    			y: ray[ 1 ],
+    			z: ray[ 2 ],
+    		} );
+
+    	} );
 
     }
 

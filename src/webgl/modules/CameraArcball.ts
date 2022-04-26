@@ -18,9 +18,7 @@ export default class CameraArcball extends Camera {
     private _rotationTargetYOnMouseDown!: number;
     private _initialPositionSpherical: number[];
     private _scrollSpeed: number;
-    private _center: vec3;
     private _shiftKeyDown: boolean;
-    private _zoom = 0;
 
     constructor(
     	width: number,
@@ -49,7 +47,6 @@ export default class CameraArcball extends Camera {
     	this._initialPositionSpherical = this.cartesianToSpherical( this.position[ 0 ], this.position[ 1 ], this.position[ 2 ] );
 
     	this.target = target || vec3.fromValues( 0, 0, 0 );
-    	this._center = vec3.create();
 
     	this._mouseDown = false;
 
