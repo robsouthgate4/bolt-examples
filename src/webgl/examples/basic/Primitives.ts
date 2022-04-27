@@ -51,7 +51,7 @@ export default class extends Base {
     	this.camera = new CameraArcball(
     		this.width,
     		this.height,
-    		vec3.fromValues( 0, 2, 6 ),
+    		vec3.fromValues( 0, 2, 10 ),
     		vec3.fromValues( 0, 0, 0 ),
     		45,
     		0.01,
@@ -77,6 +77,33 @@ export default class extends Base {
     	const planeGeometry = new Plane( { widthSegments: 10, heightSegments: 10 } );
 
     	this.root = new Node();
+    	this.root.name = "root";
+    	this.root.transform.x = 0;
+
+    	this.sphereBatch = new Batch(
+    		new Mesh( sphereGeometry ).setDrawType( TRIANGLES ),
+    		this.shader
+    	);
+
+    	this.sphereBatch.transform.y = 0;
+
+    	this.sphereBatch.name = "sphere";
+    	this.sphereBatch.setParent( this.root );
+
+
+    	this.cubeBatch = new Batch(
+    		new Mesh( cubeGeometry ).setDrawType( TRIANGLES ),
+    		this.shader
+    	);
+
+    	this.cubeBatch.name = "cube";
+    	this.cubeBatch.setParent( this.root );
+
+    	this.floorBatch = new Floor();
+    	this.floorBatch.name = "floor";
+    	this.floorBatch.setParent( this.root );
+
+    	this.cubeBatch.transform.x = 2;
 
     	const triangleGeo: GeometryBuffers = {
     		positions: [
@@ -105,7 +132,6 @@ export default class extends Base {
     		0, 0, 1
     	];
 
-    	//triangleMesh.addAttribute( colours, 3, 3 );
     	const triShader = new Shader( colorVertex, colorFragment );
 
     	const colours2 = [
@@ -126,38 +152,8 @@ export default class extends Base {
     		triShader
     	);
 
-    	this.triangleBatch.setParent( this.root );
-    	this.triangleBatch.transform.y = 3.5;
-    	this.triangleBatch.transform.scale = vec3.fromValues( 1.5, 1.5, 1.5 );
-
-    	this.sphereBatch = new Batch(
-    		new Mesh( sphereGeometry ).setDrawType( TRIANGLES ),
-    		this.shader
-    	);
-
-    	this.sphereBatch.setParent( this.root );
-
-    	this.cubeBatch = new Batch(
-    		new Mesh( cubeGeometry ).setDrawType( TRIANGLES ),
-    		this.shader
-    	);
-
-    	this.cubeBatch.setParent( this.root );
-
-    	this.planeBatch = new Batch(
-    		new Mesh( planeGeometry ).setDrawType( TRIANGLES ),
-    		this.shader
-    	);
-
-    	this.planeBatch.setParent( this.root );
-
-    	this.floorBatch = new Floor();
-    	this.floorBatch.setParent( this.root );
-
-    	this.planeBatch.transform.x = - 2;
-    	this.cubeBatch.transform.x = 2;
-
-    	this.sphereBatch.transform.y = this.cubeBatch.transform.y = this.planeBatch.transform.y = 1;
+    	this.triangleBatch.transform.x = - 2;
+    	this.triangleBatch.setParent( this.sphereBatch );
 
     	this.resize();
 
@@ -177,13 +173,15 @@ export default class extends Base {
 
     update( elapsed: number, delta: number ) {
 
+
     	this.camera.update();
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 1, 1, 1, 1 );
 
-
     	this.root.traverse( ( node: Node ) => {
+
+    		this.root.updateModelMatrix();
 
     		this.bolt.draw( node );
 

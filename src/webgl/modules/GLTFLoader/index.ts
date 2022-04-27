@@ -164,7 +164,9 @@ export default class GLTFLoader {
 
     	const originalNodes = gltf.nodes;
 
-    	const nodes = gltf.nodes?.map( ( node ) => {
+    	const computedNodes = gltf.nodes?.map( ( node ) => {
+
+    		console.log( node );
 
     		const { name, translation, rotation, scale, mesh } = node;
     		const rootTransform = new Transform();
@@ -184,11 +186,13 @@ export default class GLTFLoader {
 
     				if ( gltfMesh ) {
 
+    					let geometry: GeometryBuffers = {};
+
     					gltfMesh.primitives.forEach( ( primitive: MeshPrimitive ) => {
 
     						const attribs = primitive.bufferInfo.attributes;
 
-    						const geometry: GeometryBuffers = {
+    						geometry = {
     							positions: attribs.aPosition ? attribs.aPosition.buffer : new Float32Array(),
     							normals: attribs.aNormal ? attribs.aNormal.buffer : new Float32Array(),
     							uvs: attribs.aTexcoord_0 ? attribs.aTexcoord_0.buffer : new Float32Array(),
@@ -208,9 +212,10 @@ export default class GLTFLoader {
 
     						}
 
-    						rootNode.children.push( batch );
+    						batch.setParent( rootNode );
 
     					} );
+
 
     				}
 
@@ -222,9 +227,9 @@ export default class GLTFLoader {
 
     	} );
 
-    	if ( originalNodes && nodes ) {
+    	if ( originalNodes && computedNodes ) {
 
-    		nodes.forEach( ( node, index ) => {
+    		computedNodes.forEach( ( node, index ) => {
 
     			const children = originalNodes[ index ].children;
 
@@ -232,7 +237,7 @@ export default class GLTFLoader {
 
     				children.forEach( ( childNdx ) => {
 
-    					const child = nodes[ childNdx ];
+    					const child = computedNodes[ childNdx ];
     					child.setParent( node );
 
     				} );
@@ -256,9 +261,9 @@ export default class GLTFLoader {
 
     				scene.nodes.forEach( ( childNdx ) => {
 
-    					if ( ! nodes ) return;
+    					if ( ! computedNodes ) return;
 
-    					const child = nodes[ childNdx ];
+    					const child = computedNodes[ childNdx ];
     					child.setParent( scene.root );
 
     				} );

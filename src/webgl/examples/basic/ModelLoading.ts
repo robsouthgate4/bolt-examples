@@ -5,6 +5,7 @@ import { vec3 } from "gl-matrix";
 import CameraArcball from "../../modules/CameraArcball";
 import GLTFLoader from "@/webgl/modules/GLTFLoader";
 import { GlTf } from "@/webgl/modules/GLTFLoader/types/GLTF";
+import Floor from "@/webgl/modules/Batches/Floor";
 
 export default class extends Base {
 
@@ -18,6 +19,7 @@ export default class extends Base {
     planeNode!: Node;
     bolt: Bolt;
     gltf!: GlTf;
+    floor: Floor;
 
     constructor() {
 
@@ -45,6 +47,8 @@ export default class extends Base {
     	this.bolt = Bolt.getInstance();
     	this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
     	this.bolt.setCamera( this.camera );
+
+    	this.floor = new Floor();
 
     	this.lightPosition = vec3.fromValues( 0, 0, 2 );
 
@@ -91,8 +95,10 @@ export default class extends Base {
 
     		for ( const scene of this.gltf.scenes ) {
 
+    			scene.root.transform.y = 2.75;
     			scene.root.traverse( ( node: Node ) => {
 
+    				scene.root.updateModelMatrix();
     				this.bolt.draw( node );
 
     			} );
@@ -100,6 +106,8 @@ export default class extends Base {
     		}
 
     	}
+
+    	this.bolt.draw( this.floor );
 
 
     }

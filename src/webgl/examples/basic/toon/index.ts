@@ -2,13 +2,13 @@ import Base from "@webgl/Base";
 import Bolt, { Shader, Node, Batch, FBO, Texture, COLOR_ATTACHMENT0, RBO, Mesh, NEAREST, TextureCube } from "@bolt-webgl/core";
 
 import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
-import geometryVertex from "../../examples/shaders/phantom/geometry/geometry.vert";
-import geometryFragment from "../../examples/shaders/phantom/geometry/geometry.frag";
-import compositionVertex from "../../examples/shaders/phantom/composition/composition.vert";
-import compositionFragment from "../../examples/shaders/phantom/composition/composition.frag";
+import geometryVertex from "../../../examples/shaders/phantom/geometry/geometry.vert";
+import geometryFragment from "../../../examples/shaders/phantom/geometry/geometry.frag";
+import compositionVertex from "../../../examples/shaders/phantom/composition/composition.vert";
+import compositionFragment from "../../../examples/shaders/phantom/composition/composition.frag";
 
-import { vec2, vec3, vec4, } from "gl-matrix";
-import CameraArcball from "../../modules/CameraArcball";
+import { vec2, vec3, } from "gl-matrix";
+import CameraArcball from "@webgl/modules/CameraArcball";
 import GLTFLoader from "@/webgl/modules/GLTFLoader";
 import { GlTf } from "@/webgl/modules/GLTFLoader/types/GLTF";
 import Post from "@/webgl/modules/Post/Post";
@@ -54,8 +54,8 @@ export default class extends Base {
     	this.camera = new CameraArcball(
     		this.width,
     		this.height,
-    		vec3.fromValues( 0, 3, 20 ),
-    		vec3.fromValues( 0, 3, 0 ),
+    		vec3.fromValues( 0, 3, 7 ),
+    		vec3.fromValues( 0, 1, 0 ),
     		45,
     		0.01,
     		1000,
@@ -119,12 +119,12 @@ export default class extends Base {
     async init() {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
-    	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf/", "PhantomLogoPose.gltf" );
+    	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf/examples/toon/", "Sweep_lookdev_working.gltf" );
 
     	this.assetsLoaded = true;
 
     	this.axis = new Axis();
-    	this.axis.transform.y = 8;
+    	this.axis.transform.y = 5;
 
     	this.floor = new Floor();
 
@@ -136,21 +136,15 @@ export default class extends Base {
 
     		for ( const scene of this.gltf.scenes ) {
 
-    			scene.root.traverse( ( node: Node ) => {
+    			if ( scene.name === "penandInk_cubic_forRob" ) {
 
-    				if ( node.name === "phantom_logoPose" ) {
+    				scene.root.traverse( ( node: Node ) => {
 
-    					node.transform.y = 2.8;
+    				} );
 
-    					const batch1 = <Batch>node.children[ 0 ];
-    					this.bodyShader = batch1.shader;
+    			}
 
-    					const batch2 = <Batch>node.children[ 1 ];
-    					this.eyesShader = batch2.shader;
 
-    				}
-
-    			} );
 
     		}
 
@@ -187,38 +181,14 @@ export default class extends Base {
 
     		for ( const scene of this.gltf.scenes ) {
 
+    			scene.root.transform.position = vec3.fromValues( 1.25, 0, 0 );
     			scene.root.traverse( ( node: Node ) => {
 
-    				if ( node.name === "phantom_logoPose" ) {
-
-    					if ( sceneType === "geometry" ) {
-
-    						node.children.forEach( ( batch: Node ) => {
-
-    							if ( sceneType === "geometry" ) {
-
-    								const b = <Batch>batch;
-    								b.shader = this.geometryShader;
-
-    							}
-
-    						} );
-
-    					} else {
-
-    						const batch1 = <Batch>node.children[ 0 ];
-    						batch1.shader = this.bodyShader;
-
-    						const batch2 = <Batch>node.children[ 1 ];
-    						batch2.shader = this.eyesShader;
-
-    					}
-
-    				}
-
+    				scene.root.updateModelMatrix();
     				this.bolt.draw( node );
 
     			} );
+
 
     		}
 
@@ -248,15 +218,15 @@ export default class extends Base {
     	this.bolt.enableDepth();
     	this.bolt.enableCullFace();
 
-    	this.gBuffer.bind();
-    	this.drawScene( "geometry", delta );
-    	this.gBuffer.unbind();
-
-    	this.post.begin();
-    	this.comp.shader.activate();
-    	this.comp.shader.setTexture( "normal", this.normalTexture );
+    	//this.gBuffer.bind();
     	this.drawScene( "normal", delta );
-    	this.post.end();
+    	//this.gBuffer.unbind();
+
+    	// this.post.begin();
+    	// this.comp.shader.activate();
+    	// this.comp.shader.setTexture( "normal", this.normalTexture );
+    	// this.drawScene( "normal", delta );
+    	// this.post.end();
 
     }
 
