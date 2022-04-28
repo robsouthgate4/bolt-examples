@@ -6,6 +6,7 @@ precision highp float;
 uniform sampler2D map;
 uniform sampler2D normal;
 uniform sampler2D depth;
+uniform sampler2D uv;
 
 uniform vec2 resolution;
 uniform float thickness;
@@ -15,10 +16,10 @@ in vec2 Uv;
 out vec4 FragColor;
 
 
-void makeKernalNormal(inout vec4 n[9], sampler2D tex, vec2 coord)
+void makeKernalNormal(inout vec4 n[9], sampler2D tex, vec2 coord, vec2 coordObject )
 {
-	float w = 1.0 / resolution.x + ( abs( fract( sin( coord.x * 500. ) ) ) * 0.001 );
-	float h = 1.0 / resolution.y + ( abs( fract( cos( coord.y * 500. ) ) ) * 0.001 );
+	float w = 1.0 / resolution.x + ( abs( fract( sin( coordObject.x * 10. ) ) ) * 0.001 );
+	float h = 1.0 / resolution.y  + ( abs( fract( cos( coordObject.y * 10. ) ) ) * 0.001 );
 
 	n[0] = texture(tex, coord + ( vec2( -w, -h) * thickness ));
 	n[1] = texture(tex, coord + ( vec2(0.0, -h) * thickness ));
@@ -40,18 +41,28 @@ vec4 makeEdge( in vec4[9] n ) {
 
 void main() {
 
+    vec3 uvColor = texture( uv, Uv ).rgb;
 
     vec4 n3[9];
-	makeKernalNormal( n3, normal, Uv );
+	makeKernalNormal( n3, normal, Uv, uvColor.rg );
+
+    vec4 n4[9];
+	makeKernalNormal( n4, depth, Uv, uvColor.rg );
 
     vec4 sobelNormal = makeEdge( n3 );
+    vec4 sobelDepth = makeEdge( n4 );
 
     vec3 outColor = texture( map, Uv ).rgb;
+    vec3 depthColor = texture( depth, Uv ).rgb;
+
 
     float sN = 1.0 - length( sobelNormal.rgb );
-    sN = pow( smoothstep( 0.0, 1.0, sN ), 0.01 );
+    sN = pow( smoothstep( 0., 1.0, sN ), 0.5 );
 
-    float c = sN;
+    float sD = 1.0 - length( sobelDepth.rgb );
+    sD = pow( smoothstep( 0.5, 1.0, sD ), 1.0 );
+
+    float c = sN * sD;
 
     outColor = mix( vec3( c ), outColor, c );
 

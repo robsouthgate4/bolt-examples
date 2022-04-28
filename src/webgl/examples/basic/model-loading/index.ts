@@ -2,7 +2,7 @@ import Base from "@webgl/Base";
 import Bolt, { Node, Transform } from "@bolt-webgl/core";
 
 import { vec3 } from "gl-matrix";
-import CameraArcball from "../../modules/CameraArcball";
+import CameraArcball from "@/webgl/modules/CameraArcball";
 import GLTFLoader from "@/webgl/modules/GLTFLoader";
 import { GlTf } from "@/webgl/modules/GLTFLoader/types/GLTF";
 import Floor from "@/webgl/modules/Batches/Floor";

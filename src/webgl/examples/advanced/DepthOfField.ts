@@ -52,12 +52,12 @@ export default class extends Base {
     		this.height,
     		vec3.fromValues( 0, 5, - 5 ),
     		45,
-    		0.1,
-    		500,
+    		0.01,
+    		1000,
     	);
 
     	this.bolt = Bolt.getInstance();
-    	this.bolt.init( this.canvas, { antialias: true } );
+    	this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
     	this.bolt.setCamera( this.camera );
     	this.gl = this.bolt.getContext();
 
@@ -99,9 +99,9 @@ export default class extends Base {
 
     	this.dofPass.shader.activate();
     	this.dofPass.shader.setTexture( "depthMap", this.depthFBO.targetTexture );
-    	this.dofPass.shader.setFloat( "focus", 20 );
-    	this.dofPass.shader.setFloat( "aperture", 2.0 * 0.0001 );
-    	this.dofPass.shader.setFloat( "maxBlur", 0.3 );
+    	this.dofPass.shader.setFloat( "focus", 8 );
+    	this.dofPass.shader.setFloat( "aperture", 7 * 0.0001 );
+    	this.dofPass.shader.setFloat( "maxBlur", 3.0 );
     	this.dofPass.shader.setFloat( "aspect", this.gl.canvas.width / this.gl.canvas.height );
 
     	const instanceCount = 1000;
@@ -112,7 +112,7 @@ export default class extends Base {
 
     		const x = ( Math.random() * 2 - 1 ) * 50;
     		const y = ( Math.random() * 2 - 1 ) * 20;
-    		const z = Math.random() * 200;
+    		const z = Math.random() * 100;
 
     		const tempTranslation = vec3.fromValues( x, y, - z );
 
@@ -154,8 +154,6 @@ export default class extends Base {
     				if ( node.name === "Torus" ) {
 
     					const batch = <Batch>node.children[ 0 ];
-
-    					console.log( batch );
 
     					const { positions, normals, uvs, indices } = batch.mesh;
 
@@ -237,8 +235,6 @@ export default class extends Base {
     		this.post.begin();
 
     		this.drawInstances( this.colorShader, elapsed );
-
-    		this.torusBuffer.drawTriangles( this.colorShader );
 
     		this.post.end();
 

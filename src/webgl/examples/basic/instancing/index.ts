@@ -1,8 +1,8 @@
 import Base from "@webgl/Base";
 import Bolt, { Shader, Transform, Mesh, Node, Batch } from "@bolt-webgl/core";
 
-import defaultVertexInstanced from "../../examples/shaders/defaultInstanced/defaultInstanced.vert";
-import defaultFragmentInstanced from "../../examples/shaders/defaultInstanced/defaultInstanced.frag";
+import defaultVertexInstanced from "./shaders/defaultInstanced/defaultInstanced.vert";
+import defaultFragmentInstanced from "./shaders/defaultInstanced/defaultInstanced.frag";
 
 import { mat4, quat, vec3, } from "gl-matrix";
 import CameraFPS from "@/webgl/modules/CameraFPS";

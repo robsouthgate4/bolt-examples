@@ -2,17 +2,17 @@
 
 precision highp float;
 
-out vec4 FragColor;
-
 in vec3 Normal;
-
-in vec3 Color;
 in vec4 Position;
+in vec3 NormalEyeSpace;
+in vec2 Uv;
+
+layout( location = 0 ) out vec4 scene;
+layout( location = 1 ) out vec4 normal;
+layout( location = 2 ) out vec4 depth;
+layout( location = 3 ) out vec4 uv;
 
 uniform vec2 cameraPlanes;
-
-
-
 
 vec4 convRGBA(float depth){
     float r = depth;
@@ -38,15 +38,17 @@ float convCoord(float depth, float offset){
     return d;
 }
 
-void main()
-{
+void main() {
 
-    float depthOffset = 0.;
+    scene  = vec4( 1.0 );
+    normal = vec4( NormalEyeSpace, 1.0 );
+    uv     = vec4( Uv, 0.0, 0.0 );
 
+    float depthOffset = 0.0;
     float linearDepth = 1.0 / ( cameraPlanes.y - cameraPlanes.x );
+    float linear      = linearDepth * length( Position.xyz );
+    float d           = convRGBA( convCoord( linear, depthOffset ) ).r;
 
-    float linear    = linearDepth * length( Position.xyz );
-    vec4  conColor = convRGBA( convCoord( linear, depthOffset ) );
+    depth = vec4( vec3( d ), 1.0 );
 
-    FragColor = vec4( vec3( conColor.r ), 1.0 );
 }

@@ -2,10 +2,10 @@ import Base from "@webgl/Base";
 import Bolt, { Shader, Node, Batch, FBO, Texture, COLOR_ATTACHMENT0, RBO, Mesh, NEAREST, TextureCube } from "@bolt-webgl/core";
 
 import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
-import geometryVertex from "../../../examples/shaders/phantom/geometry/geometry.vert";
-import geometryFragment from "../../../examples/shaders/phantom/geometry/geometry.frag";
-import compositionVertex from "../../../examples/shaders/phantom/composition/composition.vert";
-import compositionFragment from "../../../examples/shaders/phantom/composition/composition.frag";
+import geometryVertex from "./shaders/geometry/geometry.vert";
+import geometryFragment from "./shaders/geometry/geometry.frag";
+import compositionVertex from "./shaders/composition/composition.vert";
+import compositionFragment from "./shaders/composition/composition.frag";
 
 import { vec2, vec3, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
@@ -39,6 +39,8 @@ export default class extends Base {
     comp: ShaderPass;
     compShader: Shader;
     cubeTexture!: TextureCube;
+    depthTexture: Texture;
+    uvTexture: Texture;
 
     constructor() {
 
@@ -84,8 +86,13 @@ export default class extends Base {
     	this.normalTexture.minFilter = NEAREST;
     	this.normalTexture.magFilter = NEAREST;
 
+    	this.depthTexture = new Texture( { width: this.canvas.width, height: this.canvas.height } );
+    	this.uvTexture = new Texture( { width: this.canvas.width, height: this.canvas.height } );
+
     	this.gBuffer.bind();
     	this.gBuffer.addAttachment( this.normalTexture, COLOR_ATTACHMENT0 + 1 );
+    	this.gBuffer.addAttachment( this.depthTexture, COLOR_ATTACHMENT0 + 2 );
+    	this.gBuffer.addAttachment( this.uvTexture, COLOR_ATTACHMENT0 + 3 );
     	this.gBuffer.setDrawBuffers();
     	this.gBuffer.unbind();
 
@@ -93,8 +100,8 @@ export default class extends Base {
 
     	this.compShader = new Shader( compositionVertex, compositionFragment );
     	this.compShader.activate();
-    	this.compShader.setVector2( "resolution", vec2.fromValues( this.canvas.width, this.canvas.height ) );
-    	this.compShader.setFloat( "thickness", 0.5 );
+    	this.compShader.setVector2( "resolution", vec2.fromValues( this.canvas.clientWidth, this.canvas.clientHeight ) );
+    	this.compShader.setFloat( "thickness", 0.6 );
 
     	this.comp = new ShaderPass( this.bolt, {
     		width: this.width,
@@ -182,6 +189,17 @@ export default class extends Base {
     		for ( const scene of this.gltf.scenes ) {
 
     			scene.root.transform.position = vec3.fromValues( 1.25, 0, 0 );
+
+    			scene.root.traverse( ( node: Node ) => {
+
+    				if ( node instanceof Batch ) {
+
+    					node.shader = this.geometryShader;
+
+    				}
+
+    			} );
+
     			this.bolt.draw( scene.root );
 
 
@@ -191,7 +209,7 @@ export default class extends Base {
 
     	if ( sceneType === "geometry" ) {
 
-    		this.cubeBatch.shader = this.geometryShader;
+
 
     	} else {
 
@@ -213,15 +231,17 @@ export default class extends Base {
     	this.bolt.enableDepth();
     	this.bolt.enableCullFace();
 
-    	//this.gBuffer.bind();
-    	this.drawScene( "normal", delta );
-    	//this.gBuffer.unbind();
+    	this.gBuffer.bind();
+    	this.drawScene( "geometry", delta );
+    	this.gBuffer.unbind();
 
-    	// this.post.begin();
-    	// this.comp.shader.activate();
-    	// this.comp.shader.setTexture( "normal", this.normalTexture );
-    	// this.drawScene( "normal", delta );
-    	// this.post.end();
+    	this.post.begin();
+    	this.comp.shader.activate();
+    	this.comp.shader.setTexture( "normal", this.normalTexture );
+    	this.comp.shader.setTexture( "depth", this.depthTexture );
+    	this.comp.shader.setTexture( "uv", this.uvTexture );
+    	this.drawScene( "normal", delta );
+    	this.post.end();
 
     }
 
