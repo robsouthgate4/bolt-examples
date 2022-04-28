@@ -11,9 +11,9 @@ import { vec3, } from "gl-matrix";
 import CameraArcball from "../../modules/CameraArcball";
 import Sphere from "../../modules/Primitives/Sphere";
 import Cube from "../../modules/Primitives/Cube";
-import Plane from "../../modules/Primitives/Plane";
 import { GeometryBuffers } from "@bolt-webgl/core/lib/Mesh";
 import Floor from "@/webgl/modules/Batches/Floor";
+
 export default class extends Base {
 
     canvas: HTMLCanvasElement;
@@ -74,7 +74,6 @@ export default class extends Base {
 
     	const sphereGeometry = new Sphere( { radius: 1, widthSegments: 32, heightSegments: 32 } );
     	const cubeGeometry = new Cube( { widthSegments: 1, heightSegments: 1 } );
-    	const planeGeometry = new Plane( { widthSegments: 10, heightSegments: 10 } );
 
     	this.root = new Node();
     	this.root.name = "root";
@@ -179,13 +178,7 @@ export default class extends Base {
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 1, 1, 1, 1 );
 
-    	this.root.traverse( ( node: Node ) => {
-
-    		this.root.updateModelMatrix();
-
-    		this.bolt.draw( node );
-
-    	} );
+    	this.bolt.draw( this.root );
 
     }
 

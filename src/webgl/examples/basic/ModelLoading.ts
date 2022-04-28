@@ -35,8 +35,8 @@ export default class extends Base {
     	this.camera = new CameraArcball(
     		this.width,
     		this.height,
-    		vec3.fromValues( 0, 2, 10 ),
-    		vec3.fromValues( 0, 2, 0 ),
+    		vec3.fromValues( 0, 4, 10 ),
+    		vec3.fromValues( 0, 4, 0 ),
     		45,
     		0.01,
     		1000,
@@ -96,12 +96,7 @@ export default class extends Base {
     		for ( const scene of this.gltf.scenes ) {
 
     			scene.root.transform.y = 2.75;
-    			scene.root.traverse( ( node: Node ) => {
-
-    				scene.root.updateModelMatrix();
-    				this.bolt.draw( node );
-
-    			} );
+    			this.bolt.draw( scene.root );
 
     		}
 

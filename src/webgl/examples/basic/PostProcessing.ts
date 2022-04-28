@@ -82,8 +82,8 @@ export default class extends Base {
     	this.pixelate = new PixelatePass( this.bolt, {
     		width: this.width,
     		height: this.height,
-    		xPixels: 80,
-    		yPixels: 80
+    		xPixels: 30,
+    		yPixels: 30
     	} ).setEnabled( true );
 
     	this.fxaa = new FXAAPass( this.bolt, {
@@ -91,7 +91,7 @@ export default class extends Base {
     		height: this.height
     	} ).setEnabled( true );
 
-    	this.post.add( this.rbgSplit );
+    	this.post.add( this.pixelate );
     	this.post.add( this.fxaa, true );
 
     	const sphereGeometry = new Sphere( { radius: 1, widthSegments: 64, heightSegments: 64 } );

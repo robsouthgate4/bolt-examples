@@ -166,8 +166,6 @@ export default class GLTFLoader {
 
     	const computedNodes = gltf.nodes?.map( ( node ) => {
 
-    		console.log( node );
-
     		const { name, translation, rotation, scale, mesh } = node;
     		const rootTransform = new Transform();
     		rootTransform.position = translation ? vec3.fromValues( translation[ 0 ], translation[ 1 ], translation[ 2 ] ) : vec3.fromValues( 0, 0, 0 );
@@ -227,6 +225,7 @@ export default class GLTFLoader {
 
     	} );
 
+
     	if ( originalNodes && computedNodes ) {
 
     		computedNodes.forEach( ( node, index ) => {
@@ -243,7 +242,6 @@ export default class GLTFLoader {
     				} );
 
     			}
-
 
     		} );
 

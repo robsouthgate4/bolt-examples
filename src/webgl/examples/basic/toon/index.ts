@@ -182,12 +182,7 @@ export default class extends Base {
     		for ( const scene of this.gltf.scenes ) {
 
     			scene.root.transform.position = vec3.fromValues( 1.25, 0, 0 );
-    			scene.root.traverse( ( node: Node ) => {
-
-    				scene.root.updateModelMatrix();
-    				this.bolt.draw( node );
-
-    			} );
+    			this.bolt.draw( scene.root );
 
 
     		}

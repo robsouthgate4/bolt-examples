@@ -120,11 +120,7 @@ export default class extends Base {
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 0, 0, 0, 1 );
 
-    	this.root.traverse( ( node: Node ) => {
-
-    		this.bolt.draw( node );
-
-    	} );
+    	this.bolt.draw( this.root );
 
 
     }

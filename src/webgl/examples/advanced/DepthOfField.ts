@@ -82,17 +82,11 @@ export default class extends Base {
 
     	this.depthFBO = new FBO( { width: this.canvas.width, height: this.canvas.height, depth: true } );
 
-    	this.renderPass = new RenderPass( this.bolt, {
-    		width: this.width,
-    		height: this.height,
-    	} ).setEnabled( true );
-
     	this.dofPass = new DOFPass( this.bolt, {
     		width: this.width,
     		height: this.height
     	} ).setEnabled( true );
 
-    	this.post.add( this.renderPass );
     	this.post.add( this.dofPass, true );
 
     	// set shader uniforms
@@ -145,7 +139,7 @@ export default class extends Base {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
 
-    	const gltf = await gltfLoader.loadGLTF( "/static/models/gltf", "torus.gltf" );
+    	const gltf = await gltfLoader.loadGLTF( "/static/models/gltf/", "torus.gltf" );
 
     	if ( ! gltf ) return;
 
@@ -160,6 +154,8 @@ export default class extends Base {
     				if ( node.name === "Torus" ) {
 
     					const batch = <Batch>node.children[ 0 ];
+
+    					console.log( batch );
 
     					const { positions, normals, uvs, indices } = batch.mesh;
 
