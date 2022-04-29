@@ -1,17 +1,13 @@
 import Base from "@webgl/Base";
 import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES } from "@bolt-webgl/core";
 
-import defaultVertex from "../../examples/shaders/default/default.vert";
-import defaultFragment from "../../examples/shaders/default/default.frag";
-
-import colorVertex from "../../examples/shaders/color/color.vert";
-import colorFragment from "../../examples/shaders/color/color.frag";
+import normalVertex from "./shaders/normal/normal.vert";
+import normalFragment from "./shaders/normal/normal.frag";
 
 import { vec3, } from "gl-matrix";
-import CameraArcball from "../../modules/CameraArcball";
-import Sphere from "../../modules/Primitives/Sphere";
-import Cube from "../../modules/Primitives/Cube";
-import { GeometryBuffers } from "@bolt-webgl/core/lib/Mesh";
+import CameraArcball from "@webgl/modules/CameraArcball";
+import Sphere from "@webgl/modules/Primitives/Sphere";
+import Cube from "@webgl/modules/Primitives/Cube";
 import Floor from "@/webgl/modules/Batches/Floor";
 
 export default class extends Base {
@@ -46,7 +42,7 @@ export default class extends Base {
 
     	this.gl = this.bolt.getContext();
 
-    	this.shader = new Shader( defaultVertex, defaultFragment );
+    	this.shader = new Shader( normalVertex, normalFragment );
 
     	this.camera = new CameraArcball(
     		this.width,
@@ -72,7 +68,7 @@ export default class extends Base {
 
     async init() {
 
-    	const sphereGeometry = new Sphere( { radius: 1, widthSegments: 32, heightSegments: 32 } );
+    	const sphereGeometry = new Sphere( { radius: 0.75, widthSegments: 32, heightSegments: 32 } );
     	const cubeGeometry = new Cube( { widthSegments: 1, heightSegments: 1 } );
 
     	this.root = new Node();
@@ -83,12 +79,10 @@ export default class extends Base {
     		new Mesh( sphereGeometry ).setDrawType( TRIANGLES ),
     		this.shader
     	);
-
-    	this.sphereBatch.transform.y = 0;
-
+    	this.sphereBatch.transform.x = - 1.6;
+    	this.sphereBatch.transform.scale = vec3.fromValues( 1.5, 1.5, 1.5 );
     	this.sphereBatch.name = "sphere";
     	this.sphereBatch.setParent( this.root );
-
 
     	this.cubeBatch = new Batch(
     		new Mesh( cubeGeometry ).setDrawType( TRIANGLES ),
@@ -96,63 +90,14 @@ export default class extends Base {
     	);
 
     	this.cubeBatch.name = "cube";
+    	this.cubeBatch.transform.scale = vec3.fromValues( 1.5, 1.5, 1.5 );
     	this.cubeBatch.setParent( this.root );
 
     	this.floorBatch = new Floor();
     	this.floorBatch.name = "floor";
     	this.floorBatch.setParent( this.root );
 
-    	this.cubeBatch.transform.x = 2;
-
-    	const triangleGeo: GeometryBuffers = {
-    		positions: [
-    			- 0.5, - 0.5, 0,
-    			0.5, - 0.5, 0,
-    			0.5, 0.5, 0,
-    		],
-    		normals: [
-    			0, 0, 0,
-    			0, 0, 0,
-    			0, 0, 0
-    		],
-    		uvs: [
-    			0, 0,
-    			0, 0,
-    			0, 0
-    		],
-    		indices: [ 0, 1, 2 ]
-    	};
-
-    	const triangleMesh = new Mesh( triangleGeo ).setDrawType( TRIANGLES );
-
-    	const colours = [
-    		1, 0, 0,
-    		0, 1, 0,
-    		0, 0, 1
-    	];
-
-    	const triShader = new Shader( colorVertex, colorFragment );
-
-    	const colours2 = [
-    		1, 1, 0,
-    		0, 1, 1,
-    		0, 0, 1
-    	];
-
-    	// attributes can be added with a named var and shader
-    	triangleMesh.addAttribute( colours, 3, { shader: triShader, attributeName: "aColor" } );
-    	triangleMesh.addAttribute( colours2, 3, { shader: triShader, attributeName: "aColor2" } );
-
-    	// attributes can be added with a layout id
-    	triangleMesh.addAttribute( colours2, 3, 4 );
-
-    	this.triangleBatch = new Batch(
-    		triangleMesh,
-    		triShader
-    	);
-
-    	this.triangleBatch.transform.x = - 2;
-    	this.triangleBatch.setParent( this.sphereBatch );
+    	this.cubeBatch.transform.x = 1.5;
 
     	this.resize();
 
@@ -171,7 +116,6 @@ export default class extends Base {
     }
 
     update( elapsed: number, delta: number ) {
-
 
     	this.camera.update();
 

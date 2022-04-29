@@ -1,11 +1,11 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Mesh, Transform, Batch, Node, Camera, LINES, TRIANGLES } from "@bolt-webgl/core";
+import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES } from "@bolt-webgl/core";
 
-import defaultVertex from "../../examples/shaders/default/default.vert";
-import defaultFragment from "../../examples/shaders/default/default.frag";
+import defaultVertex from "./shaders/default/default.vert";
+import defaultFragment from "./shaders/default/default.frag";
 
 import { vec3 } from "gl-matrix";
-import Plane from "../../modules/Primitives/Plane";
+import Plane from "@webgl/modules/Primitives/Plane";
 import CameraArcball from "@/webgl/modules/CameraArcball";
 
 export default class extends Base {
@@ -44,14 +44,14 @@ export default class extends Base {
     	this.camera = new CameraArcball(
     		this.width,
     		this.height,
-    		vec3.fromValues( 0, 0, 5 ),
+    		vec3.fromValues( 0, 0, 10 ),
     		vec3.fromValues( 0, 0, 0 ),
     		45,
     		0.01,
     		1000,
-    		0.,
-    		0.4,
-    		0.2
+    		0.08,
+    		4,
+    		0.5
     	);
 
     	this.camera.lookAt( vec3.fromValues( 0, 0, 0 ) );
@@ -65,13 +65,26 @@ export default class extends Base {
 
     }
 
+    generateViewport() {
+
+    	const fov = this.camera.fov;
+    	const height = 2 * Math.tan( fov / 2 ) * ( this.camera.position[ 2 ] );
+    	const width = height * this.camera.aspect;
+
+    	return {
+    		height,
+    		width,
+    	};
+
+    }
+
     async init() {
+
+    	const vp = this.generateViewport();
 
     	const planeGeometry = new Plane( { width: 1, height: 1 } );
 
     	this.root = new Node();
-
-    	this.root.transform.scale = vec3.fromValues( 1, 1, 1 );
 
     	const mesh = new Mesh( planeGeometry ).setDrawType( TRIANGLES );
 
@@ -80,7 +93,26 @@ export default class extends Base {
     		this.shader
     	);
 
-    	this.planeBatch.setParent( this.root );
+    	const batches = [];
+    	const count = 5;
+
+    	for ( let index = 0; index < count; index ++ ) {
+
+    		const batch = new Batch(
+    			mesh,
+    			this.shader
+    		);
+
+    		batch.transform.x = ( index * 2.5 ) - count;
+
+    		batch.transform.scaleX = vp.width / 8;
+    	    batch.transform.scaleY = vp.height / 8;
+
+    		batches.push( batch );
+
+    		batch.setParent( this.root );
+
+    	}
 
     	this.resize();
 
@@ -90,20 +122,14 @@ export default class extends Base {
 
     	this.bolt.resizeFullScreen();
 
-    	const fov = this.camera.fov;
-    	const height = 2 * Math.tan( fov / 2 ) * ( this.camera.position[ 2 ] );
-    	const width = height * this.camera.aspect;
-
-    	this.viewport = {
-    		height,
-    		width,
-    	};
+    	const vp = this.generateViewport();
 
     	this.planeBatch.transform.y = 0;
     	this.planeBatch.transform.x = 0;
 
-    	this.planeBatch.transform.scaleX = this.viewport.width;
-    	this.planeBatch.transform.scaleY = this.viewport.height;
+    	// we can now use viewport dimensions to scale and position nodes
+    	this.planeBatch.transform.scaleX = vp.width / 2;
+    	this.planeBatch.transform.scaleY = vp.height / 2;
 
     }
 
@@ -121,7 +147,6 @@ export default class extends Base {
     	this.bolt.clear( 0, 0, 0, 1 );
 
     	this.bolt.draw( this.root );
-
 
     }
 

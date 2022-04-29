@@ -1,11 +1,11 @@
 import Base from "@webgl/Base";
 import Bolt, { Shader, Transform, Mesh, FBO, Node, Batch } from "@bolt-webgl/core";
 
-import defaultVertexInstanced from "../../examples/shaders/defaultInstanced/defaultInstanced.vert";
-import defaultFragmentInstanced from "../../examples/shaders/defaultInstanced/defaultInstanced.frag";
+import defaultVertexInstanced from "./shaders/instanced/instanced.vert";
+import defaultFragmentInstanced from "./shaders/instanced/instanced.frag";
 
-import depthVertexInstanced from "../../examples/shaders/depth/depth.vert";
-import depthFragmentInstanced from "../../examples/shaders/depth/depth.frag";
+import depthVertexInstanced from "./shaders/depth/depth.vert";
+import depthFragmentInstanced from "./shaders/depth/depth.frag";
 
 import { mat4, quat, vec2, vec3, } from "gl-matrix";
 import CameraFPS from "@/webgl/modules/CameraFPS";
@@ -19,7 +19,6 @@ export default class extends Base {
 
     canvas: HTMLCanvasElement;
     colorShader: Shader;
-    lightPosition: vec3;
     camera: CameraFPS;
     assetsLoaded!: boolean;
     cubeTransform!: Transform;
@@ -66,8 +65,6 @@ export default class extends Base {
     	this.depthShader = new Shader( depthVertexInstanced, depthFragmentInstanced );
     	this.colorShader = new Shader( defaultVertexInstanced, defaultFragmentInstanced );
 
-    	this.lightPosition = vec3.fromValues( 0, 10, 0 );
-
     	this.camera.lookAt( vec3.fromValues( 0, 0, - 50 ) );
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
@@ -90,18 +87,14 @@ export default class extends Base {
     	this.post.add( this.dofPass, true );
 
     	// set shader uniforms
-    	this.colorShader.activate();
-    	this.colorShader.setVector3( "objectColor", vec3.fromValues( 1.0, 0.0, 0.0 ) );
-    	this.colorShader.setVector3( "lightColor", vec3.fromValues( 0.95, 1.0, 1.0 ) );
-
     	this.depthShader.activate();
     	this.depthShader.setVector2( "cameraPlanes", vec2.fromValues( this.camera.near, this.camera.far ) );
 
     	this.dofPass.shader.activate();
     	this.dofPass.shader.setTexture( "depthMap", this.depthFBO.targetTexture );
-    	this.dofPass.shader.setFloat( "focus", 8 );
+    	this.dofPass.shader.setFloat( "focus", 10 );
     	this.dofPass.shader.setFloat( "aperture", 7 * 0.0001 );
-    	this.dofPass.shader.setFloat( "maxBlur", 3.0 );
+    	this.dofPass.shader.setFloat( "maxBlur", 6.0 );
     	this.dofPass.shader.setFloat( "aspect", this.gl.canvas.width / this.gl.canvas.height );
 
     	const instanceCount = 1000;
@@ -213,19 +206,14 @@ export default class extends Base {
 
     	if ( ! this.assetsLoaded ) return;
 
-
     	this.camera.update( delta );
 
     	{ // Draw depth shaded to depth framebuffer
 
     		this.depthFBO.bind();
-
     		this.bolt.enableDepth();
-
     		this.drawInstances( this.depthShader, elapsed );
-
     		this.depthFBO.unbind();
-
     		this.bolt.disableDepth();
 
     	}
@@ -233,13 +221,10 @@ export default class extends Base {
     	{ // draw post process stack and set depth map
 
     		this.post.begin();
-
     		this.drawInstances( this.colorShader, elapsed );
-
     		this.post.end();
 
     	}
-
 
 
     }
