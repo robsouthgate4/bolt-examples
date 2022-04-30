@@ -1,11 +1,11 @@
 import Base from "@webgl/Base";
 import Bolt, { DYNAMIC_DRAW, FLOAT, IBO, POINTS, Shader, STATIC_DRAW, TRIANGLES, UNSIGNED_SHORT, VAO, VBO } from "@bolt-webgl/core";
 
-import particlesVertexInstanced from "../../examples/shaders/gpgpuInstanced/particles.vert";
-import particlesFragmentInstanced from "../../examples/shaders/gpgpuInstanced/particles.frag";
+import particlesVertexInstanced from "./shaders/particles/particles.vert";
+import particlesFragmentInstanced from "./shaders/particles/particles.frag";
 
-import simulationVertex from "../../examples/shaders/gpgpuInstanced/simulation/simulation.vert";
-import simulationFragment from "../../examples/shaders/gpgpuInstanced/simulation/simulation.frag";
+import simulationVertex from "./shaders/simulation/simulation.vert";
+import simulationFragment from "./shaders/simulation/simulation.frag";
 
 import { mat4, vec3 } from "gl-matrix";
 

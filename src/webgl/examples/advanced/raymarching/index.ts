@@ -1,13 +1,12 @@
 import Base from "@webgl/Base";
 import Bolt, { Shader, Transform, Mesh, Texture } from "@bolt-webgl/core";
-import vertexShader from "../../examples/shaders/raymarch/raymarch.vert";
-import fragmentShader from "../../examples/shaders/raymarch/raymarch.frag";
+import vertexShader from "./shaders/raymarch.vert";
+import fragmentShader from "./shaders/raymarch.frag";
 
 import { vec3, } from "gl-matrix";
-import CameraArcball from "../../modules/CameraArcball";
+import CameraArcball from "@webgl/modules/CameraArcball";
 import Cube from "@/webgl/modules/Primitives/Cube";
 import Post from "@/webgl/modules/Post/Post";
-import RenderPass from "@/webgl/modules/Post/passes/RenderPass";
 import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
 import Batch from "@bolt-webgl/core/lib/Batch";
 

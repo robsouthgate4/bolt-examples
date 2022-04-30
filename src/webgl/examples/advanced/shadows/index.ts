@@ -1,13 +1,15 @@
 import Base from "@webgl/Base";
 import Bolt, { Shader, Mesh, Transform, Batch, FBO } from "@bolt-webgl/core";
 
-import defaultVertex from "../../examples/shaders/default/default.vert";
-import defaultFragment from "../../examples/shaders/default/default.frag";
+import defaultVertex from "./shaders/default/default.vert";
+import defaultFragment from "./shaders/default/default.frag";
 
 import { mat4, vec3, } from "gl-matrix";
-import CameraArcball from "../../modules/CameraArcball";
-import Cube from "../../modules/Primitives/Cube";
-import Plane from "../../modules/Primitives/Plane";
+import CameraArcball from "@webgl/modules/CameraArcball";
+import Cube from "@webgl/modules/Primitives/Cube";
+import Plane from "@webgl/modules/Primitives/Plane";
+
+// WIP
 
 export default class extends Base {
 

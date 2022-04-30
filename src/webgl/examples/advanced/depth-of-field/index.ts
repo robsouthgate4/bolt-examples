@@ -92,8 +92,8 @@ export default class extends Base {
 
     	this.dofPass.shader.activate();
     	this.dofPass.shader.setTexture( "depthMap", this.depthFBO.targetTexture );
-    	this.dofPass.shader.setFloat( "focus", 10 );
-    	this.dofPass.shader.setFloat( "aperture", 7 * 0.0001 );
+    	this.dofPass.shader.setFloat( "focus", - 3 );
+    	this.dofPass.shader.setFloat( "aperture", 12 * 0.0001 );
     	this.dofPass.shader.setFloat( "maxBlur", 6.0 );
     	this.dofPass.shader.setFloat( "aspect", this.gl.canvas.width / this.gl.canvas.height );
 

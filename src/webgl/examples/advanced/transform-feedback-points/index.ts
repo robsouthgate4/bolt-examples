@@ -1,14 +1,14 @@
 import Base from "@webgl/Base";
 import Bolt, { Shader, Transform, VAO, VBO } from "@bolt-webgl/core";
 
-import particlesVertexInstanced from "../../examples/shaders/gpgpu/particles.vert";
-import particlesFragmentInstanced from "../../examples/shaders/gpgpu/particles.frag";
+import particlesVertexInstanced from "./shaders/particles/particles.vert";
+import particlesFragmentInstanced from "./shaders/particles/particles.frag";
 
-import simulationVertex from "../../examples/shaders/gpgpu/simulation/simulation.vert";
-import simulationFragment from "../../examples/shaders/gpgpu/simulation/simulation.frag";
+import simulationVertex from "./shaders/simulation/simulation.vert";
+import simulationFragment from "./shaders/simulation/simulation.frag";
 
 import { mat4, vec3, } from "gl-matrix";
-import CameraFPS from "../../modules/CameraFPS";
+import CameraFPS from "@webgl/modules/CameraFPS";
 
 export default class extends Base {
 
@@ -43,6 +43,7 @@ export default class extends Base {
     	this.canvas.height = this.height;
 
     	this.bolt = Bolt.getInstance();
+
     	this.bolt.init( this.canvas, { antialias: true } );
 
     	this.gl = this.bolt.getContext();
@@ -78,6 +79,7 @@ export default class extends Base {
     		1000,
     	);
 
+    	this.bolt.setCamera( this.camera );
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.enableDepth();
 

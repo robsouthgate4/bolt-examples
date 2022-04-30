@@ -48,5 +48,5 @@ void main()
     float linear    = linearDepth * length( Position.xyz );
     vec4  conColor = convRGBA( convCoord( linear, depthOffset ) );
 
-    FragColor = vec4( smoothstep( 0.1, 0.2, vec3( conColor.r ) ), 1.0 );
+    FragColor = vec4( conColor.rgb, 1.0 );
 }
