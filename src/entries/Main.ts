@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/advanced/transform-feedback-points";
+import Example from "@/webgl/examples/basic/toon";
 
 export default class Main {
 
