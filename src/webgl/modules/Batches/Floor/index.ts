@@ -7,7 +7,7 @@ export default class Floor extends Batch {
 
 	constructor() {
 
-		const dimensions = 50;
+		const dimensions = 20;
 		const lines = 2 * dimensions / 5;
 
 		const inc = 2 * dimensions / lines;

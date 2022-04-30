@@ -41,12 +41,12 @@ float convCoord(float depth, float offset){
 void main()
 {
 
-    float depthOffset = 0.;
+    float depthOffset = 0.0;
 
     float linearDepth = 1.0 / ( cameraPlanes.y - cameraPlanes.x );
 
     float linear    = linearDepth * length( Position.xyz );
     vec4  conColor = convRGBA( convCoord( linear, depthOffset ) );
 
-    FragColor = vec4( vec3( conColor.r ), 1.0 );
+    FragColor = vec4( conColor.rgb, 1.0 );
 }
