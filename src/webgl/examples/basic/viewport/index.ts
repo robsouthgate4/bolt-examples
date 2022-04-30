@@ -121,15 +121,9 @@ export default class extends Base {
     resize() {
 
     	this.bolt.resizeFullScreen();
-
     	const vp = this.generateViewport();
 
-    	this.planeBatch.transform.y = 0;
-    	this.planeBatch.transform.x = 0;
-
-    	// we can now use viewport dimensions to scale and position nodes
-    	this.planeBatch.transform.scaleX = vp.width / 2;
-    	this.planeBatch.transform.scaleY = vp.height / 2;
+    	// now resize all batches
 
     }
 

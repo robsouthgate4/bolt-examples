@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/basic/toon";
+import Example from "@/webgl/examples/basic/raycasting";
 
 export default class Main {
 

@@ -1,15 +1,12 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES, LINES } from "@bolt-webgl/core";
+import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES } from "@bolt-webgl/core";
 
 import normalVertex from "./shaders/normal/normal.vert";
 import normalFragment from "./shaders/normal/normal.frag";
 
-import rayVertex from "./shaders/ray/ray.vert";
-import rayFragment from "./shaders/ray/ray.frag";
-
-
-import { mat4, vec3, vec4, } from "gl-matrix";
+import { vec3, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
+import Sphere from "@webgl/modules/Primitives/Sphere";
 import Cube from "@webgl/modules/Primitives/Cube";
 import Floor from "@/webgl/modules/Batches/Floor";
 
@@ -50,8 +47,8 @@ export default class extends Base {
     	this.camera = new CameraArcball(
     		this.width,
     		this.height,
-    		vec3.fromValues( 0, 3, 5 ),
-    		vec3.fromValues( 0, 0, 0 ),
+    		vec3.fromValues( 0, 2, 5 ),
+    		vec3.fromValues( 0, 0.75, 0 ),
     		45,
     		0.01,
     		1000,
@@ -66,53 +63,6 @@ export default class extends Base {
 
     	this.init();
 
-    	this.canvas.addEventListener( "click", ( ev ) => {
-
-    		const nx = ( ev.clientX / this.canvas.clientWidth ) * 2 - 1;
-    		const ny = 1 - ( ev.clientY / this.canvas.clientHeight ) * 2;
-
-    		const clip = vec4.fromValues( nx, ny, - 1.0, 1.0 );
-    		const eye = vec4.fromValues( 0, 0, 0, 0 );
-
-    		const invProjection = mat4.create();
-
-    		mat4.invert( invProjection, this.camera.projection );
-    		vec4.transformMat4( eye, clip, invProjection );
-    		eye[ 2 ] = - 1;
-    		eye[ 3 ] = 0;
-
-    		const world = vec4.fromValues( 0, 0, 0, 0 );
-    		const inverseView = mat4.create();
-
-    		mat4.invert( inverseView, this.camera.view );
-    		vec4.transformMat4( world, eye, inverseView );
-
-    		const ray = vec3.fromValues( world[ 0 ], world[ 1 ], world[ 2 ] );
-    		vec3.normalize( ray, ray );
-
-    		const rayStart = vec3.create();
-    		mat4.getTranslation( rayStart, inverseView );
-
-    		const rayEnd = vec3.clone( rayStart );
-    		const rayScaled = vec3.create();
-
-    		vec3.multiply( rayScaled, ray, vec3.fromValues( 20, 20, 20 ) );
-    		vec3.add( rayEnd, rayEnd, rayScaled );
-
-    		const debugRay = new Batch(
-    			new Mesh( {
-    				positions: [
-    					rayStart[ 0 ], rayStart[ 1 ], rayStart[ 2 ],
-    					rayEnd[ 0 ], rayEnd[ 1 ], rayEnd[ 2 ],
-    				]
-    			} ).setDrawType( LINES ),
-    			new Shader( rayVertex, rayFragment )
-    		);
-
-    		debugRay.setParent( this.root );
-
-    	} );
-
 
     }
 
@@ -120,23 +70,17 @@ export default class extends Base {
 
     	const cubeGeometry = new Cube( { widthSegments: 1, heightSegments: 1 } );
 
-    	this.root = new Node();
-    	this.root.name = "root";
-
     	this.cubeBatch = new Batch(
     		new Mesh( cubeGeometry ).setDrawType( TRIANGLES ),
     		this.shader
     	);
 
     	this.cubeBatch.name = "cube";
-    	this.cubeBatch.transform.x = 0;
-    	this.cubeBatch.transform.y = 0.5;
-    	this.cubeBatch.transform.scale = vec3.fromValues( 1, 1, 1 );
-    	this.cubeBatch.setParent( this.root );
+    	this.cubeBatch.transform.y = 0.75;
 
     	this.floorBatch = new Floor();
     	this.floorBatch.name = "floor";
-    	this.floorBatch.setParent( this.root );
+
 
     	this.resize();
 
@@ -161,7 +105,12 @@ export default class extends Base {
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 1, 1, 1, 1 );
 
-    	this.bolt.draw( this.root );
+    	// applied to quaternion
+    	this.cubeBatch.transform.rotateX = 0.5 * delta;
+    	this.cubeBatch.transform.rotateY = 1 * delta;
+    	this.cubeBatch.transform.rotateZ = - 1.5 * delta;
+
+    	this.bolt.draw( [ this.cubeBatch, this.floorBatch ] );
 
     }
 

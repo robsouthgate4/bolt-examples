@@ -43,10 +43,8 @@ export default class extends Base {
 
     	super();
 
-    	const devicePixelRatio = Math.min( 2, window.devicePixelRatio || 1 );
-
-    	this.width = window.innerWidth * devicePixelRatio;
-    	this.height = window.innerHeight * devicePixelRatio;
+    	this.width = window.innerWidth;
+    	this.height = window.innerHeight;
 
     	this.canvas = <HTMLCanvasElement>document.getElementById( "experience" );
     	this.canvas.width = this.width;
