@@ -12,6 +12,10 @@ import { mat4, vec3, vec4, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
 import Cube from "@webgl/modules/Primitives/Cube";
 import Floor from "@/webgl/modules/Batches/Floor";
+import AxisAlignedBox from "@/webgl/modules/Raycast/AxisAlignedBox";
+import { Bounds } from "@bolt-webgl/core/lib/Mesh";
+import Ray from "@/webgl/modules/Raycast/Ray";
+import Raycast from "@/webgl/modules/Raycast";
 
 export default class extends Base {
 
@@ -25,9 +29,10 @@ export default class extends Base {
     planeBatch!: Batch;
     triangleBatch!: Batch;
     bolt: Bolt;
-    gl: WebGL2RenderingContext;
     root!: Node;
     floorBatch: any;
+    AAbox!: AxisAlignedBox;
+    raycast: Raycast;
 
     constructor() {
 
@@ -43,9 +48,9 @@ export default class extends Base {
     	this.bolt = Bolt.getInstance();
     	this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
 
-    	this.gl = this.bolt.getContext();
-
     	this.shader = new Shader( normalVertex, normalFragment );
+
+    	this.raycast = new Raycast();
 
     	this.camera = new CameraArcball(
     		this.width,
@@ -71,48 +76,43 @@ export default class extends Base {
     		const nx = ( ev.clientX / this.canvas.clientWidth ) * 2 - 1;
     		const ny = 1 - ( ev.clientY / this.canvas.clientHeight ) * 2;
 
-    		const clip = vec4.fromValues( nx, ny, - 1.0, 1.0 );
-    		const eye = vec4.fromValues( 0, 0, 0, 0 );
+    		const ray = this.raycast.generateRayFromCamera( nx, ny, this.camera );
 
-    		const invProjection = mat4.create();
+    		this.AAbox.transform( this.cubeBatch.modelMatrix );
 
-    		mat4.invert( invProjection, this.camera.projection );
-    		vec4.transformMat4( eye, clip, invProjection );
-    		eye[ 2 ] = - 1;
-    		eye[ 3 ] = 0;
+    		const intersectsBox = ray.intersectsBox( { min: this.AAbox.min, max: this.AAbox.max } );
 
-    		const world = vec4.fromValues( 0, 0, 0, 0 );
-    		const inverseView = mat4.create();
+    		console.log( intersectsBox );
 
-    		mat4.invert( inverseView, this.camera.view );
-    		vec4.transformMat4( world, eye, inverseView );
+    		this._debugDrawRay( ray, 20 );
 
-    		const ray = vec3.fromValues( world[ 0 ], world[ 1 ], world[ 2 ] );
-    		vec3.normalize( ray, ray );
-
-    		const rayStart = vec3.create();
-    		mat4.getTranslation( rayStart, inverseView );
-
-    		const rayEnd = vec3.clone( rayStart );
-    		const rayScaled = vec3.create();
-
-    		vec3.multiply( rayScaled, ray, vec3.fromValues( 20, 20, 20 ) );
-    		vec3.add( rayEnd, rayEnd, rayScaled );
-
-    		const debugRay = new Batch(
-    			new Mesh( {
-    				positions: [
-    					rayStart[ 0 ], rayStart[ 1 ], rayStart[ 2 ],
-    					rayEnd[ 0 ], rayEnd[ 1 ], rayEnd[ 2 ],
-    				]
-    			} ).setDrawType( LINES ),
-    			new Shader( rayVertex, rayFragment )
-    		);
-
-    		debugRay.setParent( this.root );
 
     	} );
 
+
+    }
+
+    _debugDrawRay( ray: Ray, scale: number ) {
+
+    	// now draw the ray
+
+    	const rayEnd = vec3.clone( ray.origin );
+    	const rayScaled = vec3.create();
+
+    	vec3.multiply( rayScaled, ray.direction, vec3.fromValues( scale, scale, scale ) );
+    	vec3.add( rayEnd, rayEnd, rayScaled );
+
+    	const debugRay = new Batch(
+    		new Mesh( {
+    			positions: [
+    				ray.origin[ 0 ], ray.origin[ 1 ], ray.origin[ 2 ],
+    				rayEnd[ 0 ], rayEnd[ 1 ], rayEnd[ 2 ],
+    			]
+    		} ).setDrawType( LINES ),
+    		new Shader( rayVertex, rayFragment )
+    	);
+
+    	debugRay.setParent( this.root );
 
     }
 
@@ -128,11 +128,16 @@ export default class extends Base {
     		this.shader
     	);
 
+    	this.cubeBatch.mesh.calculateBounds();
+    	const bounds: Bounds = this.cubeBatch.mesh.bounds;
+
     	this.cubeBatch.name = "cube";
-    	this.cubeBatch.transform.x = 0;
+    	this.cubeBatch.transform.x = 0.5;
     	this.cubeBatch.transform.y = 0.5;
     	this.cubeBatch.transform.scale = vec3.fromValues( 1, 1, 1 );
     	this.cubeBatch.setParent( this.root );
+
+    	this.AAbox = new AxisAlignedBox( bounds.min, bounds.max );
 
     	this.floorBatch = new Floor();
     	this.floorBatch.name = "floor";

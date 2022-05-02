@@ -1,0 +1,125 @@
+import { mat3, mat4, vec3, vec4 } from "gl-matrix";
+import Ray from "./Ray";
+
+export default class AxisAlignedBox {
+
+    private _max: vec3;
+    private _min: vec3;
+    private _center: vec3;
+    private _extents: vec3;
+
+    constructor( min: vec3, max: vec3 ) {
+
+    	this._min = min;
+    	this._max = max;
+
+    	this._center = vec3.create();
+    	this._extents = vec3.create();
+
+    	vec3.add( this._center, this._min, this._max );
+    	vec3.multiply( this._center, this._center, vec3.fromValues( 0.5, 0.5, 0.5 ) );
+    	vec3.sub( this._extents, this._max, this._center );
+
+    	this._absVector3( this._extents );
+
+    }
+
+    _absVector3( vector3: vec3 ) {
+
+    	vector3[ 0 ] = Math.abs( vector3[ 0 ] );
+    	vector3[ 1 ] = Math.abs( vector3[ 1 ] );
+    	vector3[ 2 ] = Math.abs( vector3[ 2 ] );
+
+    }
+
+    transform( matrix: mat4 ) {
+
+    	const m = mat3.create();
+    	mat3.fromMat4( m, matrix );
+
+    	const x = vec3.create();
+    	const y = vec3.create();
+    	const z = vec3.create();
+
+    	vec3.transformMat3( x, vec3.fromValues( this._extents[ 0 ], 0, 0 ), m );
+    	vec3.transformMat3( y, vec3.fromValues( 0, this._extents[ 1 ], 0 ), m );
+    	vec3.transformMat3( z, vec3.fromValues( 0, 0, this._extents[ 2 ] ), m );
+
+    	this._absVector3( x );
+    	this._absVector3( y );
+    	this._absVector3( z );
+
+    	const temp = vec3.create();
+    	vec3.add( temp, x, y );
+    	vec3.add( temp, temp, z );
+
+    	this._center = vec3.create();
+
+    	const v4 = vec4.fromValues( this._center[ 0 ], this._center[ 1 ], this._center[ 2 ], 1 );
+    	vec4.transformMat4( v4, v4, matrix );
+
+    	this._center = vec3.fromValues( v4[ 0 ], v4[ 1 ], v4[ 2 ] );
+
+    	this._min = vec3.create();
+    	this._max = vec3.create();
+
+    	vec3.sub( this._min, this._center, this._extents );
+    	vec3.add( this._max, this._center, this._extents );
+
+    }
+
+    intersects( ray: Ray ): boolean {
+
+    	const min = vec3.create();
+    	const max = vec3.create();
+
+    	vec3.sub( min, this._min, ray.origin );
+    	vec3.div( min, min, ray.direction );
+
+    	vec3.sub( max, this._max, ray.origin );
+    	vec3.div( max, max, ray.direction );
+
+    	const fmin = Math.max( Math.max( Math.min( min[ 0 ], max[ 0 ] ), Math.min( min[ 1 ], max[ 1 ] ) ), Math.min( min[ 2 ], max[ 2 ] ) );
+    	const fmax = Math.min( Math.min( Math.max( min[ 0 ], max[ 0 ] ), Math.max( min[ 1 ], max[ 1 ] ) ), Math.max( min[ 2 ], max[ 2 ] ) );
+
+    	return ( fmax >= fmin );
+
+    }
+
+    public get min(): vec3 {
+
+    	return this._min;
+
+    }
+
+    public set min( value: vec3 ) {
+
+    	this._min = value;
+
+    }
+
+    public get max(): vec3 {
+
+    	return this._max;
+
+    }
+
+    public set max( value: vec3 ) {
+
+    	this._max = value;
+
+    }
+
+    public get center(): vec3 {
+
+    	return this._center;
+
+    }
+
+    public set center( value: vec3 ) {
+
+    	this._center = value;
+
+    }
+
+}

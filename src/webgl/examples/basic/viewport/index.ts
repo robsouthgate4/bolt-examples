@@ -23,6 +23,7 @@ export default class extends Base {
     root!: Node;
     viewport!: { height: number; width: number; };
     gl: WebGL2RenderingContext;
+    batches: Batch[] = [];
 
     constructor() {
 
@@ -93,7 +94,6 @@ export default class extends Base {
     		this.shader
     	);
 
-    	const batches = [];
     	const count = 5;
 
     	for ( let index = 0; index < count; index ++ ) {
@@ -108,7 +108,7 @@ export default class extends Base {
     		batch.transform.scaleX = vp.width / 8;
     	    batch.transform.scaleY = vp.height / 8;
 
-    		batches.push( batch );
+    		this.batches.push( batch );
 
     		batch.setParent( this.root );
 
