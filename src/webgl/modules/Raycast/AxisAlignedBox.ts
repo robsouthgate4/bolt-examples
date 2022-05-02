@@ -1,6 +1,10 @@
 import { mat3, mat4, vec3, vec4 } from "gl-matrix";
 import Ray from "./Ray";
 
+/**
+ * World Axis aligned box
+ * Can be used for fast intersection testing
+ */
 export default class AxisAlignedBox {
 
     private _max: vec3;
@@ -8,6 +12,10 @@ export default class AxisAlignedBox {
     private _center: vec3;
     private _extents: vec3;
 
+    /**
+     * @param  {vec3} min min bounds vector
+     * @param  {vec3} max max bound vector
+     */
     constructor( min: vec3, max: vec3 ) {
 
     	this._min = min;
@@ -31,9 +39,13 @@ export default class AxisAlignedBox {
     	vector3[ 2 ] = Math.abs( vector3[ 2 ] );
 
     }
-
+    /**
+     * Transforms axis-aligned box to new coordinates via a matrix
+     * @param  {mat4} matrix transformation matrix
+     */
     transform( matrix: mat4 ) {
 
+    	// conver mat4 to mat4
     	const m = mat3.create();
     	mat3.fromMat4( m, matrix );
 
@@ -67,7 +79,11 @@ export default class AxisAlignedBox {
     	vec3.add( this._max, this._center, this._extents );
 
     }
-
+    /**
+     * Checks to see if this axis-aligned box intersects a given ray
+     * @param  {Ray} ray
+     * @returns boolean returns true / false based on ray interesection
+     */
     intersects( ray: Ray ): boolean {
 
     	const min = vec3.create();

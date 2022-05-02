@@ -1,19 +1,29 @@
 import { Bounds } from "@bolt-webgl/core/lib/Mesh";
 import { vec3 } from "gl-matrix";
 
-
+/**
+ * Represents a Ray vector in 3D space
+ */
 export default class Ray {
 
     private _origin: vec3;
     private _direction: vec3;
 
+    /**
+     * Creates a ray given the origin and direction
+     * @param  {vec3} origin ray origin
+     * @param  {vec3} direction normalized ray direction
+     */
     constructor( origin: vec3, direction: vec3 ) {
 
     	this._origin = origin;
     	this._direction = direction;
 
     }
-
+    /**
+     * Return true / false based on intersection with given box bounds
+     * @param  {Bounds} bounds min and max values to check for intersection
+     */
     intersectsBox( bounds: Bounds ) {
 
     	const min = vec3.create();

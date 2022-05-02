@@ -16,6 +16,7 @@ import AxisAlignedBox from "@/webgl/modules/Raycast/AxisAlignedBox";
 import { Bounds } from "@bolt-webgl/core/lib/Mesh";
 import Ray from "@/webgl/modules/Raycast/Ray";
 import Raycast from "@/webgl/modules/Raycast";
+import Plane from "@/webgl/modules/Primitives/Plane";
 
 export default class extends Base {
 
@@ -94,8 +95,6 @@ export default class extends Base {
 
     _debugDrawRay( ray: Ray, scale: number ) {
 
-    	// now draw the ray
-
     	const rayEnd = vec3.clone( ray.origin );
     	const rayScaled = vec3.create();
 
@@ -118,7 +117,7 @@ export default class extends Base {
 
     async init() {
 
-    	const cubeGeometry = new Cube( { widthSegments: 1, heightSegments: 1 } );
+    	const cubeGeometry = new Plane( { widthSegments: 1, heightSegments: 1 } );
 
     	this.root = new Node();
     	this.root.name = "root";
@@ -132,9 +131,7 @@ export default class extends Base {
     	const bounds: Bounds = this.cubeBatch.mesh.bounds;
 
     	this.cubeBatch.name = "cube";
-    	this.cubeBatch.transform.x = 0.5;
     	this.cubeBatch.transform.y = 0.5;
-    	this.cubeBatch.transform.scale = vec3.fromValues( 1, 1, 1 );
     	this.cubeBatch.setParent( this.root );
 
     	this.AAbox = new AxisAlignedBox( bounds.min, bounds.max );
