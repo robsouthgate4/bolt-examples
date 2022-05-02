@@ -81,6 +81,8 @@ export default class extends Base {
 
     		this.AAbox.transform( this.cubeBatch.modelMatrix );
 
+    		console.log( this.AAbox );
+
     		const intersectsBox = ray.intersectsBox( { min: this.AAbox.min, max: this.AAbox.max } );
 
     		console.log( intersectsBox );
@@ -117,7 +119,7 @@ export default class extends Base {
 
     async init() {
 
-    	const cubeGeometry = new Plane( { widthSegments: 1, heightSegments: 1 } );
+    	const cubeGeometry = new Cube( { widthSegments: 2, heightSegments: 2 } );
 
     	this.root = new Node();
     	this.root.name = "root";
@@ -132,6 +134,7 @@ export default class extends Base {
 
     	this.cubeBatch.name = "cube";
     	this.cubeBatch.transform.y = 0.5;
+    	this.cubeBatch.transform.scale = vec3.fromValues( 0.5, 0.5, 0.5 );
     	this.cubeBatch.setParent( this.root );
 
     	this.AAbox = new AxisAlignedBox( bounds.min, bounds.max );

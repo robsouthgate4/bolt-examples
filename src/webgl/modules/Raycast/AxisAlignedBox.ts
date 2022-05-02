@@ -75,12 +75,13 @@ export default class AxisAlignedBox {
     	this._min = vec3.create();
     	this._max = vec3.create();
 
+    	// add positinal offsets
     	vec3.sub( this._min, this._center, this._extents );
     	vec3.add( this._max, this._center, this._extents );
 
     }
     /**
-     * Checks to see if this axis-aligned box intersects a given ray
+     * Checks to see if axis-aligned box intersects a given ray
      * @param  {Ray} ray
      * @returns boolean returns true / false based on ray interesection
      */
