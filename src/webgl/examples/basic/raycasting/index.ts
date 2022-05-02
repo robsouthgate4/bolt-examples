@@ -8,7 +8,7 @@ import rayVertex from "./shaders/ray/ray.vert";
 import rayFragment from "./shaders/ray/ray.frag";
 
 
-import { mat4, vec3, vec4, } from "gl-matrix";
+import { vec3 } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
 import Cube from "@webgl/modules/Primitives/Cube";
 import Floor from "@/webgl/modules/Batches/Floor";
