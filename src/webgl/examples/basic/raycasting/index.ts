@@ -10,13 +10,12 @@ import rayFragment from "./shaders/ray/ray.frag";
 
 import { vec3 } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
-import Cube from "@webgl/modules/Primitives/Cube";
 import Floor from "@/webgl/modules/Batches/Floor";
 import AxisAlignedBox from "@/webgl/modules/Raycast/AxisAlignedBox";
 import { Bounds } from "@bolt-webgl/core/lib/Mesh";
 import Ray from "@/webgl/modules/Raycast/Ray";
 import Raycast from "@/webgl/modules/Raycast";
-import Plane from "@/webgl/modules/Primitives/Plane";
+import Sphere from "@/webgl/modules/Primitives/Sphere";
 
 export default class extends Base {
 
@@ -26,13 +25,13 @@ export default class extends Base {
     assetsLoaded?: boolean;
     torusTransform!: Transform;
     sphereBatch!: Batch;
-    cubeBatch!: Batch;
     planeBatch!: Batch;
     triangleBatch!: Batch;
     bolt: Bolt;
     root!: Node;
     floorBatch: any;
     AAbox!: AxisAlignedBox;
+    AABoxHelper!: Batch;
     raycast: Raycast;
 
     constructor() {
@@ -56,7 +55,7 @@ export default class extends Base {
     	this.camera = new CameraArcball(
     		this.width,
     		this.height,
-    		vec3.fromValues( 0, 3, 5 ),
+    		vec3.fromValues( 0, 3, 10 ),
     		vec3.fromValues( 0, 0, 0 ),
     		45,
     		0.01,
@@ -79,9 +78,7 @@ export default class extends Base {
 
     		const ray = this.raycast.generateRayFromCamera( nx, ny, this.camera );
 
-    		this.AAbox.transform( this.cubeBatch.modelMatrix );
-
-    		console.log( this.AAbox );
+    		this.AAbox.transform( this.sphereBatch.modelMatrix );
 
     		const intersectsBox = ray.intersectsBox( { min: this.AAbox.min, max: this.AAbox.max } );
 
@@ -119,25 +116,29 @@ export default class extends Base {
 
     async init() {
 
-    	const cubeGeometry = new Cube( { widthSegments: 2, heightSegments: 2 } );
+    	const sphereGeometry = new Sphere( { radius: 1 } );
 
     	this.root = new Node();
     	this.root.name = "root";
 
-    	this.cubeBatch = new Batch(
-    		new Mesh( cubeGeometry ).setDrawType( TRIANGLES ),
+    	this.sphereBatch = new Batch(
+    		new Mesh( sphereGeometry ).setDrawType( TRIANGLES ),
     		this.shader
     	);
 
-    	this.cubeBatch.mesh.calculateBounds();
-    	const bounds: Bounds = this.cubeBatch.mesh.bounds;
+    	this.sphereBatch.mesh.calculateBounds();
+    	const bounds: Bounds = this.sphereBatch.mesh.bounds;
 
-    	this.cubeBatch.name = "cube";
-    	this.cubeBatch.transform.y = 0.5;
-    	this.cubeBatch.transform.scale = vec3.fromValues( 0.5, 0.5, 0.5 );
-    	this.cubeBatch.setParent( this.root );
+    	this.sphereBatch.name = "cube";
+    	this.sphereBatch.transform.y = 0;
+    	this.sphereBatch.transform.scale = vec3.fromValues( 1, 1, 1 );
+    	this.sphereBatch.updateModelMatrix();
+    	this.sphereBatch.setParent( this.root );
 
     	this.AAbox = new AxisAlignedBox( bounds.min, bounds.max );
+    	this.AAbox.createVisualiser();
+    	this.AAbox.transform( this.sphereBatch.modelMatrix );
+    	this.AAbox.visualiser?.setParent( this.root );
 
     	this.floorBatch = new Floor();
     	this.floorBatch.name = "floor";

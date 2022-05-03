@@ -1,5 +1,9 @@
+import { Batch, LINES, Mesh, Shader } from "@bolt-webgl/core";
 import { mat3, mat4, vec3, vec4 } from "gl-matrix";
 import Ray from "./Ray";
+
+import helperVertex from "./shaders/helper.vert";
+import helperFragment from "./shaders/helper.frag";
 
 /**
  * World Axis aligned box
@@ -11,6 +15,8 @@ export default class AxisAlignedBox {
     private _min: vec3;
     private _center: vec3;
     private _extents: vec3;
+    private _visualiser?: Batch | undefined;
+
 
     /**
      * @param  {vec3} min min bounds vector
@@ -39,6 +45,22 @@ export default class AxisAlignedBox {
     	vector3[ 2 ] = Math.abs( vector3[ 2 ] );
 
     }
+
+    createVisualiser() {
+
+    	const mesh = new Mesh( {
+    		indices: [ 0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7 ],
+    		positions: [ 0.5, 0.5, 0.5, - 0.5, 0.5, 0.5, - 0.5, - 0.5, 0.5, 0.5, - 0.5, 0.5, 0.5, 0.5, - 0.5, - 0.5, 0.5, - 0.5, - 0.5, - 0.5, - 0.5, 0.5, - 0.5, - 0.5 ]
+    	} ).setDrawType( LINES );
+
+    	const batch = new Batch( mesh, new Shader( helperVertex, helperFragment ) );
+
+    	batch.transform.position = this._center;
+
+    	this._visualiser = batch;
+
+    }
+
     /**
      * Transforms axis-aligned box to new coordinates via a matrix
      * @param  {mat4} matrix transformation matrix
@@ -53,17 +75,18 @@ export default class AxisAlignedBox {
     	const y = vec3.create();
     	const z = vec3.create();
 
-    	vec3.transformMat3( x, vec3.fromValues( this._extents[ 0 ], 0, 0 ), m );
-    	vec3.transformMat3( y, vec3.fromValues( 0, this._extents[ 1 ], 0 ), m );
-    	vec3.transformMat3( z, vec3.fromValues( 0, 0, this._extents[ 2 ] ), m );
+    	const extents = vec3.clone( this._extents );
+
+    	vec3.transformMat3( x, vec3.fromValues( extents[ 0 ], 0, 0 ), m );
+    	vec3.transformMat3( y, vec3.fromValues( 0, extents[ 1 ], 0 ), m );
+    	vec3.transformMat3( z, vec3.fromValues( 0, 0, extents[ 2 ] ), m );
 
     	this._absVector3( x );
     	this._absVector3( y );
     	this._absVector3( z );
 
-    	const temp = vec3.create();
-    	vec3.add( temp, x, y );
-    	vec3.add( temp, temp, z );
+    	vec3.add( extents, x, y );
+    	vec3.add( extents, extents, z );
 
     	this._center = vec3.create();
 
@@ -76,8 +99,18 @@ export default class AxisAlignedBox {
     	this._max = vec3.create();
 
     	// add positinal offsets
-    	vec3.sub( this._min, this._center, this._extents );
-    	vec3.add( this._max, this._center, this._extents );
+    	vec3.sub( this._min, this._center, extents );
+    	vec3.add( this._max, this._center, extents );
+
+
+    	if ( this._visualiser ) {
+
+    		this._visualiser.transform.position = this._center;
+    		const size = vec3.create();
+    		vec3.subtract( size, this._min, this._max );
+    		this._visualiser.transform.scale = size;
+
+    	}
 
     }
     /**
@@ -136,6 +169,17 @@ export default class AxisAlignedBox {
     public set center( value: vec3 ) {
 
     	this._center = value;
+
+    }
+
+    public get visualiser(): Batch | undefined {
+
+    	return this._visualiser;
+
+    }
+    public set visualiser( value: Batch | undefined ) {
+
+    	this._visualiser = value;
 
     }
 
