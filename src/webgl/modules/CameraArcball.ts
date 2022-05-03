@@ -47,7 +47,6 @@ export default class CameraArcball extends Camera {
     	this._initialPositionSpherical = this.cartesianToSpherical( this.position[ 0 ], this.position[ 1 ], this.position[ 2 ] );
 
     	this.target = target || vec3.fromValues( 0, 0, 0 );
-    	this._center = vec3.create();
 
     	this._mouseDown = false;
 
@@ -124,9 +123,6 @@ export default class CameraArcball extends Camera {
 
     	const direction = Math.sign( ev.deltaY );
     	this.fov -= ( direction * this._scrollSpeed ) * 0.1;
-
-    	console.log( this.aspect );
-
     	this.updateProjection();
 
     }
