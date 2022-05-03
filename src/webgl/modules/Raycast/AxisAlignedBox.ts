@@ -46,6 +46,9 @@ export default class AxisAlignedBox {
 
     }
 
+    /**
+     * Creates a mesh wireframe to visualise bounds
+     */
     createVisualiser() {
 
     	const mesh = new Mesh( {

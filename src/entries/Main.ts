@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/basic/model-loading";
+import Example from "@/webgl/examples/basic/raycasting";
 
 export default class Main {
 
