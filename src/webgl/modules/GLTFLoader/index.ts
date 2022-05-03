@@ -202,11 +202,17 @@ export default class GLTFLoader {
 
     						if ( primitive.materialBolt ) {
 
+    							if ( primitive.materialBolt.pbrMetallicRoughness ) {
+
+
     							const { baseColorFactor } = primitive.materialBolt.pbrMetallicRoughness;
 
     							const shader = batch.shader;
     							shader.activate();
     							shader.setVector4( "baseColor", baseColorFactor ? vec4.fromValues( baseColorFactor[ 0 ], baseColorFactor[ 1 ], baseColorFactor[ 2 ], baseColorFactor[ 3 ] ) : vec4.fromValues( 1, 1, 1, 1 ) );
+
+    							}
+
 
     						}
 

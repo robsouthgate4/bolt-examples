@@ -22,6 +22,7 @@ out vec3 Color3;
 uniform mat4 projection;
 uniform mat4 model;
 uniform mat4 view;
+uniform mat4 normal;
 
 uniform mat4 camera;
 
@@ -29,7 +30,7 @@ void main()
 {
     Uv = aUv;
 
-    Normal = aNormal;
+    Normal = mat3( normal ) * aNormal;
 
     FragPosition = vec3( model * vec4( aPosition, 1.0 ) );
 

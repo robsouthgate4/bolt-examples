@@ -45,7 +45,7 @@ export default class extends Base {
     	);
 
     	this.bolt = Bolt.getInstance();
-    	this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
+    	this.bolt.init( this.canvas, { antialias: true, dpi: 1 } );
     	this.bolt.setCamera( this.camera );
 
     	this.floor = new Floor();
@@ -65,6 +65,16 @@ export default class extends Base {
     	const gltfLoader = new GLTFLoader( this.bolt );
     	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf/", "PhantomLogoPose.gltf" );
     	this.assetsLoaded = true;
+
+    	if ( this.gltf.scenes ) {
+
+    		for ( const scene of this.gltf.scenes ) {
+
+    			scene.root.transform.y = 2.75;
+
+    		}
+
+    	}
 
     	this.resize();
 
@@ -95,7 +105,6 @@ export default class extends Base {
 
     		for ( const scene of this.gltf.scenes ) {
 
-    			scene.root.transform.y = 2.75;
     			this.bolt.draw( scene.root );
 
     		}

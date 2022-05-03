@@ -66,7 +66,6 @@ export default class Post {
 
     	this.bolt.enableDepth();
     	this.bolt.enableCullFace();
-
     	this._readFbo.bind();
 
     }
