@@ -18,9 +18,7 @@ export default class CameraArcball extends Camera {
     private _rotationTargetYOnMouseDown!: number;
     private _initialPositionSpherical: number[];
     private _scrollSpeed: number;
-    private _center: vec3;
     private _shiftKeyDown: boolean;
-    private _zoom = 0;
 
     constructor(
     	width: number,
@@ -165,6 +163,8 @@ export default class CameraArcball extends Camera {
     		this._rotateTargetY = this._rotationTargetYOnMouseDown - ( mouseY - this._rotationMouseYOnMouseDown );
 
     	} else {
+
+    		// TODO: panning
 
     		const mouse = vec2.fromValues( this.getMousePosition( ev ).x * 3, this.getMousePosition( ev ).y * 3 );
 
