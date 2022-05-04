@@ -1,5 +1,12 @@
-import { Bounds } from "@bolt-webgl/core/lib/Mesh";
+import { BoxBounds } from "@bolt-webgl/core/lib/Mesh";
 import { vec3 } from "gl-matrix";
+
+const EPSILON = 0.000001;
+const edge1 = vec3.fromValues( 0, 0, 0 );
+const edge2 = vec3.fromValues( 0, 0, 0 );
+const tvec = vec3.fromValues( 0, 0, 0 );
+const pvec = vec3.fromValues( 0, 0, 0 );
+const qvec = vec3.fromValues( 0, 0, 0 );
 
 /**
  * Represents a Ray vector in 3D space
@@ -24,7 +31,7 @@ export default class Ray {
      * Return true / false based on intersection with given box bounds
      * @param  {Bounds} bounds min and max values to check for intersection
      */
-    intersectsBox( bounds: Bounds ) {
+    intersectsBox( bounds: BoxBounds ) {
 
     	const min = vec3.create();
     	const max = vec3.create();
@@ -39,6 +46,42 @@ export default class Ray {
     	const fmax = Math.min( Math.min( Math.max( min[ 0 ], max[ 0 ] ), Math.max( min[ 1 ], max[ 1 ] ) ), Math.max( min[ 2 ], max[ 2 ] ) );
 
     	return ( fmax >= fmin );
+
+    }
+    /**
+     * Determines if the ray intersects the given triangle
+     * @param  {vec3} out the out position
+     * @param  {vec3[]} tri the triangle to test intersections against
+     */
+    intersectTriangle( out: vec3, tri: vec3[] ) {
+
+    	vec3.sub( edge1, tri[ 1 ], tri[ 0 ] );
+    	vec3.sub( edge2, tri[ 2 ], tri[ 0 ] );
+
+    	vec3.cross( pvec, this._direction, edge2 );
+    	const det = vec3.dot( edge1, pvec );
+
+    	if ( det < EPSILON ) return null;
+
+    	vec3.sub( tvec, this._origin, tri[ 0 ] );
+
+    	const u = vec3.dot( tvec, pvec );
+
+    	if ( u < 0 || u > det ) return null;
+
+    	vec3.cross( qvec, tvec, edge1 );
+
+    	const v = vec3.dot( this._direction, qvec );
+
+    	if ( v < 0 || u + v > det ) return null;
+
+    	var t = vec3.dot( edge2, qvec ) / det;
+
+    	out[ 0 ] = this._origin[ 0 ] + t * this._direction[ 0 ];
+    	out[ 1 ] = this._origin[ 1 ] + t * this._direction[ 1 ];
+    	out[ 2 ] = this._origin[ 2 ] + t * this._direction[ 2 ];
+
+    	return out;
 
     }
 

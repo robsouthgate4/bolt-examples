@@ -12,7 +12,7 @@ import { vec3 } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
 import Floor from "@/webgl/modules/Batches/Floor";
 import AxisAlignedBox from "@/webgl/modules/Raycast/AxisAlignedBox";
-import { Bounds } from "@bolt-webgl/core/lib/Mesh";
+import { BoxBounds } from "@bolt-webgl/core/lib/Mesh";
 import Ray from "@/webgl/modules/Raycast/Ray";
 import Raycast from "@/webgl/modules/Raycast";
 import Sphere from "@/webgl/modules/Primitives/Sphere";
@@ -82,7 +82,27 @@ export default class extends Base {
 
     		const intersectsBox = ray.intersectsBox( { min: this.AAbox.min, max: this.AAbox.max } );
 
-    		console.log( intersectsBox );
+    		let hit = vec3.create();
+
+    		if ( intersectsBox ) {
+
+    			for ( let i = 0; i < this.sphereBatch.mesh.faces.length; i ++ ) {
+
+    				const tri = this.sphereBatch.mesh.faces[ i ].vertices.map( ( vertex ) => vec3.fromValues( vertex[ 0 ], vertex[ 1 ], vertex[ 2 ] ) );
+
+    				ray.intersectTriangle( hit, tri );
+
+    				if ( vec3.length( hit ) !== 0 ) {
+
+    					break;
+
+    				}
+
+    			}
+
+    			console.log( hit );
+
+    		}
 
     		this._debugDrawRay( ray, 20 );
 
@@ -126,8 +146,8 @@ export default class extends Base {
     		this.shader
     	);
 
-    	this.sphereBatch.mesh.calculateBounds();
-    	const bounds: Bounds = this.sphereBatch.mesh.bounds;
+    	this.sphereBatch.mesh.calculateBoxBounds();
+    	const bounds: BoxBounds = this.sphereBatch.mesh.bounds;
 
     	this.sphereBatch.name = "cube";
     	this.sphereBatch.transform.y = 0;
