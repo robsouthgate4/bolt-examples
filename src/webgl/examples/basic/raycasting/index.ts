@@ -84,7 +84,7 @@ export default class extends Base {
 
     		const intersectsBox = ray.intersectsBox( { min: this.AAbox.min, max: this.AAbox.max } );
 
-    		let hit = vec3.create();
+    		let hit = vec3.fromValues( - 900, - 900, - 900 );
 
     		if ( intersectsBox ) {
 
@@ -94,8 +94,9 @@ export default class extends Base {
 
     				const tri = this.sphereBatch.mesh.faces[ i ].vertices.map( ( vertex ) => {
 
-    					const vecTransformed = vec3.fromValues( vertex[ 0 ], vertex[ 1 ], vertex[ 2 ] );
+    					// transform the face by the sphere world matrix
 
+    					const vecTransformed = vec3.fromValues( vertex[ 0 ], vertex[ 1 ], vertex[ 2 ] );
     					vec3.transformMat4( vecTransformed, vecTransformed, this.sphereBatch.modelMatrix );
 
     					return vec3.fromValues( vecTransformed[ 0 ], vecTransformed[ 1 ], vecTransformed[ 2 ] );
@@ -169,7 +170,7 @@ export default class extends Base {
 
     	this.intersectionDebugBatch = new Batch( new Mesh( new Cube() ), this.shader );
     	this.intersectionDebugBatch.transform.scale = vec3.fromValues( 0.2, 0.2, 0.2 );
-    	this.intersectionDebugBatch.transform.y = 3;
+    	this.intersectionDebugBatch.transform.y = - 999;
 
     	this.intersectionDebugBatch.setParent( this.root );
 

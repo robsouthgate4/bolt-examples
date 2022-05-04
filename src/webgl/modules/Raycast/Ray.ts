@@ -55,6 +55,8 @@ export default class Ray {
      */
     intersectTriangle( out: vec3, tri: vec3[] ) {
 
+    	vec3.scale( out, out, 0 );
+
     	vec3.sub( edge1, tri[ 1 ], tri[ 0 ] );
     	vec3.sub( edge2, tri[ 2 ], tri[ 0 ] );
 
