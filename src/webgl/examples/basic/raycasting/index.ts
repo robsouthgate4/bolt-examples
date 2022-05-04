@@ -16,6 +16,7 @@ import { BoxBounds } from "@bolt-webgl/core/lib/Mesh";
 import Ray from "@/webgl/modules/Raycast/Ray";
 import Raycast from "@/webgl/modules/Raycast";
 import Sphere from "@/webgl/modules/Primitives/Sphere";
+import Cube from "@/webgl/modules/Primitives/Cube";
 
 export default class extends Base {
 
@@ -33,6 +34,7 @@ export default class extends Base {
     AAbox!: AxisAlignedBox;
     AABoxHelper!: Batch;
     raycast: Raycast;
+    intersectionDebugBatch!: Batch;
 
     constructor() {
 
@@ -86,9 +88,19 @@ export default class extends Base {
 
     		if ( intersectsBox ) {
 
+    			// now run the triangle intersection test
+
     			for ( let i = 0; i < this.sphereBatch.mesh.faces.length; i ++ ) {
 
-    				const tri = this.sphereBatch.mesh.faces[ i ].vertices.map( ( vertex ) => vec3.fromValues( vertex[ 0 ], vertex[ 1 ], vertex[ 2 ] ) );
+    				const tri = this.sphereBatch.mesh.faces[ i ].vertices.map( ( vertex ) => {
+
+    					const vecTransformed = vec3.fromValues( vertex[ 0 ], vertex[ 1 ], vertex[ 2 ] );
+
+    					vec3.transformMat4( vecTransformed, vecTransformed, this.sphereBatch.modelMatrix );
+
+    					return vec3.fromValues( vecTransformed[ 0 ], vecTransformed[ 1 ], vecTransformed[ 2 ] );
+
+    				} );
 
     				ray.intersectTriangle( hit, tri );
 
@@ -100,9 +112,9 @@ export default class extends Base {
 
     			}
 
-    			console.log( hit );
-
     		}
+
+    		this.intersectionDebugBatch.transform.position = hit;
 
     		this._debugDrawRay( ray, 20 );
 
@@ -150,10 +162,16 @@ export default class extends Base {
     	const bounds: BoxBounds = this.sphereBatch.mesh.bounds;
 
     	this.sphereBatch.name = "cube";
-    	this.sphereBatch.transform.y = 0;
+    	this.sphereBatch.transform.y = 1;
     	this.sphereBatch.transform.scale = vec3.fromValues( 1, 1, 1 );
     	this.sphereBatch.updateModelMatrix();
     	this.sphereBatch.setParent( this.root );
+
+    	this.intersectionDebugBatch = new Batch( new Mesh( new Cube() ), this.shader );
+    	this.intersectionDebugBatch.transform.scale = vec3.fromValues( 0.2, 0.2, 0.2 );
+    	this.intersectionDebugBatch.transform.y = 3;
+
+    	this.intersectionDebugBatch.setParent( this.root );
 
     	this.AAbox = new AxisAlignedBox( bounds.min, bounds.max );
     	this.AAbox.createVisualiser();
