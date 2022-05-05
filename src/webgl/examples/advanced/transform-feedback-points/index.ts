@@ -1,6 +1,5 @@
 
 
-/// @ts-nocheck
 import Base from "@webgl/Base";
 import Bolt, { Shader, Transform, VAO, VBO } from "@bolt-webgl/core";
 

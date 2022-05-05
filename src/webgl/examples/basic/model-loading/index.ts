@@ -1,5 +1,4 @@
 
-/// @ts-nocheck
 import Base from "@webgl/Base";
 import Bolt, { Node, Transform } from "@bolt-webgl/core";
 

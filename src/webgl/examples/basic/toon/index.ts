@@ -1,6 +1,5 @@
 
 
-/// @ts-nocheck
 import Base from "@webgl/Base";
 import Bolt, { Shader, Node, Batch, FBO, Texture, COLOR_ATTACHMENT0, RBO, Mesh, NEAREST, TextureCube, CameraPersp } from "@bolt-webgl/core";
 
