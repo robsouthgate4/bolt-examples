@@ -1,3 +1,6 @@
+
+
+/// @ts-nocheck
 import Base from "@webgl/Base";
 import Bolt, { DYNAMIC_DRAW, FLOAT, IBO, POINTS, Shader, STATIC_DRAW, TRIANGLES, UNSIGNED_SHORT, VAO, VBO } from "@bolt-webgl/core";
 

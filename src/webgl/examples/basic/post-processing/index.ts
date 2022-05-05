@@ -1,3 +1,6 @@
+
+
+/// @ts-nocheck
 import Base from "@webgl/Base";
 import Bolt, { Shader, Batch, Transform, Node } from "@bolt-webgl/core";
 

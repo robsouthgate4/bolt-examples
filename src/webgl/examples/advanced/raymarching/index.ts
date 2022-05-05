@@ -1,3 +1,6 @@
+
+
+/// @ts-nocheck
 import Base from "@webgl/Base";
 import Bolt, { Shader, Transform, Mesh, Texture } from "@bolt-webgl/core";
 import vertexShader from "./shaders/raymarch.vert";
