@@ -61,8 +61,8 @@ export default class extends Base {
     		fov: 45,
     		near: 0.1,
     		far: 1000,
-    		position: vec3.fromValues( 0, 3, 10 ),
-    		target: vec3.fromValues( 0, 0, 0 ),
+    		position: vec3.fromValues( 0, 3, 6 ),
+    		target: vec3.fromValues( 0, 0.5, 0 ),
     	} );
 
     	this.arcball = new CameraArcball( this.camera, 4, 0.08 );
@@ -228,7 +228,7 @@ export default class extends Base {
 
     	if ( ! this.assetsLoaded ) return;
 
-    	this.camera.update();
+    	this.arcball.update();
 
     	this.bolt.enableDepth();
     	this.bolt.enableCullFace();

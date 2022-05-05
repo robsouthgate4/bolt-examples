@@ -1,7 +1,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Transform, Mesh, Node, Batch } from "@bolt-webgl/core";
+import Bolt, { Shader, Transform, Mesh, Node, Batch, CameraPersp } from "@bolt-webgl/core";
 
 import defaultVertexInstanced from "./shaders/defaultInstanced/defaultInstanced.vert";
 import defaultFragmentInstanced from "./shaders/defaultInstanced/defaultInstanced.frag";
@@ -15,12 +15,13 @@ export default class extends Base {
     canvas: HTMLCanvasElement;
     colorShader: Shader;
     lightPosition: vec3;
-    camera: CameraFPS;
+    camera: CameraPersp;
     assetsLoaded!: boolean;
     cubeTransform!: Transform;
     torusBuffer!: Mesh;
     toruseGLTFBuffer!: Mesh;
     bolt: Bolt;
+    arcball: any;
 
     constructor() {
 
@@ -35,14 +36,14 @@ export default class extends Base {
     	this.canvas.width = this.width;
     	this.canvas.height = this.height;
 
-    	this.camera = new CameraFPS(
-    		this.width,
-    		this.height,
-    		vec3.fromValues( 0, 5, - 5 ),
-    		45,
-    		0.1,
-    		500,
-    	);
+    	this.camera = new CameraPersp( {
+    		aspect: this.canvas.width / this.canvas.height,
+    		fov: 45,
+    		near: 0.1,
+    		far: 1000,
+    		position: vec3.fromValues( 0, 3, 10 ),
+    		target: vec3.fromValues( 0, 0, 0 ),
+    	} );
 
     	this.bolt = Bolt.getInstance();
     	this.bolt.init( this.canvas, { antialias: true } );
@@ -142,6 +143,7 @@ export default class extends Base {
     resize() {
 
     	this.bolt.resizeFullScreen();
+    	this.camera.updateProjection( this.canvas.width / this.canvas.height );
 
     }
 
@@ -169,9 +171,6 @@ export default class extends Base {
     update( elapsed: number, delta: number ) {
 
     	if ( ! this.assetsLoaded ) return;
-
-
-    	this.camera.update( delta );
 
     	this.drawInstances( this.colorShader, elapsed );
 

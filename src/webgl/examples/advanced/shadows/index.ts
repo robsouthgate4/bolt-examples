@@ -2,7 +2,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Mesh, Transform, Batch, FBO } from "@bolt-webgl/core";
+import Bolt, { Shader, Mesh, Transform, Batch, FBO, CameraPersp } from "@bolt-webgl/core";
 
 import defaultVertex from "./shaders/default/default.vert";
 import defaultFragment from "./shaders/default/default.frag";
@@ -19,7 +19,7 @@ export default class extends Base {
     canvas: HTMLCanvasElement;
     shader: Shader;
     lightPosition: vec3;
-    camera: CameraArcball;
+    camera: CameraPersp;
     assetsLoaded?: boolean;
     torusTransform!: Transform;
     cubeBatch!: Batch;
@@ -30,6 +30,7 @@ export default class extends Base {
     lightProjection: mat4;
     lightView: mat4;
     lightSpaceMatrix: mat4;
+    arcball: CameraArcball;
 
     constructor() {
 
@@ -48,17 +49,16 @@ export default class extends Base {
     	this.shader = new Shader( defaultVertex, defaultFragment );
     	this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
-    	this.camera = new CameraArcball(
-    		this.width,
-    		this.height,
-    		vec3.fromValues( 0, 3, 6 ),
-    		vec3.fromValues( 0, 0, 0 ),
-    		45,
-    		0.01,
-    		1000,
-    		0.2,
-    		2
-    	);
+    	this.camera = new CameraPersp( {
+    		aspect: this.canvas.width / this.canvas.height,
+    		fov: 45,
+    		near: 0.1,
+    		far: 1000,
+    		position: vec3.fromValues( 0, 3, 10 ),
+    		target: vec3.fromValues( 0, 0, 0 ),
+    	} );
+
+    	this.arcball = new CameraArcball( this.camera, 4, 0.08 );
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.setCamera( this.camera );
@@ -114,6 +114,7 @@ export default class extends Base {
     resize() {
 
     	this.bolt.resizeFullScreen();
+    	this.camera.updateProjection( this.canvas.width / this.canvas.height );
 
     }
 
@@ -127,7 +128,7 @@ export default class extends Base {
 
 
 
-    	this.camera.update();
+    	this.arcball.update();
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 1, 1, 1, 1 );

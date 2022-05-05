@@ -1,6 +1,6 @@
 
 import Base from "@webgl/Base";
-import Bolt, { Node, Transform } from "@bolt-webgl/core";
+import Bolt, { CameraPersp, Node, Transform } from "@bolt-webgl/core";
 
 import { vec3 } from "gl-matrix";
 import CameraArcball from "@/webgl/modules/CameraArcball";
@@ -11,9 +11,8 @@ import Floor from "@/webgl/modules/Batches/Floor";
 export default class extends Base {
 
     canvas: HTMLCanvasElement;
-
     lightPosition: vec3;
-    camera: CameraArcball;
+    camera: CameraPersp;
     assetsLoaded?: boolean;
     torusTransform!: Transform;
     sphereNode!: Node;
@@ -21,6 +20,7 @@ export default class extends Base {
     bolt: Bolt;
     gltf!: GlTf;
     floor: Floor;
+    arcball: CameraArcball;
 
     constructor() {
 
@@ -33,17 +33,16 @@ export default class extends Base {
     	this.canvas.width = this.width;
     	this.canvas.height = this.height;
 
-    	this.camera = new CameraArcball(
-    		this.width,
-    		this.height,
-    		vec3.fromValues( 0, 4, 10 ),
-    		vec3.fromValues( 0, 4, 0 ),
-    		45,
-    		0.01,
-    		1000,
-    		0.1,
-    		4
-    	);
+    	this.camera = new CameraPersp( {
+    		aspect: this.canvas.width / this.canvas.height,
+    		fov: 45,
+    		near: 0.1,
+    		far: 1000,
+    		position: vec3.fromValues( 2, 7, 10 ),
+    		target: vec3.fromValues( 0, 3, 0 ),
+    	} );
+
+    	this.arcball = new CameraArcball( this.camera, 4, 0.08 );
 
     	this.bolt = Bolt.getInstance();
     	this.bolt.init( this.canvas, { antialias: true, dpi: 1 } );
@@ -84,6 +83,7 @@ export default class extends Base {
     resize() {
 
     	this.bolt.resizeFullScreen();
+    	this.camera.updateProjection( this.canvas.width / this.canvas.height );
 
     }
 
@@ -97,7 +97,7 @@ export default class extends Base {
 
     	if ( ! this.assetsLoaded ) return;
 
-    	this.camera.update();
+    	this.arcball.update();
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 0.95, 0.95, 0.95, 1 );
