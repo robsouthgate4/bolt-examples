@@ -38,14 +38,14 @@ export default class extends Base {
     		fov: 45,
     		near: 0.1,
     		far: 1000,
-    		position: vec3.fromValues( 2, 7, 10 ),
+    		position: vec3.fromValues( 4, 4, 8 ),
     		target: vec3.fromValues( 0, 3, 0 ),
     	} );
 
     	this.arcball = new CameraArcball( this.camera, 4, 0.08 );
 
     	this.bolt = Bolt.getInstance();
-    	this.bolt.init( this.canvas, { antialias: true, dpi: 1 } );
+    	this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
     	this.bolt.setCamera( this.camera );
 
     	this.floor = new Floor();
@@ -63,18 +63,9 @@ export default class extends Base {
     async init() {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
-    	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf/", "PhantomLogoPose.gltf" );
+    	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf/", "boat.gltf" );
+    	console.log( this.gltf );
     	this.assetsLoaded = true;
-
-    	if ( this.gltf.scenes ) {
-
-    		for ( const scene of this.gltf.scenes ) {
-
-    			scene.root.transform.y = 2.75;
-
-    		}
-
-    	}
 
     	this.resize();
 
@@ -100,7 +91,7 @@ export default class extends Base {
     	this.arcball.update();
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-    	this.bolt.clear( 0.95, 0.95, 0.95, 1 );
+    	this.bolt.clear( 1, 1, 1, 1 );
 
     	if ( this.gltf.scenes ) {
 

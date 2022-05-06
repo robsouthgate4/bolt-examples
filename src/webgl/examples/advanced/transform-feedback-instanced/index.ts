@@ -12,7 +12,6 @@ import simulationFragment from "./shaders/simulation/simulation.frag";
 import { mat4, vec3 } from "gl-matrix";
 
 import Plane from "@/webgl/modules/Primitives/Plane";
-import CameraArcball from "@/webgl/modules/CameraArcball";
 
 interface TransformFeedbackObject {
     updateVAO: VAO;

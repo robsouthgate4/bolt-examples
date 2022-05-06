@@ -5,8 +5,8 @@ import Bolt, { VBO, VAO, Transform, Mesh, Node, Batch, Shader } from "@bolt-webg
 import { GlTf, Mesh as GLTFMesh, MeshPrimitive } from "./types/GLTF";
 import { GeometryBuffers } from "@bolt-webgl/core/lib/Mesh";
 
-import vertexShader from "../../examples/shaders/color/color.vert";
-import fragmentShader from "../../examples/shaders/color/color.frag";
+import vertexShader from "./shaders/color/color.vert";
+import fragmentShader from "./shaders/color/color.frag";
 
 interface AccessorDict {
     [id: string]: number;

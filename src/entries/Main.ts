@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/basic/isometric";
+import Example from "@/webgl/examples/basic/model-loading";
 
 export default class Main {
 
