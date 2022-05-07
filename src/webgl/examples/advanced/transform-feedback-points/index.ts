@@ -1,5 +1,7 @@
+
+
 import Base from "@webgl/Base";
-import Bolt, { Shader, Transform, VAO, VBO } from "@bolt-webgl/core";
+import Bolt, { CameraPersp, Shader, Transform, VAO, VBO } from "@bolt-webgl/core";
 
 import particlesVertexInstanced from "./shaders/particles/particles.vert";
 import particlesFragmentInstanced from "./shaders/particles/particles.frag";
@@ -16,7 +18,7 @@ export default class extends Base {
     gl: WebGL2RenderingContext;
     particleShader!: Shader;
     lightPosition: vec3;
-    camera: CameraFPS;
+    camera: CameraPersp;
     assetsLoaded!: boolean;
     cubeTransform!: Transform;
     simulationShader!: Shader;
@@ -70,14 +72,14 @@ export default class extends Base {
 
     	this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
-    	this.camera = new CameraFPS(
-    		this.width,
-    		this.height,
-    		vec3.fromValues( 0, 0, 20 ),
-    		45,
-    		0.01,
-    		1000,
-    	);
+    	this.camera = new CameraPersp( {
+    		aspect: this.canvas.width / this.canvas.height,
+    		fov: 45,
+    		near: 0.1,
+    		far: 1000,
+    		position: vec3.fromValues( 0, 3, 10 ),
+    		target: vec3.fromValues( 0, 0, 0 ),
+    	} );
 
     	this.bolt.setCamera( this.camera );
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
@@ -168,8 +170,7 @@ export default class extends Base {
     resize() {
 
     	this.bolt.resizeFullScreen();
-
-    	this.camera.resize( this.gl.canvas.width, this.gl.canvas.height );
+    	this.camera.updateProjection( this.gl.canvas.width / this.gl.canvas.height );
 
     }
 
@@ -182,10 +183,6 @@ export default class extends Base {
     update( elapsed: number, delta: number ) {
 
     	if ( ! this.assetsLoaded ) return;
-
-
-
-    	this.camera.update( delta );
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 1, 1, 1, 1 );

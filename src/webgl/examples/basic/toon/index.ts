@@ -1,5 +1,7 @@
+
+
 import Base from "@webgl/Base";
-import Bolt, { Shader, Node, Batch, FBO, Texture, COLOR_ATTACHMENT0, RBO, Mesh, NEAREST, TextureCube } from "@bolt-webgl/core";
+import Bolt, { Shader, Node, Batch, FBO, Texture, COLOR_ATTACHMENT0, RBO, Mesh, NEAREST, TextureCube, CameraPersp } from "@bolt-webgl/core";
 
 import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
 import geometryVertex from "./shaders/geometry/geometry.vert";
@@ -22,7 +24,7 @@ export default class extends Base {
     canvas: HTMLCanvasElement;
     bodyShader!: Shader;
     eyesShader!: Shader;
-    camera: CameraArcball;
+    camera: CameraPersp;
     assetsLoaded?: boolean;
     bolt: Bolt;
     gltf!: GlTf;
@@ -41,6 +43,7 @@ export default class extends Base {
     cubeTexture!: TextureCube;
     depthTexture: Texture;
     uvTexture: Texture;
+    arcball: CameraArcball;
 
     constructor() {
 
@@ -53,17 +56,16 @@ export default class extends Base {
     	this.canvas.width = this.width;
     	this.canvas.height = this.height;
 
-    	this.camera = new CameraArcball(
-    		this.width,
-    		this.height,
-    		vec3.fromValues( 0, 3, 7 ),
-    		vec3.fromValues( 0, 1, 0 ),
-    		45,
-    		0.01,
-    		1000,
-    		0.1,
-    		4
-    	);
+    	this.camera = new CameraPersp( {
+    		aspect: this.canvas.width / this.canvas.height,
+    		fov: 45,
+    		near: 0.1,
+    		far: 1000,
+    		position: vec3.fromValues( 0, 3, 6 ),
+    		target: vec3.fromValues( 0, 0.5, 0 ),
+    	} );
+
+    	this.arcball = new CameraArcball( this.camera, 4, 0.08 );
 
     	this.bolt = Bolt.getInstance();
     	this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
@@ -164,7 +166,7 @@ export default class extends Base {
     resize() {
 
     	this.bolt.resizeFullScreen();
-    	this.camera.resize( this.gl.canvas.width, this.gl.canvas.height );
+    	this.camera.updateProjection( this.canvas.width / this.canvas.height );
     	this.compShader.activate();
     	this.compShader.setVector2( "resolution", vec2.fromValues( this.gl.canvas.width, this.gl.canvas.height ) );
     	this.post.resize( this.gl.canvas.width, this.gl.canvas.height );
@@ -226,7 +228,7 @@ export default class extends Base {
 
     	if ( ! this.assetsLoaded ) return;
 
-    	this.camera.update();
+    	this.arcball.update();
 
     	this.bolt.enableDepth();
     	this.bolt.enableCullFace();

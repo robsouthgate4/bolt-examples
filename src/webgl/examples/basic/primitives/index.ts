@@ -1,5 +1,7 @@
+
+
 import Base from "@webgl/Base";
-import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES } from "@bolt-webgl/core";
+import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES, CameraPersp } from "@bolt-webgl/core";
 
 import normalVertex from "./shaders/normal/normal.vert";
 import normalFragment from "./shaders/normal/normal.frag";
@@ -14,7 +16,7 @@ export default class extends Base {
 
     canvas: HTMLCanvasElement;
     shader: Shader;
-    camera: CameraArcball;
+    camera: CameraPersp;
     assetsLoaded?: boolean;
     torusTransform!: Transform;
     sphereBatch!: Batch;
@@ -25,6 +27,7 @@ export default class extends Base {
     gl: WebGL2RenderingContext;
     root!: Node;
     floorBatch: any;
+    arcball: CameraArcball;
 
     constructor() {
 
@@ -44,18 +47,16 @@ export default class extends Base {
 
     	this.shader = new Shader( normalVertex, normalFragment );
 
-    	this.camera = new CameraArcball(
-    		this.width,
-    		this.height,
-    		vec3.fromValues( 0, 2, 10 ),
-    		vec3.fromValues( 0, 0, 0 ),
-    		45,
-    		0.01,
-    		1000,
-    		0.08,
-    		4,
-    		0.5
-    	);
+    	this.camera = new CameraPersp( {
+    		aspect: this.canvas.width / this.canvas.height,
+    		fov: 45,
+    		near: 0.1,
+    		far: 1000,
+    		position: vec3.fromValues( 0, 3, 10 ),
+    		target: vec3.fromValues( 0, 0, 0 ),
+    	} );
+
+    	this.arcball = new CameraArcball( this.camera, 4, 0.08 );
 
     	this.bolt.setCamera( this.camera );
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );

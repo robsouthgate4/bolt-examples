@@ -1,7 +1,7 @@
 import { mat4, vec2, vec3 } from "gl-matrix";
-import { Camera } from "@bolt-webgl/core";
+import { Camera, CameraPersp } from "@bolt-webgl/core";
 
-export default class CameraArcball extends Camera {
+export default class CameraArcball {
 
     private _mouseDown: boolean;
     private _azimuth: number;
@@ -18,38 +18,22 @@ export default class CameraArcball extends Camera {
     private _rotationTargetYOnMouseDown!: number;
     private _initialPositionSpherical: number[];
     private _scrollSpeed: number;
-    private _center: vec3;
     private _shiftKeyDown: boolean;
-    private _zoom = 0;
+    private _camera: Camera;
+    private _position: vec3;
 
     constructor(
-    	width: number,
-    	height: number,
-    	position: vec3,
-    	target: vec3,
-    	fov: number,
-    	near: number,
-    	far: number,
-    	damping = 0.2,
+    	camera: Camera,
     	speed = 3,
+    	damping = 1,
     	scrollSpeed = 0.3 ) {
 
-    	super(
-    		width,
-    		height,
-    		position,
-    		fov,
-    		near,
-    		far
+    	this._camera = camera;
+    	this._position = camera.position;
+
+    	this._initialPositionSpherical = this.cartesianToSpherical(
+    		camera.position[ 0 ], camera.position[ 1 ], camera.position[ 2 ]
     	);
-
-    	this.position = position;
-
-
-    	this._initialPositionSpherical = this.cartesianToSpherical( this.position[ 0 ], this.position[ 1 ], this.position[ 2 ] );
-
-    	this.target = target || vec3.fromValues( 0, 0, 0 );
-    	this._center = vec3.create();
 
     	this._mouseDown = false;
 
@@ -58,6 +42,7 @@ export default class CameraArcball extends Camera {
     	this._radius = this._initialPositionSpherical[ 2 ];
 
     	this._scrollSpeed = scrollSpeed;
+    	this._damping = damping;
 
     	this._rotateAmountX = speed || 1;
     	this._rotateAmountY = speed || 1;
@@ -70,11 +55,8 @@ export default class CameraArcball extends Camera {
 
     	this._rotateTargetX = this._azimuth;
     	this._rotateTargetY = this._elevation;
-    	this._damping = damping || 1;
 
     	this._shiftKeyDown = false;
-
-    	this.resize( window.innerWidth, window.innerHeight );
 
     	this.initListeners();
 
@@ -125,11 +107,14 @@ export default class CameraArcball extends Camera {
     	if ( this._shiftKeyDown ) return;
 
     	const direction = Math.sign( ev.deltaY );
-    	this.fov -= ( direction * this._scrollSpeed ) * 0.1;
 
-    	console.log( this.aspect );
+    	if ( this._camera instanceof CameraPersp ) {
 
-    	this.updateProjection();
+    		this._camera.fov -= ( direction * this._scrollSpeed ) * 0.1;
+    		this._camera.updateProjection( this._camera.aspect );
+
+    	}
+
 
     }
 
@@ -166,11 +151,13 @@ export default class CameraArcball extends Camera {
 
     	} else {
 
+    		// TODO: panning
+
     		const mouse = vec2.fromValues( this.getMousePosition( ev ).x * 3, this.getMousePosition( ev ).y * 3 );
 
     		const newDirection = vec3.create();
 
-    		vec3.cross( newDirection, this.forward, this.up );
+    		vec3.cross( newDirection, this._camera.forward, this._camera.up );
     		vec3.normalize( newDirection, newDirection );
     		vec3.multiply( newDirection, newDirection, vec3.fromValues( 0.1, 0.1, 0.1 ) );
 
@@ -222,19 +209,10 @@ export default class CameraArcball extends Camera {
     	direction[ 1 ] = this._radius * sineElevation;
     	direction[ 2 ] = this._radius * cosineElevation * sineAzimuth;
 
-    	vec3.copy( this.forward, direction );
-    	vec3.normalize( this.forward, this.forward );
+    	vec3.copy( this._camera.forward, direction );
+    	vec3.normalize( this._camera.forward, this._camera.forward );
 
     	return direction;
-
-    }
-
-    resize( width: number, height: number ) {
-
-    	mat4.perspective( this.projection, this.fov, width / height, this.near, this.far );
-
-    	this.width = width;
-    	this.height = height;
 
     }
 
@@ -249,11 +227,22 @@ export default class CameraArcball extends Camera {
     	const newPosition = this.spherialToCartesian();
 
     	// generate spherical coordinates for new position
-    	this.position[ 0 ] = newPosition[ 0 ];
-    	this.position[ 1 ] = newPosition[ 1 ];
-    	this.position[ 2 ] = newPosition[ 2 ];
+    	this._position[ 0 ] = newPosition[ 0 ];
+    	this._position[ 1 ] = newPosition[ 1 ];
+    	this._position[ 2 ] = newPosition[ 2 ];
 
-    	mat4.lookAt( this.view, this.position, this.target, this.up );
+    	mat4.lookAt( this._camera.view, this._camera.position, this._camera.target, this._camera.up );
+
+    }
+
+    public get camera(): Camera {
+
+    	return this._camera;
+
+    }
+    public set camera( value: Camera ) {
+
+    	this._camera = value;
 
     }
 

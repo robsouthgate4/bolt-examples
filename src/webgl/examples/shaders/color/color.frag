@@ -16,6 +16,6 @@ uniform vec4 baseColor;
 void main()
 {
 
-  FragColor = vec4( baseColor.rgb, 1.0 );
+  FragColor = vec4( Normal.rgb * 0.5 + 0.5, 1.0 );
 
 }

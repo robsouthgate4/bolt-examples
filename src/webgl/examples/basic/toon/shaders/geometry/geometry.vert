@@ -7,6 +7,7 @@ layout( location = 2 ) in vec2 aUv;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+uniform mat4 normal;
 
 out vec4 Position;
 out vec2 Uv;
@@ -15,12 +16,13 @@ out vec3 NormalEyeSpace;
 
 void main() {
 
-    Normal = aNormal;
+    Normal = normalize(( normal * vec4( aNormal, 0.0 ) ).xyz);
+
     Uv = aUv;
 
     mat4 modelView = view * model;
 
-    NormalEyeSpace = vec3( modelView * vec4( aNormal, 0.0 ) ).xyz;
+    NormalEyeSpace = vec3( modelView * vec4( Normal, 0.0 ) ).xyz;
 
     Position = projection * modelView * vec4( aPosition, 1.0 );
 

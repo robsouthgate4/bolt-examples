@@ -1,5 +1,6 @@
+
 import Base from "@webgl/Base";
-import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES } from "@bolt-webgl/core";
+import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES, CameraPersp } from "@bolt-webgl/core";
 
 import defaultVertex from "./shaders/default/default.vert";
 import defaultFragment from "./shaders/default/default.frag";
@@ -12,7 +13,8 @@ export default class extends Base {
 
     canvas: HTMLCanvasElement;
     shader: Shader;
-    camera: CameraArcball;
+    camera: CameraPersp;
+    arcball: CameraArcball;
     assetsLoaded?: boolean;
     torusTransform!: Transform;
     sphereBatch!: Batch;
@@ -23,6 +25,7 @@ export default class extends Base {
     root!: Node;
     viewport!: { height: number; width: number; };
     gl: WebGL2RenderingContext;
+    batches: Batch[] = [];
 
     constructor() {
 
@@ -41,18 +44,16 @@ export default class extends Base {
 
     	this.shader = new Shader( defaultVertex, defaultFragment );
 
-    	this.camera = new CameraArcball(
-    		this.width,
-    		this.height,
-    		vec3.fromValues( 0, 0, 10 ),
-    		vec3.fromValues( 0, 0, 0 ),
-    		45,
-    		0.01,
-    		1000,
-    		0.08,
-    		4,
-    		0.5
-    	);
+    	this.camera = new CameraPersp( {
+    		aspect: this.canvas.width / this.canvas.height,
+    		fov: 45,
+    		near: 0.1,
+    		far: 1000,
+    		position: vec3.fromValues( 0, 3, 10 ),
+    		target: vec3.fromValues( 0, 1, 0 ),
+    	} );
+
+    	this.arcball = new CameraArcball( this.camera, 4, 0.08 );
 
     	this.camera.lookAt( vec3.fromValues( 0, 0, 0 ) );
 
@@ -93,7 +94,6 @@ export default class extends Base {
     		this.shader
     	);
 
-    	const batches = [];
     	const count = 5;
 
     	for ( let index = 0; index < count; index ++ ) {
@@ -108,7 +108,7 @@ export default class extends Base {
     		batch.transform.scaleX = vp.width / 8;
     	    batch.transform.scaleY = vp.height / 8;
 
-    		batches.push( batch );
+    		this.batches.push( batch );
 
     		batch.setParent( this.root );
 
@@ -121,15 +121,11 @@ export default class extends Base {
     resize() {
 
     	this.bolt.resizeFullScreen();
+    	this.camera.updateProjection( this.canvas.width / this.canvas.height );
 
     	const vp = this.generateViewport();
 
-    	this.planeBatch.transform.y = 0;
-    	this.planeBatch.transform.x = 0;
-
-    	// we can now use viewport dimensions to scale and position nodes
-    	this.planeBatch.transform.scaleX = vp.width / 2;
-    	this.planeBatch.transform.scaleY = vp.height / 2;
+    	// now resize all batches
 
     }
 

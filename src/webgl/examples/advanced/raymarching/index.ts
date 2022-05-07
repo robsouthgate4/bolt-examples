@@ -1,5 +1,7 @@
+
+
 import Base from "@webgl/Base";
-import Bolt, { Shader, Transform, Mesh, Texture } from "@bolt-webgl/core";
+import Bolt, { Shader, Transform, Mesh, Texture, CameraPersp } from "@bolt-webgl/core";
 import vertexShader from "./shaders/raymarch.vert";
 import fragmentShader from "./shaders/raymarch.frag";
 
@@ -15,12 +17,13 @@ export default class extends Base {
     canvas: HTMLCanvasElement;
     shader: Shader;
     lightPosition: vec3;
-    camera: CameraArcball;
+    camera: CameraPersp;
     assetsLoaded!: boolean;
     torusTransform!: Transform;
     cubeBatch!: Batch;
     bolt: Bolt;
     post: Post;
+    arcball: CameraArcball;
 
     constructor() {
 
@@ -39,17 +42,16 @@ export default class extends Base {
     	this.shader = new Shader( vertexShader, fragmentShader );
     	this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
-    	this.camera = new CameraArcball(
-    		this.width,
-    		this.height,
-    		vec3.fromValues( 0, 0.5, 1 ),
-    		vec3.fromValues( 0, 0, 0 ),
-    		45,
-    		0.01,
-    		1000,
-    		0.2,
-    		2
-    	);
+    	this.camera = new CameraPersp( {
+    		aspect: this.canvas.width / this.canvas.height,
+    		fov: 45,
+    		near: 0.1,
+    		far: 1000,
+    		position: vec3.fromValues( 0, 0, 1 ),
+    		target: vec3.fromValues( 0, 0, 0 ),
+    	} );
+
+    	this.arcball = new CameraArcball( this.camera, 4, 0.08 );
 
     	this.post = new Post( this.bolt );
 
@@ -93,7 +95,8 @@ export default class extends Base {
     resize() {
 
     	this.bolt.resizeFullScreen();
-    	this.post.resize( this.bolt.getContext().canvas.width, this.bolt.getContext().canvas.height );
+    	this.camera.updateProjection( this.canvas.width / this.canvas.height );
+    	this.post.resize( this.canvas.width, this.canvas.height );
 
     }
 
@@ -108,7 +111,7 @@ export default class extends Base {
     	if ( ! this.assetsLoaded ) return;
 
     	this.post.begin();
-    	this.camera.update();
+    	this.arcball.update();
 
     	const bgColor = 211 / 255;
 

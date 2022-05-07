@@ -1,5 +1,7 @@
+
+
 import Base from "@webgl/Base";
-import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES } from "@bolt-webgl/core";
+import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES, CameraPersp } from "@bolt-webgl/core";
 
 import colorVertex from "./shaders/color/color.vert";
 import colorFragment from "./shaders/color/color.frag";
@@ -12,7 +14,7 @@ import Floor from "@/webgl/modules/Batches/Floor";
 export default class extends Base {
 
     canvas: HTMLCanvasElement;
-    camera: CameraArcball;
+    camera: CameraPersp;
     assetsLoaded?: boolean;
     torusTransform!: Transform;
     sphereBatch!: Batch;
@@ -23,6 +25,7 @@ export default class extends Base {
     gl: WebGL2RenderingContext;
     root!: Node;
     floorBatch: any;
+    arcball: CameraArcball;
 
     constructor() {
 
@@ -40,18 +43,16 @@ export default class extends Base {
 
     	this.gl = this.bolt.getContext();
 
-    	this.camera = new CameraArcball(
-    		this.width,
-    		this.height,
-    		vec3.fromValues( 0, 2, 10 ),
-    		vec3.fromValues( 0, 0.75, 0 ),
-    		45,
-    		0.01,
-    		1000,
-    		0.08,
-    		4,
-    		0.5
-    	);
+    	this.camera = new CameraPersp( {
+    		aspect: this.canvas.width / this.canvas.height,
+    		fov: 45,
+    		near: 0.1,
+    		far: 1000,
+    		position: vec3.fromValues( 0, 3, 12 ),
+    		target: vec3.fromValues( 0, 1, 0 ),
+    	} );
+
+    	this.arcball = new CameraArcball( this.camera, 4, 0.08 );
 
     	this.bolt.setCamera( this.camera );
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
@@ -72,13 +73,16 @@ export default class extends Base {
     	this.floorBatch.name = "floor";
     	this.floorBatch.setParent( this.root );
 
+    	// draw a simple quad
     	const triangleGeo: GeometryBuffers = {
     		positions: [
-    			- 0.5, - 0.5, 0,
-    			0.5, - 0.5, 0,
-    			0.5, 0.5, 0,
+    			- 0.5, 0.5, 0.0,
+    			- 0.5, - 0.5, 0.0,
+    			0.5, - 0.5, 0.0,
+    			0.5, 0.5, 0.0
     		],
     		normals: [
+    			0, 0, 0,
     			0, 0, 0,
     			0, 0, 0,
     			0, 0, 0
@@ -86,9 +90,10 @@ export default class extends Base {
     		uvs: [
     			0, 0,
     			0, 0,
+    			0, 0,
     			0, 0
     		],
-    		indices: [ 0, 1, 2 ]
+    		indices: [ 0, 1, 2, 0, 2, 3 ]
     	};
 
     	const triangleMesh = new Mesh( triangleGeo ).setDrawType( TRIANGLES );
@@ -98,7 +103,8 @@ export default class extends Base {
     	const colours = [
     		1, 1, 0,
     		0, 1, 1,
-    		0, 0, 1
+    		0, 0, 1,
+    		1, 0, 0
     	];
 
     	// attributes can be added with a named var and shader
@@ -114,6 +120,8 @@ export default class extends Base {
 
     	this.triangleBatch.setParent( this.root );
 
+    	this.bolt.disableCullFace();
+
     	this.resize();
 
     }
@@ -121,6 +129,7 @@ export default class extends Base {
     resize() {
 
     	this.bolt.resizeFullScreen();
+    	this.camera.updateProjection( this.canvas.width / this.canvas.height );
 
     }
 
@@ -132,7 +141,7 @@ export default class extends Base {
 
     update( elapsed: number, delta: number ) {
 
-    	this.camera.update();
+    	this.arcball.update();
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 1, 1, 1, 1 );

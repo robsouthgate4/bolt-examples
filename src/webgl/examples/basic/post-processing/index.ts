@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Batch, Transform, Node } from "@bolt-webgl/core";
+import Bolt, { Shader, Batch, Transform, Node, CameraPersp } from "@bolt-webgl/core";
 
 import normalVertex from "./shaders/normal/normal.vert";
 import normalFragment from "./shaders/normal/normal.frag";
@@ -18,7 +18,7 @@ export default class extends Base {
 
     canvas: HTMLCanvasElement;
     shader: Shader;
-    camera: CameraArcball;
+    camera: CameraPersp;
     assetsLoaded?: boolean;
     torusTransform!: Transform;
     sphereBatch!: Batch;
@@ -33,6 +33,7 @@ export default class extends Base {
     root!: Node;
     floorBatch!: Floor;
     gltf!: GlTf;
+    arcball: CameraArcball;
 
     constructor() {
 
@@ -45,17 +46,16 @@ export default class extends Base {
     	this.canvas.width = this.width;
     	this.canvas.height = this.height;
 
-    	this.camera = new CameraArcball(
-    		this.width,
-    		this.height,
-    		vec3.fromValues( 3, 8, 8 ),
-    		vec3.fromValues( 0, 3, 0 ),
-    		45,
-    		0.01,
-    		1000,
-    		0.1,
-    		4
-    	);
+    	this.camera = new CameraPersp( {
+    		aspect: this.canvas.width / this.canvas.height,
+    		fov: 45,
+    		near: 0.1,
+    		far: 1000,
+    		position: vec3.fromValues( 2, 7, 10 ),
+    		target: vec3.fromValues( 0, 3, 0 ),
+    	} );
+
+    	this.arcball = new CameraArcball( this.camera, 4, 0.08 );
 
     	this.bolt.init( this.canvas, { antialias: false, dpi: 2 } );
     	this.bolt.setCamera( this.camera );
@@ -122,7 +122,7 @@ export default class extends Base {
     resize() {
 
     	this.bolt.resizeFullScreen();
-
+    	this.camera.updateProjection( this.gl.canvas.width / this.gl.canvas.height );
     	this.post.resize( this.gl.canvas.width, this.gl.canvas.height );
 
     }
@@ -137,7 +137,7 @@ export default class extends Base {
 
     	if ( ! this.assetsLoaded ) return;
 
-    	this.camera.update();
+    	this.arcball.update();
     	this.post.begin();
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );

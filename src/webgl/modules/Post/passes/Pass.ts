@@ -1,8 +1,8 @@
 
-import Bolt, { FBO, Mesh, RBO } from "@bolt-webgl/core";
+import Bolt, { FBO, Mesh } from "@bolt-webgl/core";
 export abstract class Pass {
 
-    fullScreenTriangle: Mesh;
+    private _fullScreenTriangle!: Mesh;
     private _renderToScreen = false;
     _enabled = true;
 
@@ -34,6 +34,12 @@ export abstract class Pass {
 
     }
 
+    set enabled( val: boolean ) {
+
+    	this._enabled = val;
+
+    }
+
     get enabled( ) {
 
     	return this._enabled;
@@ -49,6 +55,18 @@ export abstract class Pass {
     get renderToScreen(): boolean {
 
     	return this._renderToScreen;
+
+    }
+
+    public get fullScreenTriangle(): Mesh {
+
+    	return this._fullScreenTriangle;
+
+    }
+
+    public set fullScreenTriangle( value: Mesh ) {
+
+    	this._fullScreenTriangle = value;
 
     }
 
