@@ -48,8 +48,8 @@ export default class extends Base {
     		fov: 45,
     		near: 0.1,
     		far: 1000,
-    		position: vec3.fromValues( 0, 3, 10 ),
-    		target: vec3.fromValues( 0, 0, 0 ),
+    		position: vec3.fromValues( 0, 3, 12 ),
+    		target: vec3.fromValues( 0, 1, 0 ),
     	} );
 
     	this.arcball = new CameraArcball( this.camera, 4, 0.08 );
@@ -73,13 +73,16 @@ export default class extends Base {
     	this.floorBatch.name = "floor";
     	this.floorBatch.setParent( this.root );
 
+    	// draw a simple quad
     	const triangleGeo: GeometryBuffers = {
     		positions: [
-    			- 0.5, - 0.5, 0,
-    			0.5, - 0.5, 0,
-    			0.5, 0.5, 0,
+    			- 0.5, 0.5, 0.0,
+    			- 0.5, - 0.5, 0.0,
+    			0.5, - 0.5, 0.0,
+    			0.5, 0.5, 0.0
     		],
     		normals: [
+    			0, 0, 0,
     			0, 0, 0,
     			0, 0, 0,
     			0, 0, 0
@@ -87,9 +90,10 @@ export default class extends Base {
     		uvs: [
     			0, 0,
     			0, 0,
+    			0, 0,
     			0, 0
     		],
-    		indices: [ 0, 1, 2 ]
+    		indices: [ 0, 1, 2, 0, 2, 3 ]
     	};
 
     	const triangleMesh = new Mesh( triangleGeo ).setDrawType( TRIANGLES );
@@ -99,7 +103,8 @@ export default class extends Base {
     	const colours = [
     		1, 1, 0,
     		0, 1, 1,
-    		0, 0, 1
+    		0, 0, 1,
+    		1, 0, 0
     	];
 
     	// attributes can be added with a named var and shader
@@ -114,6 +119,8 @@ export default class extends Base {
     	this.triangleBatch.transform.scale = vec3.fromValues( 3, 3, 3 );
 
     	this.triangleBatch.setParent( this.root );
+
+    	this.bolt.disableCullFace();
 
     	this.resize();
 

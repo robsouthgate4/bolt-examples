@@ -54,6 +54,7 @@ export default class extends Base {
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.enableDepth();
+    	this.bolt.disableCullFace();
 
     	this.init();
 
@@ -63,8 +64,7 @@ export default class extends Base {
     async init() {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
-    	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf/", "boat.gltf" );
-    	console.log( this.gltf );
+    	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf/examples/boat/", "boat.gltf" );
     	this.assetsLoaded = true;
 
     	this.resize();

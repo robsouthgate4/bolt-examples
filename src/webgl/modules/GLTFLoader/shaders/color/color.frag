@@ -12,10 +12,13 @@ in vec3 FragPosition;
 in vec3 Color;
 
 uniform vec4 baseColor;
+uniform sampler2D baseTexture;
 
 void main()
 {
 
-  FragColor = vec4( (Normal.rgb * 0.5 + 0.5), 1.0 );
+    vec4 color = texture( baseTexture, Uv );
+
+    FragColor = vec4( color.rgb, 1.0 - baseColor.a );
 
 }
