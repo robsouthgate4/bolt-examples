@@ -1,10 +1,10 @@
 import Base from "@webgl/Base";
 import Bolt, { Shader, Batch, Transform, Node, CameraPersp } from "@bolt-webgl/core";
 
-import normalVertex from "./shaders/normal/normal.vert";
-import normalFragment from "./shaders/normal/normal.frag";
+import colorVertex from "./shaders/color/color.vert";
+import colorFragment from "./shaders/color/color.frag";
 
-import { vec3, } from "gl-matrix";
+import { vec3, vec4, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
 import Post from "@/webgl/modules/Post/Post";
 import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
@@ -17,7 +17,7 @@ import { GlTf } from "@/webgl/modules/GLTFLoader/types/GLTF";
 export default class extends Base {
 
     canvas: HTMLCanvasElement;
-    shader: Shader;
+    shaderEyes: Shader;
     camera: CameraPersp;
     assetsLoaded?: boolean;
     torusTransform!: Transform;
@@ -34,6 +34,7 @@ export default class extends Base {
     floorBatch!: Floor;
     gltf!: GlTf;
     arcball: CameraArcball;
+    shaderBody: Shader;
 
     constructor() {
 
@@ -64,7 +65,9 @@ export default class extends Base {
 
     	this.post = new Post( this.bolt );
 
-    	this.shader = new Shader( normalVertex, normalFragment );
+    	this.shaderEyes = new Shader( colorVertex, colorFragment );
+    	this.shaderBody = new Shader( colorVertex, colorFragment );
+
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.enableDepth();
 
@@ -76,7 +79,7 @@ export default class extends Base {
     async init() {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
-    	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf/", "PhantomLogoPose.gltf" );
+    	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf/examples/phantom/", "PhantomLogoPose.gltf" );
     	this.assetsLoaded = true;
 
     	this.rbgSplit = new RGBSplitPass( this.bolt, {
@@ -110,6 +113,31 @@ export default class extends Base {
 
     			scene.root.transform.y = 2;
     			scene.root.setParent( this.root );
+
+    			scene.root.traverse( ( node: Node ) => {
+
+    				if ( node instanceof Batch ) {
+
+    					if ( node.shader.name === "mat_phantom_body" ) {
+
+    						node.shader = this.shaderBody;
+    						node.shader.activate();
+    						node.shader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
+
+    					}
+
+    					if ( node.shader.name === "mat_phantom_eyes" ) {
+
+    						node.shader = this.shaderEyes;
+    						node.shader.activate();
+    						node.shader.setVector4( "baseColor", vec4.fromValues( 0, 0, 0, 1 ) );
+
+    					}
+
+
+    				}
+
+    			} );
 
     		}
 

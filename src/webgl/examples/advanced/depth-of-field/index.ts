@@ -201,7 +201,7 @@ export default class extends Base {
     	shader.setMatrix4( "projection", this.camera.projection );
     	shader.setMatrix4( "view", this.camera.view );
 
-    	this.torusBuffer.drawTriangles( shader );
+    	this.torusBuffer.draw( shader );
 
     }
 
