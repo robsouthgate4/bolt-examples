@@ -7,7 +7,6 @@ import defaultVertexInstanced from "./shaders/defaultInstanced/defaultInstanced.
 import defaultFragmentInstanced from "./shaders/defaultInstanced/defaultInstanced.frag";
 
 import { mat4, quat, vec3, } from "gl-matrix";
-import CameraFPS from "@/webgl/modules/CameraFPS";
 import GLTFLoader from "@/webgl/modules/GLTFLoader";
 
 export default class extends Base {

@@ -41,8 +41,8 @@ export default class extends Base {
     		fov: 45,
     		near: 0.1,
     		far: 1000,
-    		position: vec3.fromValues( 0, 3, 10 ),
-    		target: vec3.fromValues( 0, 2, 0 ),
+    		position: vec3.fromValues( 0, 6, 6 ),
+    		target: vec3.fromValues( 0, 3, 0 ),
     	} );
 
     	this.arcball = new CameraArcball( this.camera, 4, 0.08 );
@@ -66,7 +66,7 @@ export default class extends Base {
     async init() {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
-    	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf/examples/phantom/", "PhantomLogoPose.gltf" );
+    	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf/examples/phantom/", "PhantomLogoPose2.gltf" );
 
     	this.matcapTexture = new Texture( {
     		imagePath: "/static/textures/matcap/matcap.jpeg"
@@ -138,9 +138,7 @@ export default class extends Base {
     	this.arcball.update();
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-    	this.bolt.clear( 0, 0, 0, 1 );
-
-    	this.root.transform.rotateY = 0.2 * delta;
+    	this.bolt.clear( 0, 0, 0, 0 );
 
     	this.bolt.draw( this.root );
 
