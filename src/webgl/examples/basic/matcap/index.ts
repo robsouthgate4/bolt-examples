@@ -1,17 +1,14 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Batch, Transform, Node, CameraPersp } from "@bolt-webgl/core";
+import Bolt, { Shader, Batch, Node, CameraPersp, Texture } from "@bolt-webgl/core";
+
+import matcapVertex from "./shaders/matcap/matcap.vert";
+import matcapFragment from "./shaders/matcap/matcap.frag";
 
 import colorVertex from "./shaders/color/color.vert";
 import colorFragment from "./shaders/color/color.frag";
 
 import { vec3, vec4, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
-import Post from "@/webgl/modules/Post/Post";
-import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
-import RGBSplitPass from "@/webgl/modules/Post/passes/RGBSplitPass";
-import PixelatePass from "@/webgl/modules/Post/passes/PixelatePass";
-import RenderPass from "@/webgl/modules/Post/passes/RenderPass";
-import Floor from "@/webgl/modules/Batches/Floor";
 import GLTFLoader from "@/webgl/modules/GLTFLoader";
 import { GlTf } from "@/webgl/modules/GLTFLoader/types/GLTF";
 export default class extends Base {
@@ -20,21 +17,13 @@ export default class extends Base {
     shaderEyes: Shader;
     camera: CameraPersp;
     assetsLoaded?: boolean;
-    torusTransform!: Transform;
-    sphereBatch!: Batch;
-    planeBatch!: Batch;
-    post: Post;
-    fxaa!: FXAAPass;
-    rbgSplit!: RGBSplitPass;
-    renderPass!: RenderPass;
-    pixelate!: PixelatePass;
     bolt = Bolt.getInstance();
     gl: WebGL2RenderingContext;
     root!: Node;
-    floorBatch!: Floor;
     gltf!: GlTf;
     arcball: CameraArcball;
     shaderBody: Shader;
+    matcapTexture!: Texture;
 
     constructor() {
 
@@ -52,21 +41,19 @@ export default class extends Base {
     		fov: 45,
     		near: 0.1,
     		far: 1000,
-    		position: vec3.fromValues( 2, 7, 10 ),
-    		target: vec3.fromValues( 0, 3, 0 ),
+    		position: vec3.fromValues( 0, 3, 10 ),
+    		target: vec3.fromValues( 0, 2, 0 ),
     	} );
 
     	this.arcball = new CameraArcball( this.camera, 4, 0.08 );
 
-    	this.bolt.init( this.canvas, { antialias: false, dpi: 2 } );
+    	this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
     	this.bolt.setCamera( this.camera );
 
     	this.gl = this.bolt.getContext();
 
-    	this.post = new Post( this.bolt );
-
     	this.shaderEyes = new Shader( colorVertex, colorFragment );
-    	this.shaderBody = new Shader( colorVertex, colorFragment );
+    	this.shaderBody = new Shader( matcapVertex, matcapFragment );
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.enableDepth();
@@ -80,32 +67,16 @@ export default class extends Base {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
     	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf/examples/phantom/", "PhantomLogoPose.gltf" );
+
+    	this.matcapTexture = new Texture( {
+    		imagePath: "/static/textures/matcap/matcap.jpeg"
+    	} );
+
+    	await this.matcapTexture.load();
+
     	this.assetsLoaded = true;
 
-    	this.rbgSplit = new RGBSplitPass( this.bolt, {
-    		width: this.width,
-    		height: this.height
-    	} ).setEnabled( true );
-
-    	this.pixelate = new PixelatePass( this.bolt, {
-    		width: this.width,
-    		height: this.height,
-    		xPixels: 80,
-    		yPixels: 80
-    	} ).setEnabled( false );
-
-    	this.fxaa = new FXAAPass( this.bolt, {
-    		width: this.width,
-    		height: this.height
-    	} ).setEnabled( true );
-
-    	this.post.add( this.rbgSplit );
-    	this.post.add( this.pixelate );
-    	this.post.add( this.fxaa, true );
-
     	this.root = new Node();
-    	this.floorBatch = new Floor();
-    	this.floorBatch.setParent( this.root );
 
     	if ( this.gltf.scenes ) {
 
@@ -122,6 +93,7 @@ export default class extends Base {
 
     						node.shader = this.shaderBody;
     						node.shader.activate();
+    						node.shader.setTexture( "baseTexture", this.matcapTexture );
     						node.shader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
 
     					}
@@ -133,7 +105,6 @@ export default class extends Base {
     						node.shader.setVector4( "baseColor", vec4.fromValues( 0, 0, 0, 1 ) );
 
     					}
-
 
     				}
 
@@ -151,7 +122,6 @@ export default class extends Base {
 
     	this.bolt.resizeFullScreen();
     	this.camera.updateProjection( this.gl.canvas.width / this.gl.canvas.height );
-    	this.post.resize( this.gl.canvas.width, this.gl.canvas.height );
 
     }
 
@@ -166,14 +136,13 @@ export default class extends Base {
     	if ( ! this.assetsLoaded ) return;
 
     	this.arcball.update();
-    	this.post.begin();
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-    	this.bolt.clear( 0.9, 0.9, 0.9, 1 );
+    	this.bolt.clear( 0, 0, 0, 1 );
+
+    	this.root.transform.rotateY = 0.2 * delta;
 
     	this.bolt.draw( this.root );
-
-    	this.post.end();
 
 
     }

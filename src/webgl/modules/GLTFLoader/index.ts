@@ -249,6 +249,7 @@ export default class GLTFLoader {
     							    const { baseColorFactor, baseColorTexture } = primitive.materialBolt.pbrMetallicRoughness;
 
     							    const shader = batch.shader;
+    								shader.name = primitive.materialBolt.name;
     							    shader.activate();
 
     								if ( baseColorFactor ) {
