@@ -3,7 +3,7 @@ import { quat, vec3, vec4 } from "gl-matrix";
 import Bolt, { VBO, VAO, Transform, Mesh, Node, Batch, Shader, Texture, REPEAT } from "@bolt-webgl/core";
 
 import { GlTf, Image, Mesh as GLTFMesh, MeshPrimitive, Sampler, Texture as GLTFTexture } from "./types/GLTF";
-import { GeometryBuffers } from "@bolt-webgl/core/lib/Mesh";
+import { GeometryBuffers } from "@bolt-webgl/core/build/Mesh";
 
 import vertexShader from "./shaders/color/color.vert";
 import fragmentShader from "./shaders/color/color.frag";

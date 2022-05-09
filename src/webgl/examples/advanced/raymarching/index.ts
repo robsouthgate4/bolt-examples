@@ -10,7 +10,7 @@ import CameraArcball from "@webgl/modules/CameraArcball";
 import Cube from "@/webgl/modules/Primitives/Cube";
 import Post from "@/webgl/modules/Post/Post";
 import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
-import Batch from "@bolt-webgl/core/lib/Batch";
+import Batch from "@bolt-webgl/core/build/Batch";
 
 export default class extends Base {
 

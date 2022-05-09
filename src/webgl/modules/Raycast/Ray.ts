@@ -1,4 +1,5 @@
-import { BoxBounds } from "@bolt-webgl/core/lib/Mesh";
+
+import { BoxBounds } from "@bolt-webgl/core/build/Mesh";
 import { vec3 } from "gl-matrix";
 
 const EPSILON = 0.000001;

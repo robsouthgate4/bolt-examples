@@ -12,7 +12,7 @@ import { vec3 } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
 import Floor from "@/webgl/modules/Batches/Floor";
 import AxisAlignedBox from "@/webgl/modules/Raycast/AxisAlignedBox";
-import { BoxBounds } from "@bolt-webgl/core/lib/Mesh";
+import { BoxBounds } from "@bolt-webgl/core/build/Mesh";
 import Ray from "@/webgl/modules/Raycast/Ray";
 import Raycast from "@/webgl/modules/Raycast";
 import Sphere from "@/webgl/modules/Primitives/Sphere";
