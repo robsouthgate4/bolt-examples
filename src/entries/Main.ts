@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/basic/normal-mapping";
+import Example from "@/webgl/examples/basic/theatre-js-integration";
 
 export default class Main {
 
