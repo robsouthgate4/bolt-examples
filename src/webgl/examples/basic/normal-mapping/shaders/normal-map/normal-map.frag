@@ -56,8 +56,6 @@ void main()
     float diffuse = dot( normal, lightPosition ) * 0.1;
     diffuse = min( 0.8, max( diffuse, 0.5 ) );
 
-
-
     FragColor = vec4( color.rgb * diffuse, 1.0 );
 
 }
