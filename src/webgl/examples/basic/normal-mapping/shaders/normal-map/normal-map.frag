@@ -37,7 +37,7 @@ vec3 generaterNormal() {
          n.xy      *= normalHeight;
     vec3 normal     = normalize( tbn * n );
 
-    return normalize( ( vec4( normal, 0.0 ) * -view ).xyz);
+    return normalize( ( vec4( normal, 0.0 ) * view ).xyz);
 }
 
 void main()
@@ -52,6 +52,12 @@ void main()
 
     vec4 color = texture( baseTexture, vN );
 
-    FragColor = vec4( color.rgb, 1.0 );
+    vec3 lightPosition = vec3( -10.0, 0.0, 10.0 );
+    float diffuse = dot( normal, lightPosition ) * 1.0;
+    diffuse = min( 0.8, max( diffuse, 0.5 ) );
+
+
+
+    FragColor = vec4( color.rgb * diffuse, 1.0 );
 
 }
