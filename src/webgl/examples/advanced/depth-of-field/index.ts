@@ -11,11 +11,11 @@ import depthFragmentInstanced from "./shaders/depth/depth.frag";
 
 import { mat4, quat, vec2, vec3, } from "gl-matrix";
 import CameraFPS from "@/webgl/modules/CameraFPS";
-import Post from "@/webgl/modules/Post/Post";
-import RenderPass from "@/webgl/modules/Post/passes/RenderPass";
-import DOFPass from "@/webgl/modules/Post/passes/DOFPass";
-import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
-import GLTFLoader from "@/webgl/modules/GLTFLoader";
+import Post from "@/webgl/modules/post/Post";
+import RenderPass from "@/webgl/modules/post/passes/RenderPass";
+import DOFPass from "@/webgl/modules/post/passes/DOFPass";
+import FXAAPass from "@/webgl/modules/post/passes/FXAAPass";
+import GLTFLoader from "@/webgl/modules/gltf-Loader";
 
 export default class extends Base {
 

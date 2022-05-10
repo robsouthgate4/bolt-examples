@@ -9,7 +9,7 @@ import colorFragment from "./shaders/color/color.frag";
 import { vec3, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
 import { GeometryBuffers } from "@bolt-webgl/core/build/Mesh";
-import Floor from "@/webgl/modules/Batches/Floor";
+import Floor from "@/webgl/modules/batches/floor";
 
 export default class extends Base {
 

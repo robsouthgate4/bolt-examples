@@ -1,14 +1,14 @@
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES, CameraPersp, CameraOrtho } from "@bolt-webgl/core";
+import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES, CameraOrtho } from "@bolt-webgl/core";
 
 import normalVertex from "./shaders/normal/normal.vert";
 import normalFragment from "./shaders/normal/normal.frag";
 
 import { vec3, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
-import Cube from "@webgl/modules/Primitives/Cube";
-import Floor from "@/webgl/modules/Batches/Floor";
+import Cube from "@/webgl/modules/primitives/Cube";
+import Floor from "@/webgl/modules/batches/floor";
 
 export default class extends Base {
 
@@ -27,7 +27,6 @@ export default class extends Base {
     floorBatch: any;
     arcball: CameraArcball;
     frustumSize: number;
-    //arcball: CameraArcball;
 
     constructor() {
 

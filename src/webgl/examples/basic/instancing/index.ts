@@ -7,7 +7,7 @@ import defaultVertexInstanced from "./shaders/defaultInstanced/defaultInstanced.
 import defaultFragmentInstanced from "./shaders/defaultInstanced/defaultInstanced.frag";
 
 import { mat4, quat, vec3, } from "gl-matrix";
-import GLTFLoader from "@/webgl/modules/GLTFLoader";
+import GLTFLoader from "@/webgl/modules/gltf-Loader";
 
 export default class extends Base {
 

@@ -11,7 +11,7 @@ import simulationFragment from "./shaders/simulation/simulation.frag";
 
 import { mat4, vec3 } from "gl-matrix";
 
-import Plane from "@/webgl/modules/Primitives/Plane";
+import Plane from "@/webgl/modules/primitives/Plane";
 
 interface TransformFeedbackObject {
     updateVAO: VAO;

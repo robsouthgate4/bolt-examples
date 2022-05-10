@@ -9,8 +9,8 @@ import defaultFragment from "./shaders/default/default.frag";
 
 import { mat4, vec3, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
-import Cube from "@webgl/modules/Primitives/Cube";
-import Plane from "@webgl/modules/Primitives/Plane";
+import Cube from "@/webgl/modules/primitives/Cube";
+import Plane from "@/webgl/modules/primitives/Plane";
 
 // WIP
 

@@ -8,9 +8,9 @@ import normalFragment from "./shaders/normal/normal.frag";
 
 import { vec3, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
-import Sphere from "@webgl/modules/Primitives/Sphere";
-import Cube from "@webgl/modules/Primitives/Cube";
-import Floor from "@/webgl/modules/Batches/Floor";
+import Sphere from "@/webgl/modules/primitives/Sphere";
+import Cube from "@/webgl/modules/primitives/Cube";
+import Floor from "@/webgl/modules/batches/floor";
 
 export default class extends Base {
 
