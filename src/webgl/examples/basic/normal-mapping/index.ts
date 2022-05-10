@@ -1,0 +1,137 @@
+import Base from "@webgl/Base";
+import Bolt, { Shader, Batch, Node, CameraPersp, Texture, REPEAT, Mesh } from "@bolt-webgl/core";
+
+import normalmapVertex from "./shaders/normal-map/normal-map.vert";
+import normalmapFragment from "./shaders/normal-map/normal-map.frag";
+
+import colorVertex from "./shaders/color/color.vert";
+import colorFragment from "./shaders/color/color.frag";
+
+import { vec2, vec3, vec4, } from "gl-matrix";
+import CameraArcball from "@webgl/modules/CameraArcball";
+import GLTFLoader from "@/webgl/modules/gltf-Loader";
+import { GlTf } from "@/webgl/modules/gltf-Loader/types/GLTF";
+import Sphere from "@/webgl/modules/primitives/Sphere";
+export default class extends Base {
+
+    canvas: HTMLCanvasElement;
+    shaderEyes: Shader;
+    camera: CameraPersp;
+    assetsLoaded?: boolean;
+    bolt = Bolt.getInstance();
+    gl: WebGL2RenderingContext;
+    root!: Node;
+    gltf!: GlTf;
+    arcball: CameraArcball;
+    normalMapShader: Shader;
+    matcapTexture!: Texture;
+    normalTexture!: Texture;
+    sphereBatch!: Batch;
+
+    constructor() {
+
+    	super();
+
+    	this.width = window.innerWidth;
+    	this.height = window.innerHeight;
+
+    	this.canvas = <HTMLCanvasElement>document.getElementById( "experience" );
+    	this.canvas.width = this.width;
+    	this.canvas.height = this.height;
+
+    	this.camera = new CameraPersp( {
+    		aspect: this.canvas.width / this.canvas.height,
+    		fov: 45,
+    		near: 0.1,
+    		far: 1000,
+    		position: vec3.fromValues( 0, 0, 5 ),
+    		target: vec3.fromValues( 0, 0, 0 ),
+    	} );
+
+    	this.arcball = new CameraArcball( this.camera, 4, 0.08 );
+
+    	this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
+    	this.bolt.setCamera( this.camera );
+
+    	this.gl = this.bolt.getContext();
+
+    	this.shaderEyes = new Shader( colorVertex, colorFragment );
+    	this.normalMapShader = new Shader( normalmapVertex, normalmapFragment );
+
+    	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+    	this.bolt.enableDepth();
+
+    	this.init();
+
+
+    }
+
+    async init() {
+
+    	const gltfLoader = new GLTFLoader( this.bolt );
+    	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf/examples/phantom/", "PhantomLogoPose2.gltf" );
+
+    	this.matcapTexture = new Texture( {
+    		imagePath: "/static/textures/matcap/matcap.jpeg"
+    	} );
+
+    	this.normalTexture = new Texture( {
+    		imagePath: "/static/textures/normal-map/liquid-normal.jpeg",
+    		wrapS: REPEAT,
+    		wrapT: REPEAT
+    	} );
+
+    	await this.matcapTexture.load();
+    	await this.normalTexture.load();
+
+    	this.assetsLoaded = true;
+
+    	this.normalMapShader.activate();
+    	this.normalMapShader.setTexture( "baseTexture", this.matcapTexture );
+    	this.normalMapShader.setVector2( "normalUVScale", vec2.fromValues( 5, 5 ) );
+    	this.normalMapShader.setFloat( "normalHeight", 0.5 );
+    	this.normalMapShader.setTexture( "normalTexture", this.normalTexture );
+    	this.normalMapShader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
+
+    	this.root = new Node();
+    	this.sphereBatch = new Batch( new Mesh( new Sphere( { widthSegments: 24, heightSegments: 24 } ) ), this.normalMapShader );
+    	this.sphereBatch.setParent( this.root );
+
+    	this.resize();
+
+    }
+
+    resize() {
+
+    	this.bolt.resizeFullScreen();
+    	this.camera.updateProjection( this.gl.canvas.width / this.gl.canvas.height );
+
+    }
+
+    earlyUpdate( elapsed: number, delta: number ) {
+
+    	return;
+
+    }
+
+    update( elapsed: number, delta: number ) {
+
+    	if ( ! this.assetsLoaded ) return;
+
+    	this.arcball.update();
+
+    	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+    	this.bolt.clear( 0, 0, 0, 0 );
+
+    	this.bolt.draw( this.root );
+
+
+    }
+
+    lateUpdate( elapsed: number, delta: number ): void {
+
+    	return;
+
+    }
+
+}

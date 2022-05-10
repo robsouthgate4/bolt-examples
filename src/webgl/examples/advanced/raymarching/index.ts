@@ -8,7 +8,7 @@ import fragmentShader from "./shaders/raymarch.frag";
 import { vec3, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
 import Cube from "@/webgl/modules/primitives/Cube";
-import Post from "@/webgl/modules/post/Post";
+import Post from "@/webgl/modules/post";
 import FXAAPass from "@/webgl/modules/post/passes/FXAAPass";
 import Batch from "@bolt-webgl/core/build/Batch";
 

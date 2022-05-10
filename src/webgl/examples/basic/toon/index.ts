@@ -13,7 +13,7 @@ import { vec2, vec3, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
 import GLTFLoader from "@/webgl/modules/gltf-Loader";
 import { GlTf } from "@/webgl/modules/gltf-Loader/types/GLTF";
-import Post from "@/webgl/modules/post/Post";
+import Post from "@/webgl/modules/post";
 import Axis from "@/webgl/modules/batches/axis";
 import Floor from "@/webgl/modules/batches/floor";
 import Cube from "@/webgl/modules/primitives/Cube";

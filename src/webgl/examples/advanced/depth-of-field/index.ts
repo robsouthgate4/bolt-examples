@@ -10,8 +10,7 @@ import depthVertexInstanced from "./shaders/depth/depth.vert";
 import depthFragmentInstanced from "./shaders/depth/depth.frag";
 
 import { mat4, quat, vec2, vec3, } from "gl-matrix";
-import CameraFPS from "@/webgl/modules/CameraFPS";
-import Post from "@/webgl/modules/post/Post";
+import Post from "@/webgl/modules/post";
 import RenderPass from "@/webgl/modules/post/passes/RenderPass";
 import DOFPass from "@/webgl/modules/post/passes/DOFPass";
 import FXAAPass from "@/webgl/modules/post/passes/FXAAPass";

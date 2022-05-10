@@ -6,7 +6,7 @@ import colorFragment from "./shaders/color/color.frag";
 
 import { vec3, vec4, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
-import Post from "@/webgl/modules/post/Post";
+import Post from "@/webgl/modules/post";
 import FXAAPass from "@/webgl/modules/post/passes/FXAAPass";
 import RGBSplitPass from "@/webgl/modules/post/passes/RGBSplitPass";
 import PixelatePass from "@/webgl/modules/post/passes/PixelatePass";
