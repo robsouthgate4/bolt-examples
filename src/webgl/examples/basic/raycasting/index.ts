@@ -10,13 +10,13 @@ import rayFragment from "./shaders/ray/ray.frag";
 
 import { vec3 } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
-import Floor from "@/webgl/modules/Batches/Floor";
-import AxisAlignedBox from "@/webgl/modules/Raycast/AxisAlignedBox";
-import { BoxBounds } from "@bolt-webgl/core/lib/Mesh";
-import Ray from "@/webgl/modules/Raycast/Ray";
-import Raycast from "@/webgl/modules/Raycast";
-import Sphere from "@/webgl/modules/Primitives/Sphere";
-import Cube from "@/webgl/modules/Primitives/Cube";
+import Floor from "@/webgl/modules/batches/floor";
+import AxisAlignedBox from "@/webgl/modules/raycast/AxisAlignedBox";
+import { BoxBounds } from "@bolt-webgl/core/build/Mesh";
+import Ray from "@/webgl/modules/raycast/Ray";
+import Raycast from "@/webgl/modules/raycast";
+import Sphere from "@/webgl/modules/primitives/Sphere";
+import Cube from "@/webgl/modules/primitives/Cube";
 
 export default class extends Base {
 

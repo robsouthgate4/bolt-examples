@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/basic/matcap";
+import Example from "@/webgl/examples/basic/normal-mapping";
 
 export default class Main {
 

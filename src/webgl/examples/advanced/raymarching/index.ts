@@ -7,10 +7,10 @@ import fragmentShader from "./shaders/raymarch.frag";
 
 import { vec3, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
-import Cube from "@/webgl/modules/Primitives/Cube";
-import Post from "@/webgl/modules/Post/Post";
-import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
-import Batch from "@bolt-webgl/core/lib/Batch";
+import Cube from "@/webgl/modules/primitives/Cube";
+import Post from "@/webgl/modules/post";
+import FXAAPass from "@/webgl/modules/post/passes/FXAAPass";
+import Batch from "@bolt-webgl/core/build/Batch";
 
 export default class extends Base {
 

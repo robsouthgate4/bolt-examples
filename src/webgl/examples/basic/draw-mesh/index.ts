@@ -1,15 +1,15 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES, CameraPersp, LINES, POINTS, TRIANGLE_STRIP, TRIANGLE_FAN, LINE_LOOP } from "@bolt-webgl/core";
+import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES, CameraPersp } from "@bolt-webgl/core";
 
 import colorVertex from "./shaders/color/color.vert";
 import colorFragment from "./shaders/color/color.frag";
 
 import { vec3, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
-import { GeometryBuffers } from "@bolt-webgl/core/lib/Mesh";
-import Floor from "@/webgl/modules/Batches/Floor";
+import { GeometryBuffers } from "@bolt-webgl/core/build/Mesh";
+import Floor from "@/webgl/modules/batches/floor";
 
 export default class extends Base {
 

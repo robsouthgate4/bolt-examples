@@ -6,14 +6,14 @@ import colorFragment from "./shaders/color/color.frag";
 
 import { vec3, vec4, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
-import Post from "@/webgl/modules/Post/Post";
-import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
-import RGBSplitPass from "@/webgl/modules/Post/passes/RGBSplitPass";
-import PixelatePass from "@/webgl/modules/Post/passes/PixelatePass";
-import RenderPass from "@/webgl/modules/Post/passes/RenderPass";
-import Floor from "@/webgl/modules/Batches/Floor";
-import GLTFLoader from "@/webgl/modules/GLTFLoader";
-import { GlTf } from "@/webgl/modules/GLTFLoader/types/GLTF";
+import Post from "@/webgl/modules/post";
+import FXAAPass from "@/webgl/modules/post/passes/FXAAPass";
+import RGBSplitPass from "@/webgl/modules/post/passes/RGBSplitPass";
+import PixelatePass from "@/webgl/modules/post/passes/PixelatePass";
+import RenderPass from "@/webgl/modules/post/passes/RenderPass";
+import Floor from "@/webgl/modules/batches/floor";
+import GLTFLoader from "@/webgl/modules/gltf-Loader";
+import { GlTf } from "@/webgl/modules/gltf-Loader/types/GLTF";
 export default class extends Base {
 
     canvas: HTMLCanvasElement;
@@ -79,7 +79,7 @@ export default class extends Base {
     async init() {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
-    	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf/examples/phantom/", "PhantomLogoPose.gltf" );
+    	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf/examples/phantom/", "PhantomLogoPose2.gltf" );
     	this.assetsLoaded = true;
 
     	this.rbgSplit = new RGBSplitPass( this.bolt, {

@@ -11,7 +11,7 @@ import simulationFragment from "./shaders/simulation/simulation.frag";
 
 import { mat4, vec3 } from "gl-matrix";
 
-import Plane from "@/webgl/modules/Primitives/Plane";
+import Plane from "@/webgl/modules/primitives/Plane";
 
 interface TransformFeedbackObject {
     updateVAO: VAO;
@@ -95,7 +95,7 @@ export default class extends Base {
     		fov: 45,
     		near: 0.1,
     		far: 1000,
-    		position: vec3.fromValues( 0, 0, 25 ),
+    		position: vec3.fromValues( 0, 0, 40 ),
     		target: vec3.fromValues( 0, 1, 0 ),
     	} );
 
@@ -247,7 +247,7 @@ export default class extends Base {
     	this.camera.update();
 
     	this.bolt.setViewPort( 0, 0, this.gl.canvas.width, this.gl.canvas.height );
-    	this.bolt.clear( 0, 0, 0, 1 );
+    	this.bolt.clear( 0, 0, 0, 0 );
 
     	{
 

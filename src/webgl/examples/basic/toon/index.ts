@@ -3,7 +3,7 @@
 import Base from "@webgl/Base";
 import Bolt, { Shader, Node, Batch, FBO, Texture, COLOR_ATTACHMENT0, RBO, Mesh, NEAREST, TextureCube, CameraPersp } from "@bolt-webgl/core";
 
-import FXAAPass from "@/webgl/modules/Post/passes/FXAAPass";
+import FXAAPass from "@/webgl/modules/post/passes/FXAAPass";
 import geometryVertex from "./shaders/geometry/geometry.vert";
 import geometryFragment from "./shaders/geometry/geometry.frag";
 import compositionVertex from "./shaders/composition/composition.vert";
@@ -11,13 +11,13 @@ import compositionFragment from "./shaders/composition/composition.frag";
 
 import { vec2, vec3, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
-import GLTFLoader from "@/webgl/modules/GLTFLoader";
-import { GlTf } from "@/webgl/modules/GLTFLoader/types/GLTF";
-import Post from "@/webgl/modules/Post/Post";
-import Axis from "@/webgl/modules/Batches/Axis";
-import Floor from "@/webgl/modules/Batches/Floor";
-import Cube from "@/webgl/modules/Primitives/Cube";
-import ShaderPass from "@/webgl/modules/Post/passes/ShaderPass";
+import GLTFLoader from "@/webgl/modules/gltf-Loader";
+import { GlTf } from "@/webgl/modules/gltf-Loader/types/GLTF";
+import Post from "@/webgl/modules/post";
+import Axis from "@/webgl/modules/batches/axis";
+import Floor from "@/webgl/modules/batches/floor";
+import Cube from "@/webgl/modules/primitives/Cube";
+import ShaderPass from "@/webgl/modules/post/passes/ShaderPass";
 
 export default class extends Base {
 

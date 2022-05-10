@@ -6,7 +6,7 @@ import defaultVertex from "./shaders/default/default.vert";
 import defaultFragment from "./shaders/default/default.frag";
 
 import { vec3 } from "gl-matrix";
-import Plane from "@webgl/modules/Primitives/Plane";
+import Plane from "@/webgl/modules/primitives/Plane";
 import CameraArcball from "@/webgl/modules/CameraArcball";
 
 export default class extends Base {

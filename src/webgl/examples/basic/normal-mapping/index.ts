@@ -1,16 +1,18 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Batch, Node, CameraPersp, Texture } from "@bolt-webgl/core";
+import Bolt, { Shader, Batch, Node, CameraPersp, Texture, REPEAT, Mesh } from "@bolt-webgl/core";
 
-import matcapVertex from "./shaders/matcap/matcap.vert";
-import matcapFragment from "./shaders/matcap/matcap.frag";
+import normalmapVertex from "./shaders/normal-map/normal-map.vert";
+import normalmapFragment from "./shaders/normal-map/normal-map.frag";
 
 import colorVertex from "./shaders/color/color.vert";
 import colorFragment from "./shaders/color/color.frag";
 
-import { vec3, vec4, } from "gl-matrix";
+import { vec2, vec3, vec4, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
 import GLTFLoader from "@/webgl/modules/gltf-Loader";
 import { GlTf } from "@/webgl/modules/gltf-Loader/types/GLTF";
+import Sphere from "@/webgl/modules/primitives/Sphere";
+import Floor from "@/webgl/modules/batches/floor";
 export default class extends Base {
 
     canvas: HTMLCanvasElement;
@@ -22,8 +24,11 @@ export default class extends Base {
     root!: Node;
     gltf!: GlTf;
     arcball: CameraArcball;
-    shaderBody: Shader;
+    normalMapShader: Shader;
     matcapTexture!: Texture;
+    normalTexture!: Texture;
+    sphereBatch!: Batch;
+    floorBatch: any;
 
     constructor() {
 
@@ -41,8 +46,8 @@ export default class extends Base {
     		fov: 45,
     		near: 0.1,
     		far: 1000,
-    		position: vec3.fromValues( 0, 6, 6 ),
-    		target: vec3.fromValues( 0, 3, 0 ),
+    		position: vec3.fromValues( 0, 2, 5 ),
+    		target: vec3.fromValues( 0, 1, 0 ),
     	} );
 
     	this.arcball = new CameraArcball( this.camera, 4, 0.08 );
@@ -53,7 +58,7 @@ export default class extends Base {
     	this.gl = this.bolt.getContext();
 
     	this.shaderEyes = new Shader( colorVertex, colorFragment );
-    	this.shaderBody = new Shader( matcapVertex, matcapFragment );
+    	this.normalMapShader = new Shader( normalmapVertex, normalmapFragment );
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.enableDepth();
@@ -69,50 +74,34 @@ export default class extends Base {
     	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf/examples/phantom/", "PhantomLogoPose2.gltf" );
 
     	this.matcapTexture = new Texture( {
-    		imagePath: "/static/textures/matcap/matcap.jpeg"
+    		imagePath: "/static/textures/matcap/matcap2.jpeg"
+    	} );
+
+    	this.normalTexture = new Texture( {
+    		imagePath: "/static/textures/normal-map/metal-normal.jpeg",
+    		wrapS: REPEAT,
+    		wrapT: REPEAT
     	} );
 
     	await this.matcapTexture.load();
+    	await this.normalTexture.load();
 
     	this.assetsLoaded = true;
 
+    	this.normalMapShader.activate();
+    	this.normalMapShader.setTexture( "baseTexture", this.matcapTexture );
+    	this.normalMapShader.setVector2( "normalUVScale", vec2.fromValues( 2, 2 ) );
+    	this.normalMapShader.setFloat( "normalHeight", 0.1 );
+    	this.normalMapShader.setTexture( "normalTexture", this.normalTexture );
+    	this.normalMapShader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
+
     	this.root = new Node();
+    	this.sphereBatch = new Batch( new Mesh( new Sphere( { widthSegments: 24, heightSegments: 24 } ) ), this.normalMapShader );
+    	this.sphereBatch.transform.y = 1;
+    	this.sphereBatch.setParent( this.root );
 
-    	if ( this.gltf.scenes ) {
-
-    		for ( const scene of this.gltf.scenes ) {
-
-    			scene.root.transform.y = 2;
-    			scene.root.setParent( this.root );
-
-    			scene.root.traverse( ( node: Node ) => {
-
-    				if ( node instanceof Batch ) {
-
-    					if ( node.shader.name === "mat_phantom_body" ) {
-
-    						node.shader = this.shaderBody;
-    						node.shader.activate();
-    						node.shader.setTexture( "baseTexture", this.matcapTexture );
-    						node.shader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
-
-    					}
-
-    					if ( node.shader.name === "mat_phantom_eyes" ) {
-
-    						node.shader = this.shaderEyes;
-    						node.shader.activate();
-    						node.shader.setVector4( "baseColor", vec4.fromValues( 0, 0, 0, 1 ) );
-
-    					}
-
-    				}
-
-    			} );
-
-    		}
-
-    	}
+    	this.floorBatch = new Floor();
+    	this.floorBatch.setParent( this.root );
 
     	this.resize();
 
@@ -139,6 +128,8 @@ export default class extends Base {
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 0, 0, 0, 0 );
+
+    	this.sphereBatch.transform.rotateY = 0.15 * delta;
 
     	this.bolt.draw( this.root );
 
