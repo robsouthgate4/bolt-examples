@@ -52,8 +52,8 @@ void main()
 
     vec4 color = texture( baseTexture, vN );
 
-    vec3 lightPosition = vec3( -10.0, 0.0, 10.0 );
-    float diffuse = dot( normal, lightPosition ) * 1.0;
+    vec3 lightPosition = vec3( -5.0, 10.0, 10.0 );
+    float diffuse = dot( normal, lightPosition ) * 0.1;
     diffuse = min( 0.8, max( diffuse, 0.5 ) );
 
 

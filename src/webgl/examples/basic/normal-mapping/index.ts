@@ -12,6 +12,7 @@ import CameraArcball from "@webgl/modules/CameraArcball";
 import GLTFLoader from "@/webgl/modules/gltf-Loader";
 import { GlTf } from "@/webgl/modules/gltf-Loader/types/GLTF";
 import Sphere from "@/webgl/modules/primitives/Sphere";
+import Floor from "@/webgl/modules/batches/floor";
 export default class extends Base {
 
     canvas: HTMLCanvasElement;
@@ -27,6 +28,7 @@ export default class extends Base {
     matcapTexture!: Texture;
     normalTexture!: Texture;
     sphereBatch!: Batch;
+    floorBatch: any;
 
     constructor() {
 
@@ -44,8 +46,8 @@ export default class extends Base {
     		fov: 45,
     		near: 0.1,
     		far: 1000,
-    		position: vec3.fromValues( 0, 0, 5 ),
-    		target: vec3.fromValues( 0, 0, 0 ),
+    		position: vec3.fromValues( 0, 2, 5 ),
+    		target: vec3.fromValues( 0, 1, 0 ),
     	} );
 
     	this.arcball = new CameraArcball( this.camera, 4, 0.08 );
@@ -72,11 +74,11 @@ export default class extends Base {
     	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf/examples/phantom/", "PhantomLogoPose2.gltf" );
 
     	this.matcapTexture = new Texture( {
-    		imagePath: "/static/textures/matcap/matcap.jpeg"
+    		imagePath: "/static/textures/matcap/matcap2.jpeg"
     	} );
 
     	this.normalTexture = new Texture( {
-    		imagePath: "/static/textures/normal-map/liquid-normal.jpeg",
+    		imagePath: "/static/textures/normal-map/metal-normal.jpeg",
     		wrapS: REPEAT,
     		wrapT: REPEAT
     	} );
@@ -88,14 +90,18 @@ export default class extends Base {
 
     	this.normalMapShader.activate();
     	this.normalMapShader.setTexture( "baseTexture", this.matcapTexture );
-    	this.normalMapShader.setVector2( "normalUVScale", vec2.fromValues( 5, 5 ) );
-    	this.normalMapShader.setFloat( "normalHeight", 0.5 );
+    	this.normalMapShader.setVector2( "normalUVScale", vec2.fromValues( 2, 2 ) );
+    	this.normalMapShader.setFloat( "normalHeight", 0.1 );
     	this.normalMapShader.setTexture( "normalTexture", this.normalTexture );
     	this.normalMapShader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
 
     	this.root = new Node();
     	this.sphereBatch = new Batch( new Mesh( new Sphere( { widthSegments: 24, heightSegments: 24 } ) ), this.normalMapShader );
+    	this.sphereBatch.transform.y = 1;
     	this.sphereBatch.setParent( this.root );
+
+    	this.floorBatch = new Floor();
+    	this.floorBatch.setParent( this.root );
 
     	this.resize();
 
@@ -123,7 +129,7 @@ export default class extends Base {
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 0, 0, 0, 0 );
 
-    	this.root.transform.rotateY = 0.3 * delta;
+    	this.sphereBatch.transform.rotateY = 0.15 * delta;
 
     	this.bolt.draw( this.root );
 
