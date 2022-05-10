@@ -1,18 +1,20 @@
+
 import Base from "@webgl/Base";
-import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES } from "@bolt-webgl/core";
+import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES, CameraPersp } from "@bolt-webgl/core";
 
 import defaultVertex from "./shaders/default/default.vert";
 import defaultFragment from "./shaders/default/default.frag";
 
 import { vec3 } from "gl-matrix";
-import Plane from "@webgl/modules/Primitives/Plane";
+import Plane from "@/webgl/modules/primitives/Plane";
 import CameraArcball from "@/webgl/modules/CameraArcball";
 
 export default class extends Base {
 
     canvas: HTMLCanvasElement;
     shader: Shader;
-    camera: CameraArcball;
+    camera: CameraPersp;
+    arcball: CameraArcball;
     assetsLoaded?: boolean;
     torusTransform!: Transform;
     sphereBatch!: Batch;
@@ -42,18 +44,16 @@ export default class extends Base {
 
     	this.shader = new Shader( defaultVertex, defaultFragment );
 
-    	this.camera = new CameraArcball(
-    		this.width,
-    		this.height,
-    		vec3.fromValues( 0, 0, 10 ),
-    		vec3.fromValues( 0, 0, 0 ),
-    		45,
-    		0.01,
-    		1000,
-    		0.08,
-    		4,
-    		0.5
-    	);
+    	this.camera = new CameraPersp( {
+    		aspect: this.canvas.width / this.canvas.height,
+    		fov: 45,
+    		near: 0.1,
+    		far: 1000,
+    		position: vec3.fromValues( 0, 3, 10 ),
+    		target: vec3.fromValues( 0, 1, 0 ),
+    	} );
+
+    	this.arcball = new CameraArcball( this.camera, 4, 0.08 );
 
     	this.camera.lookAt( vec3.fromValues( 0, 0, 0 ) );
 
@@ -121,6 +121,8 @@ export default class extends Base {
     resize() {
 
     	this.bolt.resizeFullScreen();
+    	this.camera.updateProjection( this.canvas.width / this.canvas.height );
+
     	const vp = this.generateViewport();
 
     	// now resize all batches

@@ -1,5 +1,7 @@
+
+
 import Base from "@webgl/Base";
-import Bolt, { DYNAMIC_DRAW, FLOAT, IBO, POINTS, Shader, STATIC_DRAW, TRIANGLES, UNSIGNED_SHORT, VAO, VBO } from "@bolt-webgl/core";
+import Bolt, { CameraPersp, DYNAMIC_DRAW, FLOAT, IBO, POINTS, Shader, STATIC_DRAW, TRIANGLES, UNSIGNED_SHORT, VAO, VBO } from "@bolt-webgl/core";
 
 import particlesVertexInstanced from "./shaders/particles/particles.vert";
 import particlesFragmentInstanced from "./shaders/particles/particles.frag";
@@ -9,8 +11,7 @@ import simulationFragment from "./shaders/simulation/simulation.frag";
 
 import { mat4, vec3 } from "gl-matrix";
 
-import Plane from "@/webgl/modules/Primitives/Plane";
-import CameraArcball from "@/webgl/modules/CameraArcball";
+import Plane from "@/webgl/modules/primitives/Plane";
 
 interface TransformFeedbackObject {
     updateVAO: VAO;
@@ -24,7 +25,7 @@ export default class extends Base {
     gl: WebGL2RenderingContext;
     particleShader!: Shader;
     lightPosition: vec3;
-    camera: CameraArcball;
+    camera: CameraPersp;
     assetsLoaded!: boolean;
     simulationShader!: Shader;
     simulationShaderLocations!: { oldPosition: number; oldVelocity: number; oldLifeTime: number; initLifeTime: number; initPosition: number; };
@@ -89,17 +90,15 @@ export default class extends Base {
 
     	this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
-    	this.camera = new CameraArcball(
-    		this.width,
-    		this.height,
-    		vec3.fromValues( 0, 0, 25 ),
-    		vec3.fromValues( 0, 1, 0 ),
-    		45,
-    		0.01,
-    		1000
-    	);
+    	this.camera = new CameraPersp( {
+    		aspect: this.canvas.width / this.canvas.height,
+    		fov: 45,
+    		near: 0.1,
+    		far: 1000,
+    		position: vec3.fromValues( 0, 0, 40 ),
+    		target: vec3.fromValues( 0, 1, 0 ),
+    	} );
 
-    	this.camera.lookAt( vec3.fromValues( 0, 0, 0 ) );
     	this.bolt.setCamera( this.camera );
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.enableDepth();
@@ -231,8 +230,7 @@ export default class extends Base {
     resize() {
 
     	this.bolt.resizeFullScreen();
-
-    	this.camera.resize( this.gl.canvas.width, this.gl.canvas.height );
+    	this.camera.updateProjection( this.gl.canvas.width / this.gl.canvas.height );
 
     }
 
@@ -246,12 +244,10 @@ export default class extends Base {
 
     	if ( ! this.assetsLoaded ) return;
 
-
-
     	this.camera.update();
 
     	this.bolt.setViewPort( 0, 0, this.gl.canvas.width, this.gl.canvas.height );
-    	this.bolt.clear( 0, 0, 0, 1 );
+    	this.bolt.clear( 0, 0, 0, 0 );
 
     	{
 

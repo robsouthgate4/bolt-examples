@@ -47,7 +47,7 @@ export default class DOFPass extends Pass {
     	this.shader.activate();
     	this.shader.setTexture( "map", readFBO.targetTexture );
 
-    	this.fullScreenTriangle.drawTriangles( this.shader );
+    	this.fullScreenTriangle.draw( this.shader );
 
     	readFBO.unbind();
     	writeFbo.unbind();

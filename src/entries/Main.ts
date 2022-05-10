@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/basic/raycasting";
+import Example from "@/webgl/examples/basic/normal-mapping";
 
 export default class Main {
 

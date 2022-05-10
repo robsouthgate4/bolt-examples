@@ -16,7 +16,7 @@ out vec3 NormalEyeSpace;
 
 void main() {
 
-    Normal = ( normal * vec4( aNormal, 0.0 ) ).xyz;
+    Normal = normalize(( normal * vec4( aNormal, 0.0 ) ).xyz);
 
     Uv = aUv;
 

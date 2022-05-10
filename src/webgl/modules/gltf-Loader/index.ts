@@ -1,12 +1,12 @@
 
 import { quat, vec3, vec4 } from "gl-matrix";
-import Bolt, { VBO, VAO, Transform, Mesh, Node, Batch, Shader } from "@bolt-webgl/core";
+import Bolt, { VBO, VAO, Transform, Mesh, Node, Batch, Shader, Texture, REPEAT } from "@bolt-webgl/core";
 
-import { GlTf, Mesh as GLTFMesh, MeshPrimitive } from "./types/GLTF";
-import { GeometryBuffers } from "@bolt-webgl/core/lib/Mesh";
+import { GlTf, Image, Mesh as GLTFMesh, MeshPrimitive, Sampler, Texture as GLTFTexture } from "./types/GLTF";
+import { GeometryBuffers } from "@bolt-webgl/core/build/Mesh";
 
-import vertexShader from "../../examples/shaders/color/color.vert";
-import fragmentShader from "../../examples/shaders/color/color.frag";
+import vertexShader from "./shaders/color/color.vert";
+import fragmentShader from "./shaders/color/color.frag";
 
 interface AccessorDict {
     [id: string]: number;
@@ -18,6 +18,12 @@ interface AttributeInfo {
     numComponents: number;
     stride: number;
     offset: number;
+}
+
+interface TextureSampler {
+    source?: Image;
+    sourceIndex?: number;
+    sampler?: Sampler;
 }
 interface AttribName {
     [id: string]: AttributeInfo;
@@ -40,6 +46,9 @@ export default class GLTFLoader {
 
     bolt: Bolt;
     gl: WebGL2RenderingContext;
+
+    _textures: TextureSampler[] = [];
+    _basePath!: string;
 
     private _accessorTypeToNumComponentsMap: AccessorDict = {
     	'SCALAR': 1,
@@ -66,9 +75,12 @@ export default class GLTFLoader {
     	this.bolt = bolt;
     	this.gl = bolt.getContext();
 
+
     }
 
     async loadGLTF( basePath: string, url: string ) {
+
+    	this._basePath = basePath;
 
     	const response = await fetch( `${basePath}${url}` );
     	if ( ! response.ok ) {
@@ -83,6 +95,37 @@ export default class GLTFLoader {
     	if ( gltf.buffers ) {
 
     		bin = await this._loadBinaryBuffer( `${basePath}/${gltf.buffers[ 0 ].uri}` ) as ArrayBufferLike;
+
+    	}
+
+    	if ( gltf.textures ) {
+
+    		gltf.textures.forEach( ( texture: GLTFTexture ) => {
+
+    			const parsedTexture = {} as TextureSampler;
+
+    			if ( texture.source !== undefined ) {
+
+    				const source = gltf.images && gltf.images[ texture.source ];
+
+    				parsedTexture.source = source;
+
+
+    			}
+
+    			if ( texture.sampler !== undefined ) {
+
+    				const sampler = gltf.samplers && gltf.samplers[ texture.sampler ];
+    				parsedTexture.sampler = sampler;
+
+    			}
+
+    			console.log( parsedTexture );
+
+    			this._textures.push( parsedTexture );
+
+
+    		} );
 
     	}
 
@@ -143,7 +186,6 @@ export default class GLTFLoader {
     				for ( const [ key, value ] of Object.entries( attributes ) ) {
 
     					index ++;
-
     					vao.linkAttrib( value.vbo, index, value.numComponents, this.gl.FLOAT, value.stride, value.offset );
 
     				}
@@ -204,15 +246,43 @@ export default class GLTFLoader {
 
     							if ( primitive.materialBolt.pbrMetallicRoughness ) {
 
+    							    const { baseColorFactor, baseColorTexture } = primitive.materialBolt.pbrMetallicRoughness;
 
-    							const { baseColorFactor } = primitive.materialBolt.pbrMetallicRoughness;
+    							    const shader = batch.shader;
+    								shader.name = primitive.materialBolt.name;
+    							    shader.activate();
 
-    							const shader = batch.shader;
-    							shader.activate();
-    							shader.setVector4( "baseColor", baseColorFactor ? vec4.fromValues( baseColorFactor[ 0 ], baseColorFactor[ 1 ], baseColorFactor[ 2 ], baseColorFactor[ 3 ] ) : vec4.fromValues( 1, 1, 1, 1 ) );
+    								if ( baseColorFactor ) {
+
+    									shader.setVector4( "baseColor", baseColorFactor ? vec4.fromValues( baseColorFactor[ 0 ], baseColorFactor[ 1 ], baseColorFactor[ 2 ], baseColorFactor[ 3 ] ) : vec4.fromValues( 1, 1, 1, 1 ) );
+
+    								}
+
+    								if ( baseColorTexture ) {
+
+    									const t = this._textures[ baseColorTexture.index ];
+
+    									// TODO: get sampler data
+
+    									const createTexture = async () => {
+
+    										const texture = new Texture( {
+    											imagePath: this._basePath + t.source?.uri,
+    											wrapS: REPEAT,
+    											wrapT: REPEAT
+    										} );
+
+    										await texture.load();
+    										shader.setTexture( "baseTexture", texture );
+
+    									};
+
+    									createTexture();
+
+
+    								}
 
     							}
-
 
     						}
 

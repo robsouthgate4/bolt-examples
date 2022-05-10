@@ -1,20 +1,20 @@
+
 import Base from "@webgl/Base";
-import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES } from "@bolt-webgl/core";
+import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES, CameraPersp } from "@bolt-webgl/core";
 
 import normalVertex from "./shaders/normal/normal.vert";
 import normalFragment from "./shaders/normal/normal.frag";
 
 import { vec3, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
-import Sphere from "@webgl/modules/Primitives/Sphere";
-import Cube from "@webgl/modules/Primitives/Cube";
-import Floor from "@/webgl/modules/Batches/Floor";
+import Cube from "@/webgl/modules/primitives/Cube";
+import Floor from "@/webgl/modules/batches/floor";
 
 export default class extends Base {
 
     canvas: HTMLCanvasElement;
     shader: Shader;
-    camera: CameraArcball;
+    camera: CameraPersp;
     assetsLoaded?: boolean;
     torusTransform!: Transform;
     sphereBatch!: Batch;
@@ -25,6 +25,7 @@ export default class extends Base {
     gl: WebGL2RenderingContext;
     root!: Node;
     floorBatch: any;
+    arcball: CameraArcball;
 
     constructor() {
 
@@ -44,18 +45,16 @@ export default class extends Base {
 
     	this.shader = new Shader( normalVertex, normalFragment );
 
-    	this.camera = new CameraArcball(
-    		this.width,
-    		this.height,
-    		vec3.fromValues( 0, 2, 5 ),
-    		vec3.fromValues( 0, 0.75, 0 ),
-    		45,
-    		0.01,
-    		1000,
-    		0.08,
-    		4,
-    		0.5
-    	);
+    	this.camera = new CameraPersp( {
+    		aspect: this.canvas.width / this.canvas.height,
+    		fov: 45,
+    		near: 0.1,
+    		far: 1000,
+    		position: vec3.fromValues( 0, 3, 10 ),
+    		target: vec3.fromValues( 0, 0, 0 ),
+    	} );
+
+    	this.arcball = new CameraArcball( this.camera, 4, 0.08 );
 
     	this.bolt.setCamera( this.camera );
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
@@ -89,6 +88,7 @@ export default class extends Base {
     resize() {
 
     	this.bolt.resizeFullScreen();
+    	this.camera.updateProjection( this.canvas.width / this.canvas.height );
 
     }
 
@@ -100,7 +100,7 @@ export default class extends Base {
 
     update( elapsed: number, delta: number ) {
 
-    	this.camera.update();
+    	this.arcball.update();
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 1, 1, 1, 1 );
