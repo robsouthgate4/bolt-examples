@@ -9,8 +9,8 @@ import colorFragment from "./shaders/color/color.frag";
 
 import { vec2, vec3, vec4, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
-import GLTFLoader from "@/webgl/modules/gltf-Loader";
-import { GlTf } from "@/webgl/modules/gltf-Loader/types/GLTF";
+import GLTFLoader from "@/webgl/modules/gltf-loader";
+import { GlTf } from "@/webgl/modules/gltf-loader/types/GLTF";
 import Sphere from "@/webgl/modules/primitives/Sphere";
 import Floor from "@/webgl/modules/batches/floor";
 export default class extends Base {

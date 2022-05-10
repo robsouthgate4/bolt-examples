@@ -12,8 +12,8 @@ import RGBSplitPass from "@/webgl/modules/post/passes/RGBSplitPass";
 import PixelatePass from "@/webgl/modules/post/passes/PixelatePass";
 import RenderPass from "@/webgl/modules/post/passes/RenderPass";
 import Floor from "@/webgl/modules/batches/floor";
-import GLTFLoader from "@/webgl/modules/gltf-Loader";
-import { GlTf } from "@/webgl/modules/gltf-Loader/types/GLTF";
+import GLTFLoader from "@/webgl/modules/gltf-loader";
+import { GlTf } from "@/webgl/modules/gltf-loader/types/GLTF";
 export default class extends Base {
 
     canvas: HTMLCanvasElement;

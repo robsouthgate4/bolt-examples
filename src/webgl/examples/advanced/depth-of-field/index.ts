@@ -14,7 +14,7 @@ import Post from "@/webgl/modules/post";
 import RenderPass from "@/webgl/modules/post/passes/RenderPass";
 import DOFPass from "@/webgl/modules/post/passes/DOFPass";
 import FXAAPass from "@/webgl/modules/post/passes/FXAAPass";
-import GLTFLoader from "@/webgl/modules/gltf-Loader";
+import GLTFLoader from "@/webgl/modules/gltf-loader";
 
 export default class extends Base {
 

@@ -4,8 +4,8 @@ import Bolt, { CameraPersp, Node, Transform } from "@bolt-webgl/core";
 
 import { vec3 } from "gl-matrix";
 import CameraArcball from "@/webgl/modules/CameraArcball";
-import GLTFLoader from "@/webgl/modules/gltf-Loader";
-import { GlTf } from "@/webgl/modules/gltf-Loader/types/GLTF";
+import GLTFLoader from "@/webgl/modules/gltf-loader";
+import { GlTf } from "@/webgl/modules/gltf-loader/types/GLTF";
 import Floor from "@/webgl/modules/batches/floor";
 
 export default class extends Base {
