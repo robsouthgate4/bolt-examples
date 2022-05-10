@@ -14,8 +14,8 @@ import colorFragment from "../matcap/shaders/color/color.frag";
 
 import { getProject, ISheetObject, types as t } from "@theatre/core";
 import studio from "@theatre/studio";
-import GLTFLoader from "@/webgl/modules/gltf-Loader";
-import { GlTf } from "@/webgl/modules/gltf-Loader/types/GLTF";
+import GLTFLoader from "@/webgl/modules/gltf-loader";
+import { GlTf } from "@/webgl/modules/gltf-loader/types/GLTF";
 
 export default class extends Base {
 
