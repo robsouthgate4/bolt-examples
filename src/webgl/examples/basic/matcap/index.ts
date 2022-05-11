@@ -138,7 +138,7 @@ export default class extends Base {
     	this.arcball.update();
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-    	this.bolt.clear( 0, 0, 0, 0 );
+    	this.bolt.clear( 0.9, 0.9, 0, 1 );
 
     	this.bolt.draw( this.root );
 

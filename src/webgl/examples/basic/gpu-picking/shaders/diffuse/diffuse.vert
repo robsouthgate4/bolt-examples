@@ -20,9 +20,11 @@ uniform mat4 normal;
 void main()
 {
 
-    Normal = normalize( normal * vec4( aNormal, 0.0 ) ).xyz;
+    Normal = (vec4( aNormal, 0.0 ) ).xyz;
 
     Uv = aUv;
+
+    WorldPosition = ( model * vec4( aPosition, 1.0 ) ).xyz;
 
     mat4 mvp = projection * view * model;
 

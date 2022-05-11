@@ -166,6 +166,7 @@ export default class extends Base {
     	if ( ! this.assetsLoaded ) return;
 
     	this.arcball.update();
+
     	this.post.begin();
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );

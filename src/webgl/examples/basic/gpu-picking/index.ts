@@ -2,16 +2,20 @@
 import Base from "@webgl/Base";
 import Bolt, { Shader, Texture, Batch, Node, CameraPersp, Mesh } from "@bolt-webgl/core";
 
-import { vec3, vec4 } from "gl-matrix";
+import { vec2, vec3, vec4 } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
 
 import diffuseVertex from "./shaders/diffuse/diffuse.vert";
 import diffuseFragment from "./shaders/diffuse/diffuse.frag";
-import GLTFLoader from "@/webgl/modules/gltf-loader";
 import { GlTf } from "@/webgl/modules/gltf-loader/types/GLTF";
 import Floor from "@/webgl/modules/batches/floor";
 import Sphere from "@/webgl/modules/primitives/Sphere";
 import GPUPicker from "@/webgl/modules/gpu-picker";
+
+interface PickingData {
+    batch: Batch,
+    id: number
+}
 
 export default class extends Base {
 
@@ -31,7 +35,10 @@ export default class extends Base {
     floor!: Floor;
 
     objectCount: number = 20;
-    picker: GPUPicker;
+    picker!: GPUPicker;
+    currentPickerID: number = - 1;
+    pickingDataArray: PickingData[] = [];
+    mouse: vec2 = vec2.fromValues( - 1, - 1 );
 
     constructor() {
 
@@ -48,8 +55,6 @@ export default class extends Base {
     	this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
 
     	this.gl = this.bolt.getContext();
-
-    	this.picker = new GPUPicker( { width: this.canvas.width, height: this.canvas.height } );
 
     	this.camera = new CameraPersp( {
     		aspect: this.canvas.width / this.canvas.height,
@@ -68,16 +73,30 @@ export default class extends Base {
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.enableDepth();
 
+    	// initialise the gpu picker
+    	this.picker = new GPUPicker( this.bolt, { width: this.canvas.width, height: this.canvas.height } );
+
     	this.init();
+    	this.addListeners();
+
+
+    }
+
+    addListeners() {
+
+    	this.canvas.addEventListener( 'mousemove', ( e: MouseEvent ) => {
+
+    		const rect = this.canvas.getBoundingClientRect();
+    		this.mouse[ 0 ] = e.clientX - rect.left;
+    		this.mouse[ 1 ] = e.clientY - rect.top;
+
+    	} );
 
     }
 
     async init() {
 
     	this.assetsLoaded = true;
-
-    	this.shader.activate();
-    	this.shader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
 
     	this.root = new Node();
     	this.floor = new Floor();
@@ -88,25 +107,23 @@ export default class extends Base {
     	const gridPadding = 2.25;
     	let id = 0;
 
-        interface PickingData {
-            batch: Batch | undefined,
-            id: number | null
-        }
-
-        const pickingDataArray: PickingData[] = [];
-
     	for ( let x = 0; x < xCount; x ++ ) {
 
     		for ( let y = 0; y < yCount; y ++ ) {
 
         		id ++;
 
+    			const shader = new Shader( diffuseVertex, diffuseFragment );
+    			shader.activate();
+    	        shader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
+
     			const sphereBatch = new Batch(
     				new Mesh( new Sphere( { widthSegments: 24, heightSegments: 24 } ) ),
-    				this.shader
+    				shader
     			);
 
-        		pickingDataArray.push( {
+    			// generate ids to match picker against
+        		this.pickingDataArray.push( {
         			batch: sphereBatch,
         			id
         		} );
@@ -119,7 +136,8 @@ export default class extends Base {
 
     	}
 
-        console.log( pickingDataArray );
+    	// pass the nodes that need to be picked
+    	this.picker.setNodes( this.root );
 
     	this.resize();
 
@@ -145,10 +163,38 @@ export default class extends Base {
 
     	this.arcball.update();
 
+    	// Get the id of the object beneath the mouse
+    	const pickingId = this.picker.pick( this.mouse );
+
+    	if ( this.currentPickerID != pickingId ) {
+
+    		this.currentPickerID = pickingId;
+
+    		for ( let i = 0; i < this.pickingDataArray.length; i ++ ) {
+
+    			const pickingItem = this.pickingDataArray[ i ];
+    			const { batch } = pickingItem;
+
+    			if ( pickingItem.id === this.currentPickerID ) {
+
+    				batch.transform.scale = vec3.fromValues( 1.1, 1.1, 1.1 );
+    				batch.shader.activate();
+    				batch.shader.setVector4( "baseColor", vec4.fromValues( 0.9, 0.9, 1, 1 ) );
+
+    			} else {
+
+    				batch.transform.scale = vec3.fromValues( 1, 1, 1 );
+    				batch.shader.activate();
+    				batch.shader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
+
+    			}
+
+    		}
+
+    	}
+
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-    	this.bolt.clear( 0.6, 0.6, 0.6, 1 );
-
-
+    	this.bolt.clear( 0.8, 0.8, 0.8, 1 );
     	this.bolt.draw( [ this.root, this.floor ] );
 
     }

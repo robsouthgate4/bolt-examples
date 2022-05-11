@@ -16,8 +16,12 @@ uniform vec4 baseColor;
 void main()
 {
 
-    vec3 lightPosition = vec3( 10.0, 5.0, 30.0 );
-    float diffuse = dot( Normal, lightPosition ) * 1.0;
+    vec3 lightPosition = vec3( 0.0, 5.0, 10.0 );
+
+    vec3 norm           = normalize( Normal );
+    vec3 lightDirection = normalize( lightPosition - WorldPosition );
+
+    float diffuse = max( dot( Normal, lightDirection ), 0.5 );
 
     FragColor = vec4( baseColor.rgb * diffuse, 1.0 );
 
