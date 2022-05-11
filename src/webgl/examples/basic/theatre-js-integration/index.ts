@@ -16,6 +16,7 @@ import { getProject, ISheetObject, types as t } from "@theatre/core";
 import studio from "@theatre/studio";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
 import { GlTf } from "@/webgl/modules/gltf-loader/types/GLTF";
+import Floor from "@/webgl/modules/batches/floor";
 
 export default class extends Base {
 
@@ -54,6 +55,7 @@ export default class extends Base {
     shaderEyes: any;
     gltf!: GlTf;
     matcapTexture!: Texture;
+    floor!: Floor;
 
     constructor() {
 
@@ -76,13 +78,12 @@ export default class extends Base {
     		fov: 45,
     		near: 0.1,
     		far: 1000,
-    		position: vec3.fromValues( 0, 6, 10 ),
-    		target: vec3.fromValues( 0, 3, 0 ),
+    		position: vec3.fromValues( 4, 2, 4 ),
+    		target: vec3.fromValues( 0, 2.5, 0 ),
     	} );
 
     	this.shaderEyes = new Shader( colorVertex, colorFragment );
     	this.shaderBody = new Shader( matcapVertex, matcapFragment );
-
 
     	this.arcball = new CameraArcball( this.camera, 4, 0.08 );
 
@@ -126,7 +127,7 @@ export default class extends Base {
     	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf/examples/phantom/", "PhantomLogoPose2.gltf" );
 
     	this.matcapTexture = new Texture( {
-    		imagePath: "/static/textures/matcap/matcap2.jpeg"
+    		imagePath: "/static/textures/matcap/matcap3.jpeg"
     	} );
 
     	await this.matcapTexture.load();
@@ -135,13 +136,11 @@ export default class extends Base {
 
     	this.root = new Node();
 
+    	this.floor = new Floor();
+
     	if ( this.gltf.scenes ) {
 
     		for ( const scene of this.gltf.scenes ) {
-
-    			console.log( 'scene', scene );
-
-    			scene.root.transform.y = 2;
 
     			scene.root.transform.scale = vec3.fromValues( 0.5, 0.5, 0.5 );
     			scene.root.setParent( this.root );
@@ -199,7 +198,7 @@ export default class extends Base {
     	this.arcball.update();
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-    	this.bolt.clear( 0.3, 0.3, 0.3, 1 );
+    	this.bolt.clear( 0.6, 0.6, 0.6, 1 );
 
     	this.root.transform.position = vec3.fromValues(
     		this.theatreProject.value.x,
@@ -213,10 +212,8 @@ export default class extends Base {
     		this.theatreProject.value.scaleZ
     	);
 
-    	this.root.transform.rotateY = 0.5 * delta;
 
-
-    	this.bolt.draw( this.root );
+    	this.bolt.draw( [ this.root, this.floor ] );
 
     }
 

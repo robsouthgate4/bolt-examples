@@ -16,7 +16,8 @@
           },
           "Dude": {
             "y": 0,
-            "scaleX": 1
+            "scaleX": 1,
+            "scaleY": 0.75
           }
         }
       },
@@ -276,7 +277,7 @@
                       0.5,
                       0
                     ],
-                    "value": 2
+                    "value": 1
                   },
                   {
                     "id": "5T6bZ7AlyK",
@@ -291,12 +292,54 @@
                     "value": 1
                   }
                 ]
+              },
+              "ZkacOrfFcQ": {
+                "type": "BasicKeyframedTrack",
+                "keyframes": [
+                  {
+                    "id": "VNv88jjnYL",
+                    "position": 0,
+                    "connectedRight": true,
+                    "handles": [
+                      0.5,
+                      1,
+                      0.5,
+                      0
+                    ],
+                    "value": 1
+                  },
+                  {
+                    "id": "QtVwugnYHn",
+                    "position": 1.1,
+                    "connectedRight": true,
+                    "handles": [
+                      0.5,
+                      1,
+                      0.5,
+                      0
+                    ],
+                    "value": 0.5879659806993152
+                  },
+                  {
+                    "id": "J93-mYa2RB",
+                    "position": 2.067,
+                    "connectedRight": true,
+                    "handles": [
+                      0,
+                      0.9875776397515528,
+                      0.5,
+                      0
+                    ],
+                    "value": 1
+                  }
+                ]
               }
             },
             "trackIdByPropPath": {
               "[\"y\"]": "Q5gHUHba1e",
               "[\"scaleX\"]": "kMsFaUlXdf",
-              "[\"scaleZ\"]": "AuZgZwqvMC"
+              "[\"scaleZ\"]": "AuZgZwqvMC",
+              "[\"scaleY\"]": "ZkacOrfFcQ"
             }
           }
         }
@@ -305,6 +348,7 @@
   },
   "definitionVersion": "0.4.0",
   "revisionHistory": [
+    "nh7-nFkUwFL3xSdC",
     "lKZNcwZyU_I_AVt4",
     "5YQt_SVrnDe4bHOb",
     "XfWm72LVrOz7Ui0t",
