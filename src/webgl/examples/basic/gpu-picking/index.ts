@@ -111,11 +111,11 @@ export default class extends Base {
 
     		for ( let y = 0; y < yCount; y ++ ) {
 
-        		id ++;
+    			id ++;
 
     			const shader = new Shader( diffuseVertex, diffuseFragment );
     			shader.activate();
-    	        shader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
+    			shader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
 
     			const sphereBatch = new Batch(
     				new Mesh( new Sphere( { widthSegments: 24, heightSegments: 24 } ) ),
@@ -123,10 +123,10 @@ export default class extends Base {
     			);
 
     			// generate ids to match picker against
-        		this.pickingDataArray.push( {
-        			batch: sphereBatch,
-        			id
-        		} );
+    			this.pickingDataArray.push( {
+    				batch: sphereBatch,
+    				id
+    			} );
 
     			sphereBatch.transform.x = ( x - ( xCount * 0.45 ) ) * gridPadding;
     			sphereBatch.transform.y = y * gridPadding + 0.75;

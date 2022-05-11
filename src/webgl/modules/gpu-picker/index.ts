@@ -42,6 +42,7 @@ export default class GPUPicker {
     	const pixelY = this._gl.canvas.height - mouse[ 1 ] * this._gl.canvas.height / this._gl.canvas.clientHeight - 1;
     	const data = new Uint8Array( 4 );
 
+    	// read pixel under mouse
     	this._gl.readPixels(
     		pixelX,
     		pixelY,
@@ -52,8 +53,10 @@ export default class GPUPicker {
     		data
     	);
 
+    	// decodes vec4 back to integer ( 8 bits per channel )
     	let id = data[ 0 ] + ( data[ 1 ] << 8 ) + ( data[ 2 ] << 16 ) + ( data[ 3 ] << 24 );
 
+    	// no picked item is equal to -1
     	if ( id < 0 ) id = - 1;
 
     	this._currentPickingID = id;
@@ -162,7 +165,9 @@ export default class GPUPicker {
 
 
     }
-
+    /**
+     * reset batches shader to initial shader before picking draw
+     */
     _restoreShaders() {
 
     	for ( let i = 0; i < this._pickingDataArray.length; i ++ ) {
