@@ -74,7 +74,7 @@ export default class extends Base {
     	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf/examples/phantom/", "PhantomLogoPose2.gltf" );
 
     	this.matcapTexture = new Texture( {
-    		imagePath: "/static/textures/matcap/matcap2.jpeg"
+    		imagePath: "/static/textures/matcap/matcap3.jpeg"
     	} );
 
     	this.normalTexture = new Texture( {
@@ -127,7 +127,7 @@ export default class extends Base {
     	this.arcball.update();
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-    	this.bolt.clear( 0, 0, 0, 0 );
+    	this.bolt.clear( 0.6, 0.6, 0.6, 1 );
 
     	this.sphereBatch.transform.rotateY = 0.15 * delta;
 

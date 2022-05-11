@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/basic/theatre-js-integration";
+import Example from "@/webgl/examples/basic/gpu-picking";
 
 export default class Main {
 
