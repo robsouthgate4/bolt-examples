@@ -20,8 +20,7 @@ export default class GPUPicker {
     private _gl: WebGL2RenderingContext;
     private _currentPickingID: number = - 1;
 
-
-    constructor( bolt: Bolt, { width = 500, height = 500 } ) {
+    constructor( bolt: Bolt, { width = 256, height = 256 } ) {
 
     	this._bolt = bolt;
     	this._gl = this._bolt.getContext();
@@ -146,6 +145,8 @@ export default class GPUPicker {
     		const { batch, id } = pickingItem;
     		batch.shader = this._pickingShader;
     		batch.shader.activate();
+
+    		// adapted from https://webgl2fundamentals.org/webgl/lessons/webgl-picking.html
     		batch.shader.setVector4(
     			"id",
     			vec4.fromValues(
