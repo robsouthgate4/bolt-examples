@@ -236,7 +236,7 @@
                       0.4800796812749004,
                       0.16025641025641027
                     ],
-                    "value": 0.8
+                    "value": 1.2
                   },
                   {
                     "id": "NjCWJ_XZVW",
@@ -348,6 +348,7 @@
   },
   "definitionVersion": "0.4.0",
   "revisionHistory": [
+    "4K1DzvDS9KSarYqT",
     "nh7-nFkUwFL3xSdC",
     "lKZNcwZyU_I_AVt4",
     "5YQt_SVrnDe4bHOb",
