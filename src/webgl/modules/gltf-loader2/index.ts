@@ -1,7 +1,7 @@
-import Bolt, { Batch, IBO, Mesh, Node, Shader, Transform, VBO } from "@bolt-webgl/core";
+import Bolt, { Batch, CLAMP_TO_EDGE, IBO, Mesh, Node, Shader, Texture, Transform, VBO } from "@bolt-webgl/core";
 import { GeometryBuffers } from "@bolt-webgl/core/build/Mesh";
 import { mat4, quat, vec3 } from "gl-matrix";
-import { Accessor, GlTf, Mesh as GLTFMesh, MeshPrimitive, Node as GLTFNode } from "./types/GLTF";
+import { Accessor, GlTf, GlTfId, Mesh as GLTFMesh, MeshPrimitive, Node as GLTFNode, Texture as GLTFTexture } from "./types/GLTF";
 import { TypedArray } from "./types/TypedArray";
 
 import vertexShader from "./shaders/color/color.vert";
@@ -45,6 +45,7 @@ export default class GLTFLoader2 {
     }
 
     private _scene!: Node[];
+    private _path!: string;
 
 
     constructor( bolt: Bolt ) {
@@ -53,58 +54,13 @@ export default class GLTFLoader2 {
 
     }
 
-    async _fetchBuffer( path: string, buffer: string ) {
 
-    	const dir = path.split( '/' ).slice( 0, - 1 ).join( '/' );
-    	const response = await fetch( `${dir}/${buffer}` );
-    	return await response.arrayBuffer();
-
-    }
-
-    _getBufferFromFile( gltf: GlTf, buffers: ArrayBuffer[], accessor: Accessor ) {
-
-    	const bufferView = gltf.bufferViews![ <number>accessor.bufferView ];
-
-    	const type = accessor.type;
-
-    	// size of the data set
-    	const size = this._accessorSize[ type ];
-
-    	// component type as number
-    	const componentType = accessor.componentType;
-
-    	// get the array buffer type from map and fetch relevant data
-    	const data = new this._typedArrayMap[ componentType ]( buffers[ bufferView.buffer ], ( accessor.byteOffset || 0 ) + ( bufferView.byteOffset || 0 ), accessor.count * size ) as ArrayBuffer;
-
-    	return {
-    		size,
-    		data,
-    		componentType,
-    		type
-    	} as Buffer;
-
-    }
-
-    _getAccessor = ( gltf: GlTf, mesh: GLTFMesh, primitive: MeshPrimitive, attributeName: string ) => {
-
-    	const attribute = primitive.attributes[ attributeName ];
-    	return gltf.accessors![ attribute ];
-
-    };
-
-    _getBufferByAttribute( gltf: GlTf, buffers: ArrayBuffer[], mesh: GLTFMesh, primitive: MeshPrimitive, attributeName: string ) {
-
-    	if ( primitive.attributes[ attributeName ] === undefined ) return;
-    	const accessor = this._getAccessor( gltf, mesh, primitive, attributeName );
-    	const bufferData = this._getBufferFromFile( gltf, buffers, accessor );
-    	return bufferData;
-
-
-    }
 
     async load( path: string, fileName: string ) {
 
     	const uri = path + fileName;
+
+    	this._path = path;
 
     	const response = await fetch( path + fileName );
     	const gltf = await response.json() as GlTf;
@@ -115,12 +71,6 @@ export default class GLTFLoader2 {
 
     	}
 
-    	// get the default scene
-    	const scene = gltf.scenes![ gltf.scene || 0 ];
-
-    	// get the root node of the scene
-    	const rootNode: number = scene.nodes![ 0 ];
-
     	// grab buffers from .bin
     	const buffers = await Promise.all(
     		gltf.buffers!.map( async( buffer ) => await this._fetchBuffer( uri, buffer.uri! ) )
@@ -129,8 +79,15 @@ export default class GLTFLoader2 {
     	// arrange nodes with correct transforms
     	const nodes = gltf.nodes!.map( ( node, index ) => this._arrangeNode( index, node ) );
 
-    	// construct batches
+    	// map batches
     	const batches = gltf.meshes!.map( ( mesh ) => this._loadBatch( gltf, mesh, buffers ) );
+
+    	// map textures
+    	const textures = await Promise.all(
+            gltf.textures!.map( async( texture ) => await this._loadTexture( gltf, texture ) )
+    	);
+
+    	console.log( textures );
 
     	const root = new Node();
     	root.name = "root";
@@ -232,19 +189,79 @@ export default class GLTFLoader2 {
 
     	} );
 
+    }
+
+    async _loadTexture( gltf: GlTf, texture: GLTFTexture ) {
+
+
+    	const t = gltf.images![ texture.source! ];
+    	const s = gltf.samplers![ texture.sampler! ];
+
+
+    	const boltTexture = new Texture( {
+    		imagePath: this._path + t.uri,
+    		wrapS: s.wrapS || CLAMP_TO_EDGE,
+    		wrapT: s.wrapT || CLAMP_TO_EDGE,
+    	} );
+
+    	boltTexture.minFilter = s.minFilter!;
+    	boltTexture.magFilter = s.magFilter!;
+
+    	await boltTexture.load();
+
+    	return boltTexture;
+
+    }
+
+    async _fetchBuffer( path: string, buffer: string ) {
+
+    	const dir = path.split( '/' ).slice( 0, - 1 ).join( '/' );
+    	const response = await fetch( `${dir}/${buffer}` );
+    	return await response.arrayBuffer();
+
+    }
+
+    _getBufferFromFile( gltf: GlTf, buffers: ArrayBuffer[], accessor: Accessor ) {
+
+    	const bufferView = gltf.bufferViews![ <number>accessor.bufferView ];
+
+    	const type = accessor.type;
+
+    	// size of the data set
+    	const size = this._accessorSize[ type ];
+
+    	// component type as number
+    	const componentType = accessor.componentType;
+
+    	// get the array buffer type from map and fetch relevant data
+    	const data = new this._typedArrayMap[ componentType ]( buffers[ bufferView.buffer ], ( accessor.byteOffset || 0 ) + ( bufferView.byteOffset || 0 ), accessor.count * size ) as ArrayBuffer;
+
+    	return {
+    		size,
+    		data,
+    		componentType,
+    		type
+    	} as Buffer;
+
+    }
+
+    _getBufferByAttribute( gltf: GlTf, buffers: ArrayBuffer[], mesh: GLTFMesh, primitive: MeshPrimitive, attributeName: string ) {
+
+    	if ( primitive.attributes[ attributeName ] === undefined ) return;
+    	const accessor = this._getAccessor( gltf, mesh, primitive, attributeName );
+    	const bufferData = this._getBufferFromFile( gltf, buffers, accessor );
+    	return bufferData;
 
 
     }
 
-    public get scene(): Node[] {
+    _getAccessor = ( gltf: GlTf, mesh: GLTFMesh, primitive: MeshPrimitive, attributeName: string ) => {
 
-    	return this._scene;
+    	const attribute = primitive.attributes[ attributeName ];
+    	return gltf.accessors![ attribute ];
 
-    }
-    public set scene( value: Node[] ) {
+    };
 
-    	this._scene = value;
 
-    }
 
 }
