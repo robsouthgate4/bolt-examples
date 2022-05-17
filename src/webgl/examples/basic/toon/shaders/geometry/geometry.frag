@@ -6,6 +6,7 @@ in vec3 Normal;
 in vec4 Position;
 in vec3 NormalEyeSpace;
 in vec2 Uv;
+in vec3 WorldPosition;
 
 layout( location = 0 ) out vec4 scene;
 layout( location = 1 ) out vec4 normal;
@@ -40,9 +41,18 @@ float convCoord(float depth, float offset){
 
 void main() {
 
-    scene  = vec4( 1.0 );
+    vec3 ambient = vec3( 0.8, 0.8, 1.0 );
+
+    vec3 lightPosition = vec3( 0.0, 10.0, 5.0 );
+    vec3 norm           = normalize( Normal );
+    vec3 lightDirection = normalize( lightPosition - WorldPosition );
+
+    float diffuse = step( 0.5, max( dot( Normal, lightDirection ), 0.0 ) );
+
+    scene  = vec4( ambient + vec3( diffuse * 0.3 ), 1.0 );
     normal = vec4( NormalEyeSpace, 1.0 );
     uv     = vec4( Uv, 0.0, 0.0 );
+
 
     float depthOffset = 0.0;
     float linearDepth = 1.0 / ( cameraPlanes.y - cameraPlanes.x );

@@ -18,8 +18,8 @@ out vec4 FragColor;
 
 void makeKernalNormal(inout vec4 n[9], sampler2D tex, vec2 coord, vec2 coordObject )
 {
-	float w = 1.0 / resolution.x + ( abs( fract( sin( coordObject.x * 10. ) ) ) * 0.001 );
-	float h = 1.0 / resolution.y  + ( abs( fract( cos( coordObject.y * 10. ) ) ) * 0.001 );
+	float w = 1.0 / resolution.x + ( abs( fract( sin( coordObject.x * 10. ) ) ) * 0.0 );
+	float h = 1.0 / resolution.y  + ( abs( fract( cos( coordObject.y * 10. ) ) ) * 0.0 );
 
 	n[0] = texture(tex, coord + ( vec2( -w, -h) * thickness ));
 	n[1] = texture(tex, coord + ( vec2(0.0, -h) * thickness ));
@@ -57,16 +57,14 @@ void main() {
 
 
     float sN = 1.0 - length( sobelNormal.rgb );
-    sN = pow( smoothstep( 0., 1.0, sN ), 0.5 );
+    sN = pow( smoothstep( 0., 1.0, sN ), 1.0 );
 
     float sD = 1.0 - length( sobelDepth.rgb );
     sD = pow( smoothstep( 0.5, 1.0, sD ), 1.0 );
 
-    float c = sN * sD;
+    float c = sN;
 
     outColor = mix( vec3( c ), outColor, c );
-
-    vec3 normals = texture( normal, Uv ).rgb;
 
     FragColor = vec4( outColor, 1.0 );
 

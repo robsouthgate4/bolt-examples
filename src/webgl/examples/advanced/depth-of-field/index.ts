@@ -58,7 +58,7 @@ export default class extends Base {
     	} );
 
     	this.bolt = Bolt.getInstance();
-    	this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
+    	this.bolt.init( this.canvas, { antialias: true, dpi: 1 } );
     	this.bolt.setCamera( this.camera );
     	this.gl = this.bolt.getContext();
 

@@ -13,10 +13,13 @@ out vec4 Position;
 out vec2 Uv;
 out vec3 Normal;
 out vec3 NormalEyeSpace;
+out vec3 WorldPosition;
 
 void main() {
 
-    Normal = normalize(( normal * vec4( aNormal, 0.0 ) ).xyz);
+    Normal = aNormal;
+
+    WorldPosition = ( model * vec4( aPosition, 1.0 ) ).xyz;
 
     Uv = aUv;
 
