@@ -9,8 +9,8 @@ import colorFragment from "./shaders/color/color.frag";
 
 import { vec3, vec4, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
-import GLTFLoader from "@/webgl/modules/gltf-loader";
-import { GlTf } from "@/webgl/modules/gltf-loader/types/GLTF";
+import GLTFLoader from "@webgl/modules/gltf-loader";
+
 export default class extends Base {
 
     canvas: HTMLCanvasElement;
@@ -20,7 +20,7 @@ export default class extends Base {
     bolt = Bolt.getInstance();
     gl: WebGL2RenderingContext;
     root!: Node;
-    gltf!: GlTf;
+    gltf!: Node;
     arcball: CameraArcball;
     shaderBody: Shader;
     matcapTexture!: Texture;
@@ -66,7 +66,7 @@ export default class extends Base {
     async init() {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
-    	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf/examples/phantom/", "PhantomLogoPose2.gltf" );
+    	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/phantom/", "PhantomLogoPose2.gltf" );
 
     	this.matcapTexture = new Texture( {
     		imagePath: "/static/textures/matcap/matcap.jpeg"
@@ -78,41 +78,35 @@ export default class extends Base {
 
     	this.root = new Node();
 
-    	if ( this.gltf.scenes ) {
+    	this.gltf.transform.y = 2;
+    	this.gltf.setParent( this.root );
 
-    		for ( const scene of this.gltf.scenes ) {
+    	this.gltf.traverse( ( node: Node ) => {
 
-    			scene.root.transform.y = 2;
-    			scene.root.setParent( this.root );
+    		if ( node instanceof Batch ) {
 
-    			scene.root.traverse( ( node: Node ) => {
+    			if ( node.shader.name === "mat_phantom_body" ) {
 
-    				if ( node instanceof Batch ) {
+    				node.shader = this.shaderBody;
+    				node.shader.activate();
+    				node.shader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
+    				node.shader.setTexture( "baseTexture", this.matcapTexture );
+    			    node.shader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
 
-    					if ( node.shader.name === "mat_phantom_body" ) {
+    			}
 
-    						node.shader = this.shaderBody;
-    						node.shader.activate();
-    						node.shader.setTexture( "baseTexture", this.matcapTexture );
-    						node.shader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
+    			if ( node.shader.name === "mat_phantom_eyes" ) {
 
-    					}
+    				node.shader = this.shaderEyes;
+    				node.shader.activate();
+    				node.shader.setVector4( "baseColor", vec4.fromValues( 0, 0, 0, 1 ) );
 
-    					if ( node.shader.name === "mat_phantom_eyes" ) {
+    			}
 
-    						node.shader = this.shaderEyes;
-    						node.shader.activate();
-    						node.shader.setVector4( "baseColor", vec4.fromValues( 0, 0, 0, 1 ) );
-
-    					}
-
-    				}
-
-    			} );
 
     		}
 
-    	}
+    	} );
 
     	this.resize();
 

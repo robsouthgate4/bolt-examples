@@ -9,8 +9,6 @@ import colorFragment from "./shaders/color/color.frag";
 
 import { vec2, vec3, vec4, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
-import GLTFLoader from "@/webgl/modules/gltf-loader";
-import { GlTf } from "@/webgl/modules/gltf-loader/types/GLTF";
 import Sphere from "@/webgl/modules/primitives/Sphere";
 import Floor from "@/webgl/modules/batches/floor";
 export default class extends Base {
@@ -22,7 +20,6 @@ export default class extends Base {
     bolt = Bolt.getInstance();
     gl: WebGL2RenderingContext;
     root!: Node;
-    gltf!: GlTf;
     arcball: CameraArcball;
     normalMapShader: Shader;
     matcapTexture!: Texture;
@@ -69,9 +66,6 @@ export default class extends Base {
     }
 
     async init() {
-
-    	const gltfLoader = new GLTFLoader( this.bolt );
-    	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf/examples/phantom/", "PhantomLogoPose2.gltf" );
 
     	this.matcapTexture = new Texture( {
     		imagePath: "/static/textures/matcap/matcap3.jpeg"

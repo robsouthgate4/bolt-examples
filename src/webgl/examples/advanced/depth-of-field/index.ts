@@ -15,6 +15,7 @@ import RenderPass from "@/webgl/modules/post/passes/RenderPass";
 import DOFPass from "@/webgl/modules/post/passes/DOFPass";
 import FXAAPass from "@/webgl/modules/post/passes/FXAAPass";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
+import Sphere from "@/webgl/modules/primitives/Sphere";
 
 export default class extends Base {
 
@@ -93,9 +94,9 @@ export default class extends Base {
 
     	this.dofPass.shader.activate();
     	this.dofPass.shader.setTexture( "depthMap", this.depthFBO.targetTexture );
-    	this.dofPass.shader.setFloat( "focus", - 3 );
-    	this.dofPass.shader.setFloat( "aperture", 12 * 0.0001 );
-    	this.dofPass.shader.setFloat( "maxBlur", 6.0 );
+    	this.dofPass.shader.setFloat( "focus", 0.0 );
+    	this.dofPass.shader.setFloat( "aperture", 0.01 );
+    	this.dofPass.shader.setFloat( "maxBlur", 5.0 );
     	this.dofPass.shader.setFloat( "aspect", this.gl.canvas.width / this.gl.canvas.height );
 
     	const instanceCount = 1000;
@@ -133,42 +134,17 @@ export default class extends Base {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
 
-    	const gltf = await gltfLoader.loadGLTF( "/static/models/gltf/", "torus.gltf" );
+    	const gltf: Node = await gltfLoader.load( "/static/models/gltf/", "torus.gltf" );
 
     	if ( ! gltf ) return;
 
     	this.assetsLoaded = true;
 
-    	if ( gltf.scenes ) {
-
-    		for ( const scene of gltf.scenes ) {
-
-    			scene.root.traverse( ( node: Node ) => {
-
-    				if ( node.name === "Torus" ) {
-
-    					const batch = <Batch>node.children[ 0 ];
-
-    					const { positions, normals, uvs, indices } = batch.mesh;
-
-    				    this.torusBuffer = new Mesh( {
-    						positions,
-    						normals,
-    						uvs,
-    						indices,
-    					}, {
-    						instanceCount,
-    						instanced: true,
-    						instanceMatrices
-    					} );
-
-    				}
-
-    			} );
-
-    		}
-
-    	}
+    	this.torusBuffer = new Mesh( new Sphere(), {
+    		instanceCount,
+    		instanced: true,
+    		instanceMatrices
+    	} );
 
     	this.resize();
 
@@ -192,7 +168,7 @@ export default class extends Base {
     drawInstances( shader: Shader, elapsed: number ) {
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-    	this.bolt.clear( 1, 1, 1, 1 );
+    	this.bolt.clear( 0.8, 0.8, 0.95, 0.8 );
 
     	shader.activate();
     	shader.setVector3( "viewPosition", this.camera.position );
@@ -208,7 +184,7 @@ export default class extends Base {
 
     	if ( ! this.assetsLoaded ) return;
 
-    	{ // Draw depth shaded to depth framebuffer
+    	{ // Draw depth to framebuffer
 
     		this.depthFBO.bind();
     		this.bolt.enableDepth();

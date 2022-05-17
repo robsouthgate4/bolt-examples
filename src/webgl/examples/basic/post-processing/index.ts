@@ -13,7 +13,6 @@ import PixelatePass from "@/webgl/modules/post/passes/PixelatePass";
 import RenderPass from "@/webgl/modules/post/passes/RenderPass";
 import Floor from "@/webgl/modules/batches/floor";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
-import { GlTf } from "@/webgl/modules/gltf-loader/types/GLTF";
 export default class extends Base {
 
     canvas: HTMLCanvasElement;
@@ -32,9 +31,9 @@ export default class extends Base {
     gl: WebGL2RenderingContext;
     root!: Node;
     floorBatch!: Floor;
-    gltf!: GlTf;
     arcball: CameraArcball;
     shaderBody: Shader;
+    gltf!: Node;
 
     constructor() {
 
@@ -79,7 +78,7 @@ export default class extends Base {
     async init() {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
-    	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf/examples/phantom/", "PhantomLogoPose2.gltf" );
+    	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/phantom/", "PhantomLogoPose2.gltf" );
     	this.assetsLoaded = true;
 
     	this.rbgSplit = new RGBSplitPass( this.bolt, {
@@ -107,41 +106,34 @@ export default class extends Base {
     	this.floorBatch = new Floor();
     	this.floorBatch.setParent( this.root );
 
-    	if ( this.gltf.scenes ) {
 
-    		for ( const scene of this.gltf.scenes ) {
+    	this.gltf.transform.y = 2;
+    	this.gltf.setParent( this.root );
 
-    			scene.root.transform.y = 2;
-    			scene.root.setParent( this.root );
+    	this.gltf.traverse( ( node: Node ) => {
 
-    			scene.root.traverse( ( node: Node ) => {
+    		if ( node instanceof Batch ) {
 
-    				if ( node instanceof Batch ) {
+    			if ( node.shader.name === "mat_phantom_body" ) {
 
-    					if ( node.shader.name === "mat_phantom_body" ) {
+    				node.shader = this.shaderBody;
+    				node.shader.activate();
+    				node.shader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
 
-    						node.shader = this.shaderBody;
-    						node.shader.activate();
-    						node.shader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
+    			}
 
-    					}
+    			if ( node.shader.name === "mat_phantom_eyes" ) {
 
-    					if ( node.shader.name === "mat_phantom_eyes" ) {
+    				node.shader = this.shaderEyes;
+    				node.shader.activate();
+    				node.shader.setVector4( "baseColor", vec4.fromValues( 0, 0, 0, 1 ) );
 
-    						node.shader = this.shaderEyes;
-    						node.shader.activate();
-    						node.shader.setVector4( "baseColor", vec4.fromValues( 0, 0, 0, 1 ) );
+    			}
 
-    					}
-
-
-    				}
-
-    			} );
 
     		}
 
-    	}
+    	} );
 
     	this.resize();
 

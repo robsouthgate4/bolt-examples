@@ -5,7 +5,7 @@ import Bolt, { CameraPersp, Node, Transform } from "@bolt-webgl/core";
 import { vec3 } from "gl-matrix";
 import CameraArcball from "@/webgl/modules/CameraArcball";
 import Floor from "@/webgl/modules/batches/floor";
-import GLTFLoader2 from "@/webgl/modules/gltf-loader2";
+import GLTFLoader from "@/webgl/modules/gltf-loader";
 
 export default class extends Base {
 
@@ -62,9 +62,9 @@ export default class extends Base {
 
     async init() {
 
-    	const gltfLoader2 = new GLTFLoader2( this.bolt );
+    	const gltfLoader = new GLTFLoader( this.bolt );
 
-    	this.gltf = await gltfLoader2.load( "/static/models/gltf/examples/boat/", "boat.gltf" );
+    	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/boat/", "boat.gltf" );
 
     	this.assetsLoaded = true;
 

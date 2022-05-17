@@ -21,7 +21,7 @@ void main() {
 
     float depth = texture( depthMap, Uv ).r;
 
-    float factor = depth - focus;
+    float factor = smoothstep( 0.0, 0.3, depth - focus );
 
     vec2 dofblur = vec2 ( clamp( factor * aperture, -maxBlur, maxBlur ) );
 
@@ -77,6 +77,7 @@ void main() {
     col += texture( map, Uv.xy + ( vec2(  0.0,   0.4  ) * aspectcorrect ) * dofblur4 ).rgb;
 
     FragColor.rgb = col / 41.0;
+    //FragColor.rgb = vec3( factor );
     FragColor.a = 1.0;
 
 
