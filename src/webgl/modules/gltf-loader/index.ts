@@ -6,6 +6,7 @@ import { TypedArray } from "./types/TypedArray";
 
 import vertexShader from "./shaders/color/color.vert";
 import fragmentShader from "./shaders/color/color.frag";
+import Skin from "./Skin";
 
 enum BufferType {
     Float = 5126,
@@ -53,6 +54,8 @@ export default class GLTFLoader {
     constructor( bolt: Bolt ) {
 
     	this._bolt = bolt;
+
+    	const skin = new Skin( [ new Node() ], new Float32Array() );
 
     }
 

@@ -1,7 +1,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Transform, Mesh, FBO, Node, Batch, CameraPersp } from "@bolt-webgl/core";
+import Bolt, { Shader, Transform, Mesh, FBO, Node, CameraPersp } from "@bolt-webgl/core";
 
 import defaultVertexInstanced from "./shaders/instanced/instanced.vert";
 import defaultFragmentInstanced from "./shaders/instanced/instanced.frag";
@@ -34,6 +34,7 @@ export default class extends Base {
     depthShader: Shader;
     depthFBO!: FBO;
     gl: WebGL2RenderingContext;
+    fxaaPass!: FXAAPass;
 
     constructor() {
 
@@ -86,7 +87,13 @@ export default class extends Base {
     		height: this.height
     	} ).setEnabled( true );
 
-    	this.post.add( this.dofPass, true );
+    	this.fxaaPass = new FXAAPass( this.bolt, {
+    		width: this.width,
+    		height: this.height
+    	} ).setEnabled( true );
+
+    	this.post.add( this.dofPass );
+    	this.post.add( this.fxaaPass, true );
 
     	// set shader uniforms
     	this.depthShader.activate();
@@ -168,7 +175,7 @@ export default class extends Base {
     drawInstances( shader: Shader, elapsed: number ) {
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-    	this.bolt.clear( 0.8, 0.8, 0.95, 0.8 );
+    	this.bolt.clear( 0.8, 0.9, 0.9, 0.8 );
 
     	shader.activate();
     	shader.setVector3( "viewPosition", this.camera.position );

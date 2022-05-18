@@ -15,7 +15,6 @@ import colorFragment from "../matcap/shaders/color/color.frag";
 import { getProject, ISheetObject, types as t } from "@theatre/core";
 import studio from "@theatre/studio";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
-import { GlTf } from "@/webgl/modules/gltf-loader/types/GLTF";
 import Floor from "@/webgl/modules/batches/floor";
 
 export default class extends Base {
@@ -103,12 +102,13 @@ export default class extends Base {
     	const project = getProject( "Example with TheatreJS", { state } );
 
     	const sequence = project.sheet( "Sheet" ).sequence;
+
     	// create a project, sheet, and object
     	this.theatreProject = project
     		.sheet( "Sheet" )
     		.object( "Dude", this.dudeMotionConfig );
 
-    	// initialize the studio so the editing tools will show up on the screen
+    	// initialize the studio so the editing tools will appear on the screen
     	studio.initialize();
 
     	project.ready.then( () => {

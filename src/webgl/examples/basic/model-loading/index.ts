@@ -55,6 +55,8 @@ export default class extends Base {
     	this.bolt.enableDepth();
     	this.bolt.disableCullFace();
 
+    	console.log( this.bolt.getContext().RGBA32F );
+
     	this.init();
 
 
