@@ -49,6 +49,7 @@ export default class GLTFLoader {
     private _path!: string;
     private _materials!: Shader[];
     private _textures!: Texture[];
+    private _root!: Node;
 
 
     constructor( bolt: Bolt ) {
@@ -97,15 +98,20 @@ export default class GLTFLoader {
 
     	}
 
+    	// map skins
+
+    	if ( gltf.skins ) {
+
+
+
+    	}
+
     	// arrange nodes with correct transforms
     	const nodes = gltf.nodes!.map( ( node, index ) => this._parseNode( index, node ) );
 
     	// map batches
     	const batches = gltf.meshes!.map( ( mesh ) => this._parseBatch( gltf, mesh, buffers ) );
 
-
-    	const root = new Node();
-    	root.name = "root";
 
     	// arrange scene graph
     	nodes!.forEach( ( node: GLTFNode, i: number ) => {
@@ -141,14 +147,24 @@ export default class GLTFLoader {
 
     	} );
 
-    	// attach nodes to root node
-    	nodes.forEach( ( node: any ) => {
 
-    		node.node.setParent( root );
+    	this._root = new Node();
 
-    	} );
+        gltf.scenes!.forEach( ( scene ) => {
 
-    	return root;
+        	this._root.name = scene.name;
+
+        	scene.nodes?.forEach( childNode => {
+
+        		const child = nodes[ childNode ];
+
+        		child.node.setParent( this._root );
+
+        	} );
+
+        } );
+
+    	return this._root;
 
 
     }
@@ -304,6 +320,17 @@ export default class GLTFLoader {
     	return gltf.accessors![ attribute ];
 
     };
+
+    public get root(): Node {
+
+    	return this._root;
+
+    }
+    public set root( value: Node ) {
+
+    	this._root = value;
+
+    }
 
 
 
