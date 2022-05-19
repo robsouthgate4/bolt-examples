@@ -12,6 +12,8 @@ export default class Skin {
 
     constructor( joints: Node[], inverseBindMatrixData: Float32Array ) {
 
+    	console.log( joints );
+
     	this._joints = joints;
     	this._inverseBindMatrices = [];
     	this._jointMatrices = [];
@@ -22,12 +24,12 @@ export default class Skin {
     		this._inverseBindMatrices.push(
     			new Float32Array(
     				inverseBindMatrixData.buffer,
-    				inverseBindMatrixData.byteOffset + Float32Array.BYTES_PER_ELEMENT * 16 * i * 16
+    				inverseBindMatrixData.byteOffset + Float32Array.BYTES_PER_ELEMENT * 16 * i, 16
     			)
     		);
 
     		this._jointMatrices.push(
-    			new Float32Array( this._jointData.buffer, Float32Array.BYTES_PER_ELEMENT * 16 * i * 16 )
+    			new Float32Array( this._jointData.buffer, Float32Array.BYTES_PER_ELEMENT * 16 * i, 16 )
     		);
 
     	}
@@ -57,7 +59,6 @@ export default class Skin {
 
     		mat4.multiply( dst, this._globalWorldInverse, joint.worldMatrix );
     		mat4.multiply( dst, this._inverseBindMatrices[ i ], dst );
-
 
     	}
 

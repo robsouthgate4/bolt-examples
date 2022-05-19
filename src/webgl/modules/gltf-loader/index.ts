@@ -1,7 +1,7 @@
 import Bolt, { Batch, CLAMP_TO_EDGE, LINEAR, Mesh, Node, Shader, Texture, Transform } from "@bolt-webgl/core";
 import { GeometryBuffers } from "@bolt-webgl/core/build/Mesh";
 import { mat4, quat, vec3 } from "gl-matrix";
-import { Accessor, GlTf, Material, Mesh as GLTFMesh, MeshPrimitive, Node as GLTFNode, Texture as GLTFTexture } from "./types/GLTF";
+import { Accessor, GlTf, Material, Mesh as GLTFMesh, MeshPrimitive, Node as GLTFNode, Texture as GLTFTexture, Skin as GLTFSkin } from "./types/GLTF";
 import { TypedArray } from "./types/TypedArray";
 
 import vertexShader from "./shaders/color/color.vert";
@@ -53,16 +53,15 @@ export default class GLTFLoader {
     private _materials!: Shader[];
     private _textures!: Texture[];
     private _root!: Node;
+    private _skins!: Skin[];
+    private _nodes!: { id: number; node: Node; mesh: number | undefined; skin: number | undefined; localBindTransform: Transform; animatedTransform: mat4; children: number[]; }[];
+    private _batches!: ( Batch | undefined )[][]
 
     constructor( bolt: Bolt ) {
 
     	this._bolt = bolt;
 
-    	const skin = new Skin( [ new Node() ], new Float32Array() );
-
     }
-
-
 
     async load( path: string, fileName: string ) {
 
@@ -84,6 +83,12 @@ export default class GLTFLoader {
     		gltf.buffers!.map( async( buffer ) => await this._fetchBuffer( uri, buffer.uri! ) )
     	);
 
+    	// arrange nodes with correct transforms
+    	this._nodes = gltf.nodes!.map( ( node, index ) => this._parseNode( index, node ) );
+
+    	// map batches
+    	this._batches = gltf.meshes!.map( ( mesh ) => this._parseBatch( gltf, mesh, buffers ) );
+
     	// map textures
     	if ( gltf.textures ) {
 
@@ -104,30 +109,25 @@ export default class GLTFLoader {
 
     	if ( gltf.skins ) {
 
-
+    		this._skins = gltf.skins!.map( ( skin: GLTFSkin ) => this._parseSkin( gltf, skin, buffers ) );
 
     	}
 
-    	// arrange nodes with correct transforms
-    	const nodes = gltf.nodes!.map( ( node, index ) => this._parseNode( index, node ) );
-
-    	// map batches
-    	const batches = gltf.meshes!.map( ( mesh ) => this._parseBatch( gltf, mesh, buffers ) );
 
 
     	// arrange scene graph
-    	nodes!.forEach( ( node: GLTFNode, i: number ) => {
+    	this._nodes!.forEach( ( node: GLTFNode, i: number ) => {
 
     		const children = node.children;
 
     		// parent batches to node
     		if ( node.mesh != undefined ) {
 
-    			const b = batches[ node.mesh ];
+    			const b = this._batches[ node.mesh ];
 
     			b.forEach( ( batch?: Batch ) => {
 
-    		    	batch?.setParent( nodes[ i ].node );
+    		    	batch?.setParent( this._nodes[ i ].node );
 
     			} );
 
@@ -138,9 +138,9 @@ export default class GLTFLoader {
 
     			children.forEach( ( childIndex: number ) => {
 
-    				const n = nodes[ childIndex ];
+    				const n = this._nodes[ childIndex ];
 
-    				n.node.setParent( nodes[ i ].node );
+    				n.node.setParent( this._nodes[ i ].node );
 
     			} );
 
@@ -158,7 +158,7 @@ export default class GLTFLoader {
 
         	scene.nodes?.forEach( childNode => {
 
-        		const child = nodes[ childNode ];
+        		const child = this._nodes[ childNode ];
 
         		child.node.setParent( this._root );
 
@@ -168,6 +168,16 @@ export default class GLTFLoader {
 
     	return this._root;
 
+
+    }
+
+    _parseSkin( gltf: GlTf, skin: GLTFSkin, buffers: ArrayBufferLike[] ): Skin {
+
+    	const bindTransforms = this._getBufferFromFile( gltf, buffers, gltf.accessors![ skin.inverseBindMatrices! ] );
+
+    	const joints = skin.joints.map( ndx => this._nodes[ ndx ].node );
+
+    	return new Skin( joints, bindTransforms.data as Float32Array );
 
     }
 
