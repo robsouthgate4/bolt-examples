@@ -6,6 +6,10 @@ import { TypedArray } from "./types/TypedArray";
 
 import vertexShader from "./shaders/color/color.vert";
 import fragmentShader from "./shaders/color/color.frag";
+
+import skinVertexShader from "./shaders/skin/skin.vert";
+import skinFragmentShader from "./shaders/skin/skin.frag";
+
 import Skin from "./Skin";
 
 enum BufferType {
@@ -45,12 +49,10 @@ export default class GLTFLoader {
     	'5126': Float32Array,
     }
 
-    private _scene!: Node[];
     private _path!: string;
     private _materials!: Shader[];
     private _textures!: Texture[];
     private _root!: Node;
-
 
     constructor( bolt: Bolt ) {
 
@@ -131,7 +133,7 @@ export default class GLTFLoader {
 
     		}
 
-    		// set parent  nodes
+    		// set parent nodes
     		if ( children ) {
 
     			children.forEach( ( childIndex: number ) => {
@@ -233,7 +235,7 @@ export default class GLTFLoader {
 
     	//TODO: PBR shader setup
 
-    	const shader = new Shader( vertexShader, fragmentShader );
+    	const shader = new Shader( skinVertexShader, skinFragmentShader );
 
     	shader.name = material.name;
 

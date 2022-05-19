@@ -49,7 +49,7 @@ void main() {
 
     float diffuse = step( 0.5, max( dot( Normal, lightDirection ), 0.0 ) );
 
-    scene  = vec4( ambient + vec3( diffuse * 0.3 ), 1.0 );
+    scene  = vec4( mix( ambient, ambient * 1.1, diffuse), 1.0 );
     normal = vec4( NormalEyeSpace, 1.0 );
     uv     = vec4( Uv, 0.0, 0.0 );
 
