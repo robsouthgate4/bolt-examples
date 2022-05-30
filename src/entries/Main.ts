@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/basic/skinning";
+import Example from "@/webgl/examples/basic/data-textures";
 
 export default class Main {
 

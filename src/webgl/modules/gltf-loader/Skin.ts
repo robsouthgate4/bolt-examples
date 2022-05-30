@@ -12,8 +12,6 @@ export default class Skin {
 
     constructor( joints: Node[], inverseBindMatrixData: Float32Array ) {
 
-    	console.log( joints );
-
     	this._joints = joints;
     	this._inverseBindMatrices = [];
     	this._jointMatrices = [];
@@ -62,7 +60,18 @@ export default class Skin {
 
     	}
 
-    	this._jointTexture.setFromData( this._jointData, this._joints.length );
+    	this._jointTexture.setFromData( this._jointData, 4, this._joints.length );
+
+    }
+
+    public get jointTexture(): Texture {
+
+    	return this._jointTexture;
+
+    }
+    public set jointTexture( value: Texture ) {
+
+    	this._jointTexture = value;
 
     }
 

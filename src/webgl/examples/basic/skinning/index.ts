@@ -1,11 +1,13 @@
 
 import Base from "@webgl/Base";
-import Bolt, { CameraPersp, Node, Transform } from "@bolt-webgl/core";
+import Bolt, { Batch, CameraPersp, Node } from "@bolt-webgl/core";
 
 import { vec3 } from "gl-matrix";
 import CameraArcball from "@/webgl/modules/CameraArcball";
 import Floor from "@/webgl/modules/batches/floor";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
+
+
 
 export default class extends Base {
 
@@ -13,7 +15,6 @@ export default class extends Base {
     lightPosition: vec3;
     camera: CameraPersp;
     assetsLoaded?: boolean;
-    torusTransform!: Transform;
     sphereNode!: Node;
     planeNode!: Node;
     bolt: Bolt;
@@ -21,6 +22,7 @@ export default class extends Base {
     floor: Floor;
     arcball: CameraArcball;
     root!: Node;
+    _textureBatch!: Batch;
 
     constructor() {
 
@@ -68,18 +70,6 @@ export default class extends Base {
 
     	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/robot/", "scene.gltf" );
 
-    	console.log( this.gltf );
-
-    	// this.gltf.traverse( ( node: Node ) => {
-
-    	// 	if ( node.name === "GLTF_SceneRootNode" ) {
-
-    	// 		console.log( node );
-
-    	// 	}
-
-    	// } );
-
     	this.assetsLoaded = true;
 
     	this.resize();
@@ -108,8 +98,7 @@ export default class extends Base {
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 1, 1, 1, 1 );
 
-    	this.bolt.draw( this.gltf );
-    	this.bolt.draw( this.floor );
+    	this.bolt.draw( [ this.gltf, this.floor, this._textureBatch ] );
 
 
     }

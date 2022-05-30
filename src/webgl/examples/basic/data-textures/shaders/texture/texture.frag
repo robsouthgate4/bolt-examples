@@ -15,5 +15,5 @@ in vec3 Color;
 
 void main()
 {
-   FragColor = texture( baseTexture, Uv );
+   FragColor = texture(baseTexture, Uv);
 }

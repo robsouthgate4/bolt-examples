@@ -113,8 +113,6 @@ export default class GLTFLoader {
 
     	}
 
-
-
     	// arrange scene graph
     	this._nodes!.forEach( ( node: GLTFNode, i: number ) => {
 
@@ -177,11 +175,13 @@ export default class GLTFLoader {
 
     	const joints = skin.joints.map( ndx => this._nodes[ ndx ].node );
 
-    	return new Skin( joints, bindTransforms.data as Float32Array );
+    	const boltSkin = new Skin( joints, bindTransforms.data as Float32Array );
+
+    	return boltSkin;
 
     }
 
-    _parseNode( index: number, node: GLTFNode ) {
+    _parseNode( index: number, node: GLTFNode ) { //TODO: setup skin mesh render
 
     	const { name, translation, rotation, scale, mesh, children, skin } = node;
     	const trs = new Transform();
