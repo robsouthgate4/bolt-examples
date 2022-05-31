@@ -22,7 +22,6 @@ export default class extends Base {
     floor: Floor;
     arcball: CameraArcball;
     root!: Node;
-    _textureBatch!: Batch;
 
     constructor() {
 
@@ -98,7 +97,7 @@ export default class extends Base {
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 1, 1, 1, 1 );
 
-    	this.bolt.draw( [ this.gltf, this.floor, this._textureBatch ] );
+    	this.bolt.draw( [ this.gltf, this.floor ] );
 
 
     }

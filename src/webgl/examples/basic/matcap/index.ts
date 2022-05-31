@@ -85,13 +85,14 @@ export default class extends Base {
 
     		if ( node instanceof Batch ) {
 
+    			console.log( node );
+
     			if ( node.shader.name === "mat_phantom_body" ) {
 
     				node.shader = this.shaderBody;
     				node.shader.activate();
     				node.shader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
     				node.shader.setTexture( "baseTexture", this.matcapTexture );
-    			    node.shader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
 
     			}
 

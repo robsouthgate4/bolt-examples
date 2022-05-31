@@ -86,9 +86,6 @@ export default class GLTFLoader {
     	// arrange nodes with correct transforms
     	this._nodes = gltf.nodes!.map( ( node, index ) => this._parseNode( index, node ) );
 
-    	// map batches
-    	this._batches = gltf.meshes!.map( ( mesh ) => this._parseBatch( gltf, mesh, buffers ) );
-
     	// map textures
     	if ( gltf.textures ) {
 
@@ -104,6 +101,11 @@ export default class GLTFLoader {
     		this._materials = gltf.materials!.map( ( material: Material ) => this._parseMaterials( gltf, material ) );
 
     	}
+
+    	// map batches
+    	this._batches = gltf.meshes!.map( ( mesh ) => this._parseBatch( gltf, mesh, buffers ) );
+
+
 
     	// map skins
 
@@ -245,7 +247,7 @@ export default class GLTFLoader {
 
     	//TODO: PBR shader setup
 
-    	const shader = new Shader( skinVertexShader, skinFragmentShader );
+    	const shader = new Shader( vertexShader, fragmentShader );
 
     	shader.name = material.name;
 
@@ -255,6 +257,7 @@ export default class GLTFLoader {
 
     		if ( baseColorTexture ) {
 
+    			shader.activate();
     			shader.setTexture( "baseTexture", this._textures[ baseColorTexture.index ] );
 
     		}

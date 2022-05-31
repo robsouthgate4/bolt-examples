@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/basic/data-textures";
+import Example from "@/webgl/examples/basic/canvas-textures";
 
 export default class Main {
 

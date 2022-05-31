@@ -20,8 +20,9 @@ export default class extends Base {
     textureBatch!: Batch;
     planeBatch: any;
     dataTexture!: Texture;
+	drawCanvas: any;
 
-    constructor() {
+	constructor() {
 
     	super();
 
@@ -37,6 +38,24 @@ export default class extends Base {
 
     	this.gl = this.bolt.getContext();
 
+		// create webgl texture to hold canvas pixel data
+		this.dataTexture = new Texture( {
+			minFilter: NEAREST,
+			magFilter: NEAREST
+		} );
+
+		// create html canvas for drawign content to
+		this.drawCanvas = document.createElement( "canvas" );
+		this.drawCanvas.width = 64;
+		this.drawCanvas.height = 64;
+
+		document.body.appendChild( this.drawCanvas );
+
+		Object.assign( this.drawCanvas.style, {
+			position: "absolute",
+			top: 0,
+			left: 0,
+		} );
 
     	this.camera = new CameraPersp( {
     		aspect: this.canvas.width / this.canvas.height,
@@ -56,18 +75,19 @@ export default class extends Base {
     	this.init();
 
 
-    }
+	}
 
-    setData() {
+	setData() {
 
-    	// generate and draw random colours to canvas
-    	const width = 64;
-    	const height = 64;
-    	const size = width * height;
+		// generate and draw random colours to canvas
+		const size = this.drawCanvas.width * this.drawCanvas.height;
 
-    	const data = new Uint8Array( 4 * size );
+		const ctx = this.drawCanvas.getContext( "2d" );
 
-    	for ( let i = 0; i < size; i ++ ) {
+		const textureImage =
+    	ctx!.createImageData( this.drawCanvas.width, this.drawCanvas.width );
+
+		for ( let i = 0; i < size; i ++ ) {
 
     		const r = Math.floor( Math.random() * 255 );
     		const g = Math.floor( Math.random() * 255 );
@@ -75,19 +95,21 @@ export default class extends Base {
 
     		const stride = i * 4;
 
-    		data[ stride ] = r;
-    		data[ stride + 1 ] = g;
-    		data[ stride + 2 ] = b;
-    		data[ stride + 3 ] = 255;
+    		textureImage.data[ stride ] = r;
+    		textureImage.data[ stride + 1 ] = g;
+    		textureImage.data[ stride + 2 ] = b;
+    		textureImage.data[ stride + 3 ] = 255;
 
     	}
 
-    	// draw html canvas to webgl texture
-    	this.dataTexture.setFromData( data, width, height );
+		ctx!.putImageData( textureImage, 0, 0 );
 
-    }
+		// draw html canvas to webgl texture
+    	this.dataTexture.setFromData( this.drawCanvas, this.drawCanvas.width, this.drawCanvas.height );
 
-    async init() {
+	}
+
+	async init() {
 
     	this.dataTexture = new Texture( {
     		minFilter: NEAREST,
@@ -110,36 +132,36 @@ export default class extends Base {
 
     	this.resize();
 
-    }
+	}
 
-    resize() {
+	resize() {
 
     	this.bolt.resizeFullScreen();
     	this.camera.updateProjection( this.gl.canvas.width / this.gl.canvas.height );
 
-    }
+	}
 
-    earlyUpdate( elapsed: number, delta: number ) {
+	earlyUpdate( elapsed: number, delta: number ) {
 
     	return;
 
-    }
+	}
 
-    update( elapsed: number, delta: number ) {
+	update( elapsed: number, delta: number ) {
 
     	this.camera.update();
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-    	this.bolt.clear( 1, 1, 1, 1 );
+    	this.bolt.clear( 0, 0, 0, 1 );
 
     	this.bolt.draw( this.textureBatch );
 
-    }
+	}
 
-    lateUpdate( elapsed: number, delta: number ) {
+	lateUpdate( elapsed: number, delta: number ) {
 
     	return;
 
-    }
+	}
 
 }
