@@ -11,6 +11,7 @@ import skinVertexShader from "./shaders/skin/skin.vert";
 import skinFragmentShader from "./shaders/skin/skin.frag";
 
 import Skin from "./Skin";
+import SkinMesh from "./SkinMesh";
 
 enum BufferType {
     Float = 5126,
@@ -102,11 +103,6 @@ export default class GLTFLoader {
 
     	}
 
-    	// map batches
-    	this._batches = gltf.meshes!.map( ( mesh ) => this._parseBatch( gltf, mesh, buffers ) );
-
-
-
     	// map skins
 
     	if ( gltf.skins ) {
@@ -114,6 +110,10 @@ export default class GLTFLoader {
     		this._skins = gltf.skins!.map( ( skin: GLTFSkin ) => this._parseSkin( gltf, skin, buffers ) );
 
     	}
+
+    	// map batches
+    	this._batches = gltf.meshes!.map( ( mesh ) => this._parseBatch( gltf, mesh, buffers ) );
+
 
     	// arrange scene graph
     	this._nodes!.forEach( ( node: GLTFNode, i: number ) => {
@@ -174,12 +174,9 @@ export default class GLTFLoader {
     _parseSkin( gltf: GlTf, skin: GLTFSkin, buffers: ArrayBufferLike[] ): Skin {
 
     	const bindTransforms = this._getBufferFromFile( gltf, buffers, gltf.accessors![ skin.inverseBindMatrices! ] );
-
     	const joints = skin.joints.map( ndx => this._nodes[ ndx ].node );
 
-    	const boltSkin = new Skin( joints, bindTransforms.data as Float32Array );
-
-    	return boltSkin;
+    	return new Skin( joints, bindTransforms.data as Float32Array );
 
     }
 
@@ -231,8 +228,31 @@ export default class GLTFLoader {
     				indices: indices ? indices!.data as Int16Array : []
     			};
 
+    			// form skinned mesh data if defined
+
+    			// get joints from buffer
+    			const joints = this._getBufferByAttribute( gltf, buffers, mesh, primitive, "JOINTS_0" ) || undefined;
+
+    			// get weights from buffer
+    			const weights = this._getBufferByAttribute( gltf, buffers, mesh, primitive, "WEIGHTS_0" ) || undefined;
+
+    			let m: Mesh | SkinMesh;
+
+    			if ( joints != undefined ) {
+
+    				console.log( this._skins );
+
+    				//m = new SkinMesh( geometry, joints!.data as Float32Array, weights!.data as Float32Array );
+
+    			} else {
+
+
+    			}
+
+
+    			m = new Mesh( geometry );
+
     			// construct batches
-    			const m = new Mesh( geometry );
     			const batch = new Batch( m, this._materials ? this._materials[ primitive.material as number ] : new Shader( vertexShader, fragmentShader ) );
 
     			return batch;

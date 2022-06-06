@@ -1,13 +1,14 @@
 
 import Base from "@webgl/Base";
-import Bolt, { Batch, CameraPersp, Node } from "@bolt-webgl/core";
+import Bolt, { Batch, CameraPersp, Node, Shader } from "@bolt-webgl/core";
 
 import { vec3 } from "gl-matrix";
 import CameraArcball from "@/webgl/modules/CameraArcball";
 import Floor from "@/webgl/modules/batches/floor";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
 
-
+import normalVertexShader from "./shaders/normal/normal.vert";
+import normalFragmentShader from "./shaders/normal/normal.frag";
 
 export default class extends Base {
 
@@ -68,6 +69,18 @@ export default class extends Base {
     	const gltfLoader = new GLTFLoader( this.bolt );
 
     	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/robot/", "scene.gltf" );
+
+    	const normalShader = new Shader( normalVertexShader, normalFragmentShader );
+
+    	this.gltf.traverse( ( node: Node ) => {
+
+    		if ( node instanceof Batch ) {
+
+    			node.shader = normalShader;
+
+    		}
+
+    	} );
 
     	this.assetsLoaded = true;
 

@@ -15,19 +15,21 @@ export default class Skin {
     	this._joints = joints;
     	this._inverseBindMatrices = [];
     	this._jointMatrices = [];
-    	this._jointData = new Float32Array( this._joints.length * 16 );
+
+    	const mat4size = 4 * 4;
+    	this._jointData = new Float32Array( this._joints.length * mat4size );
 
     	for ( let i = 0; i < joints.length; i ++ ) {
 
     		this._inverseBindMatrices.push(
     			new Float32Array(
     				inverseBindMatrixData.buffer,
-    				inverseBindMatrixData.byteOffset + Float32Array.BYTES_PER_ELEMENT * 16 * i, 16
+    				inverseBindMatrixData.byteOffset + Float32Array.BYTES_PER_ELEMENT * mat4size * i, mat4size
     			)
     		);
 
     		this._jointMatrices.push(
-    			new Float32Array( this._jointData.buffer, Float32Array.BYTES_PER_ELEMENT * 16 * i, 16 )
+    			new Float32Array( this._jointData.buffer, Float32Array.BYTES_PER_ELEMENT * mat4size * i, mat4size )
     		);
 
     	}
@@ -69,9 +71,21 @@ export default class Skin {
     	return this._jointTexture;
 
     }
+
     public set jointTexture( value: Texture ) {
 
     	this._jointTexture = value;
+
+    }
+
+    public get joints(): Node[] {
+
+    	return this._joints;
+
+    }
+    public set joints( value: Node[] ) {
+
+    	this._joints = value;
 
     }
 
