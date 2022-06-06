@@ -4,9 +4,8 @@ import Bolt, { CameraPersp, Node, Transform } from "@bolt-webgl/core";
 
 import { vec3 } from "gl-matrix";
 import CameraArcball from "@/webgl/modules/CameraArcball";
-import GLTFLoader from "@/webgl/modules/gltf-loader";
-import { GlTf } from "@/webgl/modules/gltf-loader/types/GLTF";
 import Floor from "@/webgl/modules/batches/floor";
+import GLTFLoader from "@/webgl/modules/gltf-loader";
 
 export default class extends Base {
 
@@ -18,7 +17,7 @@ export default class extends Base {
     sphereNode!: Node;
     planeNode!: Node;
     bolt: Bolt;
-    gltf!: GlTf;
+    gltf!: Node;
     floor: Floor;
     arcball: CameraArcball;
 
@@ -56,6 +55,8 @@ export default class extends Base {
     	this.bolt.enableDepth();
     	this.bolt.disableCullFace();
 
+    	console.log( this.bolt.getContext().RGBA32F );
+
     	this.init();
 
 
@@ -64,7 +65,9 @@ export default class extends Base {
     async init() {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
-    	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf/examples/boat/", "boat.gltf" );
+
+    	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/boat/", "boat.gltf" );
+
     	this.assetsLoaded = true;
 
     	this.resize();
@@ -93,16 +96,7 @@ export default class extends Base {
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 1, 1, 1, 1 );
 
-    	if ( this.gltf.scenes ) {
-
-    		for ( const scene of this.gltf.scenes ) {
-
-    			this.bolt.draw( scene.root );
-
-    		}
-
-    	}
-
+    	this.bolt.draw( this.gltf );
     	this.bolt.draw( this.floor );
 
 

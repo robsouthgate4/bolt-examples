@@ -10,6 +10,7 @@ layout (location = 3) in mat4 aInstanceMatrix;
 
 out vec3 Normal;
 out vec4 Position;
+out vec3 WorldPosition;
 
 uniform mat4 projection;
 uniform mat4 model;
@@ -19,6 +20,8 @@ void main()
 {
 
   Normal = aNormal;
+
+  WorldPosition = ( aInstanceMatrix * vec4( aPosition, 1.0 ) ).xyz;
 
   Position = projection * view * aInstanceMatrix * vec4( aPosition, 1.0 );
 

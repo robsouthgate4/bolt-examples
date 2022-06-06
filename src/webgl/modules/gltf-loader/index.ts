@@ -1,56 +1,35 @@
-
-import { quat, vec3, vec4 } from "gl-matrix";
-import Bolt, { VBO, VAO, Transform, Mesh, Node, Batch, Shader, Texture, REPEAT } from "@bolt-webgl/core";
-
-import { GlTf, Image, Mesh as GLTFMesh, MeshPrimitive, Sampler, Texture as GLTFTexture } from "./types/GLTF";
+import Bolt, { Batch, CLAMP_TO_EDGE, LINEAR, Mesh, Node, Shader, Texture, Transform } from "@bolt-webgl/core";
 import { GeometryBuffers } from "@bolt-webgl/core/build/Mesh";
+import { mat4, quat, vec3 } from "gl-matrix";
+import { Accessor, GlTf, Material, Mesh as GLTFMesh, MeshPrimitive, Node as GLTFNode, Texture as GLTFTexture, Skin as GLTFSkin } from "./types/GLTF";
+import { TypedArray } from "./types/TypedArray";
 
 import vertexShader from "./shaders/color/color.vert";
 import fragmentShader from "./shaders/color/color.frag";
 
-interface AccessorDict {
-    [id: string]: number;
+import skinVertexShader from "./shaders/skin/skin.vert";
+import skinFragmentShader from "./shaders/skin/skin.frag";
+
+import Skin from "./Skin";
+
+enum BufferType {
+    Float = 5126,
+    Short = 5123,
 }
 
-interface AttributeInfo {
-    vbo: VBO;
-    type: number;
-    numComponents: number;
-    stride: number;
-    offset: number;
-}
-
-interface TextureSampler {
-    source?: Image;
-    sourceIndex?: number;
-    sampler?: Sampler;
-}
-interface AttribName {
-    [id: string]: AttributeInfo;
-}
-
-type TypedArray =
-Int8ArrayConstructor
-| Uint8ArrayConstructor // gl.UNSIGNED_BYTE
-| Int16ArrayConstructor // gl.SHORT
-| Uint16ArrayConstructor // gl.UNSIGNED_SHORT
-| Int32ArrayConstructor // gl.INT
-| Uint32ArrayConstructor // gl.UNSIGNED_INT
-| Float32ArrayConstructor
-
-interface TypedArrayDict {
-    [key: string]: TypedArray;
+interface Buffer {
+    data: Float32Array | Int16Array;
+    size: number;
+    type: string;
+    componentType: BufferType;
+    glBuffer: WebGLBuffer;
 }
 
 export default class GLTFLoader {
 
-    bolt: Bolt;
-    gl: WebGL2RenderingContext;
+    private _bolt: Bolt;
 
-    _textures: TextureSampler[] = [];
-    _basePath!: string;
-
-    private _accessorTypeToNumComponentsMap: AccessorDict = {
+    private _accessorSize: { [key: string]: number } = {
     	'SCALAR': 1,
     	'VEC2': 2,
     	'VEC3': 3,
@@ -60,379 +39,314 @@ export default class GLTFLoader {
     	'MAT4': 16,
     };
 
-    private _typedArrayMap: TypedArrayDict = {
-    	'5120': Int8Array, // gl.BYTE
-    	'5121': Uint8Array, // gl.UNSIGNED_BYTE
-    	'5122': Int16Array, // gl.SHORT
-    	'5123': Uint16Array, // gl.UNSIGNED_SHORT
-    	'5124': Int32Array, // gl.INT
-    	'5125': Uint32Array, // gl.UNSIGNED_INT
-    	'5126': Float32Array, // gl.FLOAT
+    private _typedArrayMap: { [key: string]: TypedArray } = {
+    	'5120': Int8Array,
+    	'5121': Uint8Array,
+    	'5122': Int16Array,
+    	'5123': Uint16Array,
+    	'5124': Int32Array,
+    	'5125': Uint32Array,
+    	'5126': Float32Array,
     }
+
+    private _path!: string;
+    private _materials!: Shader[];
+    private _textures!: Texture[];
+    private _root!: Node;
+    private _skins!: Skin[];
+    private _nodes!: { id: number; node: Node; mesh: number | undefined; skin: number | undefined; localBindTransform: Transform; animatedTransform: mat4; children: number[]; }[];
+    private _batches!: ( Batch | undefined )[][]
 
     constructor( bolt: Bolt ) {
 
-    	this.bolt = bolt;
-    	this.gl = bolt.getContext();
-
+    	this._bolt = bolt;
 
     }
 
-    async loadGLTF( basePath: string, url: string ) {
+    async load( path: string, fileName: string ) {
 
-    	this._basePath = basePath;
+    	const uri = path + fileName;
 
-    	const response = await fetch( `${basePath}${url}` );
-    	if ( ! response.ok ) {
+    	this._path = path;
 
-    		throw new Error( `could not load: ${url}` );
-
-    	}
-
+    	const response = await fetch( path + fileName );
     	const gltf = await response.json() as GlTf;
-    	let bin: ArrayBufferLike;
 
-    	if ( gltf.buffers ) {
+    	if ( gltf.accessors === undefined || gltf.accessors.length === 0 ) {
 
-    		bin = await this._loadBinaryBuffer( `${basePath}/${gltf.buffers[ 0 ].uri}` ) as ArrayBufferLike;
+    		throw new Error( 'GLTF File is missing accessors' );
 
     	}
 
+    	// grab buffers from .bin
+    	const buffers = await Promise.all(
+    		gltf.buffers!.map( async( buffer ) => await this._fetchBuffer( uri, buffer.uri! ) )
+    	);
+
+    	// arrange nodes with correct transforms
+    	this._nodes = gltf.nodes!.map( ( node, index ) => this._parseNode( index, node ) );
+
+    	// map textures
     	if ( gltf.textures ) {
 
-    		gltf.textures.forEach( ( texture: GLTFTexture ) => {
-
-    			const parsedTexture = {} as TextureSampler;
-
-    			if ( texture.source !== undefined ) {
-
-    				const source = gltf.images && gltf.images[ texture.source ];
-
-    				parsedTexture.source = source;
-
-
-    			}
-
-    			if ( texture.sampler !== undefined ) {
-
-    				const sampler = gltf.samplers && gltf.samplers[ texture.sampler ];
-    				parsedTexture.sampler = sampler;
-
-    			}
-
-    			console.log( parsedTexture );
-
-    			this._textures.push( parsedTexture );
-
-
-    		} );
+    		this._textures = await Promise.all(
+                gltf.textures!.map( async( texture ) => await this._parseTexture( gltf, texture ) )
+    		);
 
     	}
 
-    	if ( gltf.meshes ) {
+    	// map materials
+    	if ( gltf.materials ) {
 
-    		gltf.meshes.forEach( ( mesh: GLTFMesh ) => {
+    		this._materials = gltf.materials!.map( ( material: Material ) => this._parseMaterials( gltf, material ) );
 
-    			mesh.primitives.forEach( ( primitive: MeshPrimitive ) => {
+    	}
 
-    				const attributes: AttribName = {};
-
-    				let numElements = 0;
-
-    				for ( const [ attribName, index ] of Object.entries( primitive.attributes ) ) {
-
-    					const { accessor, stride, vbo, buffer } = this._getAccessorAndBuffer( this.gl, gltf, index, bin );
-
-    					const capitalise = ( string: string ) =>
-    						string.replaceAll( /\S*/g, word =>
-    							`${word.slice( 0, 1 )}${word.slice( 1 ).toLowerCase()}`
-    						);
-
-    					attributes[ `a${capitalise( attribName )}` ] = {
-    						vbo,
-    						buffer,
-    						type: accessor.componentType,
-    						numComponents: this._accessorTypeToNumComponents( accessor.type ),
-    						stride,
-    						offset: accessor.byteOffset | 0
-    					} as AttributeInfo;
-
-    				}
-
-    				if ( primitive.indices !== undefined ) {
-
-    					const { accessor, buffer } = this._getAccessorAndIndices( this.gl, gltf, primitive.indices, bin );
-
-    					const bufferInfo = {
-    						attributes,
-    						numElements,
-    						indices: new this._typedArrayMap[ accessor.componentType ](),
-    						elementType: 0
-    					};
-
-    					bufferInfo.numElements = accessor.count;
-    					bufferInfo.indices = buffer;
-    					bufferInfo.elementType = accessor.componentType;
-
-    					primitive.bufferInfo = bufferInfo;
-
-    				}
+    	// map batches
+    	this._batches = gltf.meshes!.map( ( mesh ) => this._parseBatch( gltf, mesh, buffers ) );
 
 
-    				const vao = new VAO();
 
-    				let index = 0;
+    	// map skins
 
-    				for ( const [ key, value ] of Object.entries( attributes ) ) {
+    	if ( gltf.skins ) {
 
-    					index ++;
-    					vao.linkAttrib( value.vbo, index, value.numComponents, this.gl.FLOAT, value.stride, value.offset );
+    		this._skins = gltf.skins!.map( ( skin: GLTFSkin ) => this._parseSkin( gltf, skin, buffers ) );
 
-    				}
+    	}
 
-    				primitive.vao = vao;
+    	// arrange scene graph
+    	this._nodes!.forEach( ( node: GLTFNode, i: number ) => {
 
-    				if ( primitive.material != undefined ) {
+    		const children = node.children;
 
-    					primitive.materialBolt = gltf.materials && gltf.materials[ primitive.material ] || undefined;
+    		// parent batches to node
+    		if ( node.mesh != undefined ) {
 
-    				}
+    			const b = this._batches[ node.mesh ];
+
+    			b.forEach( ( batch?: Batch ) => {
+
+    		    	batch?.setParent( this._nodes[ i ].node );
 
     			} );
 
-    		} );
+    		}
 
-    	}
+    		// set parent nodes
+    		if ( children ) {
 
-    	const originalNodes = gltf.nodes;
+    			children.forEach( ( childIndex: number ) => {
 
-    	const computedNodes = gltf.nodes?.map( ( node ) => {
+    				const n = this._nodes[ childIndex ];
 
-    		const { name, translation, rotation, scale, mesh } = node;
-    		const rootTransform = new Transform();
-    		rootTransform.position = translation ? vec3.fromValues( translation[ 0 ], translation[ 1 ], translation[ 2 ] ) : vec3.fromValues( 0, 0, 0 );
-    		rootTransform.quaternion = rotation ? quat.fromValues( rotation[ 0 ], rotation[ 1 ], rotation[ 2 ], rotation[ 3 ] ) : quat.fromValues( 0, 0, 0, 1 );
-    		rootTransform.scale = scale ? vec3.fromValues( scale[ 0 ], scale[ 1 ], scale[ 2 ] ) : vec3.fromValues( 1, 1, 1 );
+    				n.node.setParent( this._nodes[ i ].node );
 
-    		const rootNode = new Node();
-    		rootNode.transform = rootTransform;
-    		rootNode.name = name;
-
-    		if ( gltf.meshes && gltf.meshes.length > 0 ) {
-
-    			if ( mesh != undefined ) {
-
-    				const gltfMesh = gltf.meshes[ mesh ];
-
-    				if ( gltfMesh ) {
-
-    					let geometry: GeometryBuffers = {};
-
-    					gltfMesh.primitives.forEach( ( primitive: MeshPrimitive ) => {
-
-    						const attribs = primitive.bufferInfo.attributes;
-
-    						geometry = {
-    							positions: attribs.aPosition ? attribs.aPosition.buffer : new Float32Array(),
-    							normals: attribs.aNormal ? attribs.aNormal.buffer : new Float32Array(),
-    							uvs: attribs.aTexcoord_0 ? attribs.aTexcoord_0.buffer : new Float32Array(),
-    							indices: primitive.bufferInfo.indices
-    						};
-
-    						const mesh = new Mesh( geometry );
-    						const batch = new Batch( mesh, new Shader( vertexShader, fragmentShader ) );
-
-    						if ( primitive.materialBolt ) {
-
-    							if ( primitive.materialBolt.pbrMetallicRoughness ) {
-
-    							    const { baseColorFactor, baseColorTexture } = primitive.materialBolt.pbrMetallicRoughness;
-
-    							    const shader = batch.shader;
-    								shader.name = primitive.materialBolt.name;
-    							    shader.activate();
-
-    								if ( baseColorFactor ) {
-
-    									shader.setVector4( "baseColor", baseColorFactor ? vec4.fromValues( baseColorFactor[ 0 ], baseColorFactor[ 1 ], baseColorFactor[ 2 ], baseColorFactor[ 3 ] ) : vec4.fromValues( 1, 1, 1, 1 ) );
-
-    								}
-
-    								if ( baseColorTexture ) {
-
-    									const t = this._textures[ baseColorTexture.index ];
-
-    									// TODO: get sampler data
-
-    									const createTexture = async () => {
-
-    										const texture = new Texture( {
-    											imagePath: this._basePath + t.source?.uri,
-    											wrapS: REPEAT,
-    											wrapT: REPEAT
-    										} );
-
-    										await texture.load();
-    										shader.setTexture( "baseTexture", texture );
-
-    									};
-
-    									createTexture();
-
-
-    								}
-
-    							}
-
-    						}
-
-    						batch.setParent( rootNode );
-
-    					} );
-
-
-    				}
-
-    			}
+    			} );
 
     		}
 
-    		return rootNode;
 
     	} );
 
 
-    	if ( originalNodes && computedNodes ) {
+    	this._root = new Node();
 
-    		computedNodes.forEach( ( node, index ) => {
+        gltf.scenes!.forEach( ( scene ) => {
 
-    			const children = originalNodes[ index ].children;
+        	this._root.name = scene.name;
 
-    			if ( children ) {
+        	scene.nodes?.forEach( childNode => {
 
-    				children.forEach( ( childNdx ) => {
+        		const child = this._nodes[ childNode ];
 
-    					const child = computedNodes[ childNdx ];
-    					child.setParent( node );
+        		child.node.setParent( this._root );
 
-    				} );
+        	} );
 
-    			}
+        } );
 
-    		} );
-
-    	}
+    	return this._root;
 
 
-    	if ( gltf.scenes ) {
+    }
 
-    		for ( const scene of gltf.scenes ) {
+    _parseSkin( gltf: GlTf, skin: GLTFSkin, buffers: ArrayBufferLike[] ): Skin {
 
-    			scene.root = new Node();
-    			scene.root.name = scene.name;
+    	const bindTransforms = this._getBufferFromFile( gltf, buffers, gltf.accessors![ skin.inverseBindMatrices! ] );
 
-    			if ( scene.nodes ) {
+    	const joints = skin.joints.map( ndx => this._nodes[ ndx ].node );
 
-    				scene.nodes.forEach( ( childNdx ) => {
+    	const boltSkin = new Skin( joints, bindTransforms.data as Float32Array );
 
-    					if ( ! computedNodes ) return;
+    	return boltSkin;
 
-    					const child = computedNodes[ childNdx ];
-    					child.setParent( scene.root );
+    }
 
-    				} );
+    _parseNode( index: number, node: GLTFNode ) { //TODO: setup skin mesh render
 
-    			}
+    	const { name, translation, rotation, scale, mesh, children, skin } = node;
+    	const trs = new Transform();
+    	trs.position = translation ? vec3.fromValues( translation[ 0 ], translation[ 1 ], translation[ 2 ] ) : vec3.fromValues( 0, 0, 0 );
+    	trs.quaternion = rotation ? quat.fromValues( rotation[ 0 ], rotation[ 1 ], rotation[ 2 ], rotation[ 3 ] ) : quat.fromValues( 0, 0, 0, 1 );
+    	trs.scale = scale ? vec3.fromValues( scale[ 0 ], scale[ 1 ], scale[ 2 ] ) : vec3.fromValues( 1, 1, 1 );
+
+    	const n = new Node();
+    	n.name = name;
+    	n!.transform = trs;
+
+    	return {
+    		id: index,
+    		node: n,
+    		mesh,
+    		skin,
+    		localBindTransform: trs,
+    		animatedTransform: mat4.create(),
+    		children: children || []
+    	};
+
+    }
+
+    _parseBatch( gltf: GlTf, mesh: GLTFMesh, buffers: ArrayBufferLike[] ) {
+
+    	return mesh.primitives.map( ( primitive ) => {
+
+    		if ( primitive.indices !== undefined ) {
+
+    			// get index accessor
+    			const indexAccesor = gltf.accessors![ primitive.indices! ];
+
+    			const uvs = this._getBufferByAttribute( gltf, buffers, mesh, primitive, "TEXCOORD_0" ) || undefined;
+    			const uvs2 = this._getBufferByAttribute( gltf, buffers, mesh, primitive, "TEXCOORD_1" ) || undefined;
+    			const normals = this._getBufferByAttribute( gltf, buffers, mesh, primitive, "NORMAL" ) || undefined;
+    			const indices = this._getBufferFromFile( gltf, buffers, indexAccesor ) || undefined;
+
+    			// form bolt default geo buffers
+    			const geometry: GeometryBuffers = {
+    				// every geometry should have position data by default
+    				positions: this._getBufferByAttribute( gltf, buffers, mesh, primitive, "POSITION" )!.data as Float32Array,
+    				normals: normals ? normals!.data as Float32Array : [],
+    				uvs: uvs ? uvs!.data as Float32Array : [],
+    				uvs2: uvs2 ? uvs2!.data as Float32Array : [],
+    				indices: indices ? indices!.data as Int16Array : []
+    			};
+
+    			// construct batches
+    			const m = new Mesh( geometry );
+    			const batch = new Batch( m, this._materials ? this._materials[ primitive.material as number ] : new Shader( vertexShader, fragmentShader ) );
+
+    			return batch;
+
+    		}
+
+    	} );
+
+    }
+
+    _parseMaterials( gltf: GlTf, material: Material ): Shader {
+
+    	//TODO: PBR shader setup
+
+    	const shader = new Shader( vertexShader, fragmentShader );
+
+    	shader.name = material.name;
+
+    	if ( material.pbrMetallicRoughness ) {
+
+    		const { baseColorTexture } = material.pbrMetallicRoughness;
+
+    		if ( baseColorTexture ) {
+
+    			shader.activate();
+    			shader.setTexture( "baseTexture", this._textures[ baseColorTexture.index ] );
 
     		}
 
     	}
 
-    	return gltf;
-
-
+    	return shader;
 
     }
 
-    private _getAccessorAndBuffer( gl: WebGL2RenderingContext, gltf: any, accessorIndex: number, bin: ArrayBufferLike ) {
+    async _parseTexture( gltf: GlTf, texture: GLTFTexture ) {
 
-    	const accessor = gltf.accessors[ accessorIndex ];
-    	const bufferView = gltf.bufferViews[ accessor.bufferView ];
+    	const t = gltf.images![ texture.source! ];
+    	const s = gltf.samplers![ texture.sampler! ];
 
-    	const buffer = new Float32Array(
-    		bin,
-    		bufferView.byteOffset,
-    		bufferView.byteLength / Float32Array.BYTES_PER_ELEMENT );
-
-
-    	bufferView.vbo = new VBO( buffer );
-
-    	return {
-    		accessor,
-    		vbo: bufferView.vbo,
-    		buffer,
-    		stride: bufferView.stride || 0,
-    	};
-
-    }
-
-    private _getAccessorAndIndices( gl: WebGL2RenderingContext, gltf: any, accessorIndex: number, bin: ArrayBufferLike ) {
-
-    	const accessor = gltf.accessors[ accessorIndex ];
-    	const bufferView = gltf.bufferViews[ accessor.bufferView ];
-
-    	const typedArray = this._typedArrayMap[ accessor.componentType ];
-
-    	const buffer = new typedArray( bin, bufferView.byteOffset, bufferView.byteLength / typedArray.BYTES_PER_ELEMENT );
-
-    	return {
-    		accessor,
-    		buffer,
-    		stride: bufferView.stride || 0,
-    	};
-
-    }
-
-    _accessorTypeToNumComponents( type: string ) {
-
-    	const map = this._accessorTypeToNumComponentsMap[ type ];
-
-    	if ( ! map ) {
-
-    		throw new Error( `no key: ${type}` );
-
-    	} else {
-
-    		return map;
-
-    	}
-
-    }
-
-
-    _loadBinaryBuffer( url: string ) {
-
-    	return new Promise( ( resolve, reject ) => {
-
-    		const request = new XMLHttpRequest();
-    		request.open( "GET", url, true );
-    		request.responseType = "arraybuffer";
-    		request.onload = () => {
-
-    			resolve( request.response );
-
-    		};
-
-    		request.onerror = ( err ) => {
-
-    			reject( err );
-
-    		};
-
-    		request.send();
-
+    	const boltTexture = new Texture( {
+    		imagePath: this._path + t.uri,
+    		wrapS: s.wrapS || CLAMP_TO_EDGE,
+    		wrapT: s.wrapT || CLAMP_TO_EDGE,
     	} );
 
+    	boltTexture.minFilter = s.minFilter! || LINEAR;
+    	boltTexture.magFilter = s.magFilter! || LINEAR;
+
+    	await boltTexture.load();
+
+    	return boltTexture;
+
     }
+
+    async _fetchBuffer( path: string, buffer: string ) {
+
+    	const dir = path.split( '/' ).slice( 0, - 1 ).join( '/' );
+    	const response = await fetch( `${dir}/${buffer}` );
+    	return await response.arrayBuffer();
+
+    }
+
+    _getBufferFromFile( gltf: GlTf, buffers: ArrayBuffer[], accessor: Accessor ) {
+
+    	const bufferView = gltf.bufferViews![ <number>accessor.bufferView ];
+
+    	const type = accessor.type;
+
+    	// size of the data set
+    	const size = this._accessorSize[ type ];
+
+    	// component type as number
+    	const componentType = accessor.componentType;
+
+    	// get the array buffer type from map and fetch relevant data
+    	const data = new this._typedArrayMap[ componentType ]( buffers[ bufferView.buffer ], ( accessor.byteOffset || 0 ) + ( bufferView.byteOffset || 0 ), accessor.count * size ) as ArrayBuffer;
+
+    	return {
+    		size,
+    		data,
+    		componentType,
+    		type
+    	} as Buffer;
+
+    }
+
+    _getBufferByAttribute( gltf: GlTf, buffers: ArrayBuffer[], mesh: GLTFMesh, primitive: MeshPrimitive, attributeName: string ) {
+
+    	if ( primitive.attributes[ attributeName ] === undefined ) return;
+    	const accessor = this._getAccessor( gltf, mesh, primitive, attributeName );
+    	const bufferData = this._getBufferFromFile( gltf, buffers, accessor );
+    	return bufferData;
+
+    }
+
+    _getAccessor = ( gltf: GlTf, mesh: GLTFMesh, primitive: MeshPrimitive, attributeName: string ) => {
+
+    	const attribute = primitive.attributes[ attributeName ];
+    	return gltf.accessors![ attribute ];
+
+    };
+
+    public get root(): Node {
+
+    	return this._root;
+
+    }
+    public set root( value: Node ) {
+
+    	this._root = value;
+
+    }
+
+
 
 }

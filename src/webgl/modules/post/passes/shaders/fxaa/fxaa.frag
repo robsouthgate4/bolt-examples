@@ -17,8 +17,8 @@ in vec2 v_rgbM;
 out vec4 FragColor;
 
 #define FXAA_REDUCE_MIN   (1.0/128.0)
-#define FXAA_REDUCE_MUL   (1.0/8.0)
-#define FXAA_SPAN_MAX     8.0
+#define FXAA_REDUCE_MUL   (1.0/64.0)
+#define FXAA_SPAN_MAX     16.0
 
 
 mediump float when_gt(float x, float y) {
@@ -76,6 +76,6 @@ void main() {
 
     float conditional = orValue( when_lt( lumaB, lumaMin ), when_gt( lumaB,lumaMax ) );
 
-    FragColor = mix( rgbB, rgbA, conditional) * 1.0;
+    FragColor = mix( rgbB, rgbA, conditional);
 
 }

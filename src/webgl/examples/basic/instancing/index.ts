@@ -99,41 +99,33 @@ export default class extends Base {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
 
-    	const gltf = await gltfLoader.loadGLTF( "/static/models/gltf/", "torus.gltf" );
+    	const gltf: Node = await gltfLoader.load( "/static/models/gltf/", "torus.gltf" );
 
     	if ( ! gltf ) return;
 
     	this.assetsLoaded = true;
 
-    	if ( gltf.scenes ) {
+    	gltf.traverse( ( node: Node ) => {
 
-    		for ( const scene of gltf.scenes ) {
+    		if ( node.name === "Torus" ) {
 
-    			scene.root.traverse( ( node: Node ) => {
+    			const batch = <Batch>node.children[ 0 ];
+    			const { positions, normals, uvs, indices } = batch.mesh;
 
-    				if ( node.name === "Torus" ) {
-
-    					const batch = <Batch>node.children[ 0 ];
-    					const { positions, normals, uvs, indices } = batch.mesh;
-
-    				    this.torusBuffer = new Mesh( {
-    						positions,
-    						normals,
-    						uvs,
-    						indices,
-    					}, {
-    						instanceCount,
-    						instanced: true,
-    						instanceMatrices
-    					} );
-
-    				}
-
+    			this.torusBuffer = new Mesh( {
+    				positions,
+    				normals,
+    				uvs,
+    				indices,
+    			}, {
+    				instanceCount,
+    				instanced: true,
+    				instanceMatrices
     			} );
 
     		}
 
-    	}
+    	} );
 
     	this.resize();
 

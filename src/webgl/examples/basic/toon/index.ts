@@ -12,7 +12,6 @@ import compositionFragment from "./shaders/composition/composition.frag";
 import { vec2, vec3, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
-import { GlTf } from "@/webgl/modules/gltf-loader/types/GLTF";
 import Post from "@/webgl/modules/post";
 import Axis from "@/webgl/modules/batches/axis";
 import Floor from "@/webgl/modules/batches/floor";
@@ -27,7 +26,7 @@ export default class extends Base {
     camera: CameraPersp;
     assetsLoaded?: boolean;
     bolt: Bolt;
-    gltf!: GlTf;
+    gltf!: Node;
     post!: Post;
     fxaa!: FXAAPass;
     gl: WebGL2RenderingContext;
@@ -128,7 +127,7 @@ export default class extends Base {
     async init() {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
-    	this.gltf = await gltfLoader.loadGLTF( "/static/models/gltf/examples/toon/", "Sweep_lookdev_working.gltf" );
+    	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/toon/", "Sweep_lookdev_working.gltf" );
 
     	this.assetsLoaded = true;
 
@@ -140,24 +139,6 @@ export default class extends Base {
     	this.cubeBatch = new Batch( new Mesh( new Cube( { width: 3, height: 3, depth: 3 } ) ), this.bodyShader );
     	this.cubeBatch.transform.y = 0;
     	this.cubeBatch.transform.position = vec3.fromValues( 0, 0, 0 );
-
-    	if ( this.gltf.scenes ) {
-
-    		for ( const scene of this.gltf.scenes ) {
-
-    			if ( scene.name === "penandInk_cubic_forRob" ) {
-
-    				scene.root.traverse( ( node: Node ) => {
-
-    				} );
-
-    			}
-
-
-
-    		}
-
-    	}
 
     	this.resize();
 
@@ -186,32 +167,23 @@ export default class extends Base {
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 0.9, 0.9, 0.9, 1 );
 
-    	if ( this.gltf.scenes ) {
+    	this.gltf.transform.position = vec3.fromValues( 1.25, 0, 0 );
 
-    		for ( const scene of this.gltf.scenes ) {
+    	this.gltf.traverse( ( node: Node ) => {
 
-    			scene.root.transform.position = vec3.fromValues( 1.25, 0, 0 );
+    		if ( node instanceof Batch ) {
 
-    			scene.root.traverse( ( node: Node ) => {
-
-    				if ( node instanceof Batch ) {
-
-    					node.shader = this.geometryShader;
-
-    				}
-
-    			} );
-
-    			this.bolt.draw( scene.root );
-
+    			node.shader = this.geometryShader;
 
     		}
 
-    	}
+    	} );
+
+    	this.bolt.draw( this.gltf );
 
     	if ( sceneType === "geometry" ) {
 
-
+    		// render geo shader here
 
     	} else {
 
