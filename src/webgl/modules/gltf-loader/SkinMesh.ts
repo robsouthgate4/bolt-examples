@@ -4,17 +4,19 @@ import Skin from "./Skin";
 
 export default class SkinMesh extends Mesh {
 
-    _skin!: Skin;
+    private _skin?: Skin | undefined;
 
-    constructor( skin: Skin, geometry?: GeometryBuffers, params?: MeshParams, ) {
+    constructor( geometry?: GeometryBuffers, params?: MeshParams, ) {
 
     	super( geometry, params );
 
-    	this._skin = skin;
+    	this.isSkinMesh = true;
 
     }
 
-    draw( shader: Shader, node?: Node ) {
+    draw( shader: Shader, node: Node ) {
+
+    	if ( ! this._skin || ! node ) return;
 
     	this._skin.update( node! );
 
@@ -25,6 +27,18 @@ export default class SkinMesh extends Mesh {
 
 
     	super.draw( shader );
+
+    }
+
+    public get skin(): Skin | undefined {
+
+    	return this._skin;
+
+    }
+
+    public set skin( value: Skin | undefined ) {
+
+    	this._skin = value;
 
     }
 

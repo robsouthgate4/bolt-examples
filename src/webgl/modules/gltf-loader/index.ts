@@ -57,14 +57,15 @@ export default class GLTFLoader {
     private _skins!: Skin[];
     private _nodes!: { id: number; node: Node; mesh: number | undefined; skin: number | undefined; localBindTransform: Transform; animatedTransform: mat4; children: number[]; }[];
     private _batches!: ( Batch | undefined )[][]
+	private _skinNodes!: { nodeIndex: number; skinIndex: number; meshIndex?: number; }[];
 
-    constructor( bolt: Bolt ) {
+	constructor( bolt: Bolt ) {
 
     	this._bolt = bolt;
 
-    }
+	}
 
-    async load( path: string, fileName: string ) {
+	async load( path: string, fileName: string ) {
 
     	const uri = path + fileName;
 
@@ -83,6 +84,8 @@ export default class GLTFLoader {
     	const buffers = await Promise.all(
     		gltf.buffers!.map( async( buffer ) => await this._fetchBuffer( uri, buffer.uri! ) )
     	);
+
+		this._skinNodes = [];
 
     	// arrange nodes with correct transforms
     	this._nodes = gltf.nodes!.map( ( node, index ) => this._parseNode( index, node ) );
@@ -120,16 +123,31 @@ export default class GLTFLoader {
 
     		const children = node.children;
 
-    		// parent batches to node
-    		if ( node.mesh != undefined ) {
+    		if ( node.skin !== undefined ) {
 
-    			const b = this._batches[ node.mesh ];
+    			if ( node.mesh != undefined ) {
 
-    			b.forEach( ( batch?: Batch ) => {
+    				this._skinNodes.push( { nodeIndex: i, skinIndex: node.skin, meshIndex: node.mesh } );
 
-    		    	batch?.setParent( this._nodes[ i ].node );
+    			} else {
 
-    			} );
+    				this._skinNodes.push( { nodeIndex: i, skinIndex: node.skin } );
+
+    			}
+
+    		} else {
+
+    			if ( node.mesh !== undefined ) {
+
+    				const b = this._batches[ node.mesh ];
+
+    				b.forEach( ( batch?: Batch ) => {
+
+    					batch?.setParent( this._nodes[ i ].node );
+
+    				} );
+
+    			}
 
     		}
 
@@ -149,6 +167,36 @@ export default class GLTFLoader {
 
     	} );
 
+		this._skinNodes!.forEach( ( skinNode: { nodeIndex: number; skinIndex: number; meshIndex?: number; } ) => {
+
+			const skin = this._skins[ skinNode.skinIndex ];
+			const mesh = skinNode.meshIndex;
+			const nodeIndex = skinNode.nodeIndex;
+
+			if ( mesh !== undefined ) {
+
+				const b = this._batches[ mesh ];
+
+				if ( b !== undefined ) {
+
+					console.log( b );
+
+					b.forEach( ( batch?: Batch ) => {
+
+						const realMesh = batch!.mesh as SkinMesh;
+
+						realMesh.skin = skin;
+
+						batch?.setParent( this._nodes[ nodeIndex ].node );
+
+					} );
+
+				}
+
+
+			}
+
+		} );
 
     	this._root = new Node();
 
@@ -169,18 +217,18 @@ export default class GLTFLoader {
     	return this._root;
 
 
-    }
+	}
 
-    _parseSkin( gltf: GlTf, skin: GLTFSkin, buffers: ArrayBufferLike[] ): Skin {
+	_parseSkin( gltf: GlTf, skin: GLTFSkin, buffers: ArrayBufferLike[] ): Skin {
 
     	const bindTransforms = this._getBufferFromFile( gltf, buffers, gltf.accessors![ skin.inverseBindMatrices! ] );
     	const joints = skin.joints.map( ndx => this._nodes[ ndx ].node );
 
     	return new Skin( joints, bindTransforms.data as Float32Array );
 
-    }
+	}
 
-    _parseNode( index: number, node: GLTFNode ) { //TODO: setup skin mesh render
+	_parseNode( index: number, node: GLTFNode ) { //TODO: setup skin mesh render
 
     	const { name, translation, rotation, scale, mesh, children, skin } = node;
     	const trs = new Transform();
@@ -202,9 +250,9 @@ export default class GLTFLoader {
     		children: children || []
     	};
 
-    }
+	}
 
-    _parseBatch( gltf: GlTf, mesh: GLTFMesh, buffers: ArrayBufferLike[] ) {
+	_parseBatch( gltf: GlTf, mesh: GLTFMesh, buffers: ArrayBufferLike[] ) {
 
     	return mesh.primitives.map( ( primitive ) => {
 
@@ -236,21 +284,23 @@ export default class GLTFLoader {
     			// get weights from buffer
     			const weights = this._getBufferByAttribute( gltf, buffers, mesh, primitive, "WEIGHTS_0" ) || undefined;
 
+    			//console.log( mesh );
+
     			let m: Mesh | SkinMesh;
 
-    			if ( joints != undefined ) {
+    			if ( joints !== undefined ) {
 
-    				console.log( this._skins );
+    				//console.log( this._skins );
 
-    				//m = new SkinMesh( geometry, joints!.data as Float32Array, weights!.data as Float32Array );
+    				m = new SkinMesh( geometry );
+					m.addAttribute( joints!.data as Float32Array, joints!.size, 5 );
+					m.addAttribute( weights!.data as Float32Array, weights!.size, 6 );
 
     			} else {
 
+					m = new Mesh( geometry );
 
     			}
-
-
-    			m = new Mesh( geometry );
 
     			// construct batches
     			const batch = new Batch( m, this._materials ? this._materials[ primitive.material as number ] : new Shader( vertexShader, fragmentShader ) );
@@ -261,9 +311,9 @@ export default class GLTFLoader {
 
     	} );
 
-    }
+	}
 
-    _parseMaterials( gltf: GlTf, material: Material ): Shader {
+	_parseMaterials( gltf: GlTf, material: Material ): Shader {
 
     	//TODO: PBR shader setup
 
@@ -286,9 +336,9 @@ export default class GLTFLoader {
 
     	return shader;
 
-    }
+	}
 
-    async _parseTexture( gltf: GlTf, texture: GLTFTexture ) {
+	async _parseTexture( gltf: GlTf, texture: GLTFTexture ) {
 
     	const t = gltf.images![ texture.source! ];
     	const s = gltf.samplers![ texture.sampler! ];
@@ -306,17 +356,17 @@ export default class GLTFLoader {
 
     	return boltTexture;
 
-    }
+	}
 
-    async _fetchBuffer( path: string, buffer: string ) {
+	async _fetchBuffer( path: string, buffer: string ) {
 
     	const dir = path.split( '/' ).slice( 0, - 1 ).join( '/' );
     	const response = await fetch( `${dir}/${buffer}` );
     	return await response.arrayBuffer();
 
-    }
+	}
 
-    _getBufferFromFile( gltf: GlTf, buffers: ArrayBuffer[], accessor: Accessor ) {
+	_getBufferFromFile( gltf: GlTf, buffers: ArrayBuffer[], accessor: Accessor ) {
 
     	const bufferView = gltf.bufferViews![ <number>accessor.bufferView ];
 
@@ -338,16 +388,16 @@ export default class GLTFLoader {
     		type
     	} as Buffer;
 
-    }
+	}
 
-    _getBufferByAttribute( gltf: GlTf, buffers: ArrayBuffer[], mesh: GLTFMesh, primitive: MeshPrimitive, attributeName: string ) {
+	_getBufferByAttribute( gltf: GlTf, buffers: ArrayBuffer[], mesh: GLTFMesh, primitive: MeshPrimitive, attributeName: string ) {
 
     	if ( primitive.attributes[ attributeName ] === undefined ) return;
     	const accessor = this._getAccessor( gltf, mesh, primitive, attributeName );
     	const bufferData = this._getBufferFromFile( gltf, buffers, accessor );
     	return bufferData;
 
-    }
+	}
 
     _getAccessor = ( gltf: GlTf, mesh: GLTFMesh, primitive: MeshPrimitive, attributeName: string ) => {
 
