@@ -85,8 +85,6 @@ export default class extends Base {
 
     		if ( node instanceof Batch ) {
 
-    			console.log( node );
-
     			if ( node.shader.name === "mat_phantom_body" ) {
 
     				node.shader = this.shaderBody;

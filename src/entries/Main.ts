@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/basic/skinning";
+import Example from "@/webgl/examples/advanced/depth-of-field";
 
 export default class Main {
 

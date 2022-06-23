@@ -22,8 +22,8 @@ export default class SkinMesh extends Mesh {
 
     	// activate shader and pass joint data to shader
     	shader.activate();
-    	shader.setTexture( "jointsTexture", this._skin.jointTexture );
-    	shader.setInt( "jointsCount", this._skin.joints.length );
+    	shader.setTexture( "jointTexture", this._skin.jointTexture );
+    	shader.setFloat( "jointCount", this._skin.joints.length );
 
 
     	super.draw( shader );

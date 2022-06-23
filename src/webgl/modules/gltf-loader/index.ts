@@ -6,10 +6,6 @@ import { TypedArray } from "./types/TypedArray";
 
 import vertexShader from "./shaders/color/color.vert";
 import fragmentShader from "./shaders/color/color.frag";
-
-import skinVertexShader from "./shaders/skin/skin.vert";
-import skinFragmentShader from "./shaders/skin/skin.frag";
-
 import Skin from "./Skin";
 import SkinMesh from "./SkinMesh";
 
@@ -170,6 +166,7 @@ export default class GLTFLoader {
 		this._skinNodes!.forEach( ( skinNode: { nodeIndex: number; skinIndex: number; meshIndex?: number; } ) => {
 
 			const skin = this._skins[ skinNode.skinIndex ];
+
 			const mesh = skinNode.meshIndex;
 			const nodeIndex = skinNode.nodeIndex;
 
@@ -178,8 +175,6 @@ export default class GLTFLoader {
 				const b = this._batches[ mesh ];
 
 				if ( b !== undefined ) {
-
-					console.log( b );
 
 					b.forEach( ( batch?: Batch ) => {
 
@@ -223,12 +218,11 @@ export default class GLTFLoader {
 
     	const bindTransforms = this._getBufferFromFile( gltf, buffers, gltf.accessors![ skin.inverseBindMatrices! ] );
     	const joints = skin.joints.map( ndx => this._nodes[ ndx ].node );
-
     	return new Skin( joints, bindTransforms.data as Float32Array );
 
 	}
 
-	_parseNode( index: number, node: GLTFNode ) { //TODO: setup skin mesh render
+	_parseNode( index: number, node: GLTFNode ) {
 
     	const { name, translation, rotation, scale, mesh, children, skin } = node;
     	const trs = new Transform();
@@ -276,7 +270,6 @@ export default class GLTFLoader {
     				indices: indices ? indices!.data as Int16Array : []
     			};
 
-    			// form skinned mesh data if defined
 
     			// get joints from buffer
     			const joints = this._getBufferByAttribute( gltf, buffers, mesh, primitive, "JOINTS_0" ) || undefined;
@@ -284,14 +277,14 @@ export default class GLTFLoader {
     			// get weights from buffer
     			const weights = this._getBufferByAttribute( gltf, buffers, mesh, primitive, "WEIGHTS_0" ) || undefined;
 
-    			//console.log( mesh );
-
     			let m: Mesh | SkinMesh;
+				let s: Shader;
+
+				s = this._materials ? this._materials[ primitive.material as number ] : new Shader( vertexShader, fragmentShader );
 
     			if ( joints !== undefined ) {
 
-    				//console.log( this._skins );
-
+					// form skinned mesh data if joints defined
     				m = new SkinMesh( geometry );
 					m.addAttribute( joints!.data as Float32Array, joints!.size, 5 );
 					m.addAttribute( weights!.data as Float32Array, weights!.size, 6 );
@@ -302,8 +295,7 @@ export default class GLTFLoader {
 
     			}
 
-    			// construct batches
-    			const batch = new Batch( m, this._materials ? this._materials[ primitive.material as number ] : new Shader( vertexShader, fragmentShader ) );
+    			const batch = new Batch( m, s );
 
     			return batch;
 

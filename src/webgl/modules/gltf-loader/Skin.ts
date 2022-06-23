@@ -1,4 +1,4 @@
-import { CLAMP_TO_EDGE, FLOAT, NEAREST, Node, RGBA, RGBA32f, Texture } from "@bolt-webgl/core";
+import { CLAMP_TO_EDGE, FLOAT, LINEAR, NEAREST, Node, RGBA, RGBA32f, Texture } from "@bolt-webgl/core";
 import { mat4 } from "gl-matrix";
 
 export default class Skin {
@@ -35,30 +35,35 @@ export default class Skin {
     	}
 
     	this._jointTexture = new Texture( {
+    		width: 4,
+    		height: this._joints.length,
     		format: RGBA,
     		internalFormat: RGBA32f,
     		wrapS: CLAMP_TO_EDGE,
     		wrapT: CLAMP_TO_EDGE,
     		minFilter: NEAREST,
     		magFilter: NEAREST,
-    		type: FLOAT
+    		type: FLOAT,
+    		generateMipmaps: false
     	} );
 
     }
 
     update( node: Node ) {
 
-    	mat4.invert( this._globalWorldInverse, node.worldMatrix );
+    	const globalInverse = mat4.create();
+    	mat4.invert( globalInverse, node.worldMatrix );
 
     	// apply inverse bind matrix to each joint
 
     	for ( let i = 0; i < this._joints.length; i ++ ) {
 
     		const joint = this._joints[ i ];
+
     		const dst = this._jointMatrices[ i ];
 
-    		mat4.multiply( dst, this._globalWorldInverse, joint.worldMatrix );
-    		mat4.multiply( dst, this._inverseBindMatrices[ i ], dst );
+    		mat4.multiply( dst, globalInverse, joint.modelMatrix );
+    		mat4.multiply( dst, dst, this._inverseBindMatrices[ i ] );
 
     	}
 
