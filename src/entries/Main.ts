@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/advanced/Raymarching";
+import Example from "@/webgl/examples/basic/Cubemap";
 
 export default class Main {
 
