@@ -78,6 +78,22 @@ export default class extends Base {
 
     			node.shader = shader;
 
+    		} else {
+
+    			console.log( node.name );
+
+    			if ( node.name === "Shoulder_L_Reference" ) {
+
+    				node.transform.rotateZ = Math.PI * 0.1;
+
+    			}
+
+    			if ( node.name === "Shoulder_R_Reference" ) {
+
+    				node.transform.rotateZ = Math.PI * 0.1;
+
+    			}
+
     		}
 
     	} );
