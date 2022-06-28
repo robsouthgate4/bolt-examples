@@ -28,7 +28,7 @@ vec4 convRGBA(float depth){
 
 float convCoord(float depth, float offset){
     float d = clamp(depth + offset, 0.0, 1.0);
-    if(d > 0.6){
+    if(d > 0.5){
         d = 2.5 * (1.0 - d);
     }else if(d > 0.4){
         d = 1.0;
@@ -41,7 +41,7 @@ float convCoord(float depth, float offset){
 void main()
 {
 
-    float depthOffset = -0.5;
+    float depthOffset = 0.;
 
     float linearDepth = 1.0 / ( cameraPlanes.y - cameraPlanes.x );
 

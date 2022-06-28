@@ -1,4 +1,4 @@
-# Bolt WebGL library
+# Bolt WebGL examples repo
 
 ## Getting Started
 
@@ -32,7 +32,7 @@ To build project run:
 npm run build
 ```
 
-Open [http://localhost:8080](http://localhost:8080) with your browser to see the
+Open [http://localhost:8888](http://localhost:8888) with your browser to see the
 app.
 
 ## Features

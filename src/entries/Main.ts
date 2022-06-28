@@ -1,5 +1,9 @@
 
+<<<<<<< HEAD
 import Example from "@/webgl/examples/basic/Cubemap";
+=======
+import Example from "@/webgl/examples/basic/cube-camera";
+>>>>>>> development
 
 export default class Main {
 

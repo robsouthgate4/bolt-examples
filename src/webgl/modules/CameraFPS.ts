@@ -1,57 +1,37 @@
 import { glMatrix, mat4, vec3 } from "gl-matrix";
-import { Camera } from "@robsouthgate/bolt-core";
+import { Camera } from "@bolt-webgl/core";
 
-export default class CameraFPS extends Camera {
+export default class CameraFPS {
 
-    keyPressed: string;
-    activeKeys: string[];
-    yaw: number;
-    pitch: number;
-    delta: number;
-    lastFrame: number;
-    firstMouse: boolean;
-    mouseDown: boolean;
-    lastX: number;
-    lastY: number;
-    newPosition: vec3;
-    cameraSpeed!: number;
+    private _activeKeys: string[];
+    private _yaw: number;
+    private _pitch: number;
+    private _firstMouse: boolean;
+    private _lastX: number;
+    private _lastY: number;
+    private _newPosition: vec3;
+    private _cameraSpeed!: number;
+    private _camera: Camera;
+    private _active: boolean;
 
     constructor(
-    	width: number,
-    	height: number,
-    	position: vec3,
-    	fov: number,
-    	near: number,
-    	far: number ) {
+    	camera: Camera ) {
 
-    	super(
-    		width,
-    		height,
-    		position,
-    		fov,
-    		near,
-    		far
-    	);
+    	this._camera = camera;
+    	this._active = true;
 
-    	this.keyPressed = "";
-    	this.activeKeys = [];
-    	this.active = false;
+    	this._activeKeys = [];
 
-    	this.yaw = - 90;
-    	this.pitch = 0;
+    	this._yaw = - 90;
+    	this._pitch = 0;
 
-    	this.delta = 0;
-    	this.lastFrame = 0;
-    	this.firstMouse = true;
-    	this.mouseDown = false;
-    	this.lastX = window.innerWidth / 2;
-    	this.lastY = window.innerHeight / 2;
+    	this._firstMouse = true;
+    	this._lastX = window.innerWidth / 2;
+    	this._lastY = window.innerHeight / 2;
 
-    	this.newPosition = vec3.create();
+    	this._newPosition = vec3.create();
 
-    	vec3.copy( this.newPosition, this.position );
-
-    	this.resize( window.innerWidth, window.innerHeight );
+    	vec3.copy( this._newPosition, this._camera.position );
 
     	this.initListeners();
 
@@ -65,39 +45,39 @@ export default class CameraFPS extends Camera {
 
     		if ( e.key === "w" ) {
 
-    			this.activeKeys = this.activeKeys.filter( ( e ) => e !== 'w' );
+    			this._activeKeys = this._activeKeys.filter( ( e ) => e !== 'w' );
 
     		}
 
     		if ( e.key === "s" ) {
 
-    			this.activeKeys = this.activeKeys.filter( ( e ) => e !== 's' );
+    			this._activeKeys = this._activeKeys.filter( ( e ) => e !== 's' );
 
 
     		}
 
     		if ( e.key === "a" ) {
 
-    			this.activeKeys = this.activeKeys.filter( ( e ) => e !== 'a' );
+    			this._activeKeys = this._activeKeys.filter( ( e ) => e !== 'a' );
 
 
     		}
 
     		if ( e.key === "d" ) {
 
-    			this.activeKeys = this.activeKeys.filter( ( e ) => e !== 'd' );
+    			this._activeKeys = this._activeKeys.filter( ( e ) => e !== 'd' );
 
     		}
 
     		if ( e.key === "e" ) {
 
-    			this.activeKeys = this.activeKeys.filter( ( e ) => e !== 'e' );
+    			this._activeKeys = this._activeKeys.filter( ( e ) => e !== 'e' );
 
     		}
 
     		if ( e.key === "q" ) {
 
-    			this.activeKeys = this.activeKeys.filter( ( e ) => e !== 'q' );
+    			this._activeKeys = this._activeKeys.filter( ( e ) => e !== 'q' );
 
     		}
 
@@ -107,47 +87,47 @@ export default class CameraFPS extends Camera {
 
     		if ( e.key === "w" ) {
 
-    			this.activeKeys.push( "w" );
+    			this._activeKeys.push( "w" );
 
     		}
 
     		if ( e.key === "s" ) {
 
-    			this.activeKeys.push( "s" );
+    			this._activeKeys.push( "s" );
 
     		}
 
     		if ( e.key === "a" ) {
 
-    			this.activeKeys.push( "a" );
+    			this._activeKeys.push( "a" );
 
     		}
 
     		if ( e.key === "d" ) {
 
-    			this.activeKeys.push( "d" );
+    			this._activeKeys.push( "d" );
 
     		}
 
     		if ( e.key === "e" ) {
 
-    			this.activeKeys.push( "e" );
+    			this._activeKeys.push( "e" );
 
     		}
 
     		if ( e.key === "q" ) {
 
-    			this.activeKeys.push( "q" );
+    			this._activeKeys.push( "q" );
 
     		}
 
     		if ( e.code === "Space" ) {
 
-    			this.active = ! this.active;
+    			this._active = ! this._active;
 
-    			if ( ! this.active ) {
+    			if ( ! this._active ) {
 
-    				this.firstMouse = true;
+    				this._firstMouse = true;
 
     				document.body.style.cursor = "pointer";
 
@@ -165,51 +145,45 @@ export default class CameraFPS extends Camera {
 
     handleMouseMove( ev: MouseEvent ) {
 
-    	if ( ! this.active ) return;
+    	if ( ! this._active ) return;
 
     	const xPos = ev.clientX;
     	const yPos = ev.clientY;
 
-    	if ( this.firstMouse ) {
+    	if ( this._firstMouse ) {
 
-    		this.lastX = xPos;
-    		this.lastY = yPos;
-    		this.firstMouse = false;
+    		this._lastX = xPos;
+    		this._lastY = yPos;
+    		this._firstMouse = false;
 
     	}
 
-    	let xOffset = xPos - this.lastX;
-    	let yOffset = this.lastY - yPos;
+    	let xOffset = xPos - this._lastX;
+    	let yOffset = this._lastY - yPos;
 
-    	this.lastX = xPos;
-    	this.lastY = yPos;
+    	this._lastX = xPos;
+    	this._lastY = yPos;
 
     	const sensitivity = 0.4;
     	xOffset *= sensitivity;
     	yOffset *= sensitivity;
 
-    	this.yaw += xOffset;
-    	this.pitch += yOffset;
+    	this._yaw += xOffset;
+    	this._pitch += yOffset;
 
-    	if ( this.pitch > 89.0 )
-    		this.pitch = 89.0;
-    	if ( this.pitch < - 89.0 )
-    		this.pitch = - 89.0;
+    	if ( this._pitch > 89.0 )
+    		this._pitch = 89.0;
+    	if ( this._pitch < - 89.0 )
+    		this._pitch = - 89.0;
 
     	const direction = vec3.create();
-    	direction[ 0 ] = Math.cos( glMatrix.toRadian( this.yaw ) ) * Math.cos( glMatrix.toRadian( this.pitch ) );
-    	direction[ 1 ] = Math.sin( glMatrix.toRadian( this.pitch ) );
-    	direction[ 2 ] = Math.sin( glMatrix.toRadian( this.yaw ) ) * Math.cos( glMatrix.toRadian( this.pitch ) );
+    	direction[ 0 ] = Math.cos( glMatrix.toRadian( this._yaw ) ) * Math.cos( glMatrix.toRadian( this._pitch ) );
+    	direction[ 1 ] = Math.sin( glMatrix.toRadian( this._pitch ) );
+    	direction[ 2 ] = Math.sin( glMatrix.toRadian( this._yaw ) ) * Math.cos( glMatrix.toRadian( this._pitch ) );
 
     	vec3.normalize( direction, direction );
-    	vec3.copy( this.forward, direction );
+    	vec3.copy( this._camera.forward, direction );
 
-
-    }
-
-    resize( width: number, height: number ) {
-
-    	mat4.perspective( this.projection, this.fov, width / height, this.near, this.far );
 
     }
 
@@ -217,59 +191,59 @@ export default class CameraFPS extends Camera {
 
     	if ( ! this.active ) return;
 
-    	this.cameraSpeed = 10 * delta;
+    	this._cameraSpeed = 10 * delta;
 
-    	if ( this.activeKeys.includes( "w" ) ) {
+    	if ( this._activeKeys.includes( "w" ) ) {
 
-    		const tempForward = vec3.clone( this.forward );
+    		const tempForward = vec3.clone( this._camera.forward );
 
-    		vec3.multiply( tempForward, tempForward, vec3.fromValues( this.cameraSpeed, this.cameraSpeed, this.cameraSpeed ) );
-    		vec3.add( this.position, this.position, tempForward );
-
-    	}
-
-    	if ( this.activeKeys.includes( "s" ) ) {
-
-    		const tempForward = vec3.clone( this.forward );
-
-    		vec3.multiply( tempForward, tempForward, vec3.fromValues( this.cameraSpeed, this.cameraSpeed, this.cameraSpeed ) );
-    		vec3.sub( this.position, this.position, tempForward );
+    		vec3.multiply( tempForward, tempForward, vec3.fromValues( this._cameraSpeed, this._cameraSpeed, this._cameraSpeed ) );
+    		vec3.add( this._camera.position, this._camera.position, tempForward );
 
     	}
 
-    	if ( this.activeKeys.includes( "a" ) ) {
+    	if ( this._activeKeys.includes( "s" ) ) {
 
-    		const tempPos = vec3.clone( this.position );
+    		const tempForward = vec3.clone( this._camera.forward );
 
-    		vec3.cross( tempPos, this.forward, this.up );
+    		vec3.multiply( tempForward, tempForward, vec3.fromValues( this._cameraSpeed, this._cameraSpeed, this._cameraSpeed ) );
+    		vec3.sub( this._camera.position, this._camera.position, tempForward );
+
+    	}
+
+    	if ( this._activeKeys.includes( "a" ) ) {
+
+    		const tempPos = vec3.clone( this._camera.position );
+
+    		vec3.cross( tempPos, this._camera.forward, this._camera.up );
     		vec3.normalize( tempPos, tempPos );
 
-    		vec3.multiply( tempPos, tempPos, vec3.fromValues( this.cameraSpeed, this.cameraSpeed, this.cameraSpeed ) );
-    		vec3.sub( this.position, this.position, tempPos );
+    		vec3.multiply( tempPos, tempPos, vec3.fromValues( this._cameraSpeed, this._cameraSpeed, this._cameraSpeed ) );
+    		vec3.sub( this._camera.position, this._camera.position, tempPos );
 
     	}
 
-    	if ( this.activeKeys.includes( "d" ) ) {
+    	if ( this._activeKeys.includes( "d" ) ) {
 
-    		const tempPos = vec3.clone( this.position );
+    		const tempPos = vec3.clone( this._camera.position );
 
-    		vec3.cross( tempPos, this.forward, this.up );
+    		vec3.cross( tempPos, this._camera.forward, this._camera.up );
     		vec3.normalize( tempPos, tempPos );
 
-    		vec3.multiply( tempPos, tempPos, vec3.fromValues( this.cameraSpeed, this.cameraSpeed, this.cameraSpeed ) );
-    		vec3.add( this.position, this.position, tempPos );
+    		vec3.multiply( tempPos, tempPos, vec3.fromValues( this._cameraSpeed, this._cameraSpeed, this._cameraSpeed ) );
+    		vec3.add( this._camera.position, this._camera.position, tempPos );
 
     	}
 
-    	if ( this.activeKeys.includes( "e" ) ) {
+    	if ( this._activeKeys.includes( "e" ) ) {
 
-    		vec3.add( this.position, this.position, vec3.fromValues( 0, this.cameraSpeed, 0 ) );
+    		vec3.add( this._camera.position, this._camera.position, vec3.fromValues( 0, this._cameraSpeed, 0 ) );
 
     	}
 
-    	if ( this.activeKeys.includes( "q" ) ) {
+    	if ( this._activeKeys.includes( "q" ) ) {
 
-    		vec3.add( this.position, this.position, vec3.fromValues( 0, - this.cameraSpeed, 0 ) );
+    		vec3.add( this._camera.position, this._camera.position, vec3.fromValues( 0, - this._cameraSpeed, 0 ) );
 
     	}
 
@@ -280,10 +254,21 @@ export default class CameraFPS extends Camera {
 
     	if ( delta ) this.processInputs( delta );
 
-    	vec3.add( this.target, this.position, this.forward );
-    	mat4.lookAt( this.view, this.position, this.target, this.up );
-    	mat4.multiply( this.camera, this.projection, this.view );
+    	vec3.add( this._camera.target, this._camera.position, this._camera.forward );
+    	mat4.lookAt( this._camera.view, this._camera.position, this._camera.target, this._camera.up );
 
     }
+
+    public get active(): boolean {
+
+    	return this._active;
+
+    }
+    public set active( value: boolean ) {
+
+    	this._active = value;
+
+    }
+
 
 }

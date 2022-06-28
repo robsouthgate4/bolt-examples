@@ -1,50 +1,39 @@
-import { mat4, vec3 } from "gl-matrix";
-import { Camera } from "@robsouthgate/bolt-core";
+import { mat4, vec2, vec3 } from "gl-matrix";
+import { Camera, CameraPersp } from "@bolt-webgl/core";
 
-export default class CameraArcball extends Camera {
+export default class CameraArcball {
 
     private _mouseDown: boolean;
     private _azimuth: number;
     private _elevation: number;
     private _rotateAmountX: number;
-    private _mouseXOnMouseDown: number;
-    private _targetXOnMouseDown: number;
-    private _targetX: number;
-    private _targetY: number;
+    private _rotationMouseXOnMouseDown: number;
+    private _rotationTargetXOnMouseDown: number;
+    private _rotateTargetX: number;
+    private _rotateTargetY: number;
     private _radius: number;
     private _damping: number;
-    private _mouseYOnMouseDown!: number;
+    private _rotationMouseYOnMouseDown!: number;
     private _rotateAmountY!: number;
-    private _targetYOnMouseDown!: number;
+    private _rotationTargetYOnMouseDown!: number;
     private _initialPositionSpherical: number[];
     private _scrollSpeed: number;
+    private _shiftKeyDown: boolean;
+    private _camera: Camera;
+    private _position: vec3;
 
     constructor(
-    	width: number,
-    	height: number,
-    	position: vec3,
-    	target: vec3,
-    	fov: number,
-    	near: number,
-    	far: number,
-    	damping = 0.2,
+    	camera: Camera,
     	speed = 3,
+    	damping = 1,
     	scrollSpeed = 0.3 ) {
 
-    	super(
-    		width,
-    		height,
-    		position,
-    		fov,
-    		near,
-    		far
+    	this._camera = camera;
+    	this._position = camera.position;
+
+    	this._initialPositionSpherical = this.cartesianToSpherical(
+    		camera.position[ 0 ], camera.position[ 1 ], camera.position[ 2 ]
     	);
-
-    	this.position = position;
-
-    	this._initialPositionSpherical = this.cartesianToSpherical( this.position[ 0 ], this.position[ 1 ], this.position[ 2 ] );
-
-    	this.target = target || vec3.fromValues( 0, 0, 0 );
 
     	this._mouseDown = false;
 
@@ -53,22 +42,21 @@ export default class CameraArcball extends Camera {
     	this._radius = this._initialPositionSpherical[ 2 ];
 
     	this._scrollSpeed = scrollSpeed;
+    	this._damping = damping;
 
     	this._rotateAmountX = speed || 1;
     	this._rotateAmountY = speed || 1;
 
-    	this._mouseXOnMouseDown = 0;
-    	this._mouseYOnMouseDown = 0;
+    	this._rotationMouseXOnMouseDown = 0;
+    	this._rotationMouseYOnMouseDown = 0;
 
-    	this._targetXOnMouseDown = 0;
-    	this._targetYOnMouseDown = 0;
+    	this._rotationTargetXOnMouseDown = 0;
+    	this._rotationTargetYOnMouseDown = 0;
 
-    	this._targetX = this._azimuth;
-    	this._targetY = this._elevation;
+    	this._rotateTargetX = this._azimuth;
+    	this._rotateTargetY = this._elevation;
 
-    	this._damping = damping || 1;
-
-    	this.resize( window.innerWidth, window.innerHeight );
+    	this._shiftKeyDown = false;
 
     	this.initListeners();
 
@@ -80,6 +68,8 @@ export default class CameraArcball extends Camera {
     	window.addEventListener( "mousedown", this.handleMouseDown.bind( this ) );
     	window.addEventListener( "mouseup", this.handleMouseUp.bind( this ) );
     	window.addEventListener( "wheel", this.handleWheel.bind( this ) );
+    	window.addEventListener( "keydown", this.handleKeyDown.bind( this ) );
+    	window.addEventListener( "keyup", this.handleKeyUp.bind( this ) );
 
     }
 
@@ -92,13 +82,39 @@ export default class CameraArcball extends Camera {
 
     }
 
+    handleKeyDown( ev: KeyboardEvent ) {
+
+    	if ( ev.shiftKey ) {
+
+    		this._shiftKeyDown = true;
+
+    	}
+
+    }
+
+    handleKeyUp() {
+
+    	if ( this._shiftKeyDown ) {
+
+    		this._shiftKeyDown = false;
+
+    	}
+
+    }
+
     handleWheel( ev: WheelEvent ) {
 
-    	const direction = Math.sign( ev.deltaY );
-    	this.fov -= ( direction * this._scrollSpeed ) * 0.1;
-    	this.fov = Math.min( 45, this.fov );
+    	if ( this._shiftKeyDown ) return;
 
-    	mat4.perspective( this.projection, this.fov, this.width / this.height, this.near, this.far );
+    	const direction = Math.sign( ev.deltaY );
+
+    	if ( this._camera instanceof CameraPersp ) {
+
+    		this._camera.fov -= ( direction * this._scrollSpeed ) * 0.1;
+    		this._camera.updateProjection( this._camera.aspect );
+
+    	}
+
 
     }
 
@@ -106,11 +122,15 @@ export default class CameraArcball extends Camera {
 
     	this._mouseDown = true;
 
-    	this._mouseXOnMouseDown = this.getMousePosition( ev ).x * this._rotateAmountX;
-    	this._mouseYOnMouseDown = this.getMousePosition( ev ).y * this._rotateAmountY;
+    	if ( ! this._shiftKeyDown ) {
 
-    	this._targetXOnMouseDown = this._targetX;
-    	this._targetYOnMouseDown = this._targetY;
+    		this._rotationMouseXOnMouseDown = this.getMousePosition( ev ).x * this._rotateAmountX;
+    		this._rotationMouseYOnMouseDown = this.getMousePosition( ev ).y * this._rotateAmountY;
+
+    		this._rotationTargetXOnMouseDown = this._rotateTargetX;
+    		this._rotationTargetYOnMouseDown = this._rotateTargetY;
+
+    	}
 
     }
 
@@ -118,11 +138,32 @@ export default class CameraArcball extends Camera {
 
     	if ( ! this._mouseDown ) return;
 
-    	const mouseX = this.getMousePosition( ev ).x * this._rotateAmountX;
-    	const mouseY = this.getMousePosition( ev ).y * this._rotateAmountY;
+    	if ( ! this._shiftKeyDown ) {
 
-    	this._targetX = this._targetXOnMouseDown + ( mouseX - this._mouseXOnMouseDown );
-    	this._targetY = this._targetYOnMouseDown - ( mouseY - this._mouseYOnMouseDown );
+    		const mouseX = this.getMousePosition( ev ).x * this._rotateAmountX;
+    		const mouseY = this.getMousePosition( ev ).y * this._rotateAmountY;
+
+    		this._rotateTargetX = this._rotationTargetXOnMouseDown + ( mouseX - this._rotationMouseXOnMouseDown );
+    		this._rotateTargetY = this._rotationTargetYOnMouseDown - ( mouseY - this._rotationMouseYOnMouseDown );
+
+    		this._rotateTargetX = this._rotationTargetXOnMouseDown + ( mouseX - this._rotationMouseXOnMouseDown );
+    		this._rotateTargetY = this._rotationTargetYOnMouseDown - ( mouseY - this._rotationMouseYOnMouseDown );
+
+    	} else {
+
+    		// TODO: panning
+
+    		const mouse = vec2.fromValues( this.getMousePosition( ev ).x * 3, this.getMousePosition( ev ).y * 3 );
+
+    		const newDirection = vec3.create();
+
+    		vec3.cross( newDirection, this._camera.forward, this._camera.up );
+    		vec3.normalize( newDirection, newDirection );
+    		vec3.multiply( newDirection, newDirection, vec3.fromValues( 0.1, 0.1, 0.1 ) );
+
+
+    	}
+
 
 
     }
@@ -164,42 +205,44 @@ export default class CameraArcball extends Camera {
     	const sineElevation = Math.sin( this._elevation );
     	const cosineElevation = Math.cos( this._elevation );
 
-    	direction[ 0 ] = ( this._radius * cosineElevation * cosineAzimuth );
+    	direction[ 0 ] = this._radius * cosineElevation * cosineAzimuth;
     	direction[ 1 ] = this._radius * sineElevation;
     	direction[ 2 ] = this._radius * cosineElevation * sineAzimuth;
 
-    	this.forward = direction;
+    	vec3.copy( this._camera.forward, direction );
+    	vec3.normalize( this._camera.forward, this._camera.forward );
 
     	return direction;
 
     }
 
-    resize( width: number, height: number ) {
-
-    	mat4.perspective( this.projection, this.fov, width / height, this.near, this.far );
-
-    	this.width = width;
-    	this.height = height;
-
-    }
-
-
-
     update() {
 
-    	this._azimuth += ( this._targetX - this._azimuth ) * this._damping;
-    	this._elevation += ( this._targetY - this._elevation ) * this._damping;
+    	this._azimuth += ( this._rotateTargetX - this._azimuth ) * this._damping;
+    	this._elevation += ( this._rotateTargetY - this._elevation ) * this._damping;
 
     	this._elevation = Math.max( this._elevation, 0 );
     	this._elevation = Math.min( Math.PI / 2, this._elevation );
 
-    	// generate spherical coordinates for new position
-    	this.position[ 0 ] = this.spherialToCartesian()[ 0 ];
-    	this.position[ 1 ] = this.spherialToCartesian()[ 1 ];
-    	this.position[ 2 ] = this.spherialToCartesian()[ 2 ];
+    	const newPosition = this.spherialToCartesian();
 
-    	mat4.lookAt( this.view, this.position, this.target, this.up );
-    	mat4.multiply( this.camera, this.projection, this.view );
+    	// generate spherical coordinates for new position
+    	this._position[ 0 ] = newPosition[ 0 ];
+    	this._position[ 1 ] = newPosition[ 1 ];
+    	this._position[ 2 ] = newPosition[ 2 ];
+
+    	mat4.lookAt( this._camera.view, this._camera.position, this._camera.target, this._camera.up );
+
+    }
+
+    public get camera(): Camera {
+
+    	return this._camera;
+
+    }
+    public set camera( value: Camera ) {
+
+    	this._camera = value;
 
     }
 

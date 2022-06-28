@@ -2,22 +2,20 @@
 
 precision highp float;
 
-// uniform vec3 objectColor;
-// uniform vec3 lightColor;
-// uniform vec3 lightPosition;
 uniform vec3 viewPosition;
-// uniform sampler2D map0;
-// uniform sampler2D map1;
 
 out vec4 FragColor;
 
-in vec2 vUv;
+in vec2 Uv;
 in vec3 Normal;
 in vec3 FragPosition;
+in vec3 Color;
+
+uniform vec4 baseColor;
 
 void main()
 {
 
-  FragColor = vec4( vec3( 1.0, 0.0, 0.0 ), 1.0 );
+  FragColor = vec4( Normal.rgb * 0.5 + 0.5, 1.0 );
 
 }

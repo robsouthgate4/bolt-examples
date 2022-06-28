@@ -92,6 +92,8 @@ export default abstract class Base {
 
     	const { DEBUG_FPS } = glSettings;
 
+    	if ( DEBUG_FPS ) this.stats?.begin();
+
     	this.elapsed = timestamp * 0.001;
     	this.delta = this.elapsed - this.lastTime;
     	this.lastTime = this.elapsed;

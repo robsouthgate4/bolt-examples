@@ -16,6 +16,7 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
+		"@theatre/core": "^0.4.7",
 		"@types/stats.js": "^0.17.0",
 		"gl-matrix": "^3.4.3",
 		"lodash": "^4.17.21",
@@ -24,6 +25,7 @@
 		"url-search-params-polyfill": "^8.1.1"
 	},
 	"devDependencies": {
+		"@theatre/studio": "^0.4.7",
 		"@typescript-eslint/eslint-plugin": "^4.15.1",
 		"@typescript-eslint/parser": "^4.15.1",
 		"autoprefixer": "^9.8.6",
