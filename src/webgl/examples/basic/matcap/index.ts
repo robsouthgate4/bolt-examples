@@ -14,7 +14,6 @@ import GLTFLoader from "@webgl/modules/gltf-loader";
 export default class extends Base {
 
     canvas: HTMLCanvasElement;
-    shaderEyes: Shader;
     camera: CameraPersp;
     assetsLoaded?: boolean;
     bolt = Bolt.getInstance();
@@ -22,6 +21,7 @@ export default class extends Base {
     root!: Node;
     gltf!: Node;
     arcball: CameraArcball;
+    shaderEyes: Shader;
     shaderBody: Shader;
     matcapTexture!: Texture;
 
@@ -84,8 +84,6 @@ export default class extends Base {
     	this.gltf.traverse( ( node: Node ) => {
 
     		if ( node instanceof Batch ) {
-
-    			console.log( node );
 
     			if ( node.shader.name === "mat_phantom_body" ) {
 

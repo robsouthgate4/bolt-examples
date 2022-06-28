@@ -1,7 +1,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Node, Batch, FBO, Texture, COLOR_ATTACHMENT0, RBO, Mesh, NEAREST, TextureCube, CameraPersp } from "@bolt-webgl/core";
+import Bolt, { Shader, Node, Batch, FBO, Texture, COLOR_ATTACHMENT0, RBO, Mesh, NEAREST, CameraPersp } from "@bolt-webgl/core";
 
 import FXAAPass from "@/webgl/modules/post/passes/FXAAPass";
 import geometryVertex from "./shaders/geometry/geometry.vert";
@@ -39,7 +39,6 @@ export default class extends Base {
     cubeBatch!: Batch;
     comp: ShaderPass;
     compShader: Shader;
-    cubeTexture!: TextureCube;
     depthTexture: Texture;
     uvTexture: Texture;
     arcball: CameraArcball;

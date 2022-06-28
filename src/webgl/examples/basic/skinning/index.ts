@@ -1,13 +1,14 @@
 
 import Base from "@webgl/Base";
-import Bolt, { Batch, CameraPersp, Node } from "@bolt-webgl/core";
+import Bolt, { Batch, CameraPersp, Node, Shader } from "@bolt-webgl/core";
 
 import { vec3 } from "gl-matrix";
 import CameraArcball from "@/webgl/modules/CameraArcball";
 import Floor from "@/webgl/modules/batches/floor";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
 
-
+import skinVertexShader from "./shaders/skin/skin.vert";
+import skinFragmentShader from "./shaders/skin/skin.frag";
 
 export default class extends Base {
 
@@ -21,7 +22,6 @@ export default class extends Base {
     gltf!: Node;
     floor: Floor;
     arcball: CameraArcball;
-    root!: Node;
 
     constructor() {
 
@@ -63,15 +63,54 @@ export default class extends Base {
 
     async init() {
 
-    	this.root = new Node();
-
     	const gltfLoader = new GLTFLoader( this.bolt );
 
-    	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/robot/", "scene.gltf" );
+    	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/sonic/", "scene.gltf" );
+
+    	const shader = new Shader( skinVertexShader, skinFragmentShader );
+
+    	this.gltf.transform.position = vec3.fromValues( 0, 0, 0 );
+    	this.gltf.transform.scale = vec3.fromValues( 0.1, 0.1, 0.1 );
+
+    	this.gltf.traverse( ( node: Node ) => {
+
+    		if ( node instanceof Batch ) {
+
+    			node.shader = shader;
+
+    		} else {
+
+    			console.log( node.name );
+
+    			if ( node.name === "Shoulder_L_Reference" ) {
+
+    				node.transform.rotateZ = Math.PI * 0.1;
+
+    			}
+
+    			if ( node.name === "Shoulder_R_Reference" ) {
+
+    				node.transform.rotateZ = Math.PI * 0.1;
+
+    			}
+
+    		}
+
+    	} );
+
 
     	this.assetsLoaded = true;
 
     	this.resize();
+
+    	if ( ! this.assetsLoaded ) return;
+
+    	this.arcball.update();
+
+    	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+    	this.bolt.clear( 1, 1, 1, 1 );
+
+    	this.bolt.draw( [ this.gltf, this.floor ] );
 
     }
 
@@ -90,6 +129,7 @@ export default class extends Base {
 
     update( elapsed: number, delta: number ) {
 
+
     	if ( ! this.assetsLoaded ) return;
 
     	this.arcball.update();
@@ -98,7 +138,6 @@ export default class extends Base {
     	this.bolt.clear( 1, 1, 1, 1 );
 
     	this.bolt.draw( [ this.gltf, this.floor ] );
-
 
     }
 
