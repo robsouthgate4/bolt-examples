@@ -85,7 +85,7 @@ export default class extends Base {
 
     				node.shader = this.shaderBody;
     				node.shader.activate();
-    				node.shader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
+    				node.shader.setVector4( "baseColor", vec4.fromValues( 0.6, 1.0, 0.75, 1 ) );
 
     			}
 
@@ -109,6 +109,7 @@ export default class extends Base {
 	resize() {
 
 		this.bolt.resizeFullScreen();
+    	this.camera.updateProjection( this.canvas.width / this.canvas.height );
 
 	}
 

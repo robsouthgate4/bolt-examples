@@ -31,7 +31,6 @@ export default class extends Base {
 	shaderBody!: Shader;
 	cubeMaptexture!: TextureCube;
 	cubeCameras: Camera[] = [];
-	cubeTextures: Texture[] = [];
 	cubeTexture: TextureCube;
 	cubeFBO: FBOCube;
 
