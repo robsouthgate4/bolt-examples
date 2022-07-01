@@ -1,20 +1,18 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Node, Batch, TextureCube, CameraPersp, Camera, Texture, FBOCube } from "@bolt-webgl/core";
+import Bolt, { Shader, Node, Batch, TextureCube, CameraPersp, Camera, Texture, FBOCube, RBO, Mesh } from "@bolt-webgl/core";
 
 
 import { vec3, vec4, } from "gl-matrix";
-import CameraArcball from "@webgl/modules/CameraArcball";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
-import Post from "@/webgl/modules/post";
-import Axis from "@/webgl/modules/batches/axis";
 import Floor from "@/webgl/modules/batches/floor";
 import matcapVertex from "./shaders/matcap/matcap.vert";
 import matcapFragment from "./shaders/matcap/matcap.frag";
 
 import colorVertex from "./shaders/color/color.vert";
 import colorFragment from "./shaders/color/color.frag";
+import Sphere from "@/webgl/modules/primitives/Sphere";
 
 export default class extends Base {
 
@@ -31,8 +29,9 @@ export default class extends Base {
 	shaderBody!: Shader;
 	cubeMaptexture!: TextureCube;
 	cubeCameras: Camera[] = [];
-	cubeTexture: TextureCube;
 	cubeFBO: FBOCube;
+	//cubeRBO: RBO;
+	sphere!: Batch;
 
 	constructor() {
 
@@ -59,19 +58,23 @@ export default class extends Base {
     	this.bolt.setCamera( this.camera );
     	this.bolt.enableDepth();
 
-		this.cubeTexture = new TextureCube();
-		this.cubeFBO = new FBOCube();
+		this.cubeFBO = new FBOCube( { width: 128, height: 128 } );
+
+		// attach render buffer object to fbo
+		// this.cubeFBO.bind();
+		// this.cubeRBO = new RBO( { width: 128, height: 128, } );
+		// this.cubeFBO.unbind();
 
 		this.shaderEyes = new Shader( colorVertex, colorFragment );
 		this.shaderBody = new Shader( matcapVertex, matcapFragment );
 
 		this.shaderBody.activate();
-		this.shaderBody.setTexture( "mapReflection", this.cubeTexture );
+		this.shaderBody.setTexture( "mapReflection", this.cubeFBO.targetTexture );
 
     	this.gl = this.bolt.getContext();
 
-		this.createCubeCameras();
     	this.init();
+
 
 
 	}
@@ -82,6 +85,9 @@ export default class extends Base {
     	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/phantom/", "PhantomLogoPose2.gltf" );
 
     	this.assetsLoaded = true;
+
+		this.sphere = new Batch( new Mesh( new Sphere(), {} ), new Shader( colorVertex, colorFragment ) );
+		this.sphere.transform.position = vec3.fromValues( - 2, 1, 2 );
 
 		this.gltf.traverse( ( node: Node ) => {
 
@@ -110,6 +116,8 @@ export default class extends Base {
     	this.floor = new Floor();
 
     	this.resize();
+
+		this.createCubeCameras();
 
 	}
 
@@ -202,19 +210,33 @@ export default class extends Base {
 
 		this.cubeCameras = [ cameraPX, cameraNX, cameraPY, cameraNY, cameraPZ, cameraNZ ];
 
+		// this.cubeFBO.bind();
+
+		// this.bolt.setViewPort( 0, 0, this.cubeFBO.width, this.cubeFBO.height );
+
+		// for ( let i = 0; i < 6; i ++ ) {
+
+		// 	this.cubeFBO.setActiveSide( i );
+		// 	this.bolt.setCamera( this.cubeCameras[ i ] );
+		// 	this.bolt.clear( 0, 0, 0, 1 );
+		// 	this.bolt.draw( [ this.floor, this.sphere ] );
+
+		// }
+
+		// this.cubeFBO.unbind();
+
+		this.bolt.setCamera( this.camera );
+
 	}
 
 	drawScene( ) {
 
-    	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-    	this.bolt.clear( 0.9, 0.9, 0.9, 1 );
+    	// this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+    	// this.bolt.clear( 0.9, 0.9, 0.9, 1 );
 
-    	this.gltf.transform.position = vec3.fromValues( 0, 0, 0 );
+    	// this.gltf.transform.position = vec3.fromValues( 0, 0, 0 );
 
-		this.cubeCameras[ 0 ].update();
-		this.bolt.setCamera( this.cubeCameras[ 0 ] );
-
-    	this.bolt.draw( [ this.floor, this.gltf ] );
+    	// this.bolt.draw( [ this.floor, this.gltf, this.sphere ] );
 
 
 	}

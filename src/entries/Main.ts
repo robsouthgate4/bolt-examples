@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/basic/cube-map";
+import Example from "@/webgl/examples/basic/cube-camera";
 
 export default class Main {
 

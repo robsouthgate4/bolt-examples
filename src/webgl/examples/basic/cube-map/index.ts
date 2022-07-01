@@ -69,6 +69,8 @@ export default class extends Base {
 
     	this.assetsLoaded = true;
 
+		//TODO: switch to use TextureCube class for cubemaps
+
 		// Load cubemap images.
 		const nx = await new Texture( { imagePath: "/static/textures/envMap/nx.png" } );
 		const ny = await new Texture( { imagePath: "/static/textures/envMap/ny.png" } );
