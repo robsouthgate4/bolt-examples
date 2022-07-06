@@ -19,6 +19,6 @@ void main()
 
     vec4 color = texture( baseTexture, Uv );
 
-    FragColor = vec4( baseColor.rgb, 1.0 );
+    FragColor = vec4( Normal * 0.5 + 0.5, 1.0 );
 
 }
