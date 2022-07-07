@@ -16,6 +16,7 @@ import skyFragment from "./shaders/sky/sky.frag";
 
 import Sphere from "@/webgl/modules/primitives/Sphere";
 import Cube from "@/webgl/modules/primitives/Cube";
+import { GeometryBuffers } from "@bolt-webgl/core/build/Mesh";
 
 export default class extends Base {
 
@@ -41,7 +42,7 @@ export default class extends Base {
 	shaderSky: Shader;
 	cameraParent = new Node();
 	cameraCubeParent = new Node();
-	cameraDebug!: Node;
+	cameraDebugGeo!: GeometryBuffers;
 	cameraDebug2!: Node;
 
 	constructor() {
@@ -90,9 +91,15 @@ export default class extends Base {
 	async init() {
 
 		const gltfLoader = new GLTFLoader( this.bolt );
-		this.gltf = await gltfLoader.load( "/static/models/gltf/examples/phantom/", "PhantomLogoPose2.gltf" );
+		const cameraDebugGLTF = await gltfLoader.load( "/static/models/gltf/examples/camera/", "camera.gltf" );
+		const cameraDebugBatch = cameraDebugGLTF.children[ 0 ].children[ 0 ] as Batch;
 
-		this.cameraDebug = await gltfLoader.load( "/static/models/gltf/examples/camera/", "camera.gltf" );
+		this.cameraDebugGeo = {
+			positions: cameraDebugBatch.mesh.positions,
+			normals: cameraDebugBatch.mesh.normals,
+			uvs: cameraDebugBatch.mesh.uvs,
+			indices: cameraDebugBatch.mesh.indices,
+		};
 
 		const environmentTexture = new TextureCube( {
 			imagePath: "/static/textures/cubeMaps/sky/", files: {
@@ -116,30 +123,6 @@ export default class extends Base {
 
 		this.shaderReflection.activate();
 		this.shaderReflection.setTexture( "mapReflection", this.cubeFBO.targetTexture );
-
-		this.gltf.traverse( ( node: Node ) => {
-
-			if ( node instanceof Batch ) {
-
-				if ( node.shader.name === "mat_phantom_body" ) {
-
-					node.shader = this.shaderReflection;
-					node.shader.activate();
-					node.shader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
-
-				}
-
-				if ( node.shader.name === "mat_phantom_eyes" ) {
-
-					node.shader = this.shaderReflection;
-					node.shader.activate();
-					node.shader.setVector4( "baseColor", vec4.fromValues( 0, 0, 0, 1 ) );
-
-				}
-
-			}
-
-		} );
 
 		this.cube = new Batch( new Mesh( new Cube() ), new Shader( colorVertex, colorFragment ) );
 		this.cube.transform.position = vec3.fromValues( - 2, 0, 0 );
@@ -251,11 +234,14 @@ export default class extends Base {
 
 		this.cubeCameras.forEach( ( camera ) => {
 
+			const cameraDebugBatch = new Batch( new Mesh( this.cameraDebugGeo ), new Shader( colorVertex, colorFragment ) );
+			cameraDebugBatch.transform.quaternion = camera.transform.quaternion;
+			cameraDebugBatch.transform.scale = vec3.fromValues( 0.3, 0.3, 0.3 );
+			cameraDebugBatch.setParent( this.cameraCubeParent );
+
 			camera.setParent( this.cameraCubeParent );
 
 		} );
-
-
 
 
 	}
@@ -264,16 +250,16 @@ export default class extends Base {
 
 		this.cube.transform.x = - Math.sin( elapsed * 0.75 ) * 2.5;
 		this.cube.transform.z = - Math.cos( elapsed * 0.75 ) * 2.5;
-
 		this.cube.transform.lookAt( this.sphere.transform.position );
 
 		this.cube2.transform.x = Math.sin( elapsed * 0.75 ) * 2.5;
 		this.cube2.transform.z = Math.cos( elapsed * 0.75 ) * 2.5;
-
 		this.cube2.transform.lookAt( this.sphere.transform.position );
 
+		// combine lookat rotation with looping x rotation
+
 		const r = quat.create();
-		quat.fromEuler( r, elapsed * 100, 0, 0 );
+		quat.setAxisAngle( r, vec3.fromValues( 1, 0, 0 ), elapsed );
 		quat.multiply( this.cube2.transform.quaternion, this.cube2.transform.quaternion, r );
 		quat.multiply( this.cube.transform.quaternion, this.cube.transform.quaternion, r );
 
@@ -287,9 +273,9 @@ export default class extends Base {
 
 				this.bolt.disableCullFace();
 
+				this.bolt.setCamera( this.cubeCameras[ i ] );
 				this.cubeFBO.setActiveSide( i );
 				this.cubeCameras[ i ].update();
-				this.bolt.setCamera( this.cubeCameras[ i ] );
 
 				this.bolt.setViewPort( 0, 0, this.cubeFBO.width, this.cubeFBO.height );
 				this.bolt.clear( 1, 1, 1, 1 );
@@ -314,9 +300,13 @@ export default class extends Base {
 			this.shaderReflection.activate();
 			this.shaderReflection.setVector3( "cameraPosition", this.camera.worldPosition );
 
+			// set the default scene camera
 			this.bolt.setCamera( this.camera );
-			this.bolt.draw( [ this.sphere, this.cube, this.cube2, this.floor, this.cameraCubeParent ] );
 
+			// draw objects
+			this.bolt.draw( [ this.cameraCubeParent, this.cube2, this.cube ] );
+
+			// Draw skybox with just front faces
 			this.bolt.cullFace( FRONT );
 			this.bolt.draw( this.skyBox );
 			this.bolt.disableCullFace();
