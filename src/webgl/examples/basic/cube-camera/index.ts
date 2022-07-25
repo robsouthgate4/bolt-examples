@@ -94,12 +94,7 @@ export default class extends Base {
 		const cameraDebugGLTF = await gltfLoader.load( "/static/models/gltf/examples/camera/", "camera.gltf" );
 		const cameraDebugBatch = cameraDebugGLTF.children[ 0 ].children[ 0 ] as Batch;
 
-		this.cameraDebugGeo = {
-			positions: cameraDebugBatch.mesh.positions,
-			normals: cameraDebugBatch.mesh.normals,
-			uvs: cameraDebugBatch.mesh.uvs,
-			indices: cameraDebugBatch.mesh.indices,
-		};
+		this.cameraDebugGeo = cameraDebugBatch.mesh.buffers;
 
 		const environmentTexture = new TextureCube( {
 			imagePath: "/static/textures/cubeMaps/sky/", files: {
@@ -235,6 +230,7 @@ export default class extends Base {
 		this.cubeCameras.forEach( ( camera ) => {
 
 			const cameraDebugBatch = new Batch( new Mesh( this.cameraDebugGeo ), new Shader( colorVertex, colorFragment ) );
+
 			cameraDebugBatch.transform.quaternion = camera.transform.quaternion;
 			cameraDebugBatch.transform.scale = vec3.fromValues( 0.3, 0.3, 0.3 );
 			cameraDebugBatch.setParent( this.cameraCubeParent );
@@ -304,7 +300,7 @@ export default class extends Base {
 			this.bolt.setCamera( this.camera );
 
 			// draw objects
-			this.bolt.draw( [ this.cameraCubeParent, this.cube2, this.cube ] );
+			this.bolt.draw( [ this.sphere, this.cameraCubeParent, this.cube2, this.cube ] );
 
 			// Draw skybox with just front faces
 			this.bolt.cullFace( FRONT );

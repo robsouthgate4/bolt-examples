@@ -25,7 +25,6 @@ export default class SkinMesh extends Mesh {
     	shader.setTexture( "jointTexture", this._skin.jointTexture );
     	shader.setFloat( "jointCount", this._skin.joints.length );
 
-
     	super.draw( shader );
 
     }

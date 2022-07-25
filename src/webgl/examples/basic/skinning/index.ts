@@ -2,7 +2,7 @@
 import Base from "@webgl/Base";
 import Bolt, { Batch, CameraPersp, Node, Shader } from "@bolt-webgl/core";
 
-import { vec3 } from "gl-matrix";
+import { quat, vec3 } from "gl-matrix";
 import CameraArcball from "@/webgl/modules/CameraArcball";
 import Floor from "@/webgl/modules/batches/floor";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
@@ -22,8 +22,9 @@ export default class extends Base {
     gltf!: Node;
     floor: Floor;
     arcball: CameraArcball;
+	_headNode?: Node;
 
-    constructor() {
+	constructor() {
 
     	super();
 
@@ -39,7 +40,7 @@ export default class extends Base {
     		fov: 45,
     		near: 0.1,
     		far: 1000,
-    		position: vec3.fromValues( 4, 4, 8 ),
+    		position: vec3.fromValues( 0, 4, 16 ),
     		target: vec3.fromValues( 0, 2, 0 ),
     	} );
 
@@ -59,40 +60,24 @@ export default class extends Base {
     	this.init();
 
 
-    }
+	}
 
-    async init() {
+	async init() {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
 
     	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/sonic/", "scene.gltf" );
-
-    	const shader = new Shader( skinVertexShader, skinFragmentShader );
 
     	this.gltf.transform.position = vec3.fromValues( 0, 0, 0 );
     	this.gltf.transform.scale = vec3.fromValues( 0.1, 0.1, 0.1 );
 
     	this.gltf.traverse( ( node: Node ) => {
 
-    		if ( node instanceof Batch ) {
+			console.log( node );
 
-    			node.shader = shader;
+    		if ( node.name === "Head_Reference" ) {
 
-    		} else {
-
-    			console.log( node.name );
-
-    			if ( node.name === "Shoulder_L_Reference" ) {
-
-    				node.transform.rotateZ = Math.PI * 0.1;
-
-    			}
-
-    			if ( node.name === "Shoulder_R_Reference" ) {
-
-    				node.transform.rotateZ = Math.PI * 0.1;
-
-    			}
+				this._headNode = node;
 
     		}
 
@@ -103,48 +88,48 @@ export default class extends Base {
 
     	this.resize();
 
-    	if ( ! this.assetsLoaded ) return;
+	}
 
-    	this.arcball.update();
-
-    	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-    	this.bolt.clear( 1, 1, 1, 1 );
-
-    	this.bolt.draw( [ this.gltf, this.floor ] );
-
-    }
-
-    resize() {
+	resize() {
 
     	this.bolt.resizeFullScreen();
     	this.camera.updateProjection( this.canvas.width / this.canvas.height );
 
-    }
+	}
 
-    earlyUpdate( elapsed: number, delta: number ) {
+	earlyUpdate( elapsed: number, delta: number ) {
 
     	return;
 
-    }
+	}
 
-    update( elapsed: number, delta: number ) {
-
+	update( elapsed: number, delta: number ) {
 
     	if ( ! this.assetsLoaded ) return;
 
     	this.arcball.update();
+
+		if ( this._headNode ) {
+
+			let q = quat.create();
+			quat.setAxisAngle( q, vec3.fromValues( 0, 0, 1 ), Math.sin( elapsed * 10 ) * Math.PI * 0.005 );
+			quat.multiply( q, q, this._headNode.transform.quaternion );
+			this._headNode.transform.quaternion = q;
+
+		}
+
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 1, 1, 1, 1 );
 
     	this.bolt.draw( [ this.gltf, this.floor ] );
 
-    }
+	}
 
-    lateUpdate( elapsed: number, delta: number ) {
+	lateUpdate( elapsed: number, delta: number ) {
 
     	return;
 
-    }
+	}
 
 }
