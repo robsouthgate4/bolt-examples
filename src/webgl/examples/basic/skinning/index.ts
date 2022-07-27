@@ -1,14 +1,11 @@
 
 import Base from "@webgl/Base";
-import Bolt, { Batch, CameraPersp, Node, Shader } from "@bolt-webgl/core";
+import Bolt, { CameraPersp, Node, } from "@bolt-webgl/core";
 
 import { quat, vec3 } from "gl-matrix";
 import CameraArcball from "@/webgl/modules/CameraArcball";
 import Floor from "@/webgl/modules/batches/floor";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
-
-import skinVertexShader from "./shaders/skin/skin.vert";
-import skinFragmentShader from "./shaders/skin/skin.frag";
 
 export default class extends Base {
 
@@ -72,8 +69,6 @@ export default class extends Base {
     	this.gltf.transform.scale = vec3.fromValues( 0.1, 0.1, 0.1 );
 
     	this.gltf.traverse( ( node: Node ) => {
-
-			console.log( node );
 
     		if ( node.name === "Head_Reference" ) {
 

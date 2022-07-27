@@ -34,7 +34,7 @@ export default class extends Base {
     matcapTexture!: Texture;
     floor!: Floor;
 
-    objectCount: number = 20;
+    objectCount: number = 10;
     picker!: GPUPicker;
     currentPickerID: number = - 1;
     pickingDataArray: PickingData[] = [];
@@ -74,7 +74,7 @@ export default class extends Base {
     	this.bolt.enableDepth();
 
     	// initialise the gpu picker
-    	this.picker = new GPUPicker( this.bolt, { width: this.canvas.width, height: this.canvas.height } );
+    	this.picker = new GPUPicker( this.bolt );
 
     	this.init();
     	this.addListeners();
@@ -101,8 +101,8 @@ export default class extends Base {
     	this.root = new Node();
     	this.floor = new Floor();
 
-    	const xCount = this.objectCount / 2;
-    	const yCount = this.objectCount / 2;
+    	const xCount = this.objectCount;
+    	const yCount = this.objectCount;
 
     	const gridPadding = 2.25;
     	let id = 0;
@@ -118,7 +118,7 @@ export default class extends Base {
     			shader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
 
     			const sphereBatch = new Batch(
-    				new Mesh( new Sphere( { widthSegments: 24, heightSegments: 24 } ) ),
+    				new Mesh( new Sphere( { widthSegments: 8, heightSegments: 8 } ) ),
     				shader
     			);
 
@@ -146,7 +146,7 @@ export default class extends Base {
     resize() {
 
     	this.bolt.resizeFullScreen();
-    	this.picker.resize( this.canvas.width, this.canvas.height );
+    	this.picker.resize();
     	this.camera.updateProjection( this.canvas.width / this.canvas.height );
 
     }

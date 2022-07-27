@@ -1,4 +1,4 @@
-import { CLAMP_TO_EDGE, FLOAT, LINEAR, NEAREST, Node, RGBA, RGBA32f, Texture } from "@bolt-webgl/core";
+import { CLAMP_TO_EDGE, FLOAT, NEAREST, Node, RGBA, RGBA32f, Texture } from "@bolt-webgl/core";
 import { mat4 } from "gl-matrix";
 
 export default class Skin {
