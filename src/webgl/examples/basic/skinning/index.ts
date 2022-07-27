@@ -66,7 +66,7 @@ export default class extends Base {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
 
-    	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/sonic/", "scene.gltf" );
+    	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/rigging/", "scene.gltf" );
     	this.gltf.transform.position = vec3.fromValues( 0, 0, 0 );
 
     	this.assetsLoaded = true;
