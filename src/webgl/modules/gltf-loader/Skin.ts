@@ -15,37 +15,43 @@ export default class Skin {
     	this._joints = joints;
     	this._inverseBindMatrices = [];
     	this._jointMatrices = [];
-    	this._jointData = new Float32Array( this._joints.length * 16 );
+
+    	const mat4size = 4 * 4;
+    	this._jointData = new Float32Array( this._joints.length * mat4size );
 
     	for ( let i = 0; i < joints.length; i ++ ) {
 
     		this._inverseBindMatrices.push(
     			new Float32Array(
     				inverseBindMatrixData.buffer,
-    				inverseBindMatrixData.byteOffset + Float32Array.BYTES_PER_ELEMENT * 16 * i, 16
+    				inverseBindMatrixData.byteOffset + Float32Array.BYTES_PER_ELEMENT * mat4size * i, mat4size
     			)
     		);
 
     		this._jointMatrices.push(
-    			new Float32Array( this._jointData.buffer, Float32Array.BYTES_PER_ELEMENT * 16 * i, 16 )
+    			new Float32Array( this._jointData.buffer, Float32Array.BYTES_PER_ELEMENT * mat4size * i, mat4size )
     		);
 
     	}
 
     	this._jointTexture = new Texture( {
+    		width: 4,
+    		height: this._joints.length,
     		format: RGBA,
     		internalFormat: RGBA32f,
     		wrapS: CLAMP_TO_EDGE,
     		wrapT: CLAMP_TO_EDGE,
     		minFilter: NEAREST,
     		magFilter: NEAREST,
-    		type: FLOAT
+    		type: FLOAT,
+    		generateMipmaps: false
     	} );
 
     }
 
     update( node: Node ) {
 
+    	//const globalInverse = mat4.create();
     	mat4.invert( this._globalWorldInverse, node.worldMatrix );
 
     	// apply inverse bind matrix to each joint
@@ -53,10 +59,11 @@ export default class Skin {
     	for ( let i = 0; i < this._joints.length; i ++ ) {
 
     		const joint = this._joints[ i ];
+
     		const dst = this._jointMatrices[ i ];
 
-    		mat4.multiply( dst, this._globalWorldInverse, joint.worldMatrix );
-    		mat4.multiply( dst, this._inverseBindMatrices[ i ], dst );
+    		mat4.multiply( dst, this._globalWorldInverse, joint.modelMatrix );
+    		mat4.multiply( dst, dst, this._inverseBindMatrices[ i ] );
 
     	}
 
@@ -69,9 +76,31 @@ export default class Skin {
     	return this._jointTexture;
 
     }
+
     public set jointTexture( value: Texture ) {
 
     	this._jointTexture = value;
+
+    }
+
+    public get joints(): Node[] {
+
+    	return this._joints;
+
+    }
+    public set joints( value: Node[] ) {
+
+    	this._joints = value;
+
+    }
+    public get jointMatrices(): Float32Array[] {
+
+    	return this._jointMatrices;
+
+    }
+    public set jointMatrices( value: Float32Array[] ) {
+
+    	this._jointMatrices = value;
 
     }
 

@@ -15,6 +15,8 @@ uniform float aspect;
 in vec2 Uv;
 out vec4 FragColor;
 
+float hash( vec2 p ){ return fract(sin(dot(p, vec2(41, 289)))*45758.5453); }
+
 void main() {
 
     vec2 aspectcorrect = vec2( 1.0, aspect );
@@ -31,50 +33,56 @@ void main() {
 
     vec3 col = vec3( 0.0 );
 
-    col += texture( map, Uv.xy ).rgb;
-    col += texture( map, Uv.xy + ( vec2(  0.0,   0.4  ) * aspectcorrect ) * dofblur ).rgb;
-    col += texture( map, Uv.xy + ( vec2(  0.15,  0.37 ) * aspectcorrect ) * dofblur ).rgb;
-    col += texture( map, Uv.xy + ( vec2(  0.29,  0.29 ) * aspectcorrect ) * dofblur ).rgb;
-    col += texture( map, Uv.xy + ( vec2( -0.37,  0.15 ) * aspectcorrect ) * dofblur ).rgb;
-    col += texture( map, Uv.xy + ( vec2(  0.40,  0.0  ) * aspectcorrect ) * dofblur ).rgb;
-    col += texture( map, Uv.xy + ( vec2(  0.37, -0.15 ) * aspectcorrect ) * dofblur ).rgb;
-    col += texture( map, Uv.xy + ( vec2(  0.29, -0.29 ) * aspectcorrect ) * dofblur ).rgb;
-    col += texture( map, Uv.xy + ( vec2( -0.15, -0.37 ) * aspectcorrect ) * dofblur ).rgb;
-    col += texture( map, Uv.xy + ( vec2(  0.0,  -0.4  ) * aspectcorrect ) * dofblur ).rgb;
-    col += texture( map, Uv.xy + ( vec2( -0.15,  0.37 ) * aspectcorrect ) * dofblur ).rgb;
-    col += texture( map, Uv.xy + ( vec2( -0.29,  0.29 ) * aspectcorrect ) * dofblur ).rgb;
-    col += texture( map, Uv.xy + ( vec2(  0.37,  0.15 ) * aspectcorrect ) * dofblur ).rgb;
-    col += texture( map, Uv.xy + ( vec2( -0.4,   0.0  ) * aspectcorrect ) * dofblur ).rgb;
-    col += texture( map, Uv.xy + ( vec2( -0.37, -0.15 ) * aspectcorrect ) * dofblur ).rgb;
-    col += texture( map, Uv.xy + ( vec2( -0.29, -0.29 ) * aspectcorrect ) * dofblur ).rgb;
-    col += texture( map, Uv.xy + ( vec2(  0.15, -0.37 ) * aspectcorrect ) * dofblur ).rgb;
+    vec2 st = Uv;
 
-    col += texture( map, Uv.xy + ( vec2(  0.15,  0.37 ) * aspectcorrect ) * dofblur9 ).rgb;
-    col += texture( map, Uv.xy + ( vec2( -0.37,  0.15 ) * aspectcorrect ) * dofblur9 ).rgb;
-    col += texture( map, Uv.xy + ( vec2(  0.37, -0.15 ) * aspectcorrect ) * dofblur9 ).rgb;
-    col += texture( map, Uv.xy + ( vec2( -0.15, -0.37 ) * aspectcorrect ) * dofblur9 ).rgb;
-    col += texture( map, Uv.xy + ( vec2( -0.15,  0.37 ) * aspectcorrect ) * dofblur9 ).rgb;
-    col += texture( map, Uv.xy + ( vec2(  0.37,  0.15 ) * aspectcorrect ) * dofblur9 ).rgb;
-    col += texture( map, Uv.xy + ( vec2( -0.37, -0.15 ) * aspectcorrect ) * dofblur9 ).rgb;
-    col += texture( map, Uv.xy + ( vec2(  0.15, -0.37 ) * aspectcorrect ) * dofblur9 ).rgb;
+    //st += hash( Uv ) * 0.002;
 
-    col += texture( map, Uv.xy + ( vec2(  0.29,  0.29 ) * aspectcorrect ) * dofblur7 ).rgb;
-    col += texture( map, Uv.xy + ( vec2(  0.40,  0.0  ) * aspectcorrect ) * dofblur7 ).rgb;
-    col += texture( map, Uv.xy + ( vec2(  0.29, -0.29 ) * aspectcorrect ) * dofblur7 ).rgb;
-    col += texture( map, Uv.xy + ( vec2(  0.0,  -0.4  ) * aspectcorrect ) * dofblur7 ).rgb;
-    col += texture( map, Uv.xy + ( vec2( -0.29,  0.29 ) * aspectcorrect ) * dofblur7 ).rgb;
-    col += texture( map, Uv.xy + ( vec2( -0.4,   0.0  ) * aspectcorrect ) * dofblur7 ).rgb;
-    col += texture( map, Uv.xy + ( vec2( -0.29, -0.29 ) * aspectcorrect ) * dofblur7 ).rgb;
-    col += texture( map, Uv.xy + ( vec2(  0.0,   0.4  ) * aspectcorrect ) * dofblur7 ).rgb;
+    col += texture( map, st.xy ).rgb;
+    col += texture( map, st.xy + ( vec2(  0.0,   0.4  ) * aspectcorrect ) * dofblur ).rgb;
+    col += texture( map, st.xy + ( vec2(  0.15,  0.37 ) * aspectcorrect ) * dofblur ).rgb;
+    col += texture( map, st.xy + ( vec2(  0.29,  0.29 ) * aspectcorrect ) * dofblur ).rgb;
+    col += texture( map, st.xy + ( vec2( -0.37,  0.15 ) * aspectcorrect ) * dofblur ).rgb;
+    col += texture( map, st.xy + ( vec2(  0.40,  0.0  ) * aspectcorrect ) * dofblur ).rgb;
+    col += texture( map, st.xy + ( vec2(  0.37, -0.15 ) * aspectcorrect ) * dofblur ).rgb;
+    col += texture( map, st.xy + ( vec2(  0.29, -0.29 ) * aspectcorrect ) * dofblur ).rgb;
+    col += texture( map, st.xy + ( vec2( -0.15, -0.37 ) * aspectcorrect ) * dofblur ).rgb;
+    col += texture( map, st.xy + ( vec2(  0.0,  -0.4  ) * aspectcorrect ) * dofblur ).rgb;
+    col += texture( map, st.xy + ( vec2( -0.15,  0.37 ) * aspectcorrect ) * dofblur ).rgb;
+    col += texture( map, st.xy + ( vec2( -0.29,  0.29 ) * aspectcorrect ) * dofblur ).rgb;
+    col += texture( map, st.xy + ( vec2(  0.37,  0.15 ) * aspectcorrect ) * dofblur ).rgb;
+    col += texture( map, st.xy + ( vec2( -0.4,   0.0  ) * aspectcorrect ) * dofblur ).rgb;
+    col += texture( map, st.xy + ( vec2( -0.37, -0.15 ) * aspectcorrect ) * dofblur ).rgb;
+    col += texture( map, st.xy + ( vec2( -0.29, -0.29 ) * aspectcorrect ) * dofblur ).rgb;
+    col += texture( map, st.xy + ( vec2(  0.15, -0.37 ) * aspectcorrect ) * dofblur ).rgb;
 
-    col += texture( map, Uv.xy + ( vec2(  0.29,  0.29 ) * aspectcorrect ) * dofblur4 ).rgb;
-    col += texture( map, Uv.xy + ( vec2(  0.4,   0.0  ) * aspectcorrect ) * dofblur4 ).rgb;
-    col += texture( map, Uv.xy + ( vec2(  0.29, -0.29 ) * aspectcorrect ) * dofblur4 ).rgb;
-    col += texture( map, Uv.xy + ( vec2(  0.0,  -0.4  ) * aspectcorrect ) * dofblur4 ).rgb;
-    col += texture( map, Uv.xy + ( vec2( -0.29,  0.29 ) * aspectcorrect ) * dofblur4 ).rgb;
-    col += texture( map, Uv.xy + ( vec2( -0.4,   0.0  ) * aspectcorrect ) * dofblur4 ).rgb;
-    col += texture( map, Uv.xy + ( vec2( -0.29, -0.29 ) * aspectcorrect ) * dofblur4 ).rgb;
-    col += texture( map, Uv.xy + ( vec2(  0.0,   0.4  ) * aspectcorrect ) * dofblur4 ).rgb;
+    col += texture( map, st.xy + ( vec2(  0.15,  0.37 ) * aspectcorrect ) * dofblur9 ).rgb;
+    col += texture( map, st.xy + ( vec2( -0.37,  0.15 ) * aspectcorrect ) * dofblur9 ).rgb;
+    col += texture( map, st.xy + ( vec2(  0.37, -0.15 ) * aspectcorrect ) * dofblur9 ).rgb;
+    col += texture( map, st.xy + ( vec2( -0.15, -0.37 ) * aspectcorrect ) * dofblur9 ).rgb;
+    col += texture( map, st.xy + ( vec2( -0.15,  0.37 ) * aspectcorrect ) * dofblur9 ).rgb;
+    col += texture( map, st.xy + ( vec2(  0.37,  0.15 ) * aspectcorrect ) * dofblur9 ).rgb;
+    col += texture( map, st.xy + ( vec2( -0.37, -0.15 ) * aspectcorrect ) * dofblur9 ).rgb;
+    col += texture( map, st.xy + ( vec2(  0.15, -0.37 ) * aspectcorrect ) * dofblur9 ).rgb;
+
+    col += texture( map, st.xy + ( vec2(  0.29,  0.29 ) * aspectcorrect ) * dofblur7 ).rgb;
+    col += texture( map, st.xy + ( vec2(  0.40,  0.0  ) * aspectcorrect ) * dofblur7 ).rgb;
+    col += texture( map, st.xy + ( vec2(  0.29, -0.29 ) * aspectcorrect ) * dofblur7 ).rgb;
+    col += texture( map, st.xy + ( vec2(  0.0,  -0.4  ) * aspectcorrect ) * dofblur7 ).rgb;
+    col += texture( map, st.xy + ( vec2( -0.29,  0.29 ) * aspectcorrect ) * dofblur7 ).rgb;
+    col += texture( map, st.xy + ( vec2( -0.4,   0.0  ) * aspectcorrect ) * dofblur7 ).rgb;
+    col += texture( map, st.xy + ( vec2( -0.29, -0.29 ) * aspectcorrect ) * dofblur7 ).rgb;
+    col += texture( map, st.xy + ( vec2(  0.0,   0.4  ) * aspectcorrect ) * dofblur7 ).rgb;
+
+    col += texture( map, st.xy + ( vec2(  0.29,  0.29 ) * aspectcorrect ) * dofblur4 ).rgb;
+    col += texture( map, st.xy + ( vec2(  0.4,   0.0  ) * aspectcorrect ) * dofblur4 ).rgb;
+    col += texture( map, st.xy + ( vec2(  0.29, -0.29 ) * aspectcorrect ) * dofblur4 ).rgb;
+    col += texture( map, st.xy + ( vec2(  0.0,  -0.4  ) * aspectcorrect ) * dofblur4 ).rgb;
+    col += texture( map, st.xy + ( vec2( -0.29,  0.29 ) * aspectcorrect ) * dofblur4 ).rgb;
+    col += texture( map, st.xy + ( vec2( -0.4,   0.0  ) * aspectcorrect ) * dofblur4 ).rgb;
+    col += texture( map, st.xy + ( vec2( -0.29, -0.29 ) * aspectcorrect ) * dofblur4 ).rgb;
+    col += texture( map, st.xy + ( vec2(  0.0,   0.4  ) * aspectcorrect ) * dofblur4 ).rgb;
+
+   col += hash( Uv ) * 2.0;
 
     FragColor.rgb = col / 41.0;
     //FragColor.rgb = vec3( factor );

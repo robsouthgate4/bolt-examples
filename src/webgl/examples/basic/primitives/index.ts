@@ -92,6 +92,7 @@ export default class extends Base {
 
     	this.cubeBatch.name = "cube";
     	this.cubeBatch.transform.scale = vec3.fromValues( 1.5, 1.5, 1.5 );
+    	this.cubeBatch.draw = true;
     	this.cubeBatch.setParent( this.root );
 
     	this.floorBatch = new Floor();
@@ -118,7 +119,7 @@ export default class extends Base {
 
     update( elapsed: number, delta: number ) {
 
-    	this.camera.update();
+    	this.arcball.update();
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 1, 1, 1, 1 );

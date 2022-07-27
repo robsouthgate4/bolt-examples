@@ -8,6 +8,7 @@ import defaultFragment from "./shaders/default/default.frag";
 import { vec3 } from "gl-matrix";
 import Plane from "@/webgl/modules/primitives/Plane";
 import CameraArcball from "@/webgl/modules/CameraArcball";
+import Cube from "@/webgl/modules/primitives/Cube";
 
 export default class extends Base {
 
@@ -49,7 +50,7 @@ export default class extends Base {
     		fov: 45,
     		near: 0.1,
     		far: 1000,
-    		position: vec3.fromValues( 0, 3, 10 ),
+    		position: vec3.fromValues( 6, 6, 10 ),
     		target: vec3.fromValues( 0, 1, 0 ),
     	} );
 
@@ -83,7 +84,7 @@ export default class extends Base {
 
     	const vp = this.generateViewport();
 
-    	const planeGeometry = new Plane( { width: 1, height: 1 } );
+    	const planeGeometry = new Cube( { width: 1, height: 1, depth: 1 } );
 
     	this.root = new Node();
 
@@ -103,10 +104,10 @@ export default class extends Base {
     			this.shader
     		);
 
-    		batch.transform.x = ( index * 2.5 ) - count;
+    		//batch.transform.x = ( index * 2.5 ) - count;
 
-    		batch.transform.scaleX = vp.width / 8;
-    	    batch.transform.scaleY = vp.height / 8;
+    		batch.transform.scaleX = vp.width * 0.5;
+    	    batch.transform.scaleY = vp.height * 0.5;
 
     		this.batches.push( batch );
 

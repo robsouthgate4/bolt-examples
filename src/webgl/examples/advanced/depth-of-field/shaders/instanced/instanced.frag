@@ -15,7 +15,7 @@ void main()
     vec3 norm           = normalize( Normal );
     vec3 lightDirection = normalize( lightPosition - WorldPosition );
 
-    float diffuse = max( dot( Normal, lightDirection ), 0.2 );
+    float diffuse = max( dot( Normal, lightDirection ), 0.1 );
 
-    FragColor = vec4( Normal * 0.5 + 0.5, 1.0 );
+    FragColor = vec4( vec3( 0.3 ) + diffuse, 1.0 );
 }

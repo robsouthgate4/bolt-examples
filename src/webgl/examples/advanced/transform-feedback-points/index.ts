@@ -118,9 +118,9 @@ export default class extends Base {
 
     	}
 
-    	const position1VBO = new VBO( positions, this.gl.DYNAMIC_DRAW );
-    	const position2VBO = new VBO( positions, this.gl.DYNAMIC_DRAW );
-    	const velocityBuffer = new VBO( velocities, this.gl.STATIC_DRAW );
+    	const position1VBO = new VBO( new Float32Array( positions ), this.gl.DYNAMIC_DRAW );
+    	const position2VBO = new VBO( new Float32Array( positions ), this.gl.DYNAMIC_DRAW );
+    	const velocityBuffer = new VBO( new Float32Array( velocities ), this.gl.STATIC_DRAW );
 
 
     	const vaoUpdate1 = new VAO();

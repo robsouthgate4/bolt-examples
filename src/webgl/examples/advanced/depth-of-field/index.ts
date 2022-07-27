@@ -16,12 +16,14 @@ import DOFPass from "@/webgl/modules/post/passes/DOFPass";
 import FXAAPass from "@/webgl/modules/post/passes/FXAAPass";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
 import Sphere from "@/webgl/modules/primitives/Sphere";
+import CameraFPS from "@/webgl/modules/CameraFPS";
 
 export default class extends Base {
 
     canvas: HTMLCanvasElement;
     colorShader: Shader;
     camera: CameraPersp;
+	cameraFPS!: CameraFPS;
     assetsLoaded!: boolean;
     cubeTransform!: Transform;
     torusBuffer!: Mesh;
@@ -57,6 +59,8 @@ export default class extends Base {
     		position: vec3.fromValues( 0, 5, 10 ),
     		target: vec3.fromValues( 0, 0, - 50 ),
     	} );
+
+    	this.cameraFPS = new CameraFPS( this.camera );
 
     	this.bolt = Bolt.getInstance();
     	this.bolt.init( this.canvas, { antialias: true, dpi: 1 } );
@@ -102,17 +106,17 @@ export default class extends Base {
     	this.dofPass.shader.activate();
     	this.dofPass.shader.setTexture( "depthMap", this.depthFBO.targetTexture );
     	this.dofPass.shader.setFloat( "focus", 0.0 );
-    	this.dofPass.shader.setFloat( "aperture", 0.01 );
-    	this.dofPass.shader.setFloat( "maxBlur", 5.0 );
+    	this.dofPass.shader.setFloat( "aperture", 0.028 );
+    	this.dofPass.shader.setFloat( "maxBlur", 1.0 );
     	this.dofPass.shader.setFloat( "aspect", this.gl.canvas.width / this.gl.canvas.height );
 
-    	const instanceCount = 1000;
+    	const instanceCount = 500;
 
     	const instanceMatrices: mat4[] = [];
 
     	for ( let i = 0; i < instanceCount; i ++ ) {
 
-    		const x = ( Math.random() * 2 - 1 ) * 50;
+    		const x = ( Math.random() * 2 - 1 ) * 40;
     		const y = ( Math.random() * 2 - 1 ) * 20;
     		const z = Math.random() * 100;
 
@@ -172,10 +176,12 @@ export default class extends Base {
 
     }
 
-    drawInstances( shader: Shader, elapsed: number ) {
+    drawInstances( shader: Shader, elapsed: number, delta: number ) {
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-    	this.bolt.clear( 0.8, 0.9, 0.9, 0.8 );
+    	this.bolt.clear( 0.0, 0.0, 0.0, 1 );
+
+    	this.cameraFPS.update( delta );
 
     	shader.activate();
     	shader.setVector3( "viewPosition", this.camera.position );
@@ -195,7 +201,7 @@ export default class extends Base {
 
     		this.depthFBO.bind();
     		this.bolt.enableDepth();
-    		this.drawInstances( this.depthShader, elapsed );
+    		this.drawInstances( this.depthShader, elapsed, delta );
     		this.depthFBO.unbind();
     		this.bolt.disableDepth();
 
@@ -204,7 +210,7 @@ export default class extends Base {
     	{ // draw post process stack and set depth map
 
     		this.post.begin();
-    		this.drawInstances( this.colorShader, elapsed );
+    		this.drawInstances( this.colorShader, elapsed, delta );
     		this.post.end();
 
     	}

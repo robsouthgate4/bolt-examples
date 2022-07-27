@@ -1,7 +1,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES, CameraPersp } from "@bolt-webgl/core";
+import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES, CameraPersp, UNSIGNED_BYTE, UNSIGNED_SHORT } from "@bolt-webgl/core";
 
 import colorVertex from "./shaders/color/color.vert";
 import colorFragment from "./shaders/color/color.frag";
@@ -95,8 +95,12 @@ export default class extends Base {
     		1, 0, 0
     	];
 
+    	const index = [
+    		0, 1, 2, 3
+    	];
+
     	// attributes can be added with a named var and shader
-    	triangleMesh.addAttribute( colours, 3, { shader: triShader, attributeName: "aColor" } );
+    	triangleMesh.addAttribute( new Float32Array( colours ), 3, { shader: triShader, attributeName: "aColor" } );
 
     	this.triangleBatch = new Batch(
     		triangleMesh,

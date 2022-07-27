@@ -1,13 +1,11 @@
 
 import Base from "@webgl/Base";
-import Bolt, { Batch, CameraPersp, Node } from "@bolt-webgl/core";
+import Bolt, { BACK, CameraPersp, FRONT, Node, } from "@bolt-webgl/core";
 
-import { vec3 } from "gl-matrix";
+import { quat, vec3 } from "gl-matrix";
 import CameraArcball from "@/webgl/modules/CameraArcball";
 import Floor from "@/webgl/modules/batches/floor";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
-
-
 
 export default class extends Base {
 
@@ -21,9 +19,9 @@ export default class extends Base {
     gltf!: Node;
     floor: Floor;
     arcball: CameraArcball;
-    root!: Node;
+	_headNode?: Node;
 
-    constructor() {
+	constructor() {
 
     	super();
 
@@ -39,8 +37,8 @@ export default class extends Base {
     		fov: 45,
     		near: 0.1,
     		far: 1000,
-    		position: vec3.fromValues( 4, 4, 8 ),
-    		target: vec3.fromValues( 0, 2, 0 ),
+    		position: vec3.fromValues( 0, 4, 16 ),
+    		target: vec3.fromValues( 0, 4, 0 ),
     	} );
 
     	this.arcball = new CameraArcball( this.camera, 4, 0.08 );
@@ -56,56 +54,56 @@ export default class extends Base {
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.enableDepth();
 
+		this.bolt.enableCullFace();
+		this.bolt.cullFace( BACK );
+
     	this.init();
 
 
-    }
+	}
 
-    async init() {
-
-    	this.root = new Node();
+	async init() {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
 
-    	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/robot/", "scene.gltf" );
+    	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/rigging/", "scene.gltf" );
+    	this.gltf.transform.position = vec3.fromValues( 0, 0, 0 );
 
     	this.assetsLoaded = true;
 
     	this.resize();
 
-    }
+	}
 
-    resize() {
+	resize() {
 
     	this.bolt.resizeFullScreen();
     	this.camera.updateProjection( this.canvas.width / this.canvas.height );
 
-    }
+	}
 
-    earlyUpdate( elapsed: number, delta: number ) {
+	earlyUpdate( elapsed: number, delta: number ) {
 
     	return;
 
-    }
+	}
 
-    update( elapsed: number, delta: number ) {
+	update( elapsed: number, delta: number ) {
 
     	if ( ! this.assetsLoaded ) return;
 
     	this.arcball.update();
-
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 1, 1, 1, 1 );
 
-    	this.bolt.draw( [ this.gltf, this.floor ] );
+    	this.bolt.draw( this.gltf );
 
+	}
 
-    }
-
-    lateUpdate( elapsed: number, delta: number ) {
+	lateUpdate( elapsed: number, delta: number ) {
 
     	return;
 
-    }
+	}
 
 }

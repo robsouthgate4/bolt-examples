@@ -3,7 +3,11 @@
 		"outDir": "./out/",
 		"sourceMap": true,
 		"target": "es6",
-		"lib": ["dom", "dom.iterable", "esnext"],
+		"lib": [
+			"dom",
+			"dom.iterable",
+			"esnext"
+		],
 		"allowJs": false,
 		"skipLibCheck": true,
 		"strict": true,
@@ -17,10 +21,19 @@
 		"jsx": "preserve",
 		"baseUrl": ".",
 		"paths": {
-			"@/*": ["src/*"],
-			"@webgl/*": ["src/webgl/*"]
+			"@/*": [
+				"src/*"
+			],
+			"@webgl/*": [
+				"src/webgl/*"
+			]
 		}
 	},
-	"include": ["**/*.ts"],
-	"exclude": ["node_modules", "out"]
+	"include": [
+		"**/*.ts"
+	],
+	"exclude": [
+		"node_modules",
+		"out"
+	]
 }

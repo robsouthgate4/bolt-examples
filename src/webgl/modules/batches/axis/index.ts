@@ -22,7 +22,7 @@ export default class Axis extends Batch {
 			0.0, 0.0, 1.0, 0.0, 0.0, 1.0
 		];
 
-		mesh.addAttribute( colors, 3, 3 );
+		mesh.addAttribute( new Float32Array( colors ), 3, 3 );
 
 		const shader = new Shader( vertexShader, fragmentShader );
 
