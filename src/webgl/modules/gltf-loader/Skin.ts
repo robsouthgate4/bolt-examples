@@ -51,8 +51,8 @@ export default class Skin {
 
     update( node: Node ) {
 
-    	const globalInverse = mat4.create();
-    	mat4.invert( globalInverse, node.worldMatrix );
+    	//const globalInverse = mat4.create();
+    	mat4.invert( this._globalWorldInverse, node.worldMatrix );
 
     	// apply inverse bind matrix to each joint
 
@@ -62,7 +62,7 @@ export default class Skin {
 
     		const dst = this._jointMatrices[ i ];
 
-    		mat4.multiply( dst, globalInverse, joint.modelMatrix );
+    		mat4.multiply( dst, this._globalWorldInverse, joint.modelMatrix );
     		mat4.multiply( dst, dst, this._inverseBindMatrices[ i ] );
 
     	}
@@ -91,6 +91,16 @@ export default class Skin {
     public set joints( value: Node[] ) {
 
     	this._joints = value;
+
+    }
+    public get jointMatrices(): Float32Array[] {
+
+    	return this._jointMatrices;
+
+    }
+    public set jointMatrices( value: Float32Array[] ) {
+
+    	this._jointMatrices = value;
 
     }
 
