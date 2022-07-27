@@ -1,7 +1,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES, CameraPersp } from "@bolt-webgl/core";
+import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES, CameraPersp, UNSIGNED_BYTE, UNSIGNED_SHORT } from "@bolt-webgl/core";
 
 import colorVertex from "./shaders/color/color.vert";
 import colorFragment from "./shaders/color/color.frag";
@@ -16,10 +16,11 @@ export default class extends Base {
     canvas: HTMLCanvasElement;
     camera: CameraPersp;
     assetsLoaded?: boolean;
+    torusTransform!: Transform;
     sphereBatch!: Batch;
     cubeBatch!: Batch;
     planeBatch!: Batch;
-    quadBatch!: Batch;
+    triangleBatch!: Batch;
     bolt: Bolt;
     gl: WebGL2RenderingContext;
     root!: Node;
@@ -72,18 +73,8 @@ export default class extends Base {
     	this.floorBatch.name = "floor";
     	this.floorBatch.setParent( this.root );
 
-    	this._createQuad();
-
-    	this.bolt.disableCullFace();
-
-    	this.resize();
-
-    }
-
-    _createQuad() {
-
     	// draw a simple quad
-    	const quadGeo: GeometryBuffers = {
+    	const triangleGeo: GeometryBuffers = {
     		positions: [
     			- 0.5, 0.5, 0.0,
     			- 0.5, - 0.5, 0.0,
@@ -93,7 +84,7 @@ export default class extends Base {
     		indices: [ 0, 1, 2, 0, 2, 3 ]
     	};
 
-    	const quadMesh = new Mesh( quadGeo ).setDrawType( TRIANGLES );
+    	const triangleMesh = new Mesh( triangleGeo ).setDrawType( TRIANGLES );
 
     	const triShader = new Shader( colorVertex, colorFragment );
 
@@ -104,21 +95,28 @@ export default class extends Base {
     		1, 0, 0
     	];
 
-    	// attributes can be added with a named var and shader
-    	quadMesh.addAttribute( colours, 3, { shader: triShader, attributeName: "aColor" } );
+    	const index = [
+    		0, 1, 2, 3
+    	];
 
-    	this.quadBatch = new Batch(
-    		quadMesh,
+    	// attributes can be added with a named var and shader
+    	triangleMesh.addAttribute( new Float32Array( colours ), 3, { shader: triShader, attributeName: "aColor" } );
+
+    	this.triangleBatch = new Batch(
+    		triangleMesh,
     		triShader
     	);
 
-    	this.quadBatch.transform.y = 1.5;
-    	this.quadBatch.transform.scale = vec3.fromValues( 3, 3, 3 );
+    	this.triangleBatch.transform.y = 1.5;
+    	this.triangleBatch.transform.scale = vec3.fromValues( 3, 3, 3 );
 
-    	this.quadBatch.setParent( this.root );
+    	this.triangleBatch.setParent( this.root );
+
+    	this.bolt.disableCullFace();
+
+    	this.resize();
 
     }
-
 
     resize() {
 

@@ -5,8 +5,6 @@ precision highp float;
 uniform vec3 objectColor;
 uniform vec3 lightColor;
 uniform sampler2D baseTexture;
-uniform sampler2D jointTexture;
-
 out vec4 FragColor;
 
 in vec3 Normal;

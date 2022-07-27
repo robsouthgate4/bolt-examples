@@ -145,27 +145,27 @@ export default class extends Base {
     	const particleGeometry = new Plane( { width: 0.05, height: 0.05 } );
 
     	// mesh vbo
-    	const meshPositionVBO = new VBO( particleGeometry.positions, STATIC_DRAW );
-    	const meshNormalVBO = new VBO( particleGeometry.normals, STATIC_DRAW );
-    	const meshUVVBO = new VBO( particleGeometry.uvs, STATIC_DRAW );
+    	const meshPositionVBO = new VBO( new Float32Array( particleGeometry.positions ), STATIC_DRAW );
+    	const meshNormalVBO = new VBO( new Float32Array( particleGeometry.normals ), STATIC_DRAW );
+    	const meshUVVBO = new VBO( new Float32Array( particleGeometry.uvs ), STATIC_DRAW );
 
-    	this.meshIBO = new IBO( particleGeometry.indices );
+    	this.meshIBO = new IBO( new Uint16Array( particleGeometry.indices ) );
 
     	// buffers
-    	const offset1VBO = new VBO( offsets, DYNAMIC_DRAW );
-    	const offset2VBO = new VBO( offsets, DYNAMIC_DRAW );
+    	const offset1VBO = new VBO( new Float32Array( offsets ), DYNAMIC_DRAW );
+    	const offset2VBO = new VBO( new Float32Array( offsets ), DYNAMIC_DRAW );
 
-    	const init1VBO = new VBO( offsets, DYNAMIC_DRAW );
-    	const init2VBO = new VBO( offsets, DYNAMIC_DRAW );
+    	const init1VBO = new VBO( new Float32Array( offsets ), DYNAMIC_DRAW );
+    	const init2VBO = new VBO( new Float32Array( offsets ), DYNAMIC_DRAW );
 
-    	const velocity1VBO = new VBO( velocities, DYNAMIC_DRAW );
-    	const velocity2VBO = new VBO( velocities, DYNAMIC_DRAW );
+    	const velocity1VBO = new VBO( new Float32Array( velocities ), DYNAMIC_DRAW );
+    	const velocity2VBO = new VBO( new Float32Array( velocities ), DYNAMIC_DRAW );
 
-    	const life1VBO = new VBO( lifeTimes, DYNAMIC_DRAW );
-    	const life2VBO = new VBO( lifeTimes, DYNAMIC_DRAW );
+    	const life1VBO = new VBO( new Float32Array( lifeTimes ), DYNAMIC_DRAW );
+    	const life2VBO = new VBO( new Float32Array( lifeTimes ), DYNAMIC_DRAW );
 
-    	const initLife1VBO = new VBO( lifeTimes, DYNAMIC_DRAW );
-    	const initLife2VBO = new VBO( lifeTimes, DYNAMIC_DRAW );
+    	const initLife1VBO = new VBO( new Float32Array( lifeTimes ), DYNAMIC_DRAW );
+    	const initLife2VBO = new VBO( new Float32Array( lifeTimes ), DYNAMIC_DRAW );
 
     	// create simulation vaos
     	const vaoSim1 = new VAO();

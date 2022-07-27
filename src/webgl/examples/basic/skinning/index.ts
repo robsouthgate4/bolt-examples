@@ -1,6 +1,6 @@
 
 import Base from "@webgl/Base";
-import Bolt, { CameraPersp, Node, } from "@bolt-webgl/core";
+import Bolt, { BACK, CameraPersp, FRONT, Node, } from "@bolt-webgl/core";
 
 import { quat, vec3 } from "gl-matrix";
 import CameraArcball from "@/webgl/modules/CameraArcball";
@@ -38,7 +38,7 @@ export default class extends Base {
     		near: 0.1,
     		far: 1000,
     		position: vec3.fromValues( 0, 4, 16 ),
-    		target: vec3.fromValues( 0, 2, 0 ),
+    		target: vec3.fromValues( 0, 4, 0 ),
     	} );
 
     	this.arcball = new CameraArcball( this.camera, 4, 0.08 );
@@ -54,6 +54,9 @@ export default class extends Base {
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.enableDepth();
 
+		this.bolt.enableCullFace();
+		this.bolt.cullFace( BACK );
+
     	this.init();
 
 
@@ -66,17 +69,8 @@ export default class extends Base {
     	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/sonic/", "scene.gltf" );
 
     	this.gltf.transform.position = vec3.fromValues( 0, 0, 0 );
-    	this.gltf.transform.scale = vec3.fromValues( 0.1, 0.1, 0.1 );
 
-    	this.gltf.traverse( ( node: Node ) => {
-
-    		if ( node.name === "Head_Reference" ) {
-
-				this._headNode = node;
-
-    		}
-
-    	} );
+		this.gltf.transform.scale = vec3.fromValues( 0.1, 0.1, 0.1 );
 
 
     	this.assetsLoaded = true;
@@ -103,21 +97,10 @@ export default class extends Base {
     	if ( ! this.assetsLoaded ) return;
 
     	this.arcball.update();
-
-		if ( this._headNode ) {
-
-			let q = quat.create();
-			quat.setAxisAngle( q, vec3.fromValues( 0, 0, 1 ), Math.sin( elapsed * 10 ) * Math.PI * 0.005 );
-			quat.multiply( q, q, this._headNode.transform.quaternion );
-			this._headNode.transform.quaternion = q;
-
-		}
-
-
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 1, 1, 1, 1 );
 
-    	this.bolt.draw( [ this.gltf, this.floor ] );
+    	this.bolt.draw( this.gltf );
 
 	}
 

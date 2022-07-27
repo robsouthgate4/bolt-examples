@@ -41,7 +41,7 @@ export default class Floor extends Batch {
 
 		const mesh = new Mesh( {
 			positions,
-			indices
+			indices,
 		} ).setDrawType( LINES );
 
 		const shader = new Shader( vertexShader, fragmentShader );

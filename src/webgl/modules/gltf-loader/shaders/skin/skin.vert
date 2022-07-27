@@ -6,8 +6,8 @@ layout (location = 0) in vec3 aPosition;
 layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aUv;
 
-layout (location = 5) in vec4 aJoints;
-layout (location = 6) in vec4 aWeights;
+in vec4 aJoints;
+in vec4 aWeights;
 
 out vec3 Normal;
 out vec2 Uv;
@@ -40,20 +40,30 @@ mat4 getBoneMatrix( float jointIndex ) {
 
 }
 
+// mat4 getBoneMatrix( uint jointIndex  ) {
+
+//   return mat4(
+//     texelFetch( jointTexture, ivec2( 0, jointIndex ), 0 ),
+//     texelFetch( jointTexture, ivec2( 1, jointIndex ), 0 ),
+//     texelFetch( jointTexture, ivec2( 2, jointIndex ), 0 ),
+//     texelFetch( jointTexture, ivec2( 3, jointIndex ), 0 ) );
+
+// }
+
 void main()
 {
 
   Uv = aUv;
   Normal = aNormal;
   Normal = aJoints.xyz / ( jointCount - 1.0 );
-  Normal = aWeights.xyz;
+  //Normal = aWeights.xyz;
 
   mat4 skinMatrix = mat4( 1.0 );
 
-  skinMatrix = getBoneMatrix( aJoints[ 0 ] ) * aWeights[ 0 ] +
-                    getBoneMatrix( aJoints[ 1 ] ) * aWeights[ 1 ] +
-                    getBoneMatrix( aJoints[ 2 ] ) * aWeights[ 2 ] +
-                    getBoneMatrix( aJoints[ 3 ] ) * aWeights[ 3 ];
+  // mat4 skinMatrix = getBoneMatrix( aJoints.x ) * aWeights.x +
+  //                   getBoneMatrix( aJoints.y ) * aWeights.y +
+  //                   getBoneMatrix( aJoints.z ) * aWeights.z +
+  //                   getBoneMatrix( aJoints.w ) * aWeights.w;
 
   mat4 combinedModel = model * skinMatrix;
 
