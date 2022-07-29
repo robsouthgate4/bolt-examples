@@ -1,7 +1,7 @@
-import Bolt, { Batch, CLAMP_TO_EDGE, FLOAT, LINEAR, Mesh, Node, Shader, Texture, Transform, UNSIGNED_BYTE, UNSIGNED_SHORT } from "@bolt-webgl/core";
+import Bolt, { Batch, CLAMP_TO_EDGE, FLOAT, LINEAR, Mesh, Node, Shader, Texture, Transform } from "@bolt-webgl/core";
 import { GeometryBuffers } from "@bolt-webgl/core/build/Mesh";
 import { mat4, quat, vec3, vec4 } from "gl-matrix";
-import { Accessor, GlTf, Material, Mesh as GLTFMesh, MeshPrimitive, Node as GLTFNode, Texture as GLTFTexture, Skin as GLTFSkin } from "./types/GLTF";
+import { Accessor, GlTf, Material, Mesh as GLTFMesh, MeshPrimitive, Node as GLTFNode, Texture as GLTFTexture, Skin as GLTFSkin, BufferView } from "./types/GLTF";
 import { TypedArray } from "./types/TypedArray";
 
 import vertexShader from "./shaders/color/color.vert";
@@ -73,50 +73,50 @@ export default class GLTFLoader {
 
 		const file = path + fileName;
 
-		const response = await fetch( file );
-		let gltf = await response.json() as GlTf;
+		let json: GlTf;
 
-		if ( ! file.match( /\.glb/ ) ) {
+		// load either a gltf or loade and decode a .glb file
+		if ( ! fileName.match( /\.glb/ ) ) {
 
-			gltf = await fetch( file ).then( ( res ) => res.json() );
+			json = await fetch( file ).then( ( res ) => res.json() );
 
 		} else {
 
-			return await fetch( file )
+			json = await fetch( file )
 				.then( ( res ) => res.arrayBuffer() )
 				.then( ( glb ) => this._decodeGLB( glb ) );
 
 		}
 
-		if ( gltf.accessors === undefined || gltf.accessors.length === 0 ) {
+		if ( json.accessors === undefined || json.accessors.length === 0 ) {
 
 			throw new Error( 'GLTF File is missing accessors' );
 
 		}
 
-		// grab buffers from .bin
+		// grab buffers
 		const buffers = await Promise.all(
-			gltf.buffers!.map( async ( buffer ) => await this._fetchBuffer( uri, buffer.uri! ) )
+			json.buffers!.map( async ( buffer ) => await this._fetchBuffer( uri, buffer as BufferView ) )
 		);
 
 		this._skinNodes = [];
 
 		// arrange nodes with correct transforms
-		this._nodes = gltf.nodes!.map( ( node, index ) => this._parseNode( index, node ) );
+		this._nodes = json.nodes!.map( ( node, index ) => this._parseNode( index, node ) );
 
 		// map textures
-		if ( gltf.textures ) {
+		if ( json.textures ) {
 
 			this._textures = await Promise.all(
-				gltf.textures!.map( async ( texture ) => await this._parseTexture( gltf, texture ) )
+				json.textures!.map( async ( texture ) => await this._parseTexture( json, texture ) )
 			);
 
 		}
 
 		// map skins
-		if ( gltf.skins ) {
+		if ( json.skins ) {
 
-			this._skins = gltf.skins!.map( ( skin: GLTFSkin ) => this._parseSkin( gltf, skin, buffers ) );
+			this._skins = json.skins!.map( ( skin: GLTFSkin ) => this._parseSkin( json, skin, buffers ) );
 
 			if ( this._skins.length > 0 ) {
 
@@ -127,14 +127,14 @@ export default class GLTFLoader {
 		}
 
 		// map materials
-		if ( gltf.materials ) {
+		if ( json.materials ) {
 
-			this._materials = gltf.materials!.map( ( material: Material ) => this._parseMaterials( gltf, material ) );
+			this._materials = json.materials!.map( ( material: Material ) => this._parseMaterials( json, material ) );
 
 		}
 
 		// map batches
-		this._batches = gltf.meshes!.map( ( mesh ) => this._parseBatch( gltf, mesh, buffers ) );
+		this._batches = json.meshes!.map( ( mesh ) => this._parseBatch( json, mesh, buffers ) );
 
 
 		// arrange scene graph
@@ -218,7 +218,7 @@ export default class GLTFLoader {
 
 		this._root = new Node();
 
-		gltf.scenes!.forEach( ( scene ) => {
+		json.scenes!.forEach( ( scene ) => {
 
 			this._root.name = scene.name;
 
@@ -293,7 +293,6 @@ export default class GLTFLoader {
 					indices: indices ? indices!.data as Int16Array : undefined
 				};
 
-
 				// get joints from buffer
 				const joints = this._getBufferByAttribute( gltf, buffers, mesh, primitive, "JOINTS_0" ) || undefined;
 
@@ -307,9 +306,6 @@ export default class GLTFLoader {
 
 				if ( joints !== undefined ) {
 
-					//console.log( joints.data );
-					console.log( joints );
-
 					// form skinned mesh data if joints defined
 					m = new SkinMesh( geometry );
 					m.addAttribute( Float32Array.from( joints!.data ), joints!.size, { shader: s, attributeName: "aJoints" } );
@@ -322,6 +318,7 @@ export default class GLTFLoader {
 				}
 
 				const batch = new Batch( m, s );
+				batch.name = mesh.name;
 
 				return batch;
 
@@ -343,9 +340,11 @@ export default class GLTFLoader {
 
 			if ( material.extensions.KHR_materials_pbrSpecularGlossiness !== undefined ) {
 
+				console.log( "pbr specular glosiness not current supported by Bolt" );
+
 				const { diffuseTexture } = material.extensions.KHR_materials_pbrSpecularGlossiness;
 
-				if ( diffuseTexture !== undefined ) {
+				if ( diffuseTexture !== undefined && this._textures[ diffuseTexture.index ] ) {
 
 					shader.activate();
 					shader.setTexture( "baseTexture", this._textures[ diffuseTexture.index ] );
@@ -359,17 +358,16 @@ export default class GLTFLoader {
 		if ( material.pbrMetallicRoughness !== undefined ) {
 
 			const { baseColorTexture, baseColorFactor } = material.pbrMetallicRoughness;
+			shader.activate();
 
 			if ( baseColorTexture ) {
 
-				shader.activate();
 				shader.setTexture( "baseTexture", this._textures[ baseColorTexture.index ] );
 
 			}
 
 			if ( baseColorFactor != undefined ) {
 
-				shader.activate();
 				shader.setVector4(
 					"baseColorFactor",
 					vec4.fromValues(
@@ -390,27 +388,68 @@ export default class GLTFLoader {
 	async _parseTexture( gltf: GlTf, texture: GLTFTexture ) {
 
 		const t = gltf.images![ texture.source! ];
+
 		const s = gltf.samplers![ texture.sampler! ];
 
-		const boltTexture = new Texture( {
-			imagePath: this._path + t.uri,
-			wrapS: s.wrapS || CLAMP_TO_EDGE,
-			wrapT: s.wrapT || CLAMP_TO_EDGE,
-		} );
+		let boltTexture = new Texture();
 
-		boltTexture.minFilter = s.minFilter! || LINEAR;
-		boltTexture.magFilter = s.magFilter! || LINEAR;
+		if ( t.bufferView ) {
 
-		await boltTexture.load();
+			const bufferView = gltf.bufferViews![ t.bufferView! ];
+
+			const data = gltf.buffers![ bufferView.buffer ].binary;
+
+			const blob = new Blob( [ new Uint8Array( data, bufferView.byteOffset, bufferView.byteLength ) ] );
+
+			const image = new Image();
+
+			image.src = URL.createObjectURL( blob );
+
+			await image.decode();
+
+			boltTexture = new Texture( {
+				imagePath: image.src,
+				wrapS: s.wrapS || CLAMP_TO_EDGE,
+				wrapT: s.wrapT || CLAMP_TO_EDGE,
+			} );
+
+			await boltTexture.load();
+
+		}
+
+		if ( t.uri ) {
+
+			boltTexture = new Texture( {
+				imagePath: this._path + t.uri,
+				wrapS: s.wrapS || CLAMP_TO_EDGE,
+				wrapT: s.wrapT || CLAMP_TO_EDGE,
+			} );
+
+			boltTexture.minFilter = s.minFilter! || LINEAR;
+			boltTexture.magFilter = s.magFilter! || LINEAR;
+
+			await boltTexture.load();
+
+		}
+
+		console.log( boltTexture );
 
 		return boltTexture;
 
+
 	}
 
-	async _fetchBuffer( path: string, buffer: string ) {
+	/**
+	 * @param  {string} path
+	 * @param  {BufferView} buffer
+	 * Returns buffers from either a .bin file or the binary property from .glb
+	 */
+	async _fetchBuffer( path: string, buffer: BufferView ) {
+
+		if ( buffer.binary ) return buffer.binary;
 
 		const dir = path.split( '/' ).slice( 0, - 1 ).join( '/' );
-		const response = await fetch( `${dir}/${buffer}` );
+		const response = await fetch( `${dir}/${buffer.uri}` );
 		return await response.arrayBuffer();
 
 	}

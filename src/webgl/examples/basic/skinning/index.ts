@@ -37,8 +37,8 @@ export default class extends Base {
     		fov: 45,
     		near: 0.1,
     		far: 1000,
-    		position: vec3.fromValues( 0, 4, 16 ),
-    		target: vec3.fromValues( 0, 4, 0 ),
+    		position: vec3.fromValues( 0, 2, 16 ),
+    		target: vec3.fromValues( 0, 2, 0 ),
     	} );
 
     	this.arcball = new CameraArcball( this.camera, 4, 0.08 );
@@ -66,8 +66,9 @@ export default class extends Base {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
 
-    	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/rigging/", "scene.gltf" );
+    	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/sonic/", "scene.gltf" );
     	this.gltf.transform.position = vec3.fromValues( 0, 0, 0 );
+		this.gltf.transform.scale = vec3.fromValues( 0.1, 0.1, 0.1 );
 
     	this.assetsLoaded = true;
 

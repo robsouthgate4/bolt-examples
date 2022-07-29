@@ -309,9 +309,6 @@ export default class extends Base {
 
 		}
 
-
-
-
 	}
 
 	update( elapsed: number, delta: number ) {
