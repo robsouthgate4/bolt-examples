@@ -20,208 +20,208 @@ import CameraFPS from "@/webgl/modules/CameraFPS";
 
 export default class extends Base {
 
-    canvas: HTMLCanvasElement;
-    colorShader: Shader;
-    camera: CameraPersp;
+	canvas: HTMLCanvasElement;
+	colorShader: Shader;
+	camera: CameraPersp;
 	cameraFPS!: CameraFPS;
-    assetsLoaded!: boolean;
-    cubeTransform!: Transform;
-    torusBuffer!: Mesh;
-    toruseGLTFBuffer!: Mesh;
-    bolt: Bolt;
-    post: Post;
-    renderPass!: RenderPass;
-    fxaa!: FXAAPass;
-    dofPass!: DOFPass;
-    depthShader: Shader;
-    depthFBO!: FBO;
-    gl: WebGL2RenderingContext;
-    fxaaPass!: FXAAPass;
+	assetsLoaded!: boolean;
+	cubeTransform!: Transform;
+	torusBuffer!: Mesh;
+	toruseGLTFBuffer!: Mesh;
+	bolt: Bolt;
+	post: Post;
+	renderPass!: RenderPass;
+	fxaa!: FXAAPass;
+	dofPass!: DOFPass;
+	depthShader: Shader;
+	depthFBO!: FBO;
+	gl: WebGL2RenderingContext;
+	fxaaPass!: FXAAPass;
 
-    constructor() {
+	constructor() {
 
-    	super();
+		super();
 
-    	const devicePixelRatio = Math.min( 2, window.devicePixelRatio || 1 );
+		const devicePixelRatio = Math.min( 2, window.devicePixelRatio || 1 );
 
-    	this.width = window.innerWidth * devicePixelRatio;
-    	this.height = window.innerHeight * devicePixelRatio;
+		this.width = window.innerWidth * devicePixelRatio;
+		this.height = window.innerHeight * devicePixelRatio;
 
-    	this.canvas = <HTMLCanvasElement>document.getElementById( "experience" );
-    	this.canvas.width = this.width;
-    	this.canvas.height = this.height;
+		this.canvas = <HTMLCanvasElement>document.getElementById( "experience" );
+		this.canvas.width = this.width;
+		this.canvas.height = this.height;
 
-    	this.camera = new CameraPersp( {
-    		aspect: this.canvas.width / this.canvas.height,
-    		fov: 45,
-    		near: 0.1,
-    		far: 1000,
-    		position: vec3.fromValues( 0, 5, 10 ),
-    		target: vec3.fromValues( 0, 0, - 50 ),
-    	} );
+		this.camera = new CameraPersp( {
+			aspect: this.canvas.width / this.canvas.height,
+			fov: 45,
+			near: 0.1,
+			far: 1000,
+			position: vec3.fromValues( 0, 5, 10 ),
+			target: vec3.fromValues( 0, 0, - 50 ),
+		} );
 
-    	this.cameraFPS = new CameraFPS( this.camera );
+		this.cameraFPS = new CameraFPS( this.camera );
 
-    	this.bolt = Bolt.getInstance();
-    	this.bolt.init( this.canvas, { antialias: true, dpi: 1 } );
-    	this.bolt.setCamera( this.camera );
-    	this.gl = this.bolt.getContext();
+		this.bolt = Bolt.getInstance();
+		this.bolt.init( this.canvas, { antialias: true, dpi: 1 } );
+		this.bolt.setCamera( this.camera );
+		this.gl = this.bolt.getContext();
 
-    	this.post = new Post( this.bolt );
+		this.post = new Post( this.bolt );
 
-    	this.depthShader = new Shader( depthVertexInstanced, depthFragmentInstanced );
-    	this.colorShader = new Shader( defaultVertexInstanced, defaultFragmentInstanced );
+		this.depthShader = new Shader( depthVertexInstanced, depthFragmentInstanced );
+		this.colorShader = new Shader( defaultVertexInstanced, defaultFragmentInstanced );
 
-    	this.camera.lookAt( vec3.fromValues( 0, 0, - 50 ) );
+		this.camera.lookAt( vec3.fromValues( 0, 0, - 50 ) );
 
-    	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-    	this.bolt.enableDepth();
+		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+		this.bolt.enableDepth();
 
-    	this.init();
+		this.init();
 
 
-    }
+	}
 
-    async init() {
+	async init() {
 
-    	this.depthFBO = new FBO( { width: this.canvas.width, height: this.canvas.height, depth: true } );
+		this.depthFBO = new FBO( { width: this.canvas.width, height: this.canvas.height, depth: true } );
 
-    	this.dofPass = new DOFPass( this.bolt, {
-    		width: this.width,
-    		height: this.height
-    	} ).setEnabled( true );
+		this.dofPass = new DOFPass( this.bolt, {
+			width: this.width,
+			height: this.height
+		} ).setEnabled( true );
 
-    	this.fxaaPass = new FXAAPass( this.bolt, {
-    		width: this.width,
-    		height: this.height
-    	} ).setEnabled( true );
+		this.fxaaPass = new FXAAPass( this.bolt, {
+			width: this.width,
+			height: this.height
+		} ).setEnabled( true );
 
-    	this.post.add( this.dofPass );
-    	this.post.add( this.fxaaPass, true );
+		this.post.add( this.dofPass );
+		this.post.add( this.fxaaPass, true );
 
-    	// set shader uniforms
-    	this.depthShader.activate();
-    	this.depthShader.setVector2( "cameraPlanes", vec2.fromValues( this.camera.near, this.camera.far ) );
+		// set shader uniforms
+		this.depthShader.activate();
+		this.depthShader.setVector2( "cameraPlanes", vec2.fromValues( this.camera.near, this.camera.far ) );
 
-    	this.dofPass.shader.activate();
-    	this.dofPass.shader.setTexture( "depthMap", this.depthFBO.targetTexture );
-    	this.dofPass.shader.setFloat( "focus", 0.0 );
-    	this.dofPass.shader.setFloat( "aperture", 0.028 );
-    	this.dofPass.shader.setFloat( "maxBlur", 1.0 );
-    	this.dofPass.shader.setFloat( "aspect", this.gl.canvas.width / this.gl.canvas.height );
+		this.dofPass.shader.activate();
+		this.dofPass.shader.setTexture( "depthMap", this.depthFBO.targetTexture );
+		this.dofPass.shader.setFloat( "focus", 0.0 );
+		this.dofPass.shader.setFloat( "aperture", 0.028 );
+		this.dofPass.shader.setFloat( "maxBlur", 1.0 );
+		this.dofPass.shader.setFloat( "aspect", this.gl.canvas.width / this.gl.canvas.height );
 
-    	const instanceCount = 500;
+		const instanceCount = 500;
 
-    	const instanceMatrices: mat4[] = [];
+		const instanceMatrices: mat4[] = [];
 
-    	for ( let i = 0; i < instanceCount; i ++ ) {
+		for ( let i = 0; i < instanceCount; i ++ ) {
 
-    		const x = ( Math.random() * 2 - 1 ) * 40;
-    		const y = ( Math.random() * 2 - 1 ) * 20;
-    		const z = Math.random() * 100;
+			const x = ( Math.random() * 2 - 1 ) * 40;
+			const y = ( Math.random() * 2 - 1 ) * 20;
+			const z = Math.random() * 100;
 
-    		const tempTranslation = vec3.fromValues( x, y, - z );
+			const tempTranslation = vec3.fromValues( x, y, - z );
 
-    		const tempQuat = quat.create();
-    		const tempRotation = quat.fromEuler( tempQuat, Math.random() * 360, Math.random() * 360, Math.random() * 360 );
-    		const tempScale = vec3.fromValues( 1, 1, 1 );
+			const tempQuat = quat.create();
+			const tempRotation = quat.fromEuler( tempQuat, Math.random() * 360, Math.random() * 360, Math.random() * 360 );
+			const tempScale = vec3.fromValues( 1, 1, 1 );
 
-    		const translation = mat4.create();
-    		mat4.fromTranslation( translation, tempTranslation );
+			const translation = mat4.create();
+			mat4.fromTranslation( translation, tempTranslation );
 
-    		const rotation = mat4.create();
-    		mat4.fromQuat( rotation, tempRotation );
+			const rotation = mat4.create();
+			mat4.fromQuat( rotation, tempRotation );
 
-    		const scale = mat4.create();
-    		mat4.fromScaling( scale, tempScale );
+			const scale = mat4.create();
+			mat4.fromScaling( scale, tempScale );
 
-    		const combined = mat4.create();
-    		mat4.multiply( combined, translation, rotation );
-    		mat4.multiply( combined, combined, scale );
+			const combined = mat4.create();
+			mat4.multiply( combined, translation, rotation );
+			mat4.multiply( combined, combined, scale );
 
-    		instanceMatrices.push( combined );
+			instanceMatrices.push( combined );
 
-    	}
+		}
 
-    	const gltfLoader = new GLTFLoader( this.bolt );
+		const gltfLoader = new GLTFLoader( this.bolt );
 
-    	const gltf: Node = await gltfLoader.load( "/static/models/gltf/", "torus.gltf" );
+		const gltf: Node = await gltfLoader.load( "/static/models/gltf/", "torus.gltf" );
 
-    	if ( ! gltf ) return;
+		if ( ! gltf ) return;
 
-    	this.assetsLoaded = true;
+		this.assetsLoaded = true;
 
-    	this.torusBuffer = new Mesh( new Sphere(), {
-    		instanceCount,
-    		instanced: true,
-    		instanceMatrices
-    	} );
+		this.torusBuffer = new Mesh( new Sphere(), {
+			instanceCount,
+			instanced: true,
+			instanceMatrices
+		} );
 
-    	this.resize();
+		this.resize();
 
-    }
+	}
 
-    resize() {
+	resize() {
 
-    	this.bolt.resizeFullScreen();
-    	this.camera.updateProjection( this.canvas.width / this.canvas.height );
-    	this.post.resize( this.gl.canvas.width, this.gl.canvas.height );
-    	this.depthFBO.resize( this.gl.canvas.width, this.gl.canvas.height );
+		this.bolt.resizeFullScreen();
+		this.camera.updateProjection( this.canvas.width / this.canvas.height );
+		this.post.resize( this.gl.canvas.width, this.gl.canvas.height );
+		this.depthFBO.resize( this.gl.canvas.width, this.gl.canvas.height );
 
-    }
+	}
 
-    earlyUpdate( elapsed: number, delta: number ) {
+	earlyUpdate( elapsed: number, delta: number ) {
 
-    	return;
+		return;
 
-    }
+	}
 
-    drawInstances( shader: Shader, elapsed: number, delta: number ) {
+	drawInstances( shader: Shader, elapsed: number, delta: number ) {
 
-    	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-    	this.bolt.clear( 0.0, 0.0, 0.0, 1 );
+		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+		this.bolt.clear( 0.0, 0.0, 0.0, 1 );
 
-    	this.cameraFPS.update( delta );
+		this.cameraFPS.update( delta );
 
-    	shader.activate();
-    	shader.setVector3( "viewPosition", this.camera.position );
-    	shader.setFloat( "time", elapsed );
-    	shader.setMatrix4( "projection", this.camera.projection );
-    	shader.setMatrix4( "view", this.camera.view );
+		shader.activate();
+		shader.setVector3( "viewPosition", this.camera.position );
+		shader.setFloat( "time", elapsed );
+		shader.setMatrix4( "projection", this.camera.projection );
+		shader.setMatrix4( "view", this.camera.view );
 
-    	this.torusBuffer.draw( shader );
+		this.torusBuffer.draw( shader );
 
-    }
+	}
 
-    update( elapsed: number, delta: number ) {
+	update( elapsed: number, delta: number ) {
 
-    	if ( ! this.assetsLoaded ) return;
+		if ( ! this.assetsLoaded ) return;
 
-    	{ // Draw depth to framebuffer
+		{ // Draw depth to framebuffer
 
-    		this.depthFBO.bind();
-    		this.bolt.enableDepth();
-    		this.drawInstances( this.depthShader, elapsed, delta );
-    		this.depthFBO.unbind();
-    		this.bolt.disableDepth();
+			this.depthFBO.bind();
+			this.bolt.enableDepth();
+			this.drawInstances( this.depthShader, elapsed, delta );
+			this.depthFBO.unbind();
+			this.bolt.disableDepth();
 
-    	}
+		}
 
-    	{ // draw post process stack and set depth map
+		{ // draw post process stack and set depth map
 
-    		this.post.begin();
-    		this.drawInstances( this.colorShader, elapsed, delta );
-    		this.post.end();
+			this.post.begin();
+			this.drawInstances( this.colorShader, elapsed, delta );
+			this.post.end();
 
-    	}
+		}
 
 
-    }
+	}
 
-    lateUpdate( elapsed: number, delta: number ) {
+	lateUpdate( elapsed: number, delta: number ) {
 
-    	return;
+		return;
 
-    }
+	}
 
 }

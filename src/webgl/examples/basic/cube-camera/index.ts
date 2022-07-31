@@ -275,7 +275,8 @@ export default class extends Base {
 
 				this.bolt.setViewPort( 0, 0, this.cubeFBO.width, this.cubeFBO.height );
 				this.bolt.clear( 1, 1, 1, 1 );
-				this.bolt.draw( [ this.cube, this.cube2 ] );
+				this.bolt.draw( this.cube2 );
+				this.bolt.draw( this.cube );
 
 				this.bolt.cullFace( FRONT );
 				this.bolt.draw( this.skyBox );
@@ -300,7 +301,10 @@ export default class extends Base {
 			this.bolt.setCamera( this.camera );
 
 			// draw objects
-			this.bolt.draw( [ this.sphere, this.cameraCubeParent, this.cube2, this.cube ] );
+			this.bolt.draw( this.sphere );
+			this.bolt.draw( this.cameraCubeParent );
+			this.bolt.draw( this.cube2 );
+			this.bolt.draw( this.cube );
 
 			// Draw skybox with just front faces
 			this.bolt.cullFace( FRONT );

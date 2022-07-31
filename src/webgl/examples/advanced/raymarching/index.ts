@@ -14,124 +14,124 @@ import { Batch } from "@bolt-webgl/core/";
 
 export default class extends Base {
 
-    canvas: HTMLCanvasElement;
-    shader: Shader;
-    lightPosition: vec3;
-    camera: CameraPersp;
-    assetsLoaded!: boolean;
-    torusTransform!: Transform;
-    cubeBatch!: Batch;
-    bolt: Bolt;
-    post: Post;
-    arcball: CameraArcball;
+	canvas: HTMLCanvasElement;
+	shader: Shader;
+	lightPosition: vec3;
+	camera: CameraPersp;
+	assetsLoaded!: boolean;
+	torusTransform!: Transform;
+	cubeBatch!: Batch;
+	bolt: Bolt;
+	post: Post;
+	arcball: CameraArcball;
 
-    constructor() {
+	constructor() {
 
-    	super();
+		super();
 
-    	this.width = window.innerWidth;
-    	this.height = window.innerHeight;
+		this.width = window.innerWidth;
+		this.height = window.innerHeight;
 
-    	this.canvas = <HTMLCanvasElement>document.getElementById( "experience" );
-    	this.canvas.width = this.width;
-    	this.canvas.height = this.height;
+		this.canvas = <HTMLCanvasElement>document.getElementById( "experience" );
+		this.canvas.width = this.width;
+		this.canvas.height = this.height;
 
-    	this.bolt = Bolt.getInstance();
-    	this.bolt.init( this.canvas, { antialias: true } );
+		this.bolt = Bolt.getInstance();
+		this.bolt.init( this.canvas, { antialias: true } );
 
-    	this.shader = new Shader( vertexShader, fragmentShader );
-    	this.lightPosition = vec3.fromValues( 0, 10, 0 );
+		this.shader = new Shader( vertexShader, fragmentShader );
+		this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
-    	this.camera = new CameraPersp( {
-    		aspect: this.canvas.width / this.canvas.height,
-    		fov: 45,
-    		near: 0.1,
-    		far: 1000,
-    		position: vec3.fromValues( 0, 0, 1 ),
-    		target: vec3.fromValues( 0, 0, 0 ),
-    	} );
+		this.camera = new CameraPersp( {
+			aspect: this.canvas.width / this.canvas.height,
+			fov: 45,
+			near: 0.1,
+			far: 1000,
+			position: vec3.fromValues( 0, 0, 1 ),
+			target: vec3.fromValues( 0, 0, 0 ),
+		} );
 
-    	this.arcball = new CameraArcball( this.camera, 4, 0.08 );
+		this.arcball = new CameraArcball( this.camera, 4, 0.08 );
 
-    	this.post = new Post( this.bolt );
+		this.post = new Post( this.bolt );
 
-    	this.post.add( new FXAAPass( this.bolt, {
-    		width: this.width,
-    		height: this.height,
-    	} ), true );
+		this.post.add( new FXAAPass( this.bolt, {
+			width: this.width,
+			height: this.height,
+		} ), true );
 
-    	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-    	this.bolt.setCamera( this.camera );
-    	this.bolt.enableDepth();
+		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+		this.bolt.setCamera( this.camera );
+		this.bolt.enableDepth();
 
-    	this.init();
-
-
-    }
-
-    async init() {
-
-    	const geometry = new Cube();
-
-    	const equiTexture = new Texture( { imagePath: "/static/textures/equi-studio.jpg" } );
-    	await equiTexture.load();
+		this.init();
 
 
-    	this.assetsLoaded = true;
+	}
 
-    	this.shader.activate();
-    	this.shader.setTexture( "mapEqui", equiTexture );
+	async init() {
 
-    	// setup nodes
-    	this.cubeBatch = new Batch(
-    		new Mesh( geometry ),
-    		this.shader
-    	);
+		const geometry = new Cube();
 
-    	this.resize();
+		const equiTexture = new Texture( { imagePath: "/static/textures/equi-studio.jpg" } );
+		await equiTexture.load();
 
-    }
 
-    resize() {
+		this.assetsLoaded = true;
 
-    	this.bolt.resizeFullScreen();
-    	this.camera.updateProjection( this.canvas.width / this.canvas.height );
-    	this.post.resize( this.canvas.width, this.canvas.height );
+		this.shader.activate();
+		this.shader.setTexture( "mapEqui", equiTexture );
 
-    }
+		// setup nodes
+		this.cubeBatch = new Batch(
+			new Mesh( geometry ),
+			this.shader
+		);
 
-    earlyUpdate( elapsed: number, delta: number ) {
+		this.resize();
 
-    	return;
+	}
 
-    }
+	resize() {
 
-    update( elapsed: number, delta: number ) {
+		this.bolt.resizeFullScreen();
+		this.camera.updateProjection( this.canvas.width / this.canvas.height );
+		this.post.resize( this.canvas.width, this.canvas.height );
 
-    	if ( ! this.assetsLoaded ) return;
+	}
 
-    	this.post.begin();
-    	this.arcball.update();
+	earlyUpdate( elapsed: number, delta: number ) {
 
-    	const bgColor = 211 / 255;
+		return;
 
-    	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-    	this.bolt.clear( bgColor, bgColor, bgColor, 1 );
+	}
 
-    	this.shader.activate();
-    	this.shader.setVector3( "viewPosition", this.camera.position );
-    	this.shader.setFloat( "time", elapsed );
+	update( elapsed: number, delta: number ) {
 
-    	this.bolt.draw( this.cubeBatch );
+		if ( ! this.assetsLoaded ) return;
 
-    	this.post.end();
+		this.post.begin();
+		this.arcball.update();
 
-    }
+		const bgColor = 211 / 255;
 
-    lateUpdate( elapsed: number, delta: number ) {
+		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+		this.bolt.clear( bgColor, bgColor, bgColor, 1 );
 
-    	return;
+		this.shader.activate();
+		this.shader.setVector3( "viewPosition", this.camera.position );
+		this.shader.setFloat( "time", elapsed );
 
-    }
+		this.bolt.draw( this.cubeBatch );
+
+		this.post.end();
+
+	}
+
+	lateUpdate( elapsed: number, delta: number ) {
+
+		return;
+
+	}
 
 }

@@ -186,7 +186,9 @@ export default class extends Base {
 
     	} else {
 
-    		this.bolt.draw( [ this.floor, this.axis ] );
+    		this.bolt.draw( this.floor );
+    		this.bolt.draw( this.axis );
+
 
     	}
 

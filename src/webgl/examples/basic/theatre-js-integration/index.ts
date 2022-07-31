@@ -205,7 +205,9 @@ export default class extends Base {
     	);
 
 
-    	this.bolt.draw( [ this.root, this.floor ] );
+    	this.bolt.draw( this.root );
+    	this.bolt.draw( this.floor );
+
 
     }
 

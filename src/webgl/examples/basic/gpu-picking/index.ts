@@ -195,7 +195,8 @@ export default class extends Base {
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 0.8, 0.8, 0.8, 1 );
-    	this.bolt.draw( [ this.root, this.floor ] );
+    	this.bolt.draw( this.root );
+    	this.bolt.draw( this.floor );
 
     }
 

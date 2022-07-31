@@ -122,7 +122,9 @@ export default class extends Base {
     	this.cubeBatch.transform.rotateY = 1 * delta;
     	this.cubeBatch.transform.rotateZ = - 1.5 * delta;
 
-    	this.bolt.draw( [ this.cubeBatch, this.floorBatch ] );
+    	this.bolt.draw( this.cubeBatch );
+    	this.bolt.draw( this.floorBatch );
+
 
     }
 
