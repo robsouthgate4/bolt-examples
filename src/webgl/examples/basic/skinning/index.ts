@@ -19,7 +19,7 @@ export default class extends Base {
     gltf!: Node;
     floor: Floor;
     arcball: CameraArcball;
-	_headNode?: Node;
+	_neckNode?: Node;
 
 	constructor() {
 
@@ -37,14 +37,14 @@ export default class extends Base {
     		fov: 45,
     		near: 0.1,
     		far: 1000,
-    		position: vec3.fromValues( 0, 2, 16 ),
-    		target: vec3.fromValues( 0, 2, 0 ),
+    		position: vec3.fromValues( 0, 3, 8 ),
+    		target: vec3.fromValues( 0, 4, 0 ),
     	} );
 
     	this.arcball = new CameraArcball( this.camera, 4, 0.08 );
 
     	this.bolt = Bolt.getInstance();
-    	this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
+    	this.bolt.init( this.canvas, { antialias: true, dpi: 2, powerPreference: "high-performance" } );
     	this.bolt.setCamera( this.camera );
 
     	this.floor = new Floor();
@@ -66,9 +66,19 @@ export default class extends Base {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
 
-    	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/sonic/", "scene.gltf" );
+    	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/tony-stark/scene.glb" );
     	this.gltf.transform.position = vec3.fromValues( 0, 0, 0 );
-		this.gltf.transform.scale = vec3.fromValues( 0.1, 0.1, 0.1 );
+		this.gltf.transform.scale = vec3.fromValues( 3, 3, 3 );
+
+		this.gltf.traverse( ( node: Node ) => {
+
+			if ( node.name === "Neck" ) {
+
+				this._neckNode = node;
+
+			}
+
+		} );
 
     	this.assetsLoaded = true;
 
@@ -96,6 +106,16 @@ export default class extends Base {
     	this.arcball.update();
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 1, 1, 1, 1 );
+
+		if ( this._neckNode ) {
+
+			const yQuat = quat.create();
+			const angle = Math.sin( elapsed * 10 ) * 0.0075;
+			quat.setAxisAngle( yQuat, vec3.fromValues( 0, 1, 0 ), angle );
+			quat.multiply( yQuat, this._neckNode.transform.quaternion, yQuat );
+			this._neckNode.transform.quaternion = yQuat;
+
+		}
 
     	this.bolt.draw( this.gltf );
 

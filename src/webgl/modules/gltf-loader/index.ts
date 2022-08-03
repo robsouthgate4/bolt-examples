@@ -65,24 +65,22 @@ export default class GLTFLoader {
 
 	}
 
-	async load( path: string, fileName: string ) {
+	async load( url: string ) {
 
-		const uri = path + fileName;
+		const file = url.split( '\\' ).pop()!.split( '/' ).pop() || "";
+		const path = url.split( '/' ).slice( 0, - 1 ).join( '/' ) + '/';
 
 		this._path = path;
 
-		const file = path + fileName;
-
 		let json: GlTf;
 
-		// load either a gltf or loade and decode a .glb file
-		if ( ! fileName.match( /\.glb/ ) ) {
+		if ( ! file.match( /\.glb/ ) ) {
 
-			json = await fetch( file ).then( ( res ) => res.json() );
+			json = await fetch( url ).then( ( res ) => res.json() );
 
 		} else {
 
-			json = await fetch( file )
+			json = await fetch( url )
 				.then( ( res ) => res.arrayBuffer() )
 				.then( ( glb ) => this._decodeGLB( glb ) );
 
@@ -96,7 +94,7 @@ export default class GLTFLoader {
 
 		// grab buffers
 		const buffers = await Promise.all(
-			json.buffers!.map( async ( buffer ) => await this._fetchBuffer( uri, buffer as BufferView ) )
+			json.buffers!.map( async ( buffer ) => await this._fetchBuffer( url, buffer as BufferView ) )
 		);
 
 		this._skinNodes = [];
@@ -340,7 +338,7 @@ export default class GLTFLoader {
 
 			if ( material.extensions.KHR_materials_pbrSpecularGlossiness !== undefined ) {
 
-				console.log( "pbr specular glosiness not current supported by Bolt" );
+				console.warn( "pbr specular glossiness not supported by Bolt" );
 
 				const { diffuseTexture } = material.extensions.KHR_materials_pbrSpecularGlossiness;
 
@@ -388,7 +386,6 @@ export default class GLTFLoader {
 	async _parseTexture( gltf: GlTf, texture: GLTFTexture ) {
 
 		const t = gltf.images![ texture.source! ];
-
 		const s = gltf.samplers![ texture.sampler! ];
 
 		let boltTexture = new Texture();
@@ -431,8 +428,6 @@ export default class GLTFLoader {
 			await boltTexture.load();
 
 		}
-
-		console.log( boltTexture );
 
 		return boltTexture;
 

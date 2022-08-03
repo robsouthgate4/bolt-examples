@@ -52,7 +52,7 @@ export default class extends Base {
 		this.canvas.height = this.height;
 
 		this.bolt = Bolt.getInstance();
-		this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
+		this.bolt.init( this.canvas, { antialias: true, dpi: 2, powerPreference: "high-performance" } );
 
 		this.gl = this.bolt.getContext();
 
@@ -129,7 +129,7 @@ export default class extends Base {
 
 		for ( let i = 0; i < this.instanceCount; i ++ ) {
 
-			lifeTimes.push( ( Math.random() + 1 ) * 20 );
+			lifeTimes.push( ( Math.random() + 0.5 ) * 20 );
 
 			offsets.push( ( Math.random() * 2 - 1 ) * 5 );
 			offsets.push( ( Math.random() * 2 - 1 ) * 5 );
@@ -247,7 +247,7 @@ export default class extends Base {
 		this.camera.update();
 
 		this.bolt.setViewPort( 0, 0, this.gl.canvas.width, this.gl.canvas.height );
-		this.bolt.clear( 0, 0, 0, 0 );
+		this.bolt.clear( 0, 0, 0, 1 );
 
 		{
 

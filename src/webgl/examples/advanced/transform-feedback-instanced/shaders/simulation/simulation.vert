@@ -148,13 +148,13 @@ void main() {
     vec3 pos = oldPosition;
     vec3 vel = oldVelocity;
 
-    vel += curlNoise( ( pos * 0.1 ) + (time * 0.01) ) * 0.02;
-    vel *= 0.7;
+    vel += curlNoise( ( pos * 0.1 ) + (time * 0.001) ) * 0.02;
+    vel *= 0.87;
     pos += vel;
 
     vec3 dir = pos - vec3( 0.0 );
 
-    if( distance( pos, vec3( 0.0 ) ) > 7.0 ) {
+    if( distance( pos, vec3( 0.0 ) ) >= 7.0 ) {
 
         vel -= normalize( dir ) * 0.004;
 
@@ -164,7 +164,7 @@ void main() {
 
     life -= 0.1;
 
-    if( life <= 0.0 ) {
+    if( life <= 0.00001 ) {
 
         pos = initPosition;
         life = initLife;

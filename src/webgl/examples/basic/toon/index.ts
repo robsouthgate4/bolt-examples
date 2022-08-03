@@ -126,7 +126,7 @@ export default class extends Base {
     async init() {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
-    	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/toon/", "Sweep_lookdev_working.gltf" );
+    	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/toon/Sweep_lookdev_working.gltf" );
 
     	this.assetsLoaded = true;
 

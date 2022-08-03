@@ -91,7 +91,7 @@ export default class extends Base {
 	async init() {
 
 		const gltfLoader = new GLTFLoader( this.bolt );
-		const cameraDebugGLTF = await gltfLoader.load( "/static/models/gltf/examples/camera/", "camera.gltf" );
+		const cameraDebugGLTF = await gltfLoader.load( "/static/models/gltf/examples/camera/camera.gltf" );
 		const cameraDebugBatch = cameraDebugGLTF.children[ 0 ].children[ 0 ] as Batch;
 
 		this.cameraDebugGeo = cameraDebugBatch.mesh.buffers;

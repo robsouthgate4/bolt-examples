@@ -66,7 +66,7 @@ export default class extends Base {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
 
-    	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/boat/", "boat.gltf" );
+    	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/boat/boat.gltf" );
 
     	this.assetsLoaded = true;
 

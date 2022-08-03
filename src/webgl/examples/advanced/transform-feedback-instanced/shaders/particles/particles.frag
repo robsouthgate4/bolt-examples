@@ -10,5 +10,5 @@ in vec3 Normal;
 
 void main()
 {
-   FragColor = vec4( vec3( 0.9 ), 1.0 );
+   FragColor = vec4( vec3( 0.5 ), 1.0 );
 }

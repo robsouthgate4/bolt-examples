@@ -43,10 +43,10 @@ void main()
 
   mat4 skinMatrix = mat4( 1.0 );
 
-  skinMatrix = getBoneMatrix( int( aJoints.x ) ) * aWeights.x +
-                    getBoneMatrix( int( aJoints.y ) ) * aWeights.y +
-                    getBoneMatrix( int( aJoints.z ) ) * aWeights.z +
-                    getBoneMatrix( int( aJoints.w ) ) * aWeights.w;
+  skinMatrix = jointTransforms[ int( aJoints.x ) ] * aWeights.x +
+                    jointTransforms[ int( aJoints.y ) ] * aWeights.y +
+                    jointTransforms[ int( aJoints.z ) ] * aWeights.z +
+                    jointTransforms[ int( aJoints.w ) ] * aWeights.w;
 
   mat4 combinedModel = model * skinMatrix;
 
