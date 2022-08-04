@@ -78,7 +78,7 @@ export default class extends Base {
 
     	this.root = new Node();
 
-    	this.gltf.transform.y = 2;
+    	this.gltf.transform.positionY = 2;
     	this.gltf.setParent( this.root );
 
     	this.gltf.traverse( ( node: Node ) => {

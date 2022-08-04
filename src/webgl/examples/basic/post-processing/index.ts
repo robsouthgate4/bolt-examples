@@ -107,7 +107,7 @@ export default class extends Base {
     	this.floorBatch.setParent( this.root );
 
 
-    	this.gltf.transform.y = 2;
+    	this.gltf.transform.positionY = 2;
     	this.gltf.setParent( this.root );
 
     	this.gltf.traverse( ( node: Node ) => {

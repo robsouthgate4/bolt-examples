@@ -225,7 +225,7 @@ export default class extends Base {
 
 		this.cubeCameras = [ cameraPX, cameraNX, cameraPY, cameraNY, cameraPZ, cameraNZ ];
 
-		this.cameraCubeParent.transform.y = 0;
+		this.cameraCubeParent.transform.positionY = 0;
 
 		this.cubeCameras.forEach( ( camera ) => {
 
@@ -244,12 +244,12 @@ export default class extends Base {
 
 	drawScene( elapsed: number ) {
 
-		this.cube.transform.x = - Math.sin( elapsed * 0.75 ) * 2.5;
-		this.cube.transform.z = - Math.cos( elapsed * 0.75 ) * 2.5;
+		this.cube.transform.positionX = - Math.sin( elapsed * 0.75 ) * 2.5;
+		this.cube.transform.positionZ = - Math.cos( elapsed * 0.75 ) * 2.5;
 		this.cube.transform.lookAt( this.sphere.transform.position );
 
-		this.cube2.transform.x = Math.sin( elapsed * 0.75 ) * 2.5;
-		this.cube2.transform.z = Math.cos( elapsed * 0.75 ) * 2.5;
+		this.cube2.transform.positionX = Math.sin( elapsed * 0.75 ) * 2.5;
+		this.cube2.transform.positionZ = Math.cos( elapsed * 0.75 ) * 2.5;
 		this.cube2.transform.lookAt( this.sphere.transform.position );
 
 		// combine lookat rotation with looping x rotation
@@ -319,8 +319,8 @@ export default class extends Base {
 
 		if ( ! this.assetsLoaded ) return;
 
-		this.cameraParent.transform.x = Math.sin( elapsed * 0.2 ) * 10;
-		this.cameraParent.transform.z = Math.cos( elapsed * 0.2 ) * 10;
+		this.cameraParent.transform.positionX = Math.sin( elapsed * 0.2 ) * 10;
+		this.cameraParent.transform.positionZ = Math.cos( elapsed * 0.2 ) * 10;
 
 		this.cameraParent.updateModelMatrix();
 		this.cameraParent.transform.lookAt( vec3.fromValues( 0, 0, 0 ) );

@@ -20,7 +20,7 @@ uniform mat4 view;
 uniform mat4 normal;
 
 uniform sampler2D jointTexture;
-uniform mat4 jointTransforms[25];
+uniform mat4 jointTransforms[128];
 uniform float jointCount;
 
 mat4 getBoneMatrix( int jointIndex  ) {

@@ -128,8 +128,8 @@ export default class extends Base {
     				id
     			} );
 
-    			sphereBatch.transform.x = ( x - ( xCount * 0.45 ) ) * gridPadding;
-    			sphereBatch.transform.y = y * gridPadding + 0.75;
+    			sphereBatch.transform.positionX = ( x - ( xCount * 0.45 ) ) * gridPadding;
+    			sphereBatch.transform.positionY = y * gridPadding + 0.75;
     			sphereBatch.setParent( this.root );
 
     		}

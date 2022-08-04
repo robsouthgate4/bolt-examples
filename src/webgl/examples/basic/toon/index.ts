@@ -131,12 +131,12 @@ export default class extends Base {
     	this.assetsLoaded = true;
 
     	this.axis = new Axis();
-    	this.axis.transform.y = 5;
+    	this.axis.transform.positionY = 5;
 
     	this.floor = new Floor();
 
     	this.cubeBatch = new Batch( new Mesh( new Cube( { width: 3, height: 3, depth: 3 } ) ), this.bodyShader );
-    	this.cubeBatch.transform.y = 0;
+    	this.cubeBatch.transform.positionY = 0;
     	this.cubeBatch.transform.position = vec3.fromValues( 0, 0, 0 );
 
     	this.resize();

@@ -75,7 +75,7 @@ export default class extends Base {
     	);
 
     	this.cubeBatch.name = "cube";
-    	this.cubeBatch.transform.y = 0.75;
+    	this.cubeBatch.transform.positionY = 0.75;
 
     	this.floorBatch = new Floor();
     	this.floorBatch.name = "floor";
@@ -106,9 +106,9 @@ export default class extends Base {
     	this.bolt.clear( 1, 1, 1, 1 );
 
     	// applied to quaternion
-    	this.cubeBatch.transform.rotateX = 0.5 * delta;
-    	this.cubeBatch.transform.rotateY = 1 * delta;
-    	this.cubeBatch.transform.rotateZ = - 1.5 * delta;
+    	this.cubeBatch.transform.rotateX( 0.5 * delta );
+    	this.cubeBatch.transform.rotateY( 1 * delta );
+    	this.cubeBatch.transform.rotateZ( - 1.5 * delta );
 
     	this.bolt.draw( this.cubeBatch );
     	this.bolt.draw( this.floorBatch );
