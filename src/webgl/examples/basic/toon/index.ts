@@ -126,7 +126,7 @@ export default class extends Base {
 	async init() {
 
 		const gltfLoader = new GLTFLoader( this.bolt );
-		this.gltf = await gltfLoader.load( "/static/models/gltf/examples/toon/Sweep_lookdev_working.gltf" );
+		this.gltf = await gltfLoader.load( "/static/models/gltf/examples/toon/scene.glb" );
 
 		this.assetsLoaded = true;
 
@@ -137,15 +137,10 @@ export default class extends Base {
 
 		this.gltf.traverse( ( node: Node ) => {
 
+			console.log( node.name );
+			console.log( node );
+
 			if ( node instanceof Batch ) {
-
-				console.log( node.name );
-
-				if ( node.name === "Cube.157" ) {
-
-					node.draw = false;
-
-				}
 
 				node.shader = this.geometryShader;
 
@@ -179,8 +174,6 @@ export default class extends Base {
 
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.clear( 0.9, 0.9, 0.9, 1 );
-
-		this.gltf.transform.position = vec3.fromValues( 1.25, 0, 0 );
 
 		this.gltf.traverse( ( node: Node ) => {
 

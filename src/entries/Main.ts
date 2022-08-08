@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/basic/skinning";
+import Example from "@/webgl/examples/basic/gpu-picking";
 
 export default class Main {
 

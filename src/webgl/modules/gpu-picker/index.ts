@@ -1,3 +1,5 @@
+
+
 import Bolt, { Batch, Camera, CameraPersp, FBO, Node, RBO, RGBA, Shader, UNSIGNED_BYTE } from "@bolt-webgl/core";
 import { mat4, vec2, vec4 } from "gl-matrix";
 import fragmentShader from "./shaders/picking.frag";
@@ -46,6 +48,7 @@ export default class GPUPicker {
     	const pixelX = mouse[ 0 ] * this._canvas.width / this._canvas.clientWidth;
     	const pixelY = this._gl.canvas.height - mouse[ 1 ] * this._gl.canvas.height / this._gl.canvas.clientHeight - 1;
     	const data = new Uint8Array( 4 );
+
 
 		const subLeft = this._nearPlane.left + pixelX * this._nearPlane.width / this._canvas.width;
 		const subBottom = this._nearPlane.bottom + pixelY * this._nearPlane.height / this._canvas.height;
