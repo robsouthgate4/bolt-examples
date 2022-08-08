@@ -96,8 +96,6 @@ export default class extends Base {
 
     async init() {
 
-    	this.assetsLoaded = true;
-
     	this.root = new Node();
     	this.floor = new Floor();
 
@@ -146,7 +144,7 @@ export default class extends Base {
     resize() {
 
     	this.bolt.resizeFullScreen();
-    	this.picker.resize();
+    	this.picker.resize( );
     	this.camera.updateProjection( this.canvas.width / this.canvas.height );
 
     }
@@ -159,12 +157,12 @@ export default class extends Base {
 
     update( elapsed: number, delta: number ) {
 
-    	if ( ! this.assetsLoaded ) return;
-
     	this.arcball.update();
 
     	// Get the id of the object beneath the mouse
     	const pickingId = this.picker.pick( this.mouse );
+
+    	console.log( pickingId );
 
     	if ( this.currentPickerID != pickingId ) {
 
