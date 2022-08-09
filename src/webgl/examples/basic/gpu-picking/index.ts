@@ -26,7 +26,7 @@ export default class extends Base {
     assetsLoaded?: boolean;
     bolt: Bolt;
     gl: WebGL2RenderingContext;
-    arcball: CameraArcball;
+    arcball!: CameraArcball;
 
     shader: any;
     shaderEyes: any;
@@ -52,7 +52,7 @@ export default class extends Base {
     	this.canvas.height = this.height;
 
     	this.bolt = Bolt.getInstance();
-    	this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
+    	this.bolt.init( this.canvas, { antialias: true, dpi: 1 } );
 
     	this.gl = this.bolt.getContext();
 
@@ -90,6 +90,36 @@ export default class extends Base {
     		this.mouse[ 0 ] = e.clientX - rect.left;
     		this.mouse[ 1 ] = e.clientY - rect.top;
 
+    		// Get the id of the object beneath the mouse
+    		const pickingId = this.picker.pick( this.mouse );
+
+    		if ( this.currentPickerID != pickingId ) {
+
+    			this.currentPickerID = pickingId;
+
+    			for ( let i = 0; i < this.pickingDataArray.length; i ++ ) {
+
+    				const pickingItem = this.pickingDataArray[ i ];
+    				const { batch } = pickingItem;
+
+    				if ( pickingItem.id === this.currentPickerID ) {
+
+    					batch.transform.scale = vec3.fromValues( 1.1, 1.1, 1.1 );
+    					batch.shader.activate();
+    					batch.shader.setVector4( "baseColor", vec4.fromValues( 0.9, 0.9, 1, 1 ) );
+
+    				} else {
+
+    					batch.transform.scale = vec3.fromValues( 1, 1, 1 );
+    					batch.shader.activate();
+    					batch.shader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
+
+    				}
+
+    			}
+
+    		}
+
     	} );
 
     }
@@ -112,6 +142,7 @@ export default class extends Base {
     			id ++;
 
     			const shader = new Shader( diffuseVertex, diffuseFragment );
+    			shader.transparent = false;
     			shader.activate();
     			shader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
 
@@ -144,7 +175,7 @@ export default class extends Base {
     resize() {
 
     	this.bolt.resizeFullScreen();
-    	this.picker.resize( );
+    	this.picker.resize();
     	this.camera.updateProjection( this.canvas.width / this.canvas.height );
 
     }
@@ -157,39 +188,9 @@ export default class extends Base {
 
     update( elapsed: number, delta: number ) {
 
-    	this.arcball.update();
+    	this.arcball.update( );
 
-    	// Get the id of the object beneath the mouse
-    	const pickingId = this.picker.pick( this.mouse );
 
-    	console.log( pickingId );
-
-    	if ( this.currentPickerID != pickingId ) {
-
-    		this.currentPickerID = pickingId;
-
-    		for ( let i = 0; i < this.pickingDataArray.length; i ++ ) {
-
-    			const pickingItem = this.pickingDataArray[ i ];
-    			const { batch } = pickingItem;
-
-    			if ( pickingItem.id === this.currentPickerID ) {
-
-    				batch.transform.scale = vec3.fromValues( 1.1, 1.1, 1.1 );
-    				batch.shader.activate();
-    				batch.shader.setVector4( "baseColor", vec4.fromValues( 0.9, 0.9, 1, 1 ) );
-
-    			} else {
-
-    				batch.transform.scale = vec3.fromValues( 1, 1, 1 );
-    				batch.shader.activate();
-    				batch.shader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
-
-    			}
-
-    		}
-
-    	}
 
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 0.8, 0.8, 0.8, 1 );

@@ -9,7 +9,6 @@ export default class CameraFPS {
     private _firstMouse: boolean;
     private _lastX: number;
     private _lastY: number;
-    private _newPosition: vec3;
     private _cameraSpeed!: number;
     private _camera: Camera;
     private _active: boolean;
@@ -18,7 +17,7 @@ export default class CameraFPS {
     	camera: Camera ) {
 
     	this._camera = camera;
-    	this._active = true;
+    	this._active = false;
 
     	this._activeKeys = [];
 
@@ -28,10 +27,6 @@ export default class CameraFPS {
     	this._firstMouse = true;
     	this._lastX = window.innerWidth / 2;
     	this._lastY = window.innerHeight / 2;
-
-    	this._newPosition = vec3.create();
-
-    	vec3.copy( this._newPosition, this._camera.position );
 
     	this.initListeners();
 
@@ -164,7 +159,7 @@ export default class CameraFPS {
     	this._lastX = xPos;
     	this._lastY = yPos;
 
-    	const sensitivity = 0.4;
+    	const sensitivity = 1;
     	xOffset *= sensitivity;
     	yOffset *= sensitivity;
 
@@ -191,7 +186,7 @@ export default class CameraFPS {
 
     	if ( ! this.active ) return;
 
-    	this._cameraSpeed = 10 * delta;
+    	this._cameraSpeed = 20 * delta;
 
     	if ( this._activeKeys.includes( "w" ) ) {
 
@@ -253,9 +248,9 @@ export default class CameraFPS {
     update( delta?: number ) {
 
     	if ( delta ) this.processInputs( delta );
-
     	vec3.add( this._camera.target, this._camera.position, this._camera.forward );
-    	mat4.lookAt( this._camera.view, this._camera.position, this._camera.target, this._camera.up );
+    	this._camera.transform.lookAt( this._camera.target, this._camera.up );
+    	this._camera.update();
 
     }
 

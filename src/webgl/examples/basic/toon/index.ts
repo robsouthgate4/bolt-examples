@@ -137,9 +137,6 @@ export default class extends Base {
 
 		this.gltf.traverse( ( node: Node ) => {
 
-			console.log( node.name );
-			console.log( node );
-
 			if ( node instanceof Batch ) {
 
 				node.shader = this.geometryShader;
