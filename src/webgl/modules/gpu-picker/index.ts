@@ -80,6 +80,8 @@ export default class GPUPicker {
      */
 	pick( mouse: vec2 ): number {
 
+		this._generatePixelFrustum();
+
     	this._drawPickingBuffer();
     	this._getPickedID( mouse );
 
