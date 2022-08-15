@@ -2,10 +2,10 @@
 
 precision highp float;
 
-uniform vec3 objectColor;
-uniform vec3 lightColor;
+//uniform vec3 objectColor;
+//uniform vec3 lightColor;
 uniform sampler2D baseTexture;
-uniform sampler2D jointTexture;
+//uniform sampler2D jointTexture;
 
 out vec4 FragColor;
 
@@ -17,6 +17,6 @@ void main()
 
    vec3 baseColor = texture( baseTexture, Uv ).rgb;
 
-   FragColor = vec4( Normal, 1.0 );
+   FragColor = vec4( baseColor, 1.0 );
 
 }

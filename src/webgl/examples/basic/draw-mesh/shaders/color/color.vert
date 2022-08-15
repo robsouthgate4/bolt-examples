@@ -8,15 +8,11 @@ layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aUv;
 
 in vec3 aColor;
-in uint aIndex;
-
 out vec3 Normal;
 out vec2 Uv;
 out vec3 FragPosition;
 
 out vec3 Color;
-
-flat out uint Index;
 
 uniform mat4 projection;
 uniform mat4 model;
@@ -31,8 +27,6 @@ void main()
     Normal = aNormal;
 
     Color = aColor;
-
-    Index = aIndex;
 
     vec3 pos = aPosition;
 

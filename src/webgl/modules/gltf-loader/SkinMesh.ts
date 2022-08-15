@@ -25,8 +25,6 @@ export default class SkinMesh extends Mesh {
     	shader.activate();
     	shader.setTexture( "jointTexture", this._skin.jointTexture );
 
-    	console.log( this._skin.jointMatrices.length );
-
     	this._skin.jointMatrices.forEach( ( jointMatrix, i ) => {
 
     		shader.setMatrix4( `jointTransforms[${i}]`, jointMatrix );

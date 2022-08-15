@@ -78,7 +78,7 @@ export default class extends Base {
     async init() {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
-    	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/phantom/", "PhantomLogoPose2.gltf" );
+    	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/phantom/PhantomLogoPose2.gltf" );
     	this.assetsLoaded = true;
 
     	this.rbgSplit = new RGBSplitPass( this.bolt, {
@@ -107,7 +107,7 @@ export default class extends Base {
     	this.floorBatch.setParent( this.root );
 
 
-    	this.gltf.transform.y = 2;
+    	this.gltf.transform.positionY = 2;
     	this.gltf.setParent( this.root );
 
     	this.gltf.traverse( ( node: Node ) => {

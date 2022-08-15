@@ -67,7 +67,7 @@ export default class extends Base {
 
     	this.root = new Node();
     	this.root.name = "root";
-    	this.root.transform.x = 0;
+    	this.root.transform.positionX = 0;
 
     	this.floorBatch = new Floor();
     	this.floorBatch.name = "floor";
@@ -107,7 +107,7 @@ export default class extends Base {
     		triShader
     	);
 
-    	this.triangleBatch.transform.y = 1.5;
+    	this.triangleBatch.transform.positionY = 1.5;
     	this.triangleBatch.transform.scale = vec3.fromValues( 3, 3, 3 );
 
     	this.triangleBatch.setParent( this.root );

@@ -104,7 +104,7 @@ export default class extends Base {
     			this.shader
     		);
 
-    		//batch.transform.x = ( index * 2.5 ) - count;
+    		//batch.transform.positionX = ( index * 2.5 ) - count;
 
     		batch.transform.scaleX = vp.width * 0.5;
     	    batch.transform.scaleY = vp.height * 0.5;

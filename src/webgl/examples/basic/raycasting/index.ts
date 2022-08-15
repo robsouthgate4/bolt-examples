@@ -162,14 +162,14 @@ export default class extends Base {
     	const bounds: BoxBounds = this.sphereBatch.mesh.bounds;
 
     	this.sphereBatch.name = "cube";
-    	this.sphereBatch.transform.y = 1;
+    	this.sphereBatch.transform.positionY = 1;
     	this.sphereBatch.transform.scale = vec3.fromValues( 1, 1, 1 );
     	this.sphereBatch.updateModelMatrix();
     	this.sphereBatch.setParent( this.root );
 
     	this.intersectionDebugBatch = new Batch( new Mesh( new Cube() ), this.shader );
     	this.intersectionDebugBatch.transform.scale = vec3.fromValues( 0.2, 0.2, 0.2 );
-    	this.intersectionDebugBatch.transform.y = - 999;
+    	this.intersectionDebugBatch.transform.positionY = - 999;
 
     	this.intersectionDebugBatch.setParent( this.root );
 

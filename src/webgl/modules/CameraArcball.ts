@@ -231,7 +231,9 @@ export default class CameraArcball {
     	this._position[ 1 ] = newPosition[ 1 ];
     	this._position[ 2 ] = newPosition[ 2 ];
 
-    	mat4.lookAt( this._camera.view, this._camera.position, this._camera.target, this._camera.up );
+    	this._camera.transform.lookAt( this._camera.target, this._camera.up );
+    	this._camera.update();
+
 
     }
 

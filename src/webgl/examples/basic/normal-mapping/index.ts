@@ -91,7 +91,7 @@ export default class extends Base {
 
     	this.root = new Node();
     	this.sphereBatch = new Batch( new Mesh( new Sphere( { widthSegments: 24, heightSegments: 24 } ) ), this.normalMapShader );
-    	this.sphereBatch.transform.y = 1;
+    	this.sphereBatch.transform.positionY = 1;
     	this.sphereBatch.setParent( this.root );
 
     	this.floorBatch = new Floor();
@@ -123,7 +123,7 @@ export default class extends Base {
     	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
     	this.bolt.clear( 0.6, 0.6, 0.6, 1 );
 
-    	this.sphereBatch.transform.rotateY = 0.15 * delta;
+    	this.sphereBatch.transform.rotateY( 0.15 * delta );
 
     	this.bolt.draw( this.root );
 

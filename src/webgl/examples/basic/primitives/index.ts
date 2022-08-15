@@ -74,13 +74,13 @@ export default class extends Base {
 
     	this.root = new Node();
     	this.root.name = "root";
-    	this.root.transform.x = 0;
+    	this.root.transform.positionX = 0;
 
     	this.sphereBatch = new Batch(
     		new Mesh( sphereGeometry ).setDrawType( TRIANGLES ),
     		this.shader
     	);
-    	this.sphereBatch.transform.x = - 1.6;
+    	this.sphereBatch.transform.positionX = - 1.6;
     	this.sphereBatch.transform.scale = vec3.fromValues( 1.5, 1.5, 1.5 );
     	this.sphereBatch.name = "sphere";
     	this.sphereBatch.setParent( this.root );
@@ -99,7 +99,7 @@ export default class extends Base {
     	this.floorBatch.name = "floor";
     	this.floorBatch.setParent( this.root );
 
-    	this.cubeBatch.transform.x = 1.5;
+    	this.cubeBatch.transform.positionX = 1.5;
 
     	this.resize();
 

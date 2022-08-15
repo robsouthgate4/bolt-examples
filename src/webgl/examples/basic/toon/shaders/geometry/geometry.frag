@@ -14,6 +14,7 @@ layout( location = 2 ) out vec4 depth;
 layout( location = 3 ) out vec4 uv;
 
 uniform vec2 cameraPlanes;
+uniform vec4 baseColor;
 
 vec4 convRGBA(float depth){
     float r = depth;
@@ -41,7 +42,7 @@ float convCoord(float depth, float offset){
 
 void main() {
 
-    vec3 ambient = vec3( 0.8, 0.8, 1.0 );
+    vec3 ambient = vec3( 1.0 ); //baseColor.rgb;
 
     vec3 lightPosition = vec3( 0.0, 10.0, 5.0 );
     vec3 norm           = normalize( Normal );
