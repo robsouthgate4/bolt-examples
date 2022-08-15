@@ -84,8 +84,6 @@ export default class extends Base {
 
 		this.gltf = await gltfLoader.load( "/static/models/gltf/examples/sonic2/scene-v4.glb" );
 
-		console.log( this.gltf );
-
 		this.assetsLoaded = true;
 
 		this.resize();

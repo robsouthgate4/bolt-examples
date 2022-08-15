@@ -406,8 +406,6 @@ export default class GLTFLoader {
 
 			if ( baseColorTexture !== undefined ) {
 
-				console.log( this._textures[ baseColorTexture.index ] );
-
 				shader.activate();
 				shader.setTexture( "baseTexture", this._textures[ baseColorTexture.index ] );
 
