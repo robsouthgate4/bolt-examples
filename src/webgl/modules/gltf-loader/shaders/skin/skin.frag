@@ -13,8 +13,8 @@ in vec2 Uv;
 void main()
 {
 
-   vec3 baseColor = texture( baseTexture, Uv ).rgb;
+   vec3 color = texture( baseTexture, Uv ).rgb;
 
-   FragColor = vec4( baseColor, 1.0 );
+   FragColor = vec4( color, 1.0 );
 
 }

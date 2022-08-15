@@ -28,7 +28,7 @@ export default class extends Base {
 	tf2?: WebGLTransformFeedback;
 	current!: { updateVAO: VAO; tf: WebGLTransformFeedback; drawVAO: VAO; };
 	next!: { updateVAO: VAO; tf: WebGLTransformFeedback; drawVAO: VAO; };
-	instanceCount = 10000;
+	instanceCount = 200000;
 	bolt: Bolt;
 
 	constructor() {
@@ -47,6 +47,8 @@ export default class extends Base {
 		this.bolt = Bolt.getInstance();
 
 		this.bolt.init( this.canvas, { antialias: true } );
+		this.bolt.enableAlphaBlending();
+
 
 		this.gl = this.bolt.getContext();
 
@@ -76,8 +78,8 @@ export default class extends Base {
 			aspect: this.canvas.width / this.canvas.height,
 			fov: 45,
 			near: 0.1,
-			far: 1000,
-			position: vec3.fromValues( 0, 3, 10 ),
+			far: 10000,
+			position: vec3.fromValues( 0, 3, 100 ),
 			target: vec3.fromValues( 0, 0, 0 ),
 		} );
 
@@ -120,7 +122,7 @@ export default class extends Base {
 
 		const position1VBO = new VBO( new Float32Array( positions ), this.gl.DYNAMIC_DRAW );
 		const position2VBO = new VBO( new Float32Array( positions ), this.gl.DYNAMIC_DRAW );
-		const velocityBuffer = new VBO( new Float32Array( velocities ), this.gl.STATIC_DRAW );
+		const velocityBuffer = new VBO( new Float32Array( velocities ), this.gl.DYNAMIC_DRAW );
 
 
 		const vaoUpdate1 = new VAO();

@@ -35,8 +35,6 @@ void main() {
 
     vec2 st = Uv;
 
-    //st += hash( Uv ) * 0.002;
-
     col += texture( map, st.xy ).rgb;
     col += texture( map, st.xy + ( vec2(  0.0,   0.4  ) * aspectcorrect ) * dofblur ).rgb;
     col += texture( map, st.xy + ( vec2(  0.15,  0.37 ) * aspectcorrect ) * dofblur ).rgb;
@@ -81,8 +79,6 @@ void main() {
     col += texture( map, st.xy + ( vec2( -0.4,   0.0  ) * aspectcorrect ) * dofblur4 ).rgb;
     col += texture( map, st.xy + ( vec2( -0.29, -0.29 ) * aspectcorrect ) * dofblur4 ).rgb;
     col += texture( map, st.xy + ( vec2(  0.0,   0.4  ) * aspectcorrect ) * dofblur4 ).rgb;
-
-   col += hash( Uv ) * 2.0;
 
     FragColor.rgb = col / 41.0;
     //FragColor.rgb = vec3( factor );

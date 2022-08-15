@@ -34,7 +34,7 @@ export default class extends Base {
 	tf2?: WebGLTransformFeedback;
 	current!: TransformFeedbackObject;
 	next!: TransformFeedbackObject;
-	instanceCount = 100000;
+	instanceCount = 200000;
 	tfVelocity1?: WebGLTransformFeedback;
 	tfVelocity2?: WebGLTransformFeedback;
 	meshIBO!: IBO;
@@ -95,7 +95,7 @@ export default class extends Base {
 			fov: 45,
 			near: 0.1,
 			far: 1000,
-			position: vec3.fromValues( 0, 0, 40 ),
+			position: vec3.fromValues( 0, 0, 60 ),
 			target: vec3.fromValues( 0, 1, 0 ),
 		} );
 
@@ -262,11 +262,11 @@ export default class extends Base {
 			this.gl.beginTransformFeedback( POINTS );
 
 			this.gl.drawArrays( POINTS, 0, this.instanceCount );
+			this.gl.disable( this.gl.RASTERIZER_DISCARD );
 
 			this.gl.endTransformFeedback();
 			this.gl.bindTransformFeedback( this.gl.TRANSFORM_FEEDBACK, null );
 
-			this.gl.disable( this.gl.RASTERIZER_DISCARD );
 
 		}
 

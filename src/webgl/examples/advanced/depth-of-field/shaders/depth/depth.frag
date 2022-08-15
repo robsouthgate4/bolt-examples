@@ -12,8 +12,6 @@ in vec4 Position;
 uniform vec2 cameraPlanes;
 
 
-
-
 vec4 convRGBA(float depth){
     float r = depth;
     float g = fract(r * 255.0);

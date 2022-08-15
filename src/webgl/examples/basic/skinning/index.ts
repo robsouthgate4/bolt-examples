@@ -38,7 +38,7 @@ export default class extends Base {
     		near: 0.1,
     		far: 1000,
     		position: vec3.fromValues( 0, 3, 8 ),
-    		target: vec3.fromValues( 0, 4, 0 ),
+    		target: vec3.fromValues( 0, 2, 0 ),
     	} );
 
     	this.arcball = new CameraArcball( this.camera, 4, 0.08 );
@@ -66,9 +66,8 @@ export default class extends Base {
 
     	const gltfLoader = new GLTFLoader( this.bolt );
 
-    	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/tony-stark/scene.glb" );
+    	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/sonic2/scene-v4.glb" );
     	this.gltf.transform.position = vec3.fromValues( 0, 0, 0 );
-		this.gltf.transform.scale = vec3.fromValues( 3, 3, 3 );
 
 		this.gltf.traverse( ( node: Node ) => {
 

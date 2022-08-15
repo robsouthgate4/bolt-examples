@@ -9,7 +9,7 @@ import geometryFragment from "./shaders/geometry/geometry.frag";
 import compositionVertex from "./shaders/composition/composition.vert";
 import compositionFragment from "./shaders/composition/composition.frag";
 
-import { vec2, vec3, } from "gl-matrix";
+import { vec2, vec3, vec4, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
 import Post from "@/webgl/modules/post";
@@ -101,7 +101,7 @@ export default class extends Base {
 		this.compShader = new Shader( compositionVertex, compositionFragment );
 		this.compShader.activate();
 		this.compShader.setVector2( "resolution", vec2.fromValues( this.canvas.clientWidth, this.canvas.clientHeight ) );
-		this.compShader.setFloat( "thickness", 0.6 );
+		this.compShader.setFloat( "thickness", 0.75 );
 
 		this.comp = new ShaderPass( this.bolt, {
 			width: this.width,
@@ -139,7 +139,11 @@ export default class extends Base {
 
 			if ( node instanceof Batch ) {
 
-				node.shader = this.geometryShader;
+
+				node.shader = new Shader( geometryVertex, geometryFragment );
+				node.shader.activate();
+				node.shader.setVector2( "cameraPlanes", vec2.fromValues( this.camera.near, this.camera.far ) );
+				node.shader.setVector4( "baseColor", vec4.fromValues( Math.random(), Math.random(), Math.random(), 1 ) );
 
 			}
 
@@ -176,7 +180,7 @@ export default class extends Base {
 
 			if ( node instanceof Batch ) {
 
-				node.shader = this.geometryShader;
+				//node.shader = this.geometryShader;
 
 			}
 

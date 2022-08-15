@@ -7,7 +7,7 @@ import CameraArcball from "@webgl/modules/CameraArcball";
 
 import diffuseVertex from "./shaders/diffuse/diffuse.vert";
 import diffuseFragment from "./shaders/diffuse/diffuse.frag";
-import { GlTf } from "@/webgl/modules/gltf-loader/types/GLTF";
+import { GlTf } from "@/webgl/modules/gltf-loader/types/gltf";
 import Floor from "@/webgl/modules/batches/floor";
 import Sphere from "@/webgl/modules/primitives/Sphere";
 import GPUPicker from "@/webgl/modules/gpu-picker";

@@ -1,8 +1,8 @@
 import Bolt, { Batch, CLAMP_TO_EDGE, FLOAT, LINEAR, Mesh, Node, Shader, Texture, Transform } from "@bolt-webgl/core";
 import { GeometryBuffers } from "@bolt-webgl/core/build/Mesh";
 import { mat4, quat, vec3, vec4 } from "gl-matrix";
-import { Accessor, GlTf, Material, Mesh as GLTFMesh, MeshPrimitive, Node as GLTFNode, Texture as GLTFTexture, Skin as GLTFSkin, BufferView } from "./types/GLTF";
-import { TypedArray } from "./types/TypedArray";
+import { Accessor, GlTf, Material, Mesh as GLTFMesh, MeshPrimitive, Node as GLTFNode, Texture as GLTFTexture, Skin as GLTFSkin, BufferView, Animation as GLTFAnimation } from "./types/gltf";
+import { TypedArray } from "./types/typedArray";
 
 import vertexShader from "./shaders/color/color.vert";
 import fragmentShader from "./shaders/color/color.frag";
@@ -11,6 +11,7 @@ import skinFragmentShader from "./shaders/skin/skin.frag";
 
 import Skin from "./Skin";
 import SkinMesh from "./SkinMesh";
+import { Animation, Channel } from "./types/animation";
 
 enum BufferType {
 	Float = 5126,
@@ -58,6 +59,7 @@ export default class GLTFLoader {
 	private _batches!: ( Batch | undefined )[][]
 	private _skinNodes!: { nodeIndex: number; skinIndex: number; meshIndex?: number; }[];
 	private _useSkinShader = false;
+	private _json!: GlTf;
 
 	constructor( bolt: Bolt ) {
 
@@ -72,21 +74,19 @@ export default class GLTFLoader {
 
 		this._path = path;
 
-		let json: GlTf;
-
 		if ( ! file.match( /\.glb/ ) ) {
 
-			json = await fetch( url ).then( ( res ) => res.json() );
+			this._json = await fetch( url ).then( ( res ) => res.json() );
 
 		} else {
 
-			json = await fetch( url )
+			this._json = await fetch( url )
 				.then( ( res ) => res.arrayBuffer() )
 				.then( ( glb ) => this._decodeGLB( glb ) );
 
 		}
 
-		if ( json.accessors === undefined || json.accessors.length === 0 ) {
+		if ( this._json.accessors === undefined || this._json.accessors.length === 0 ) {
 
 			throw new Error( 'GLTF File is missing accessors' );
 
@@ -94,45 +94,48 @@ export default class GLTFLoader {
 
 		// grab buffers
 		const buffers = await Promise.all(
-			json.buffers!.map( async ( buffer ) => await this._fetchBuffer( url, buffer as BufferView ) )
+			this._json.buffers!.map( async ( buffer ) => await this._fetchBuffer( url, buffer as BufferView ) )
 		);
 
 		this._skinNodes = [];
 
 		// arrange nodes with correct transforms
-		this._nodes = json.nodes!.map( ( node, index ) => this._parseNode( index, node ) );
+		this._nodes = this._json.nodes!.map( ( node, index ) => this._parseNode( index, node ) );
+
+
+		const animations = {} as Animation;
+
+		this._json.animations && this._json.animations!.forEach( ( animation: GLTFAnimation ) => {
+
+			animations[ animation.name as string ] = this._parseAnimations( animation, this._json, buffers );
+
+		} );
 
 		// map textures
-		if ( json.textures ) {
+		if ( this._json.textures !== undefined ) {
 
 			this._textures = await Promise.all(
-				json.textures!.map( async ( texture ) => await this._parseTexture( json, texture ) )
+				this._json.textures!.map( async ( texture ) => await this._parseTexture( this._json, texture ) )
 			);
 
 		}
 
 		// map skins
-		if ( json.skins ) {
+		if ( this._json.skins !== undefined ) {
 
-			this._skins = json.skins!.map( ( skin: GLTFSkin ) => this._parseSkin( json, skin, buffers ) );
-
-			if ( this._skins.length > 0 ) {
-
-				this._useSkinShader = true;
-
-			}
+			this._skins = this._json.skins!.map( ( skin: GLTFSkin ) => this._parseSkin( this._json, skin, buffers ) );
 
 		}
 
 		// map materials
-		if ( json.materials ) {
+		if ( this._json.materials !== undefined ) {
 
-			this._materials = json.materials!.map( ( material: Material ) => this._parseMaterials( json, material ) );
+			this._materials = this._json.materials!.map( ( material: Material, index: number ) => this._parseMaterials( this._json, material, index ) );
 
 		}
 
 		// map batches
-		this._batches = json.meshes!.map( ( mesh ) => this._parseBatch( json, mesh, buffers ) );
+		this._batches = this._json.meshes!.map( ( mesh, index ) => this._parseBatch( this._json, mesh, buffers, index ) );
 
 
 		// arrange scene graph
@@ -169,7 +172,7 @@ export default class GLTFLoader {
 			}
 
 			// set parent nodes
-			if ( children ) {
+			if ( children !== undefined && children.length > 0 ) {
 
 				children.forEach( ( childIndex: number ) => {
 
@@ -199,9 +202,9 @@ export default class GLTFLoader {
 
 					b.forEach( ( batch?: Batch ) => {
 
-						const realMesh = batch!.mesh as SkinMesh;
+						const mesh = batch!.mesh as SkinMesh;
 
-						realMesh.skin = skin;
+						mesh.skin = skin;
 
 						batch?.setParent( this._nodes[ nodeIndex ].node );
 
@@ -216,7 +219,7 @@ export default class GLTFLoader {
 
 		this._root = new Node();
 
-		json.scenes!.forEach( ( scene ) => {
+		this._json.scenes!.forEach( ( scene ) => {
 
 			this._root.name = scene.name;
 
@@ -232,6 +235,32 @@ export default class GLTFLoader {
 
 		return this._root;
 
+
+	}
+
+	_parseAnimations( animation: GLTFAnimation, json: GlTf, buffers: ArrayBufferLike[] ): Channel {
+
+		const channels = animation.channels;
+
+		channels.map( ( channel ) => {
+
+			// get target information
+			const target = channel.target;
+
+			// get the sampler information for this channel
+			const sampler = animation.samplers[ channel.sampler ];
+
+			// get the time data for the animation
+			const time = this._getBufferFromFile( json, buffers, json.accessors![ sampler.input ] );
+
+			// get the data for the animation
+			const buffer = this._getBufferFromFile( json, buffers, json.accessors![ sampler.output ] );
+
+		} );
+
+		const c: Channel = {};
+
+		return c;
 
 	}
 
@@ -268,7 +297,9 @@ export default class GLTFLoader {
 
 	}
 
-	_parseBatch( gltf: GlTf, mesh: GLTFMesh, buffers: ArrayBufferLike[] ) {
+	_parseBatch( gltf: GlTf, mesh: GLTFMesh, buffers: ArrayBufferLike[], index: number ) {
+
+		const node = this._nodes.find( ( n ) => n.mesh === index );
 
 		return mesh.primitives.map( ( primitive ) => {
 
@@ -302,7 +333,7 @@ export default class GLTFLoader {
 
 				s = this._materials ? this._materials[ primitive.material as number ] : new Shader( vertexShader, fragmentShader );
 
-				if ( joints !== undefined ) {
+				if ( node!.skin !== undefined ) {
 
 					// form skinned mesh data if joints defined
 					m = new SkinMesh( geometry );
@@ -326,11 +357,35 @@ export default class GLTFLoader {
 
 	}
 
-	_parseMaterials( gltf: GlTf, material: Material ): Shader {
+	_parseMaterials( gltf: GlTf, material: Material, index: number ): Shader {
 
 		//TODO:Full PBR shader setup
 
-		const shader = this._useSkinShader ? new Shader( skinVertexShader, skinFragmentShader ) : new Shader( vertexShader, fragmentShader );
+		let hasSkin = false;
+
+		// determine whether this material has skinning
+		this._nodes.forEach( ( node ) => {
+
+			if ( node.mesh !== undefined ) {
+
+				const mesh = gltf.meshes![ node.mesh ];
+
+				mesh.primitives.forEach( ( primitive ) => {
+
+					if ( primitive.material === index ) {
+
+						node.skin !== undefined ? hasSkin = true : hasSkin = false;
+
+					}
+
+				} );
+
+			}
+
+		} );
+
+		// get the shader for this material
+		const shader = hasSkin ? new Shader( skinVertexShader, skinFragmentShader ) : new Shader( vertexShader, fragmentShader );
 
 		shader.name = material.name;
 
@@ -338,16 +393,7 @@ export default class GLTFLoader {
 
 			if ( material.extensions.KHR_materials_pbrSpecularGlossiness !== undefined ) {
 
-				console.warn( "pbr specular glossiness not supported by Bolt" );
-
-				const { diffuseTexture } = material.extensions.KHR_materials_pbrSpecularGlossiness;
-
-				if ( diffuseTexture !== undefined && this._textures[ diffuseTexture.index ] ) {
-
-					shader.activate();
-					shader.setTexture( "baseTexture", this._textures[ diffuseTexture.index ] );
-
-				}
+				console.warn( "pbr specular glossiness not supported by Bolt, please use the metallic roughness workflow" );
 
 			}
 
@@ -356,16 +402,20 @@ export default class GLTFLoader {
 		if ( material.pbrMetallicRoughness !== undefined ) {
 
 			const { baseColorTexture, baseColorFactor } = material.pbrMetallicRoughness;
-			shader.activate();
 
-			if ( baseColorTexture ) {
 
+			if ( baseColorTexture !== undefined ) {
+
+				console.log( this._textures[ baseColorTexture.index ] );
+
+				shader.activate();
 				shader.setTexture( "baseTexture", this._textures[ baseColorTexture.index ] );
 
 			}
 
-			if ( baseColorFactor != undefined ) {
+			if ( baseColorFactor !== undefined ) {
 
+				shader.activate();
 				shader.setVector4(
 					"baseColorFactor",
 					vec4.fromValues(
@@ -390,7 +440,7 @@ export default class GLTFLoader {
 
 		let boltTexture = new Texture();
 
-		if ( t.bufferView ) {
+		if ( t.bufferView !== undefined ) {
 
 			const bufferView = gltf.bufferViews![ t.bufferView! ];
 
@@ -414,7 +464,7 @@ export default class GLTFLoader {
 
 		}
 
-		if ( t.uri ) {
+		if ( t.uri !== undefined ) {
 
 			boltTexture = new Texture( {
 				imagePath: this._path + t.uri,

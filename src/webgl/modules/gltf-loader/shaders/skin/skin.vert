@@ -37,8 +37,8 @@ void main()
 {
 
   Uv = aUv;
-  Normal = aNormal;
-  Normal = aJoints.xyz / ( jointCount - 1.0 );
+  //Normal = aNormal;
+  //Normal = aJoints.xyz / ( jointCount - 1.0 );
   //Normal = aWeights.xyz;
 
   mat4 skinMatrix = mat4( 1.0 );
