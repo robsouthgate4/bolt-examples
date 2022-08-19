@@ -1,6 +1,6 @@
 
 import Base from "@webgl/Base";
-import Bolt, { CameraPersp, Node, Transform } from "@bolt-webgl/core";
+import Bolt, { Batch, CameraPersp, Node, Transform } from "@bolt-webgl/core";
 
 import { quat, vec2, vec3 } from "gl-matrix";
 import CameraArcball from "@/webgl/modules/CameraArcball";
@@ -24,7 +24,7 @@ export default class extends Base {
 	_rotationX = quat.create();
 	_rotationY = quat.create();
 	_rotation = quat.create();
-	//arcball: CameraArcball;
+	arcball: CameraArcball;
 
 	constructor() {
 
@@ -42,12 +42,14 @@ export default class extends Base {
 			fov: 45,
 			near: 0.1,
 			far: 1000,
-			position: vec3.fromValues( 0, 4, 5 ),
-			target: vec3.fromValues( 0, 2, 0 ),
+			position: vec3.fromValues( 4, 5, 8 ),
+			target: vec3.fromValues( 0, 0.5, 0 ),
 		} );
 
+		this.arcball = new CameraArcball( this.camera, 4, 0.08 );
+
 		this.bolt = Bolt.getInstance();
-		this.bolt.init( this.canvas, { antialias: true, dpi: 1 } );
+		this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
 		this.bolt.setCamera( this.camera );
 
 		this.floor = new Floor();
@@ -82,7 +84,18 @@ export default class extends Base {
 
 		const gltfLoader = new GLTFLoader( this.bolt );
 
-		this.gltf = await gltfLoader.load( "/static/models/gltf/examples/sonic2/scene-v4.glb" );
+		this.gltf = await gltfLoader.load( "/static/models/gltf/examples/character/scene.glb" );
+		this.gltf.transform.scale = vec3.fromValues( 0.5, 0.5, 0.5 );
+
+		this.gltf.traverse( ( node: Node ) => {
+
+			if ( node instanceof Batch ) {
+
+				console.log( node );
+
+			}
+
+		} );
 
 		this.assetsLoaded = true;
 
@@ -108,7 +121,7 @@ export default class extends Base {
 		if ( ! this.assetsLoaded ) return;
 
 
-		this.camera.update();
+		this.arcball.update();
 
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.clear( 1, 1, 1, 1 );

@@ -37,7 +37,7 @@ void main()
 {
 
   Uv = aUv;
-  //Normal = aNormal;
+  Normal = aNormal;
   //Normal = aJoints.xyz / ( jointCount - 1.0 );
   //Normal = aWeights.xyz;
 

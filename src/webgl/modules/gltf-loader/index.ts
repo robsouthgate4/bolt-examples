@@ -319,6 +319,7 @@ export default class GLTFLoader {
 					positions: this._getBufferByAttribute( gltf, buffers, mesh, primitive, "POSITION" )!.data as Float32Array,
 					normals: normals ? normals!.data as Float32Array : undefined,
 					uvs: uvs ? uvs!.data as Float32Array : undefined,
+					uvs2: uvs ? uvs!.data as Float32Array : undefined,
 					indices: indices ? indices!.data as Int16Array : undefined
 				};
 
@@ -331,7 +332,7 @@ export default class GLTFLoader {
 				let m: Mesh | SkinMesh;
 				let s: Shader;
 
-				s = this._materials ? this._materials[ primitive.material as number ] : new Shader( vertexShader, fragmentShader );
+				s = ( this._materials && primitive.material !== undefined ) ? this._materials[ primitive.material as number ] : new Shader( vertexShader, fragmentShader );
 
 				if ( node!.skin !== undefined ) {
 
@@ -403,17 +404,16 @@ export default class GLTFLoader {
 
 			const { baseColorTexture, baseColorFactor } = material.pbrMetallicRoughness;
 
+			shader.activate();
 
 			if ( baseColorTexture !== undefined ) {
 
-				shader.activate();
 				shader.setTexture( "baseTexture", this._textures[ baseColorTexture.index ] );
 
 			}
 
 			if ( baseColorFactor !== undefined ) {
 
-				shader.activate();
 				shader.setVector4(
 					"baseColorFactor",
 					vec4.fromValues(
