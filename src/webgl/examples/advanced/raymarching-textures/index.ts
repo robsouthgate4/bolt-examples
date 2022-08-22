@@ -1,7 +1,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Transform, Mesh, Texture, CameraPersp, REPEAT, CLAMP_TO_EDGE, NEAREST, LINEAR, SRC_ALPHA, ONE_MINUS_SRC_ALPHA } from "@bolt-webgl/core";
+import Bolt, { Shader, Transform, Mesh, Texture2D, CameraPersp, CLAMP_TO_EDGE, LINEAR, SRC_ALPHA, ONE_MINUS_SRC_ALPHA } from "@bolt-webgl/core";
 import vertexShader from "./shaders/raymarch.vert";
 import fragmentShader from "./shaders/raymarch.frag";
 
@@ -37,7 +37,7 @@ export default class extends Base {
 		this.canvas.height = this.height;
 
 		this.bolt = Bolt.getInstance();
-		this.bolt.init( this.canvas, { antialias: true } );
+		this.bolt.init( this.canvas, { antialias: true, powerPreference: "high-performance" } );
 
 		this.shader = new Shader( vertexShader, fragmentShader );
 		this.lightPosition = vec3.fromValues( 0, 10, 0 );
@@ -47,7 +47,7 @@ export default class extends Base {
 			fov: 45,
 			near: 0.1,
 			far: 1000,
-			position: vec3.fromValues( 0, 0, 5 ),
+			position: vec3.fromValues( 2, 0, 2 ),
 			target: vec3.fromValues( 0, 0, 0 ),
 		} );
 
@@ -73,7 +73,7 @@ export default class extends Base {
 
 		const geometry = new Cube( { widthSegments: 1, heightSegments: 1, depthSegments: 1 } );
 
-		const volumeTexture = new Texture( {
+		const volumeTexture = new Texture2D( {
 			imagePath: "/static/textures/volumes/volume-rubber.png",
 			wrapS: CLAMP_TO_EDGE,
 			wrapT: CLAMP_TO_EDGE,
@@ -81,6 +81,7 @@ export default class extends Base {
 			magFilter: LINEAR,
 			generateMipmaps: false,
 		} );
+
 		await volumeTexture.load();
 
 

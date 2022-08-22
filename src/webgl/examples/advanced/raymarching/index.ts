@@ -1,7 +1,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Transform, Mesh, Texture, CameraPersp } from "@bolt-webgl/core";
+import Bolt, { Shader, Transform, Mesh, Texture2D, CameraPersp } from "@bolt-webgl/core";
 import vertexShader from "./shaders/raymarch.vert";
 import fragmentShader from "./shaders/raymarch.frag";
 
@@ -73,7 +73,7 @@ export default class extends Base {
 
 		const geometry = new Cube();
 
-		const equiTexture = new Texture( { imagePath: "/static/textures/equi-studio.jpg" } );
+		const equiTexture = new Texture2D( { imagePath: "/static/textures/equi-studio.jpg" } );
 		await equiTexture.load();
 
 

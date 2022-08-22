@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Batch, Node, CameraPersp, Texture, REPEAT, Mesh } from "@bolt-webgl/core";
+import Bolt, { Shader, Batch, Node, CameraPersp, Texture2D, REPEAT, Mesh } from "@bolt-webgl/core";
 
 import normalmapVertex from "./shaders/normal-map/normal-map.vert";
 import normalmapFragment from "./shaders/normal-map/normal-map.frag";
@@ -22,8 +22,8 @@ export default class extends Base {
     root!: Node;
     arcball: CameraArcball;
     normalMapShader: Shader;
-    matcapTexture!: Texture;
-    normalTexture!: Texture;
+    matcapTexture!: Texture2D;
+    normalTexture!: Texture2D;
     sphereBatch!: Batch;
     floorBatch: any;
 
@@ -67,11 +67,11 @@ export default class extends Base {
 
     async init() {
 
-    	this.matcapTexture = new Texture( {
+    	this.matcapTexture = new Texture2D( {
     		imagePath: "/static/textures/matcap/matcap3.jpeg"
     	} );
 
-    	this.normalTexture = new Texture( {
+    	this.normalTexture = new Texture2D( {
     		imagePath: "/static/textures/normal-map/metal-normal.jpeg",
     		wrapS: REPEAT,
     		wrapT: REPEAT

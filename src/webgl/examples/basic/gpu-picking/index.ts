@@ -1,6 +1,6 @@
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Texture, Batch, Node, CameraPersp, Mesh } from "@bolt-webgl/core";
+import Bolt, { Shader, Texture2D, Batch, Node, CameraPersp, Mesh } from "@bolt-webgl/core";
 
 import { vec2, vec3, vec4 } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
@@ -31,7 +31,7 @@ export default class extends Base {
 	shader: any;
 	shaderEyes: any;
 	gltf!: GlTf;
-	matcapTexture!: Texture;
+	matcapTexture!: Texture2D;
 	floor!: Floor;
 
 	objectCount: number = 10;

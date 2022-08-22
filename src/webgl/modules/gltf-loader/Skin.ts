@@ -1,4 +1,4 @@
-import { CLAMP_TO_EDGE, FLOAT, NEAREST, Node, RGBA, RGBA32f, Texture } from "@bolt-webgl/core";
+import { CLAMP_TO_EDGE, FLOAT, NEAREST, Node, RGBA, RGBA32f, Texture2D } from "@bolt-webgl/core";
 import { mat4 } from "gl-matrix";
 
 export default class Skin {
@@ -7,7 +7,7 @@ export default class Skin {
     private _inverseBindMatrices: Float32Array[];
     private _jointMatrices: Float32Array[];
     private _jointData: Float32Array;
-    private _jointTexture: Texture;
+    private _jointTexture: Texture2D;
     private _globalWorldInverse = mat4.create();
 
     constructor( joints: Node[], inverseBindMatrixData: Float32Array ) {
@@ -34,7 +34,7 @@ export default class Skin {
 
     	}
 
-    	this._jointTexture = new Texture( {
+    	this._jointTexture = new Texture2D( {
     		width: 4,
     		height: this._joints.length,
     		format: RGBA,
@@ -71,13 +71,13 @@ export default class Skin {
 
     }
 
-    public get jointTexture(): Texture {
+    public get jointTexture(): Texture2D {
 
     	return this._jointTexture;
 
     }
 
-    public set jointTexture( value: Texture ) {
+    public set jointTexture( value: Texture2D ) {
 
     	this._jointTexture = value;
 

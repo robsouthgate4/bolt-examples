@@ -19,8 +19,6 @@ uniform vec3 viewPosition;
 void main()
 {
 
-  //Ro = ( inverse( model ) * vec4( viewPosition, 1.0 ) ).xyz;
-
   Normal = aNormal;
 
   Ro = ( model * vec4( aPosition, 1.0 ) ).xyz;

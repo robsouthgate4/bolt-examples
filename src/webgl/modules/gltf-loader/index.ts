@@ -1,4 +1,4 @@
-import Bolt, { Batch, CLAMP_TO_EDGE, FLOAT, LINEAR, Mesh, Node, Shader, Texture, Transform } from "@bolt-webgl/core";
+import Bolt, { Batch, CLAMP_TO_EDGE, FLOAT, LINEAR, Mesh, Node, Shader, Texture2D, Transform } from "@bolt-webgl/core";
 import { GeometryBuffers } from "@bolt-webgl/core/build/Mesh";
 import { mat4, quat, vec3, vec4 } from "gl-matrix";
 import { Accessor, GlTf, Material, Mesh as GLTFMesh, MeshPrimitive, Node as GLTFNode, Texture as GLTFTexture, Skin as GLTFSkin, BufferView, Animation as GLTFAnimation } from "./types/gltf";
@@ -52,7 +52,7 @@ export default class GLTFLoader {
 
 	private _path!: string;
 	private _materials!: Shader[];
-	private _textures!: Texture[];
+	private _textures!: Texture2D[];
 	private _root!: Node;
 	private _skins!: Skin[];
 	private _nodes!: { id: number; node: Node; mesh: number | undefined; skin: number | undefined; localBindTransform: Transform; animatedTransform: mat4; children: number[]; }[];
@@ -436,7 +436,7 @@ export default class GLTFLoader {
 		const t = gltf.images![ texture.source! ];
 		const s = gltf.samplers![ texture.sampler! ];
 
-		let boltTexture = new Texture();
+		let boltTexture = new Texture2D();
 
 		if ( t.bufferView !== undefined ) {
 
@@ -452,7 +452,7 @@ export default class GLTFLoader {
 
 			await image.decode();
 
-			boltTexture = new Texture( {
+			boltTexture = new Texture2D( {
 				imagePath: image.src,
 				wrapS: s.wrapS || CLAMP_TO_EDGE,
 				wrapT: s.wrapT || CLAMP_TO_EDGE,
@@ -464,7 +464,7 @@ export default class GLTFLoader {
 
 		if ( t.uri !== undefined ) {
 
-			boltTexture = new Texture( {
+			boltTexture = new Texture2D( {
 				imagePath: this._path + t.uri,
 				wrapS: s.wrapS || CLAMP_TO_EDGE,
 				wrapT: s.wrapT || CLAMP_TO_EDGE,

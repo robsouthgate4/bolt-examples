@@ -1,7 +1,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Node, Batch, FBO, Texture, COLOR_ATTACHMENT0, RBO, Mesh, NEAREST, CameraPersp } from "@bolt-webgl/core";
+import Bolt, { Shader, Node, Batch, FBO, Texture2D, COLOR_ATTACHMENT0, RBO, NEAREST, CameraPersp } from "@bolt-webgl/core";
 
 import FXAAPass from "@/webgl/modules/post/passes/FXAAPass";
 import geometryVertex from "./shaders/geometry/geometry.vert";
@@ -33,14 +33,14 @@ export default class extends Base {
 	axis!: Axis;
 	floor!: Floor;
 	gBuffer: FBO;
-	normalTexture: Texture;
+	normalTexture: Texture2D;
 	geometryShader: Shader;
 	gBufferRBO: RBO;
 	cubeBatch!: Batch;
 	comp: ShaderPass;
 	compShader: Shader;
-	depthTexture: Texture;
-	uvTexture: Texture;
+	depthTexture: Texture2D;
+	uvTexture: Texture2D;
 	arcball: CameraArcball;
 
 	constructor() {
@@ -82,12 +82,12 @@ export default class extends Base {
 		this.gBufferRBO = new RBO( { width: this.canvas.width, height: this.canvas.height } );
 		this.gBuffer.unbind();
 
-		this.normalTexture = new Texture( { width: this.canvas.width, height: this.canvas.height } );
+		this.normalTexture = new Texture2D( { width: this.canvas.width, height: this.canvas.height } );
 		this.normalTexture.minFilter = NEAREST;
 		this.normalTexture.magFilter = NEAREST;
 
-		this.depthTexture = new Texture( { width: this.canvas.width, height: this.canvas.height } );
-		this.uvTexture = new Texture( { width: this.canvas.width, height: this.canvas.height } );
+		this.depthTexture = new Texture2D( { width: this.canvas.width, height: this.canvas.height } );
+		this.uvTexture = new Texture2D( { width: this.canvas.width, height: this.canvas.height } );
 
 		this.gBuffer.bind();
 		this.gBuffer.addAttachment( this.normalTexture, COLOR_ATTACHMENT0 + 1 );

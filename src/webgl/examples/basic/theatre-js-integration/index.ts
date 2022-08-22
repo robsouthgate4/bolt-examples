@@ -1,6 +1,6 @@
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Texture, Batch, Node, CameraPersp } from "@bolt-webgl/core";
+import Bolt, { Shader, Texture2D, Batch, Node, CameraPersp } from "@bolt-webgl/core";
 import state from "./state.json";
 
 import { vec3, vec4, } from "gl-matrix";
@@ -53,7 +53,7 @@ export default class extends Base {
     shaderBody: any;
     shaderEyes: any;
     gltf!: Node;
-    matcapTexture!: Texture;
+    matcapTexture!: Texture2D;
     floor!: Floor;
 
     constructor() {
@@ -126,7 +126,7 @@ export default class extends Base {
     	const gltfLoader = new GLTFLoader( this.bolt );
     	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/phantom/PhantomLogoPose2.gltf" );
 
-    	this.matcapTexture = new Texture( {
+    	this.matcapTexture = new Texture2D( {
     		imagePath: "/static/textures/matcap/matcap3.jpeg"
     	} );
 

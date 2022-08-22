@@ -2,7 +2,7 @@ import Base from "@webgl/Base";
 import Bolt, { Shader, Node, Batch, TextureCube, CameraPersp, Camera, FBOCube, RBO, Mesh, LINEAR, FRONT } from "@bolt-webgl/core";
 
 
-import { mat4, quat, vec3, vec4, } from "gl-matrix";
+import { quat, vec3 } from "gl-matrix";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
 import Floor from "@/webgl/modules/batches/floor";
 import reflectionVertex from "./shaders/reflection/reflection.vert";

@@ -13,7 +13,7 @@ in vec3 WorldPosition;
 
 uniform vec4 baseColor;
 uniform sampler2D baseTexture;
-uniform sampler2D normalTexture;
+uniform sampler2D normalTexture2D;
 uniform vec2 normalUVScale;
 uniform float normalHeight;
 uniform mat4 view;

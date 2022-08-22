@@ -2,20 +2,15 @@
 
 precision highp float;
 
-uniform float time;
 uniform sampler2D mapVolume;
-uniform vec3 viewPosition;
+uniform float time;
 
 out vec4 FragColor;
-
-in vec3 Normal;
-in vec3 FragPosition;
-in vec3 HitPos;
 in vec3 Ro;
 in vec3 Rd;
 
-#define MAX_STEPS 64
-#define MAX_DIST 20.
+#define MAX_STEPS 62
+#define MAX_DIST 10.
 #define SURFACE_DIST 1e-3
 
 #define BOX_POS vec3( 0., 0., 0. )
@@ -56,6 +51,22 @@ vec4 sampleAs3DTexture(
   return slice0Color;
 }
 
+uint wang_hash(uint seed)
+{
+    seed = (seed ^ 61u) ^ (seed >> 16u);
+    seed *= 9u;
+    seed = seed ^ (seed >> 4u);
+    seed *= 0x27d4eb2du;
+    seed = seed ^ (seed >> 15u);
+    return seed;
+}
+
+float randomFloat(inout uint seed)
+{
+    return float(wang_hash(seed)) / 4294967296.;
+}
+
+
 void main()
 {
 
@@ -68,13 +79,17 @@ void main()
   float density = 0.0;
   float transmision = 0.0;
 
+  uint seed = uint( gl_FragCoord.x ) * uint( 1973 ) + uint( gl_FragCoord.y ) * uint( 9277 ) + uint( time ) * uint( 26699 );
+  float randNum = randomFloat( seed ) * 2.0 - 1.0;
+
+
   for ( int i = 0; i < MAX_STEPS; i++ )
   {
     rayOrigin += ( rayDirection * stepSize );
 
     float sampledDensity = sampleAs3DTexture( mapVolume, clamp( rayOrigin + vec3( 0.5 ), 0.0, 1.0 ), 64., 8., 8. ).r;
 
-    if( sampledDensity > MAX_DIST )
+    if( density > MAX_DIST )
     {
       break;
     }

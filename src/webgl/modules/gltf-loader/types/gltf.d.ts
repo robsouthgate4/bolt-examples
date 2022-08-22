@@ -684,7 +684,7 @@ export interface GlTf {
   /**
    * An array of textures.
    */
-  'textures'?: Texture[];
+  'textures'?: Texture2D[];
   'extensions'?: any;
   'extras'?: any;
   [k: string]: any;

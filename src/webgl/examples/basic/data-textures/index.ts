@@ -1,7 +1,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Mesh, Batch, Node, CameraPersp, Texture, NEAREST } from "@bolt-webgl/core";
+import Bolt, { Shader, Mesh, Batch, CameraPersp, Texture2D, NEAREST } from "@bolt-webgl/core";
 
 import { vec3, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
@@ -19,7 +19,7 @@ export default class extends Base {
     arcball: CameraArcball;
     textureBatch!: Batch;
     planeBatch: any;
-    dataTexture!: Texture;
+    dataTexture!: Texture2D;
 
     constructor() {
 
@@ -89,7 +89,7 @@ export default class extends Base {
 
     async init() {
 
-    	this.dataTexture = new Texture( {
+    	this.dataTexture = new Texture2D( {
     		minFilter: NEAREST,
     		magFilter: NEAREST,
     	} );
