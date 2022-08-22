@@ -37,7 +37,6 @@ export default class extends Base {
 
     	this.gl = this.bolt.getContext();
 
-
     	this.camera = new CameraPersp( {
     		aspect: this.canvas.width / this.canvas.height,
     		fov: 45,

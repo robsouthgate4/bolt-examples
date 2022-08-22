@@ -199,7 +199,7 @@ export default class extends Base {
 		const vaoDraw2 = new VAO();
 		vaoDraw2.bind();
 		vaoDraw2.linkAttrib( meshPositionVBO, this.particleShaderLocations.aPosition, 3, FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
-		vaoDraw1.linkAttrib( meshPositionVBO, this.particleShaderLocations.aNormal, 3, FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
+		vaoDraw1.linkAttrib( meshNormalVBO, this.particleShaderLocations.aNormal, 3, FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
 		vaoDraw2.linkAttrib( offset2VBO, this.particleShaderLocations.aOffset, 3, FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
 		vaoDraw2.linkAttrib( meshUVVBO, this.particleShaderLocations.aUV, 2, FLOAT, 2 * Float32Array.BYTES_PER_ELEMENT, 0 );
 		this.gl.vertexAttribDivisor( 1, 1 );
@@ -259,13 +259,14 @@ export default class extends Base {
 			this.gl.enable( this.gl.RASTERIZER_DISCARD );
 
 			this.gl.bindTransformFeedback( this.gl.TRANSFORM_FEEDBACK, this.current.tf );
+
 			this.gl.beginTransformFeedback( POINTS );
-
 			this.gl.drawArrays( POINTS, 0, this.instanceCount );
-			this.gl.disable( this.gl.RASTERIZER_DISCARD );
-
 			this.gl.endTransformFeedback();
+
+			this.gl.disable( this.gl.RASTERIZER_DISCARD );
 			this.gl.bindTransformFeedback( this.gl.TRANSFORM_FEEDBACK, null );
+
 
 
 		}

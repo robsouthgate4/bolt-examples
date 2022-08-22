@@ -148,7 +148,7 @@ void main() {
     vec3 pos = oldPosition;
     vec3 vel = oldVelocity;
 
-    vel += curlNoise( ( pos * 0.1 ) + (time * 0.001) ) * 0.02;
+    vel += curlNoise( ( pos * 0.1 ) + (time * 0.0001) ) * 0.02;
     vel *= 0.87;
     pos += vel;
 

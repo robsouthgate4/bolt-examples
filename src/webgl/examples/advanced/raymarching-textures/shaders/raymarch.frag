@@ -9,7 +9,7 @@ out vec4 FragColor;
 in vec3 Ro;
 in vec3 Rd;
 
-#define MAX_STEPS 62
+#define MAX_STEPS 64
 #define MAX_DIST 10.
 #define SURFACE_DIST 1e-3
 
@@ -71,7 +71,7 @@ void main()
 {
 
   float stepSize = 0.02;
-  float densityScale = 0.1;
+  float densityScale = 0.05;
 
   vec3 rayOrigin = Ro;
   vec3 rayDirection = normalize( Rd );

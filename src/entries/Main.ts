@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/basic/gpu-picking";
+import Example from "@/webgl/examples/basic/pixel-art";
 
 export default class Main {
 
