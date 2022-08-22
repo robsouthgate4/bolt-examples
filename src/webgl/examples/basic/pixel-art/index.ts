@@ -84,8 +84,8 @@ export default class extends Base {
     	this.pixelate = new PixelatePass( this.bolt, {
     		width: this.width,
     		height: this.height,
-    		xPixels: 240,
-    		yPixels: 240
+    		xPixels: 180,
+    		yPixels: 180
     	} ).setEnabled( true );
 
     	this.fxaa = new FXAAPass( this.bolt, {

@@ -74,7 +74,7 @@ export default class extends Base {
 		const geometry = new Cube( { widthSegments: 1, heightSegments: 1, depthSegments: 1 } );
 
 		const volumeTexture = new Texture2D( {
-			imagePath: "/static/textures/volumes/volume-cloud.png",
+			imagePath: "/static/textures/volumes/volume-rubber.png",
 			wrapS: CLAMP_TO_EDGE,
 			wrapT: CLAMP_TO_EDGE,
 			minFilter: LINEAR,

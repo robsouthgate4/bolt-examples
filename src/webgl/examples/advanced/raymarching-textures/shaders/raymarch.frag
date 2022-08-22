@@ -71,7 +71,7 @@ void main()
 {
 
   float stepSize = 0.02;
-  float densityScale = 0.05;
+  float densityScale = 0.15;
 
   vec3 rayOrigin = Ro;
   vec3 rayDirection = normalize( Rd );
