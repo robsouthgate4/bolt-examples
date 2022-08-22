@@ -26,7 +26,7 @@ void main()
     vec3 lightDirection = normalize( lightPosition - FragPosition );
 
     // get diffuse lighting
-    float diff = max( dot( Normal, lightDirection ), 0.0 );
+    float diff = smoothstep( 0.0, 0.5, max( dot( Normal, lightDirection ), 0.0 ) );
 
     float diffuse = diff * lightColor.r;
 
