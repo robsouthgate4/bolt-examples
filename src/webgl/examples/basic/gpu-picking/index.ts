@@ -52,7 +52,7 @@ export default class extends Base {
 		this.canvas.height = this.height;
 
 		this.bolt = Bolt.getInstance();
-		this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
+		this.bolt.init( this.canvas, { antialias: true, dpi: 1, powerPreference: "high-performance" } );
 
 		this.gl = this.bolt.getContext();
 
