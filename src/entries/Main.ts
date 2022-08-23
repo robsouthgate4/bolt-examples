@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/advanced/raymarching-textures-procedural";
+import Example from "@/webgl/examples/advanced/raymarching-textures";
 
 export default class Main {
 

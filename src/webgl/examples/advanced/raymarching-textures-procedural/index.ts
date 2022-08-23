@@ -1,7 +1,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Transform, Mesh, CameraPersp, SRC_ALPHA, ONE_MINUS_SRC_ALPHA, Texture3D, RED, R8, UNSIGNED_BYTE, LINEAR_MIPMAP_LINEAR, LINEAR, REPEAT } from "@bolt-webgl/core";
+import Bolt, { Shader, Transform, Mesh, CameraPersp, SRC_ALPHA, ONE_MINUS_SRC_ALPHA, Texture3D, RED, R8, UNSIGNED_BYTE, LINEAR_MIPMAP_LINEAR, LINEAR, REPEAT, BACK, FRONT } from "@bolt-webgl/core";
 import vertexShader from "./shaders/raymarch.vert";
 import fragmentShader from "./shaders/raymarch.frag";
 
@@ -93,6 +93,7 @@ export default class extends Base {
 		} );
 
 		const data = new Uint8Array( SIZE * SIZE * SIZE );
+
 		const noise3D = createNoise3D();
 
 		let x = 0;
@@ -112,9 +113,6 @@ export default class extends Base {
 			}
 
 		}
-
-		console.log( data.length );
-		console.log( SIZE * SIZE * SIZE );
 
 		volumeTexture.setFromData( data, SIZE, SIZE, SIZE );
 
@@ -152,6 +150,10 @@ export default class extends Base {
 	update( elapsed: number, delta: number ) {
 
 		if ( ! this.assetsLoaded ) return;
+
+		this.bolt.enableCullFace();
+		this.bolt.cullFace( FRONT );
+
 
 		this.post.begin();
 		this.arcball.update();

@@ -1,7 +1,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Transform, Mesh, Texture2D, CameraPersp, CLAMP_TO_EDGE, LINEAR, SRC_ALPHA, ONE_MINUS_SRC_ALPHA } from "@bolt-webgl/core";
+import Bolt, { Shader, Transform, Mesh, Texture2D, CameraPersp, CLAMP_TO_EDGE, LINEAR, SRC_ALPHA, ONE_MINUS_SRC_ALPHA, FRONT, BACK } from "@bolt-webgl/core";
 import vertexShader from "./shaders/raymarch.vert";
 import fragmentShader from "./shaders/raymarch.frag";
 
@@ -122,6 +122,9 @@ export default class extends Base {
 
 		this.post.begin();
 		this.arcball.update();
+
+		this.bolt.enableCullFace();
+		this.bolt.cullFace( BACK );
 
 		const bgColor = 211 / 255;
 
