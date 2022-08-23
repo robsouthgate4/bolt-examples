@@ -7,6 +7,10 @@ import CameraArcball from "@/webgl/modules/CameraArcball";
 import Floor from "@/webgl/modules/batches/floor";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
 
+/**
+ * TODO: INCOMPLETE
+ */
+
 export default class extends Base {
 
 	canvas: HTMLCanvasElement;

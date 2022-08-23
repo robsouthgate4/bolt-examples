@@ -87,43 +87,6 @@
 		%>
 
 		<!-- twitter tags end -->
-
-		<!-- ga analytics starts -->
-
-		<script
-			async
-			src="https://www.googletagmanager.com/gtag/js?id=<%= analytics.propertyId %>"
-		></script>
-
-		<script
-			type="text/javascript"
-		>
-			window.dataLayer =
-				window.dataLayer ||
-				[];
-			function gtag() {
-				dataLayer.push(
-					arguments
-				);
-			}
-			gtag(
-				'js',
-				new Date()
-			);
-			gtag(
-				'config',
-				'<%= analytics.propertyId %>'
-			);
-			var disabled =
-				'<%= analytics.disabled  %>' ===
-				'true';
-			window[
-				'ga-disable-<%= analytics.propertyId %>'
-			] =
-				disabled;
-		</script>
-
-		<!-- ga analytics ends-->
 	</head>
 
 	<body>
