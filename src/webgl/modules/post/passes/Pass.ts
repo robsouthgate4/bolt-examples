@@ -1,15 +1,18 @@
 
-import Bolt, { FBO, Mesh } from "@bolt-webgl/core";
+import Bolt, { FBO, Mesh, Texture2D } from "@bolt-webgl/core";
 export abstract class Pass {
 
     private _fullScreenTriangle!: Mesh;
     private _renderToScreen = false;
-    _enabled = true;
+    private _enabled = true;
+
+    protected _texture: Texture2D | undefined;
 
     constructor( bolt: Bolt, {
     	width = 256,
     	height = 256,
-    } ) {
+    	texture
+    } : { width: number, height: number, texture?: Texture2D } ) {
 
     	const triangleVertices = [
     		- 1, - 1, 0, - 1, 4, 0, 4, - 1, 0
@@ -23,6 +26,8 @@ export abstract class Pass {
     		positions: triangleVertices,
     		indices: triangleIndices
     	} );
+
+    	this._texture = texture || undefined;
 
     }
 
@@ -70,6 +75,12 @@ export abstract class Pass {
 
     }
 
-    abstract draw( readFBO: FBO, writeFbo: FBO, renderToScreen?: boolean ): void
+    public get texture(): Texture2D | undefined {
+
+    	return this._texture;
+
+    }
+
+    abstract draw( readFBO: FBO, writeFbo: FBO, texture?: Texture2D, renderToScreen?: boolean ): void
 
 }

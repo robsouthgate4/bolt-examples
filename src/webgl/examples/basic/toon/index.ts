@@ -10,7 +10,7 @@ import compositionVertex from "./shaders/composition/composition.vert";
 import compositionFragment from "./shaders/composition/composition.frag";
 
 import { vec2, vec3, vec4, } from "gl-matrix";
-import CameraArcball from "@webgl/modules/CameraArcball";
+import CameraFPS from "@webgl/modules/CameraFPS";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
 import Post from "@/webgl/modules/post";
 import Axis from "@/webgl/modules/batches/axis";
@@ -41,7 +41,7 @@ export default class extends Base {
 	compShader: Shader;
 	depthTexture: Texture2D;
 	uvTexture: Texture2D;
-	arcball: CameraArcball;
+	fpsCamera: CameraFPS;
 
 	constructor() {
 
@@ -63,10 +63,10 @@ export default class extends Base {
 			target: vec3.fromValues( 0, 0.5, 0 ),
 		} );
 
-		this.arcball = new CameraArcball( this.camera, 4, 0.08 );
+		this.fpsCamera = new CameraFPS( this.camera );
 
 		this.bolt = Bolt.getInstance();
-		this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
+		this.bolt.init( this.canvas, { antialias: true, dpi: 2, powerPreference: "high-performance" } );
 		this.bolt.setCamera( this.camera );
 
 		this.gl = this.bolt.getContext();
@@ -83,9 +83,6 @@ export default class extends Base {
 		this.gBuffer.unbind();
 
 		this.normalTexture = new Texture2D( { width: this.canvas.width, height: this.canvas.height } );
-		this.normalTexture.minFilter = NEAREST;
-		this.normalTexture.magFilter = NEAREST;
-
 		this.depthTexture = new Texture2D( { width: this.canvas.width, height: this.canvas.height } );
 		this.uvTexture = new Texture2D( { width: this.canvas.width, height: this.canvas.height } );
 
@@ -115,7 +112,7 @@ export default class extends Base {
 		} ).setEnabled( true );
 
 
-		this.post.add( this.comp );
+		this.post.add( this.comp, false );
 		this.post.add( this.fxaa, true );
 
 		this.init();
@@ -209,7 +206,7 @@ export default class extends Base {
 
 		if ( ! this.assetsLoaded ) return;
 
-		this.arcball.update();
+		this.fpsCamera.update( delta * 0.1 );
 
 		this.bolt.enableDepth();
 		this.bolt.enableCullFace();

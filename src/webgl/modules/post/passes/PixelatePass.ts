@@ -2,7 +2,8 @@ import { Pass } from "./Pass";
 
 import vertexShader from "./shaders/pixelate/pixelate.vert";
 import fragmentShader from "./shaders/pixelate/pixelate.frag";
-import Bolt, { Shader, FBO } from "@bolt-webgl/core";
+import Bolt, { Shader, FBO, Texture2D } from "@bolt-webgl/core";
+
 
 export default class PixelatePass extends Pass {
 
@@ -48,7 +49,7 @@ export default class PixelatePass extends Pass {
 
     }
 
-    draw( readFBO: FBO, writeFbo: FBO, renderToScreen?: boolean ) {
+    draw( readFBO: FBO, writeFbo: FBO, texture?: Texture2D, renderToScreen?: boolean ) {
 
     	if ( ! renderToScreen ) {
 
@@ -56,7 +57,7 @@ export default class PixelatePass extends Pass {
 
     	}
 
-    	this.shader.setTexture( "map", readFBO.targetTexture );
+    	this.shader.setTexture( "map", texture ? texture : readFBO.targetTexture );
 
     	this.fullScreenTriangle.draw( this.shader );
 

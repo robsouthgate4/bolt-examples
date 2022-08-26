@@ -78,9 +78,10 @@ export default class Post {
     	this.bolt.disableCullFace();
 
     	const enabledPasses = this._passes.filter( pass => pass.enabled );
+
     	enabledPasses.forEach( ( pass: Pass ) => {
 
-    		pass.draw( this._readFbo, this._writeFbo, pass.renderToScreen );
+    		pass.draw( this._readFbo, this._writeFbo, pass.texture, pass.renderToScreen );
 
     		this.swap();
 

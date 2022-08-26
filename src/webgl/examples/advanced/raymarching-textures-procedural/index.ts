@@ -25,7 +25,7 @@ export default class extends Base {
 	cubeBatch!: Batch;
 	bolt: Bolt;
 	post: Post;
-	arcball: CameraArcball;
+	arcball!: CameraArcball;
 
 	constructor() {
 
@@ -49,11 +49,9 @@ export default class extends Base {
 			fov: 45,
 			near: 0.1,
 			far: 1000,
-			position: vec3.fromValues( 2, 0, 2 ),
+			position: vec3.fromValues( 2, 2, 2 ),
 			target: vec3.fromValues( 0, 0, 0 ),
 		} );
-
-		this.arcball = new CameraArcball( this.camera, 4, 0.08 );
 
 		this.post = new Post( this.bolt );
 
@@ -151,14 +149,15 @@ export default class extends Base {
 
 		if ( ! this.assetsLoaded ) return;
 
-		this.bolt.enableCullFace();
-		this.bolt.cullFace( FRONT );
-
-
 		this.post.begin();
-		this.arcball.update();
 
-		const bgColor = 211 / 255;
+		this.camera.transform.positionX = 3 * Math.sin( elapsed * 0.5 );
+		this.camera.transform.positionZ = 3 * Math.cos( elapsed * 0.5 );
+		this.camera.lookAt( vec3.fromValues( 0, 0, 0 ) );
+
+		this.camera.update();
+
+		const bgColor = 0 / 255;
 
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.clear( bgColor, bgColor, bgColor, 1 );

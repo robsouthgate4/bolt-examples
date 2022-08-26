@@ -2,7 +2,7 @@ import { Pass } from "./Pass";
 
 import vertexShader from "./shaders/dof/dof.vert";
 import fragmentShader from "./shaders/dof/dof.frag";
-import Bolt, { Shader, FBO } from "@bolt-webgl/core";
+import Bolt, { Shader, FBO, Texture2D } from "@bolt-webgl/core";
 export default class DOFPass extends Pass {
 
     shader!: Shader;
@@ -36,7 +36,7 @@ export default class DOFPass extends Pass {
 
     }
 
-    draw( readFBO: FBO, writeFbo: FBO, renderToScreen?: boolean ) {
+    draw( readFBO: FBO, writeFbo: FBO, texture?: Texture2D, renderToScreen?: boolean ) {
 
     	if ( ! renderToScreen ) {
 
@@ -45,7 +45,7 @@ export default class DOFPass extends Pass {
     	}
 
     	this.shader.activate();
-    	this.shader.setTexture( "map", readFBO.targetTexture );
+    	this.shader.setTexture( "map", texture ? texture : readFBO.targetTexture );
 
     	this.fullScreenTriangle.draw( this.shader );
 

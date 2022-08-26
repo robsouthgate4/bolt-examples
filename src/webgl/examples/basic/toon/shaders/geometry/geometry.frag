@@ -51,13 +51,13 @@ void main() {
     float diffuse = step( 0.5, max( dot( Normal, lightDirection ), 0.0 ) );
 
     scene  = vec4( mix( ambient, ambient * 1.1, diffuse), 1.0 );
-    normal = vec4( NormalEyeSpace, 1.0 );
+    normal = vec4( norm, 0.0 );
     uv     = vec4( Uv, 0.0, 0.0 );
 
 
     float depthOffset = 0.0;
     float linearDepth = 1.0 / ( cameraPlanes.y - cameraPlanes.x );
-    float linear      = linearDepth * length( Position.xyz );
+    float linear      = linearDepth * length( WorldPosition.xyz );
     float d           = convRGBA( convCoord( linear, depthOffset ) ).r;
 
     depth = vec4( vec3( d ), 1.0 );

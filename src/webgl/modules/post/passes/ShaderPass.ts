@@ -1,6 +1,6 @@
 
 import { Pass } from "./Pass";
-import Bolt, { Shader, FBO } from "@bolt-webgl/core";
+import Bolt, { Shader, FBO, Texture2D } from "@bolt-webgl/core";
 
 interface ShaderPassParams {
     width: number;
@@ -27,7 +27,7 @@ export default class ShaderPass extends Pass {
 
     }
 
-    draw( readFBO: FBO, writeFbo: FBO, renderToScreen?: boolean ) {
+    draw( readFBO: FBO, writeFbo: FBO, texture?: Texture2D, renderToScreen?: boolean ) {
 
     	if ( ! renderToScreen ) {
 
@@ -36,7 +36,7 @@ export default class ShaderPass extends Pass {
     	}
 
     	this.shader.activate();
-    	this.shader.setTexture( "map", readFBO.targetTexture );
+    	this.shader.setTexture( "map", texture ? texture : readFBO.targetTexture );
 
     	this.fullScreenTriangle.draw( this.shader );
 

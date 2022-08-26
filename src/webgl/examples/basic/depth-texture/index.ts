@@ -1,18 +1,19 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Batch, Transform, Node, CameraPersp } from "@bolt-webgl/core";
+import Bolt, { Shader, Batch, Transform, Node, CameraPersp, FBO, Mesh, RBO, FRONT, NONE, BACK } from "@bolt-webgl/core";
 
 import colorVertex from "./shaders/color/color.vert";
 import colorFragment from "./shaders/color/color.frag";
 
-import { vec3, vec4, } from "gl-matrix";
-import CameraArcball from "@webgl/modules/CameraArcball";
+import compositionVertex from "./shaders/composition/composition.vert";
+import compositionFragment from "./shaders/composition/composition.frag";
+
+import { vec2, vec3, vec4, } from "gl-matrix";
 import Post from "@/webgl/modules/post";
-import FXAAPass from "@/webgl/modules/post/passes/FXAAPass";
-import RGBSplitPass from "@/webgl/modules/post/passes/RGBSplitPass";
-import PixelatePass from "@/webgl/modules/post/passes/PixelatePass";
-import RenderPass from "@/webgl/modules/post/passes/RenderPass";
 import Floor from "@/webgl/modules/batches/floor";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
+import CameraFPS from "@/webgl/modules/CameraFPS";
+import Cube from "@/webgl/modules/primitives/Cube";
+
 export default class extends Base {
 
     canvas: HTMLCanvasElement;
@@ -23,19 +24,21 @@ export default class extends Base {
     sphereBatch!: Batch;
     planeBatch!: Batch;
     post: Post;
-    fxaa!: FXAAPass;
-    rbgSplit!: RGBSplitPass;
-    renderPass!: RenderPass;
-    pixelate!: PixelatePass;
     bolt = Bolt.getInstance();
     gl: WebGL2RenderingContext;
     root!: Node;
     floorBatch!: Floor;
-    arcball: CameraArcball;
+    cameraFPS: CameraFPS;
     shaderBody: Shader;
     gltf!: Node;
+	depthFBO!: FBO;
+	fullScreenTriangle!: Mesh;
+	compositionShader!: Shader;
+	depthRBO!: RBO;
+	screenBatch!: Batch;
+	cubeBatch!: Batch;
 
-    constructor() {
+	constructor() {
 
     	super();
 
@@ -48,14 +51,14 @@ export default class extends Base {
 
     	this.camera = new CameraPersp( {
     		aspect: this.canvas.width / this.canvas.height,
-    		fov: 45,
-    		near: 0.1,
-    		far: 1000,
-    		position: vec3.fromValues( 2, 7, 10 ),
+    		fov: 70,
+    		near: 0.01,
+    		far: 20,
+    		position: vec3.fromValues( 0, 3, 6 ),
     		target: vec3.fromValues( 0, 3, 0 ),
     	} );
 
-    	this.arcball = new CameraArcball( this.camera, 4, 0.08 );
+    	this.cameraFPS = new CameraFPS( this.camera );
 
     	this.bolt.init( this.canvas, { antialias: false, dpi: 2 } );
     	this.bolt.setCamera( this.camera );
@@ -63,6 +66,10 @@ export default class extends Base {
     	this.gl = this.bolt.getContext();
 
     	this.post = new Post( this.bolt );
+
+		this.compositionShader = new Shader( compositionVertex, compositionFragment );
+		this.compositionShader.activate();
+		this.compositionShader.setVector2( "cameraPlanes", vec2.fromValues( this.camera.near, this.camera.far ) );
 
     	this.shaderEyes = new Shader( colorVertex, colorFragment );
     	this.shaderBody = new Shader( colorVertex, colorFragment );
@@ -73,34 +80,31 @@ export default class extends Base {
     	this.init();
 
 
-    }
+	}
 
-    async init() {
+	async init() {
+
+		this.depthFBO = new FBO( { width: this.canvas.width, height: this.canvas.height, depth: true } );
+
+		const triangleVertices = [
+    		- 1, - 1, 0, - 1, 4, 0, 4, - 1, 0
+    	];
+
+    	const triangleIndices = [
+    		2, 1, 0
+    	];
+
+    	this.fullScreenTriangle = new Mesh( {
+    		positions: triangleVertices,
+    		indices: triangleIndices
+    	} );
+
+		this.screenBatch = new Batch( this.fullScreenTriangle, this.compositionShader );
 
     	const gltfLoader = new GLTFLoader( this.bolt );
     	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/phantom/PhantomLogoPose2.gltf" );
+
     	this.assetsLoaded = true;
-
-    	this.rbgSplit = new RGBSplitPass( this.bolt, {
-    		width: this.width,
-    		height: this.height
-    	} ).setEnabled( true );
-
-    	this.pixelate = new PixelatePass( this.bolt, {
-    		width: this.width,
-    		height: this.height,
-    		xPixels: 80,
-    		yPixels: 80
-    	} ).setEnabled( false );
-
-    	this.fxaa = new FXAAPass( this.bolt, {
-    		width: this.width,
-    		height: this.height
-    	} ).setEnabled( true );
-
-    	this.post.add( this.rbgSplit );
-    	this.post.add( this.pixelate );
-    	this.post.add( this.fxaa, true );
 
     	this.root = new Node();
     	this.floorBatch = new Floor();
@@ -117,7 +121,7 @@ export default class extends Base {
 
     				node.shader = this.shaderBody;
     				node.shader.activate();
-    				node.shader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
+    				node.shader.setVector4( "baseColor", vec4.fromValues( 0, 1, 1, 1 ) );
 
     			}
 
@@ -136,44 +140,49 @@ export default class extends Base {
 
     	this.resize();
 
-    }
+	}
 
-    resize() {
+	resize() {
 
     	this.bolt.resizeFullScreen();
     	this.camera.updateProjection( this.gl.canvas.width / this.gl.canvas.height );
-    	this.post.resize( this.gl.canvas.width, this.gl.canvas.height );
+    	this.depthFBO.resize( this.gl.canvas.width, this.gl.canvas.height );
 
-    }
+	}
 
-    earlyUpdate( elapsed: number, delta: number ) {
+	earlyUpdate( elapsed: number, delta: number ) {
 
     	return;
 
-    }
+	}
 
-    update( elapsed: number, delta: number ) {
+	update( elapsed: number, delta: number ) {
 
     	if ( ! this.assetsLoaded ) return;
 
-    	this.arcball.update();
+    	this.cameraFPS.update( delta );
 
-    	this.post.begin();
+		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 
-    	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+		this.depthFBO.bind();
+		this.bolt.enableDepth();
     	this.bolt.clear( 0.9, 0.9, 0.9, 1 );
-
     	this.bolt.draw( this.root );
+		this.depthFBO.unbind();
 
-    	this.post.end();
+		this.compositionShader.activate();
+		this.compositionShader.setTexture( "map", this.depthFBO.targetTexture );
+		this.compositionShader.setTexture( "mapDepth", this.depthFBO.depthTexture );
+
+		this.fullScreenTriangle.draw( this.compositionShader );
 
 
-    }
+	}
 
-    lateUpdate( elapsed: number, delta: number ): void {
+	lateUpdate( elapsed: number, delta: number ): void {
 
     	return;
 
-    }
+	}
 
 }

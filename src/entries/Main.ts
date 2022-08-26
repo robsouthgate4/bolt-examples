@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/advanced/raymarching-textures";
+import Example from "@/webgl/examples/basic/depth-texture";
 
 export default class Main {
 

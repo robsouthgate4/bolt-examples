@@ -56,10 +56,6 @@ void main() {
     vec3 depthColor = texture( depth, Uv ).rgb;
 
     float sN = 1.0 - length( sobelNormal.rgb );
-    sN = pow( smoothstep( 0.0, 1.0, sN ), 2.0 );
-
-    float sD = 1.0 - length( sobelDepth.rgb );
-    sD = pow( smoothstep( 0.0, 1.0, sD ), 1.0 );
 
     float c = sN;
 
