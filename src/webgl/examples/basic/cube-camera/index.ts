@@ -97,7 +97,8 @@ export default class extends Base {
 		this.cameraDebugGeo = cameraDebugBatch.mesh.buffers;
 
 		const environmentTexture = new TextureCube( {
-			imagePath: "/static/textures/cubeMaps/sky/", files: {
+			imagePath: "/static/textures/cubeMaps/sky/",
+			files: {
 				px: "px.png",
 				nx: "nx.png",
 				py: "py.png",
