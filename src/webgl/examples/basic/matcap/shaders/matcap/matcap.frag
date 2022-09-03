@@ -13,16 +13,15 @@ in vec3 Eye;
 uniform vec4 baseColor;
 uniform sampler2D baseTexture;
 
-void main()
-{
+void main() {
 
-    vec3 reflected = reflect( Eye, normalize( Normal ) );
+    vec3 reflected = reflect(Eye, normalize(Normal));
 
-    float m = 2. * sqrt( pow( reflected.x, 2. ) + pow( reflected.y, 2. ) + pow( reflected.z + 1., 2. ) );
+    float m = 2. * sqrt(pow(reflected.x, 2.) + pow(reflected.y, 2.) + pow(reflected.z + 1., 2.));
     vec2 vN = reflected.xy / m + .5;
 
-    vec4 color = texture( baseTexture, vN );
+    vec4 color = texture(baseTexture, vN);
 
-    FragColor = vec4( color.rgb, 1.0 );
+    FragColor = vec4(color.rgb, 1.0);
 
 }

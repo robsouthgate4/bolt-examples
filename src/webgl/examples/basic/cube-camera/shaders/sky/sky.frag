@@ -15,11 +15,10 @@ in vec3 Position;
 
 uniform vec4 baseColor;
 
-void main()
-{
+void main() {
 
-    vec3 color = texture( mapEnvironment, Position ).rgb;
+    vec3 color = texture(mapEnvironment, Position).rgb;
 
-    FragColor = vec4( color, 1.0 );
+    FragColor = vec4(color, 1.0);
 
 }

@@ -15,15 +15,14 @@ in vec3 Position;
 
 uniform vec4 baseColor;
 
-void main()
-{
+void main() {
 
-    vec3 I = normalize( Position - cameraPosition );
+    vec3 I = normalize(Position - cameraPosition);
 
-    vec3 reflected = reflect( I, normalize( Normal ) );
+    vec3 reflected = reflect(I, normalize(Normal));
 
-    vec3 color = texture( mapReflection, reflected ).rgb;
+    vec3 color = texture(mapReflection, reflected).rgb;
 
-    FragColor = vec4( color, 1.0 );
+    FragColor = vec4(color, 1.0);
 
 }

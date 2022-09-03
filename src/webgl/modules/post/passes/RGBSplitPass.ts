@@ -6,37 +6,37 @@ import fragmentShader from "./shaders/rgbSplit/rgbSplit.frag";
 
 export default class RGBSplitPass extends Pass {
 
-    shader!: Shader;
+	shader!: Shader;
 
-    constructor( bolt: Bolt, {
-    	width = 256,
-    	height = 256
-    } ) {
+	constructor( bolt: Bolt, {
+		width = 256,
+		height = 256
+	} ) {
 
-    	super( bolt, {
-    		width,
-    		height
-    	} );
+		super( bolt, {
+			width,
+			height
+		} );
 
-    	this.shader = new Shader( vertexShader, fragmentShader );
+		this.shader = new Shader( vertexShader, fragmentShader );
 
-    }
+	}
 
-    draw( readFBO: FBO, writeFbo: FBO, texture?: Texture2D, renderToScreen?: boolean ) {
+	draw( readFBO: FBO, writeFbo: FBO, texture?: Texture2D, renderToScreen?: boolean ) {
 
-    	if ( ! renderToScreen ) {
+		if ( ! renderToScreen ) {
 
-    		writeFbo.bind();
+			writeFbo.bind();
 
-    	}
+		}
 
-    	this.shader.setTexture( "map", texture ? texture : readFBO.targetTexture );
+		this.shader.setTexture( "map", texture ? texture : readFBO.targetTexture );
 
-    	this.fullScreenTriangle.draw( this.shader );
+		this.fullScreenTriangle.draw( this.shader );
 
-    	readFBO.unbind();
-    	writeFbo.unbind();
+		readFBO.unbind();
+		writeFbo.unbind();
 
-    }
+	}
 
 }

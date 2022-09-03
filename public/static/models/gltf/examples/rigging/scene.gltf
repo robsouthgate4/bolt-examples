@@ -1,183 +1,183 @@
 {
-    "asset" : {
-        "generator" : "Khronos glTF Blender I/O v1.8.19",
-        "version" : "2.0"
+    "asset": {
+        "generator": "Khronos glTF Blender I/O v1.8.19",
+        "version": "2.0"
     },
-    "scene" : 0,
-    "scenes" : [
+    "scene": 0,
+    "scenes": [
         {
-            "name" : "Scene",
-            "nodes" : [
+            "name": "Scene",
+            "nodes": [
                 14
             ]
         }
     ],
-    "nodes" : [
+    "nodes": [
         {
-            "name" : "LowerArm.l",
-            "rotation" : [
+            "name": "LowerArm.l",
+            "rotation": [
                 0.04649611562490463,
                 0.15989257395267487,
                 0.3217262029647827,
                 0.9320755004882812
             ],
-            "scale" : [
+            "scale": [
                 1.0000001192092896,
                 1,
                 1
             ],
-            "translation" : [
+            "translation": [
                 5.609242492710109e-08,
                 0.6067529916763306,
                 -1.8626310493985443e-09
             ]
         },
         {
-            "children" : [
+            "children": [
                 0
             ],
-            "name" : "UpperArm.l",
-            "rotation" : [
+            "name": "UpperArm.l",
+            "rotation": [
                 -0.0012397491373121738,
                 0.014830885455012321,
                 -0.3711952865123749,
                 0.9284355640411377
             ],
-            "scale" : [
+            "scale": [
                 1,
                 0.9999998807907104,
                 1
             ],
-            "translation" : [
+            "translation": [
                 7.993604083235233e-15,
                 0.864587664604187,
                 1.7763568394002505e-14
             ]
         },
         {
-            "children" : [
+            "children": [
                 1
             ],
-            "name" : "Shoulder.l",
-            "rotation" : [
+            "name": "Shoulder.l",
+            "rotation": [
                 1.0435818609266789e-07,
                 -4.580019208333397e-08,
                 0.8288776874542236,
                 0.5594298839569092
             ],
-            "scale" : [
+            "scale": [
                 0.9999998211860657,
                 0.9999999403953552,
                 1
             ],
-            "translation" : [
+            "translation": [
                 0,
                 1,
                 0
             ]
         },
         {
-            "name" : "LowerArm.r",
-            "rotation" : [
+            "name": "LowerArm.r",
+            "rotation": [
                 0.008454768918454647,
                 0.008737733587622643,
                 -0.29183581471443176,
                 0.9563911557197571
             ],
-            "translation" : [
+            "translation": [
                 -5.609242492710109e-08,
                 0.6067529916763306,
                 1.4050211528623437e-14
             ]
         },
         {
-            "children" : [
+            "children": [
                 3
             ],
-            "name" : "UpperArm.r",
-            "rotation" : [
+            "name": "UpperArm.r",
+            "rotation": [
                 0.0008135158568620682,
                 0.04335980862379074,
                 0.004581761546432972,
                 0.9990487694740295
             ],
-            "scale" : [
+            "scale": [
                 1.0000001192092896,
                 0.9999999403953552,
                 1
             ],
-            "translation" : [
+            "translation": [
                 -7.993604083235233e-15,
                 0.864587664604187,
                 1.7763568394002505e-14
             ]
         },
         {
-            "children" : [
+            "children": [
                 4
             ],
-            "name" : "Shoulder.r",
-            "rotation" : [
+            "name": "Shoulder.r",
+            "rotation": [
                 1.0435818609266789e-07,
                 4.580019208333397e-08,
                 -0.8288776874542236,
                 0.5594298839569092
             ],
-            "scale" : [
+            "scale": [
                 0.9999998211860657,
                 0.9999999403953552,
                 1
             ],
-            "translation" : [
+            "translation": [
                 0,
                 1,
                 0
             ]
         },
         {
-            "children" : [
+            "children": [
                 2,
                 5
             ],
-            "name" : "Spine"
+            "name": "Spine"
         },
         {
-            "name" : "LowerLeg.l",
-            "rotation" : [
+            "name": "LowerLeg.l",
+            "rotation": [
                 0.2497612088918686,
                 0.005380439106374979,
                 0.012399587780237198,
                 0.9682131409645081
             ],
-            "translation" : [
+            "translation": [
                 3.730349362740526e-14,
                 0.7681565880775452,
                 -1.0244553649840782e-08
             ]
         },
         {
-            "children" : [
+            "children": [
                 7
             ],
-            "name" : "UpperLeg.l",
-            "rotation" : [
+            "name": "UpperLeg.l",
+            "rotation": [
                 -0.5847417712211609,
                 -1.0008894690827219e-07,
                 -5.415983750367559e-08,
                 0.8112195134162903
             ],
-            "translation" : [
+            "translation": [
                 2.6645352591003757e-15,
                 0.4815634787082672,
                 -1.6431299070386422e-14
             ]
         },
         {
-            "children" : [
+            "children": [
                 8
             ],
-            "name" : "hip.l",
-            "rotation" : [
+            "name": "hip.l",
+            "rotation": [
                 -0.5718000531196594,
                 0.4159868061542511,
                 0.5717997550964355,
@@ -185,47 +185,47 @@
             ]
         },
         {
-            "name" : "LowerLeg.r",
-            "rotation" : [
+            "name": "LowerLeg.r",
+            "rotation": [
                 0.29105353355407715,
                 -0.006127352360635996,
                 0.014467122964560986,
                 0.9565777778625488
             ],
-            "scale" : [
+            "scale": [
                 0.9999999403953552,
                 1,
                 1
             ],
-            "translation" : [
+            "translation": [
                 -3.730349362740526e-14,
                 0.7681565880775452,
                 -1.0244553649840782e-08
             ]
         },
         {
-            "children" : [
+            "children": [
                 10
             ],
-            "name" : "UpperLeg.r",
-            "rotation" : [
+            "name": "UpperLeg.r",
+            "rotation": [
                 -0.5847417712211609,
                 1.0008894690827219e-07,
                 5.415983750367559e-08,
                 0.8112195134162903
             ],
-            "translation" : [
+            "translation": [
                 -2.6645352591003757e-15,
                 0.4815634787082672,
                 -1.6431299070386422e-14
             ]
         },
         {
-            "children" : [
+            "children": [
                 11
             ],
-            "name" : "hip.r",
-            "rotation" : [
+            "name": "hip.r",
+            "rotation": [
                 -0.5718000531196594,
                 -0.4159868061542511,
                 -0.5717997550964355,
@@ -233,68 +233,68 @@
             ]
         },
         {
-            "mesh" : 0,
-            "name" : "Character",
-            "skin" : 0
+            "mesh": 0,
+            "name": "Character",
+            "skin": 0
         },
         {
-            "children" : [
+            "children": [
                 13,
                 6,
                 9,
                 12
             ],
-            "name" : "Armature",
-            "scale" : [
+            "name": "Armature",
+            "scale": [
                 2.0270378589630127,
                 2.0270378589630127,
                 2.0270378589630127
             ],
-            "translation" : [
+            "translation": [
                 0,
                 3.4418389797210693,
                 0
             ]
         }
     ],
-    "materials" : [
+    "materials": [
         {
-            "doubleSided" : true,
-            "name" : "Material",
-            "pbrMetallicRoughness" : {
-                "baseColorFactor" : [
+            "doubleSided": true,
+            "name": "Material",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
                     0.800000011920929,
                     0.800000011920929,
                     0.800000011920929,
                     1
                 ],
-                "metallicFactor" : 0,
-                "roughnessFactor" : 0.4000000059604645
+                "metallicFactor": 0,
+                "roughnessFactor": 0.4000000059604645
             }
         }
     ],
-    "meshes" : [
+    "meshes": [
         {
-            "name" : "Cube.002",
-            "primitives" : [
+            "name": "Cube.002",
+            "primitives": [
                 {
-                    "attributes" : {
-                        "POSITION" : 0,
-                        "NORMAL" : 1,
-                        "TEXCOORD_0" : 2,
-                        "JOINTS_0" : 3,
-                        "WEIGHTS_0" : 4
+                    "attributes": {
+                        "POSITION": 0,
+                        "NORMAL": 1,
+                        "TEXCOORD_0": 2,
+                        "JOINTS_0": 3,
+                        "WEIGHTS_0": 4
                     },
-                    "indices" : 5,
-                    "material" : 0
+                    "indices": 5,
+                    "material": 0
                 }
             ]
         }
     ],
-    "skins" : [
+    "skins": [
         {
-            "inverseBindMatrices" : 6,
-            "joints" : [
+            "inverseBindMatrices": 6,
+            "joints": [
                 6,
                 2,
                 1,
@@ -309,104 +309,104 @@
                 11,
                 10
             ],
-            "name" : "Armature"
+            "name": "Armature"
         }
     ],
-    "accessors" : [
+    "accessors": [
         {
-            "bufferView" : 0,
-            "componentType" : 5126,
-            "count" : 404,
-            "max" : [
+            "bufferView": 0,
+            "componentType": 5126,
+            "count": 404,
+            "max": [
                 4.457208633422852,
                 6.650260925292969,
                 1.1730153560638428
             ],
-            "min" : [
+            "min": [
                 -4.457208633422852,
                 -0.002748250961303711,
                 -1.1730153560638428
             ],
-            "type" : "VEC3"
+            "type": "VEC3"
         },
         {
-            "bufferView" : 1,
-            "componentType" : 5126,
-            "count" : 404,
-            "type" : "VEC3"
+            "bufferView": 1,
+            "componentType": 5126,
+            "count": 404,
+            "type": "VEC3"
         },
         {
-            "bufferView" : 2,
-            "componentType" : 5126,
-            "count" : 404,
-            "type" : "VEC2"
+            "bufferView": 2,
+            "componentType": 5126,
+            "count": 404,
+            "type": "VEC2"
         },
         {
-            "bufferView" : 3,
-            "componentType" : 5121,
-            "count" : 404,
-            "type" : "VEC4"
+            "bufferView": 3,
+            "componentType": 5121,
+            "count": 404,
+            "type": "VEC4"
         },
         {
-            "bufferView" : 4,
-            "componentType" : 5126,
-            "count" : 404,
-            "type" : "VEC4"
+            "bufferView": 4,
+            "componentType": 5126,
+            "count": 404,
+            "type": "VEC4"
         },
         {
-            "bufferView" : 5,
-            "componentType" : 5123,
-            "count" : 888,
-            "type" : "SCALAR"
+            "bufferView": 5,
+            "componentType": 5123,
+            "count": 888,
+            "type": "SCALAR"
         },
         {
-            "bufferView" : 6,
-            "componentType" : 5126,
-            "count" : 13,
-            "type" : "MAT4"
+            "bufferView": 6,
+            "componentType": 5126,
+            "count": 13,
+            "type": "MAT4"
         }
     ],
-    "bufferViews" : [
+    "bufferViews": [
         {
-            "buffer" : 0,
-            "byteLength" : 4848,
-            "byteOffset" : 0
+            "buffer": 0,
+            "byteLength": 4848,
+            "byteOffset": 0
         },
         {
-            "buffer" : 0,
-            "byteLength" : 4848,
-            "byteOffset" : 4848
+            "buffer": 0,
+            "byteLength": 4848,
+            "byteOffset": 4848
         },
         {
-            "buffer" : 0,
-            "byteLength" : 3232,
-            "byteOffset" : 9696
+            "buffer": 0,
+            "byteLength": 3232,
+            "byteOffset": 9696
         },
         {
-            "buffer" : 0,
-            "byteLength" : 1616,
-            "byteOffset" : 12928
+            "buffer": 0,
+            "byteLength": 1616,
+            "byteOffset": 12928
         },
         {
-            "buffer" : 0,
-            "byteLength" : 6464,
-            "byteOffset" : 14544
+            "buffer": 0,
+            "byteLength": 6464,
+            "byteOffset": 14544
         },
         {
-            "buffer" : 0,
-            "byteLength" : 1776,
-            "byteOffset" : 21008
+            "buffer": 0,
+            "byteLength": 1776,
+            "byteOffset": 21008
         },
         {
-            "buffer" : 0,
-            "byteLength" : 832,
-            "byteOffset" : 22784
+            "buffer": 0,
+            "byteLength": 832,
+            "byteOffset": 22784
         }
     ],
-    "buffers" : [
+    "buffers": [
         {
-            "byteLength" : 23616,
-            "uri" : "scene.bin"
+            "byteLength": 23616,
+            "uri": "scene.bin"
         }
     ]
 }

@@ -12,7 +12,7 @@ export abstract class Pass {
     	width = 256,
     	height = 256,
     	texture
-    } : { width: number, height: number, texture?: Texture2D } ) {
+    }: { width: number, height: number, texture?: Texture2D } ) {
 
     	const triangleVertices = [
     		- 1, - 1, 0, - 1, 4, 0, 4, - 1, 0
@@ -45,7 +45,7 @@ export abstract class Pass {
 
     }
 
-    get enabled( ) {
+    get enabled() {
 
     	return this._enabled;
 

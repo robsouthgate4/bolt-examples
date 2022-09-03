@@ -13,135 +13,135 @@ import GLTFLoader from "@webgl/modules/gltf-loader";
 
 export default class extends Base {
 
-    canvas: HTMLCanvasElement;
-    camera: CameraPersp;
-    assetsLoaded?: boolean;
-    bolt = Bolt.getInstance();
-    gl: WebGL2RenderingContext;
-    root!: Node;
-    gltf!: Node;
-    arcball: CameraArcball;
-    shaderEyes: Shader;
-    shaderBody: Shader;
-    matcapTexture!: Texture2D;
+	canvas: HTMLCanvasElement;
+	camera: CameraPersp;
+	assetsLoaded?: boolean;
+	bolt = Bolt.getInstance();
+	gl: WebGL2RenderingContext;
+	root!: Node;
+	gltf!: Node;
+	arcball: CameraArcball;
+	shaderEyes: Shader;
+	shaderBody: Shader;
+	matcapTexture!: Texture2D;
 
-    constructor() {
+	constructor() {
 
-    	super();
+		super();
 
-    	this.width = window.innerWidth;
-    	this.height = window.innerHeight;
+		this.width = window.innerWidth;
+		this.height = window.innerHeight;
 
-    	this.canvas = <HTMLCanvasElement>document.getElementById( "experience" );
-    	this.canvas.width = this.width;
-    	this.canvas.height = this.height;
+		this.canvas = <HTMLCanvasElement>document.getElementById( "experience" );
+		this.canvas.width = this.width;
+		this.canvas.height = this.height;
 
-    	this.camera = new CameraPersp( {
-    		aspect: this.canvas.width / this.canvas.height,
-    		fov: 45,
-    		near: 0.1,
-    		far: 1000,
-    		position: vec3.fromValues( 0, 6, 6 ),
-    		target: vec3.fromValues( 0, 3, 0 ),
-    	} );
+		this.camera = new CameraPersp( {
+			aspect: this.canvas.width / this.canvas.height,
+			fov: 45,
+			near: 0.1,
+			far: 1000,
+			position: vec3.fromValues( 0, 6, 6 ),
+			target: vec3.fromValues( 0, 3, 0 ),
+		} );
 
-    	this.arcball = new CameraArcball( this.camera, 4, 0.08 );
+		this.arcball = new CameraArcball( this.camera, 4, 0.08 );
 
-    	this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
-    	this.bolt.setCamera( this.camera );
+		this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
+		this.bolt.setCamera( this.camera );
 
-    	this.gl = this.bolt.getContext();
+		this.gl = this.bolt.getContext();
 
-    	this.shaderEyes = new Shader( colorVertex, colorFragment );
-    	this.shaderBody = new Shader( matcapVertex, matcapFragment );
+		this.shaderEyes = new Shader( colorVertex, colorFragment );
+		this.shaderBody = new Shader( matcapVertex, matcapFragment );
 
-    	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-    	this.bolt.enableDepth();
+		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+		this.bolt.enableDepth();
 
-    	this.init();
-
-
-    }
-
-    async init() {
-
-    	const gltfLoader = new GLTFLoader( this.bolt );
-    	this.gltf = await gltfLoader.load( "/static/models/gltf/examples/phantom/PhantomLogoPose2.gltf" );
-
-    	this.matcapTexture = new Texture2D( {
-    		imagePath: "/static/textures/matcap/matcap.jpeg"
-    	} );
-
-    	await this.matcapTexture.load();
-
-    	this.assetsLoaded = true;
-
-    	this.root = new Node();
-
-    	this.gltf.transform.positionY = 2;
-    	this.gltf.setParent( this.root );
-
-    	this.gltf.traverse( ( node: Node ) => {
-
-    		if ( node instanceof Batch ) {
-
-    			if ( node.shader.name === "mat_phantom_body" ) {
-
-    				node.shader = this.shaderBody;
-    				node.shader.activate();
-    				node.shader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
-    				node.shader.setTexture( "baseTexture", this.matcapTexture );
-
-    			}
-
-    			if ( node.shader.name === "mat_phantom_eyes" ) {
-
-    				node.shader = this.shaderEyes;
-    				node.shader.activate();
-    				node.shader.setVector4( "baseColor", vec4.fromValues( 0, 0, 0, 1 ) );
-
-    			}
+		this.init();
 
 
-    		}
+	}
 
-    	} );
+	async init() {
 
-    	this.resize();
+		const gltfLoader = new GLTFLoader( this.bolt );
+		this.gltf = await gltfLoader.load( "/static/models/gltf/examples/phantom/PhantomLogoPose2.gltf" );
 
-    }
+		this.matcapTexture = new Texture2D( {
+			imagePath: "/static/textures/matcap/matcap.jpeg"
+		} );
 
-    resize() {
+		await this.matcapTexture.load();
 
-    	this.bolt.resizeFullScreen();
-    	this.camera.updateProjection( this.gl.canvas.width / this.gl.canvas.height );
+		this.assetsLoaded = true;
 
-    }
+		this.root = new Node();
 
-    earlyUpdate( elapsed: number, delta: number ) {
+		this.gltf.transform.positionY = 2;
+		this.gltf.setParent( this.root );
 
-    	return;
+		this.gltf.traverse( ( node: Node ) => {
 
-    }
+			if ( node instanceof Batch ) {
 
-    update( elapsed: number, delta: number ) {
+				if ( node.shader.name === "mat_phantom_body" ) {
 
-    	if ( ! this.assetsLoaded ) return;
+					node.shader = this.shaderBody;
+					node.shader.activate();
+					node.shader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
+					node.shader.setTexture( "baseTexture", this.matcapTexture );
 
-    	this.arcball.update();
+				}
 
-    	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-    	this.bolt.clear( 0.9, 0.9, 0, 1 );
+				if ( node.shader.name === "mat_phantom_eyes" ) {
 
-    	this.bolt.draw( this.root );
+					node.shader = this.shaderEyes;
+					node.shader.activate();
+					node.shader.setVector4( "baseColor", vec4.fromValues( 0, 0, 0, 1 ) );
+
+				}
 
 
-    }
+			}
 
-    lateUpdate( elapsed: number, delta: number ): void {
+		} );
 
-    	return;
+		this.resize();
 
-    }
+	}
+
+	resize() {
+
+		this.bolt.resizeFullScreen();
+		this.camera.updateProjection( this.gl.canvas.width / this.gl.canvas.height );
+
+	}
+
+	earlyUpdate( elapsed: number, delta: number ) {
+
+		return;
+
+	}
+
+	update( elapsed: number, delta: number ) {
+
+		if ( ! this.assetsLoaded ) return;
+
+		this.arcball.update();
+
+		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+		this.bolt.clear( 0.9, 0.9, 0, 1 );
+
+		this.bolt.draw( this.root );
+
+
+	}
+
+	lateUpdate( elapsed: number, delta: number ): void {
+
+		return;
+
+	}
 
 }

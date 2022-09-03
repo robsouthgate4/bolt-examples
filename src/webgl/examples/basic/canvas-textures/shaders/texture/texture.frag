@@ -13,7 +13,6 @@ in vec3 Normal;
 in vec2 Uv;
 in vec3 Color;
 
-void main()
-{
+void main() {
    FragColor = texture(baseTexture, Uv);
 }

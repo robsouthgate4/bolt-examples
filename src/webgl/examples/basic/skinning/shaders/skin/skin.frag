@@ -12,11 +12,10 @@ out vec4 FragColor;
 in vec3 Normal;
 in vec2 Uv;
 
-void main()
-{
+void main() {
 
-   vec3 baseColor = texture( baseTexture, Uv ).rgb;
+   vec3 baseColor = texture(baseTexture, Uv).rgb;
 
-   FragColor = vec4( baseColor, 1.0 );
+   FragColor = vec4(baseColor, 1.0);
 
 }

@@ -11,10 +11,7 @@ in vec4 Position;
 
 uniform vec2 cameraPlanes;
 
-
-
-
-vec4 convRGBA(float depth){
+vec4 convRGBA(float depth) {
     float r = depth;
     float g = fract(r * 255.0);
     float b = fract(g * 255.0);
@@ -26,27 +23,26 @@ vec4 convRGBA(float depth){
     return vec4(r, g, b, a);
 }
 
-float convCoord(float depth, float offset){
+float convCoord(float depth, float offset) {
     float d = clamp(depth + offset, 0.0, 1.0);
-    if(d > 0.5){
+    if(d > 0.5) {
         d = 2.5 * (1.0 - d);
-    }else if(d > 0.4){
+    } else if(d > 0.4) {
         d = 1.0;
-    }else{
+    } else {
         d *= 2.5;
     }
     return d;
 }
 
-void main()
-{
+void main() {
 
     float depthOffset = 0.;
 
-    float linearDepth = 1.0 / ( cameraPlanes.y - cameraPlanes.x );
+    float linearDepth = 1.0 / (cameraPlanes.y - cameraPlanes.x);
 
-    float linear    = linearDepth * length( Position.xyz );
-    vec4  conColor = convRGBA( convCoord( linear, depthOffset ) );
+    float linear = linearDepth * length(Position.xyz);
+    vec4 conColor = convRGBA(convCoord(linear, depthOffset));
 
-    FragColor = vec4( vec3( conColor.r ), 1.0 );
+    FragColor = vec4(vec3(conColor.r), 1.0);
 }

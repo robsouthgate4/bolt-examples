@@ -11,32 +11,32 @@ import Plane from "@/webgl/modules/primitives/Plane";
 
 export default class extends Base {
 
-    canvas: HTMLCanvasElement;
-    camera: CameraPersp;
-    assetsLoaded?: boolean;
-    bolt: Bolt;
-    gl: WebGL2RenderingContext;
-    arcball: CameraArcball;
-    textureBatch!: Batch;
-    planeBatch: any;
-    dataTexture!: Texture2D;
+	canvas: HTMLCanvasElement;
+	camera: CameraPersp;
+	assetsLoaded?: boolean;
+	bolt: Bolt;
+	gl: WebGL2RenderingContext;
+	arcball: CameraArcball;
+	textureBatch!: Batch;
+	planeBatch: any;
+	dataTexture!: Texture2D;
 	drawCanvas: any;
 
 	constructor() {
 
-    	super();
+		super();
 
-    	this.width = window.innerWidth;
-    	this.height = window.innerHeight;
+		this.width = window.innerWidth;
+		this.height = window.innerHeight;
 
-    	this.canvas = <HTMLCanvasElement>document.getElementById( "experience" );
-    	this.canvas.width = this.width;
-    	this.canvas.height = this.height;
+		this.canvas = <HTMLCanvasElement>document.getElementById( "experience" );
+		this.canvas.width = this.width;
+		this.canvas.height = this.height;
 
-    	this.bolt = Bolt.getInstance();
-    	this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
+		this.bolt = Bolt.getInstance();
+		this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
 
-    	this.gl = this.bolt.getContext();
+		this.gl = this.bolt.getContext();
 
 		// create webgl texture to hold canvas pixel data
 		this.dataTexture = new Texture2D( {
@@ -57,22 +57,22 @@ export default class extends Base {
 			left: 0,
 		} );
 
-    	this.camera = new CameraPersp( {
-    		aspect: this.canvas.width / this.canvas.height,
-    		fov: 45,
-    		near: 0.1,
-    		far: 1000,
-    		position: vec3.fromValues( 0, 0, 10 ),
-    		target: vec3.fromValues( 0, 0, 0 ),
-    	} );
+		this.camera = new CameraPersp( {
+			aspect: this.canvas.width / this.canvas.height,
+			fov: 45,
+			near: 0.1,
+			far: 1000,
+			position: vec3.fromValues( 0, 0, 10 ),
+			target: vec3.fromValues( 0, 0, 0 ),
+		} );
 
-    	this.arcball = new CameraArcball( this.camera, 4, 0.08 );
+		this.arcball = new CameraArcball( this.camera, 4, 0.08 );
 
-    	this.bolt.setCamera( this.camera );
-    	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-    	this.bolt.enableDepth();
+		this.bolt.setCamera( this.camera );
+		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+		this.bolt.enableDepth();
 
-    	this.init();
+		this.init();
 
 
 	}
@@ -85,82 +85,82 @@ export default class extends Base {
 		const ctx = this.drawCanvas.getContext( "2d" );
 
 		const textureImage =
-    	ctx!.createImageData( this.drawCanvas.width, this.drawCanvas.width );
+			ctx!.createImageData( this.drawCanvas.width, this.drawCanvas.width );
 
 		for ( let i = 0; i < size; i ++ ) {
 
-    		const r = Math.floor( Math.random() * 255 );
-    		const g = Math.floor( Math.random() * 255 );
-    		const b = Math.floor( Math.random() * 255 );
+			const r = Math.floor( Math.random() * 255 );
+			const g = Math.floor( Math.random() * 255 );
+			const b = Math.floor( Math.random() * 255 );
 
-    		const stride = i * 4;
+			const stride = i * 4;
 
-    		textureImage.data[ stride ] = r;
-    		textureImage.data[ stride + 1 ] = g;
-    		textureImage.data[ stride + 2 ] = b;
-    		textureImage.data[ stride + 3 ] = 255;
+			textureImage.data[ stride ] = r;
+			textureImage.data[ stride + 1 ] = g;
+			textureImage.data[ stride + 2 ] = b;
+			textureImage.data[ stride + 3 ] = 255;
 
-    	}
+		}
 
 		ctx!.putImageData( textureImage, 0, 0 );
 
 		// draw html canvas to webgl texture
-    	this.dataTexture.setFromData( this.drawCanvas, this.drawCanvas.width, this.drawCanvas.height );
+		this.dataTexture.setFromData( this.drawCanvas, this.drawCanvas.width, this.drawCanvas.height );
 
 	}
 
 	async init() {
 
-    	this.dataTexture = new Texture2D( {
-    		minFilter: NEAREST,
-    		magFilter: NEAREST,
-    	} );
+		this.dataTexture = new Texture2D( {
+			minFilter: NEAREST,
+			magFilter: NEAREST,
+		} );
 
-    	this.setData();
+		this.setData();
 
-    	const shader = new Shader( vertexShader, fragmentShader );
-    	shader.activate();
-    	shader.setTexture( "baseTexture", this.dataTexture );
+		const shader = new Shader( vertexShader, fragmentShader );
+		shader.activate();
+		shader.setTexture( "baseTexture", this.dataTexture );
 
-    	setInterval( () => {
+		setInterval( () => {
 
-    		this.setData();
+			this.setData();
 
-    	}, 100 );
+		}, 100 );
 
-    	this.textureBatch = new Batch( new Mesh( new Plane( { width: 5, height: 5 } ), ), shader );
+		this.textureBatch = new Batch( new Mesh( new Plane( { width: 5, height: 5 } ), ), shader );
 
-    	this.resize();
+		this.resize();
 
 	}
 
 	resize() {
 
-    	this.bolt.resizeFullScreen();
-    	this.camera.updateProjection( this.gl.canvas.width / this.gl.canvas.height );
+		this.bolt.resizeFullScreen();
+		this.camera.updateProjection( this.gl.canvas.width / this.gl.canvas.height );
 
 	}
 
 	earlyUpdate( elapsed: number, delta: number ) {
 
-    	return;
+		return;
 
 	}
 
 	update( elapsed: number, delta: number ) {
 
-    	this.camera.update();
+		this.camera.update();
 
-    	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-    	this.bolt.clear( 0, 0, 0, 1 );
+		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+		this.bolt.clear( 0, 0, 0, 1 );
 
-    	this.bolt.draw( this.textureBatch );
+		this.bolt.draw( this.textureBatch );
 
 	}
 
 	lateUpdate( elapsed: number, delta: number ) {
 
-    	return;
+		return;
 
 	}
 

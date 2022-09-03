@@ -5,10 +5,10 @@ const isTouchDevice = () => {
 
 	return navigator
 		? "ontouchstart" in window ||
-        // @ts-ignore-disable-next-line
-        ( window.DocumentTouch && document instanceof window.DocumentTouch ) ||
-        navigator.maxTouchPoints ||
-        false
+		// @ts-ignore-disable-next-line
+		( window.DocumentTouch && document instanceof window.DocumentTouch ) ||
+		navigator.maxTouchPoints ||
+		false
 		: false;
 
 };

@@ -13,10 +13,8 @@ in vec3 Color;
 
 uniform vec4 baseColor;
 
+void main() {
 
-void main()
-{
-
-    FragColor = vec4( Normal * 0.5 + 0.5, 1.0 );
+    FragColor = vec4(Normal * 0.5 + 0.5, 1.0);
 
 }

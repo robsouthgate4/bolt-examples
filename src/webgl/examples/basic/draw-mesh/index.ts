@@ -1,7 +1,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES, CameraPersp, UNSIGNED_BYTE, UNSIGNED_SHORT } from "@bolt-webgl/core";
+import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES, CameraPersp, UNSIGNED_BYTE, UNSIGNED_SHORT, BACK, FRONT_AND_BACK, FRONT, NONE } from "@bolt-webgl/core";
 
 import colorVertex from "./shaders/color/color.vert";
 import colorFragment from "./shaders/color/color.frag";
@@ -85,7 +85,6 @@ export default class extends Base {
     	};
 
     	const triangleMesh = new Mesh( triangleGeo ).setDrawType( TRIANGLES );
-
     	const triShader = new Shader( colorVertex, colorFragment );
 
     	const colours = [
@@ -93,10 +92,6 @@ export default class extends Base {
     		0, 1, 1,
     		0, 0, 1,
     		1, 0, 0
-    	];
-
-    	const index = [
-    		0, 1, 2, 3
     	];
 
     	// attributes can be added with a named var and shader
@@ -111,8 +106,6 @@ export default class extends Base {
     	this.triangleBatch.transform.scale = vec3.fromValues( 3, 3, 3 );
 
     	this.triangleBatch.setParent( this.root );
-
-    	this.bolt.disableCullFace();
 
     	this.resize();
 

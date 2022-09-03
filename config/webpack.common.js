@@ -1,9 +1,9 @@
-const HtmlWebpackPlugin = require( "html-webpack-plugin" );
-const { CleanWebpackPlugin } = require( "clean-webpack-plugin" );
-const NodePolyfillPlugin = require( "node-polyfill-webpack-plugin" );
-const paths = require( "./paths" );
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const NodePolyfillPlugin = require("node-polyfill-webpack-plugin");
+const paths = require("./paths");
 
-const globals = require( "./globals.js" );
+const globals = require("./globals.js");
 
 module.exports = {
 	entry: paths.src + "/index.ts",
@@ -13,7 +13,7 @@ module.exports = {
 	},
 	resolve: {
 		symlinks: false,
-		extensions: [ ".js", ".ts" ],
+		extensions: [".js", ".ts"],
 		alias: {
 			"@assets": paths.public + "/static/assets",
 			"@pubSub": paths.src + "/pubSub",
@@ -29,12 +29,12 @@ module.exports = {
 	plugins: [
 		new NodePolyfillPlugin(),
 		new CleanWebpackPlugin(),
-		new HtmlWebpackPlugin( {
+		new HtmlWebpackPlugin({
 			template: paths.src + "/index.html",
 			favicon: paths.src + "/images/favicon.ico",
 			filename: "index.html",
 			templateParameters: globals,
-		} ),
+		}),
 	],
 	module: {
 		rules: [
@@ -45,7 +45,7 @@ module.exports = {
 			{
 				test: /\.(glsl|vs|fs|vert|frag)$/,
 				exclude: /node_modules/,
-				use: [ "ts-shader-loader" ],
+				use: ["ts-shader-loader"],
 			},
 			{
 				test: /zcv\.wasm$/,

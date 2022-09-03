@@ -11,9 +11,8 @@ in vec3 Normal;
 in vec3 FragPosition;
 in vec3 Color;
 
-void main()
-{
+void main() {
 
-  FragColor = vec4( Color, 1.0 );
+  FragColor = vec4(Color, 1.0);
 
 }

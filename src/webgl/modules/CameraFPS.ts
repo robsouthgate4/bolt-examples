@@ -3,267 +3,267 @@ import { Camera } from "@bolt-webgl/core";
 
 export default class CameraFPS {
 
-    private _activeKeys: string[];
-    private _yaw: number;
-    private _pitch: number;
-    private _firstMouse: boolean;
-    private _lastX: number;
-    private _lastY: number;
-    private _cameraSpeed!: number;
-    private _camera: Camera;
-    private _active: boolean;
+	private _activeKeys: string[];
+	private _yaw: number;
+	private _pitch: number;
+	private _firstMouse: boolean;
+	private _lastX: number;
+	private _lastY: number;
+	private _cameraSpeed!: number;
+	private _camera: Camera;
+	private _active: boolean;
 
-    constructor(
-    	camera: Camera ) {
+	constructor(
+		camera: Camera ) {
 
-    	this._camera = camera;
-    	this._active = false;
+		this._camera = camera;
+		this._active = false;
 
-    	this._activeKeys = [];
+		this._activeKeys = [];
 
-    	this._yaw = - 90;
-    	this._pitch = 0;
+		this._yaw = - 90;
+		this._pitch = 0;
 
-    	this._firstMouse = true;
-    	this._lastX = window.innerWidth / 2;
-    	this._lastY = window.innerHeight / 2;
+		this._firstMouse = true;
+		this._lastX = window.innerWidth / 2;
+		this._lastY = window.innerHeight / 2;
 
-    	this.initListeners();
+		this.initListeners();
 
-    }
+	}
 
-    initListeners() {
+	initListeners() {
 
-    	window.addEventListener( "mousemove", this.handleMouseMove.bind( this ) );
+		window.addEventListener( "mousemove", this.handleMouseMove.bind( this ) );
 
-    	window.addEventListener( "keyup", e => {
+		window.addEventListener( "keyup", e => {
 
-    		if ( e.key === "w" ) {
+			if ( e.key === "w" ) {
 
-    			this._activeKeys = this._activeKeys.filter( ( e ) => e !== 'w' );
+				this._activeKeys = this._activeKeys.filter( ( e ) => e !== 'w' );
 
-    		}
+			}
 
-    		if ( e.key === "s" ) {
+			if ( e.key === "s" ) {
 
-    			this._activeKeys = this._activeKeys.filter( ( e ) => e !== 's' );
+				this._activeKeys = this._activeKeys.filter( ( e ) => e !== 's' );
 
 
-    		}
+			}
 
-    		if ( e.key === "a" ) {
+			if ( e.key === "a" ) {
 
-    			this._activeKeys = this._activeKeys.filter( ( e ) => e !== 'a' );
+				this._activeKeys = this._activeKeys.filter( ( e ) => e !== 'a' );
 
 
-    		}
+			}
 
-    		if ( e.key === "d" ) {
+			if ( e.key === "d" ) {
 
-    			this._activeKeys = this._activeKeys.filter( ( e ) => e !== 'd' );
+				this._activeKeys = this._activeKeys.filter( ( e ) => e !== 'd' );
 
-    		}
+			}
 
-    		if ( e.key === "e" ) {
+			if ( e.key === "e" ) {
 
-    			this._activeKeys = this._activeKeys.filter( ( e ) => e !== 'e' );
+				this._activeKeys = this._activeKeys.filter( ( e ) => e !== 'e' );
 
-    		}
+			}
 
-    		if ( e.key === "q" ) {
+			if ( e.key === "q" ) {
 
-    			this._activeKeys = this._activeKeys.filter( ( e ) => e !== 'q' );
+				this._activeKeys = this._activeKeys.filter( ( e ) => e !== 'q' );
 
-    		}
+			}
 
-    	} );
+		} );
 
-    	window.addEventListener( "keydown", e => {
+		window.addEventListener( "keydown", e => {
 
-    		if ( e.key === "w" ) {
+			if ( e.key === "w" ) {
 
-    			this._activeKeys.push( "w" );
+				this._activeKeys.push( "w" );
 
-    		}
+			}
 
-    		if ( e.key === "s" ) {
+			if ( e.key === "s" ) {
 
-    			this._activeKeys.push( "s" );
+				this._activeKeys.push( "s" );
 
-    		}
+			}
 
-    		if ( e.key === "a" ) {
+			if ( e.key === "a" ) {
 
-    			this._activeKeys.push( "a" );
+				this._activeKeys.push( "a" );
 
-    		}
+			}
 
-    		if ( e.key === "d" ) {
+			if ( e.key === "d" ) {
 
-    			this._activeKeys.push( "d" );
+				this._activeKeys.push( "d" );
 
-    		}
+			}
 
-    		if ( e.key === "e" ) {
+			if ( e.key === "e" ) {
 
-    			this._activeKeys.push( "e" );
+				this._activeKeys.push( "e" );
 
-    		}
+			}
 
-    		if ( e.key === "q" ) {
+			if ( e.key === "q" ) {
 
-    			this._activeKeys.push( "q" );
+				this._activeKeys.push( "q" );
 
-    		}
+			}
 
-    		if ( e.code === "Space" ) {
+			if ( e.code === "Space" ) {
 
-    			this._active = ! this._active;
+				this._active = ! this._active;
 
-    			if ( ! this._active ) {
+				if ( ! this._active ) {
 
-    				this._firstMouse = true;
+					this._firstMouse = true;
 
-    				document.body.style.cursor = "pointer";
+					document.body.style.cursor = "pointer";
 
-    			} else {
+				} else {
 
-    				document.body.style.cursor = "none";
+					document.body.style.cursor = "none";
 
-    			}
+				}
 
-    		}
+			}
 
-    	} );
+		} );
 
-    }
+	}
 
-    handleMouseMove( ev: MouseEvent ) {
+	handleMouseMove( ev: MouseEvent ) {
 
-    	if ( ! this._active ) return;
+		if ( ! this._active ) return;
 
-    	const xPos = ev.clientX;
-    	const yPos = ev.clientY;
+		const xPos = ev.clientX;
+		const yPos = ev.clientY;
 
-    	if ( this._firstMouse ) {
+		if ( this._firstMouse ) {
 
-    		this._lastX = xPos;
-    		this._lastY = yPos;
-    		this._firstMouse = false;
+			this._lastX = xPos;
+			this._lastY = yPos;
+			this._firstMouse = false;
 
-    	}
+		}
 
-    	let xOffset = xPos - this._lastX;
-    	let yOffset = this._lastY - yPos;
+		let xOffset = xPos - this._lastX;
+		let yOffset = this._lastY - yPos;
 
-    	this._lastX = xPos;
-    	this._lastY = yPos;
+		this._lastX = xPos;
+		this._lastY = yPos;
 
-    	const sensitivity = 1;
-    	xOffset *= sensitivity;
-    	yOffset *= sensitivity;
+		const sensitivity = 1;
+		xOffset *= sensitivity;
+		yOffset *= sensitivity;
 
-    	this._yaw += xOffset;
-    	this._pitch += yOffset;
+		this._yaw += xOffset;
+		this._pitch += yOffset;
 
-    	if ( this._pitch > 89.0 )
-    		this._pitch = 89.0;
-    	if ( this._pitch < - 89.0 )
-    		this._pitch = - 89.0;
+		if ( this._pitch > 89.0 )
+			this._pitch = 89.0;
+		if ( this._pitch < - 89.0 )
+			this._pitch = - 89.0;
 
-    	const direction = vec3.create();
-    	direction[ 0 ] = Math.cos( glMatrix.toRadian( this._yaw ) ) * Math.cos( glMatrix.toRadian( this._pitch ) );
-    	direction[ 1 ] = Math.sin( glMatrix.toRadian( this._pitch ) );
-    	direction[ 2 ] = Math.sin( glMatrix.toRadian( this._yaw ) ) * Math.cos( glMatrix.toRadian( this._pitch ) );
+		const direction = vec3.create();
+		direction[ 0 ] = Math.cos( glMatrix.toRadian( this._yaw ) ) * Math.cos( glMatrix.toRadian( this._pitch ) );
+		direction[ 1 ] = Math.sin( glMatrix.toRadian( this._pitch ) );
+		direction[ 2 ] = Math.sin( glMatrix.toRadian( this._yaw ) ) * Math.cos( glMatrix.toRadian( this._pitch ) );
 
-    	vec3.normalize( direction, direction );
-    	vec3.copy( this._camera.forward, direction );
+		vec3.normalize( direction, direction );
+		vec3.copy( this._camera.forward, direction );
 
 
-    }
+	}
 
-    processInputs( delta: number ) {
+	processInputs( delta: number ) {
 
-    	if ( ! this.active ) return;
+		if ( ! this.active ) return;
 
-    	this._cameraSpeed = 20 * delta;
+		this._cameraSpeed = 20 * delta;
 
-    	if ( this._activeKeys.includes( "w" ) ) {
+		if ( this._activeKeys.includes( "w" ) ) {
 
-    		const tempForward = vec3.clone( this._camera.forward );
+			const tempForward = vec3.clone( this._camera.forward );
 
-    		vec3.multiply( tempForward, tempForward, vec3.fromValues( this._cameraSpeed, this._cameraSpeed, this._cameraSpeed ) );
-    		vec3.add( this._camera.position, this._camera.position, tempForward );
+			vec3.multiply( tempForward, tempForward, vec3.fromValues( this._cameraSpeed, this._cameraSpeed, this._cameraSpeed ) );
+			vec3.add( this._camera.position, this._camera.position, tempForward );
 
-    	}
+		}
 
-    	if ( this._activeKeys.includes( "s" ) ) {
+		if ( this._activeKeys.includes( "s" ) ) {
 
-    		const tempForward = vec3.clone( this._camera.forward );
+			const tempForward = vec3.clone( this._camera.forward );
 
-    		vec3.multiply( tempForward, tempForward, vec3.fromValues( this._cameraSpeed, this._cameraSpeed, this._cameraSpeed ) );
-    		vec3.sub( this._camera.position, this._camera.position, tempForward );
+			vec3.multiply( tempForward, tempForward, vec3.fromValues( this._cameraSpeed, this._cameraSpeed, this._cameraSpeed ) );
+			vec3.sub( this._camera.position, this._camera.position, tempForward );
 
-    	}
+		}
 
-    	if ( this._activeKeys.includes( "a" ) ) {
+		if ( this._activeKeys.includes( "a" ) ) {
 
-    		const tempPos = vec3.clone( this._camera.position );
+			const tempPos = vec3.clone( this._camera.position );
 
-    		vec3.cross( tempPos, this._camera.forward, this._camera.up );
-    		vec3.normalize( tempPos, tempPos );
+			vec3.cross( tempPos, this._camera.forward, this._camera.up );
+			vec3.normalize( tempPos, tempPos );
 
-    		vec3.multiply( tempPos, tempPos, vec3.fromValues( this._cameraSpeed, this._cameraSpeed, this._cameraSpeed ) );
-    		vec3.sub( this._camera.position, this._camera.position, tempPos );
+			vec3.multiply( tempPos, tempPos, vec3.fromValues( this._cameraSpeed, this._cameraSpeed, this._cameraSpeed ) );
+			vec3.sub( this._camera.position, this._camera.position, tempPos );
 
-    	}
+		}
 
-    	if ( this._activeKeys.includes( "d" ) ) {
+		if ( this._activeKeys.includes( "d" ) ) {
 
-    		const tempPos = vec3.clone( this._camera.position );
+			const tempPos = vec3.clone( this._camera.position );
 
-    		vec3.cross( tempPos, this._camera.forward, this._camera.up );
-    		vec3.normalize( tempPos, tempPos );
+			vec3.cross( tempPos, this._camera.forward, this._camera.up );
+			vec3.normalize( tempPos, tempPos );
 
-    		vec3.multiply( tempPos, tempPos, vec3.fromValues( this._cameraSpeed, this._cameraSpeed, this._cameraSpeed ) );
-    		vec3.add( this._camera.position, this._camera.position, tempPos );
+			vec3.multiply( tempPos, tempPos, vec3.fromValues( this._cameraSpeed, this._cameraSpeed, this._cameraSpeed ) );
+			vec3.add( this._camera.position, this._camera.position, tempPos );
 
-    	}
+		}
 
-    	if ( this._activeKeys.includes( "e" ) ) {
+		if ( this._activeKeys.includes( "e" ) ) {
 
-    		vec3.add( this._camera.position, this._camera.position, vec3.fromValues( 0, this._cameraSpeed, 0 ) );
+			vec3.add( this._camera.position, this._camera.position, vec3.fromValues( 0, this._cameraSpeed, 0 ) );
 
-    	}
+		}
 
-    	if ( this._activeKeys.includes( "q" ) ) {
+		if ( this._activeKeys.includes( "q" ) ) {
 
-    		vec3.add( this._camera.position, this._camera.position, vec3.fromValues( 0, - this._cameraSpeed, 0 ) );
+			vec3.add( this._camera.position, this._camera.position, vec3.fromValues( 0, - this._cameraSpeed, 0 ) );
 
-    	}
+		}
 
 
-    }
+	}
 
-    update( delta?: number ) {
+	update( delta?: number ) {
 
-    	if ( delta ) this.processInputs( delta );
-    	vec3.add( this._camera.target, this._camera.position, this._camera.forward );
-    	this._camera.transform.lookAt( this._camera.target, this._camera.up );
-    	this._camera.update();
+		if ( delta ) this.processInputs( delta );
+		vec3.add( this._camera.target, this._camera.position, this._camera.forward );
+		this._camera.transform.lookAt( this._camera.target, this._camera.up );
+		this._camera.update();
 
-    }
+	}
 
-    public get active(): boolean {
+	public get active(): boolean {
 
-    	return this._active;
+		return this._active;
 
-    }
-    public set active( value: boolean ) {
+	}
+	public set active( value: boolean ) {
 
-    	this._active = value;
+		this._active = value;
 
-    }
+	}
 
 
 }

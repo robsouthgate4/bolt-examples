@@ -14,10 +14,9 @@ in vec3 Color;
 uniform vec4 baseColor;
 uniform sampler2D baseTexture;
 
-void main()
-{
+void main() {
 
-    vec4 color = texture( baseTexture, Uv );
+    vec4 color = texture(baseTexture, Uv);
     FragColor = color;
 
 }

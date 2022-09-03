@@ -12,10 +12,8 @@ in vec2 Uv;
 in vec3 Normal;
 in vec3 FragPosition;
 
-void main()
-{
+void main() {
 
-  FragColor = vec4( Normal * 0.5 + 0.5, 1.0 );
-
+  FragColor = vec4(Normal * 0.5 + 0.5, 1.0);
 
 }

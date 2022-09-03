@@ -5,48 +5,48 @@ import Skin from "./Skin";
 
 export default class SkinMesh extends Mesh {
 
-    private _skin?: Skin | undefined;
+	private _skin?: Skin | undefined;
 
-    constructor( geometry?: GeometryBuffers, params?: MeshParams, ) {
+	constructor( geometry?: GeometryBuffers, params?: MeshParams, ) {
 
-    	super( geometry, params );
+		super( geometry, params );
 
-    	this.isSkinMesh = true;
+		this.isSkinMesh = true;
 
-    }
+	}
 
-    draw( shader: Shader, node: Node ) {
+	draw( shader: Shader, node: Node ) {
 
-    	if ( ! this._skin || ! node ) return;
+		if ( ! this._skin || ! node ) return;
 
-    	this._skin.update( node! );
+		this._skin.update( node! );
 
-    	// activate shader and pass joint data to shader
-    	shader.activate();
-    	shader.setTexture( "jointTexture", this._skin.jointTexture );
+		// activate shader and pass joint data to shader
+		shader.activate();
+		shader.setTexture( "jointTexture", this._skin.jointTexture );
 
-    	this._skin.jointMatrices.forEach( ( jointMatrix, i ) => {
+		this._skin.jointMatrices.forEach( ( jointMatrix, i ) => {
 
-    		shader.setMatrix4( `jointTransforms[${i}]`, jointMatrix );
+			shader.setMatrix4( `jointTransforms[${i}]`, jointMatrix );
 
-    	} );
+		} );
 
-    	shader.setFloat( "jointCount", this._skin.joints.length );
+		shader.setFloat( "jointCount", this._skin.joints.length );
 
-    	super.draw( shader );
+		super.draw( shader );
 
-    }
+	}
 
-    public get skin(): Skin | undefined {
+	public get skin(): Skin | undefined {
 
-    	return this._skin;
+		return this._skin;
 
-    }
+	}
 
-    public set skin( value: Skin | undefined ) {
+	public set skin( value: Skin | undefined ) {
 
-    	this._skin = value;
+		this._skin = value;
 
-    }
+	}
 
 }

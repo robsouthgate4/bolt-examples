@@ -21,54 +21,48 @@ in vec3 FragPosition;
 #define PI 3.14159265359
 #define TWO_PI ( 2.0 * PI )
 
-uint wang_hash(uint seed)
-{
-    seed = (seed ^ 61u) ^ (seed >> 16u);
-    seed *= 9u;
-    seed = seed ^ (seed >> 4u);
-    seed *= 0x27d4eb2du;
-    seed = seed ^ (seed >> 15u);
-    return seed;
+uint wang_hash(uint seed) {
+  seed = (seed ^ 61u) ^ (seed >> 16u);
+  seed *= 9u;
+  seed = seed ^ (seed >> 4u);
+  seed *= 0x27d4eb2du;
+  seed = seed ^ (seed >> 15u);
+  return seed;
 }
 
-float randomFloat(inout uint seed)
-{
-    return float(wang_hash(seed)) / 4294967296.;
+float randomFloat(inout uint seed) {
+  return float(wang_hash(seed)) / 4294967296.;
 }
 
-
-void main()
-{
+void main() {
 
   float stepSize = 0.01;
   float densityScale = 0.09;
 
   vec3 rayOrigin = Ro;
-  vec3 rayDirection = normalize( Rd );
+  vec3 rayDirection = normalize(Rd);
 
   float density = 0.0;
   float transmision = 0.0;
 
-  uint seed = uint( gl_FragCoord.x ) * uint( 1973 ) + uint( gl_FragCoord.y ) * uint( 9277 ) + uint( time ) * uint( 26699 );
-  float randNum = randomFloat( seed ) * 2.0 - 1.0;
+  uint seed = uint(gl_FragCoord.x) * uint(1973) + uint(gl_FragCoord.y) * uint(9277) + uint(time) * uint(26699);
+  float randNum = randomFloat(seed) * 2.0 - 1.0;
 
-  for ( int i = 0; i < MAX_STEPS; i++ )
-  {
-    rayOrigin += ( rayDirection * stepSize );
+  for(int i = 0; i < MAX_STEPS; i++) {
+    rayOrigin += (rayDirection * stepSize);
 
-    float sampledDensity = texture( mapVolume, rayOrigin + vec3( 0.5 ) ).r;
+    float sampledDensity = texture(mapVolume, rayOrigin + vec3(0.5)).r;
 
-    if( density > MAX_DIST )
-    {
+    if(density > MAX_DIST) {
       break;
     }
 
-    density += ( sampledDensity * densityScale );
+    density += (sampledDensity * densityScale);
 
   }
 
-  transmision = exp( -density );
+  transmision = exp(-density);
 
-  FragColor = vec4( vec3( transmision ), 1.0 - transmision );
+  FragColor = vec4(vec3(transmision), 1.0 - transmision);
 
 }

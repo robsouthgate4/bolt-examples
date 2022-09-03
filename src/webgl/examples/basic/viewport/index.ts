@@ -12,145 +12,145 @@ import Cube from "@/webgl/modules/primitives/Cube";
 
 export default class extends Base {
 
-    canvas: HTMLCanvasElement;
-    shader: Shader;
-    camera: CameraPersp;
-    arcball: CameraArcball;
-    assetsLoaded?: boolean;
-    torusTransform!: Transform;
-    sphereBatch!: Batch;
-    cubeBatch!: Batch;
-    planeBatch!: Batch;
-    triangleBatch!: Batch;
-    bolt: Bolt;
-    root!: Node;
-    viewport!: { height: number; width: number; };
-    gl: WebGL2RenderingContext;
-    batches: Batch[] = [];
+	canvas: HTMLCanvasElement;
+	shader: Shader;
+	camera: CameraPersp;
+	arcball: CameraArcball;
+	assetsLoaded?: boolean;
+	torusTransform!: Transform;
+	sphereBatch!: Batch;
+	cubeBatch!: Batch;
+	planeBatch!: Batch;
+	triangleBatch!: Batch;
+	bolt: Bolt;
+	root!: Node;
+	viewport!: { height: number; width: number; };
+	gl: WebGL2RenderingContext;
+	batches: Batch[] = [];
 
-    constructor() {
+	constructor() {
 
-    	super();
+		super();
 
-    	this.width = window.innerWidth;
-    	this.height = window.innerHeight;
+		this.width = window.innerWidth;
+		this.height = window.innerHeight;
 
-    	this.canvas = <HTMLCanvasElement>document.getElementById( "experience" );
-    	this.canvas.width = this.width;
-    	this.canvas.height = this.height;
+		this.canvas = <HTMLCanvasElement>document.getElementById( "experience" );
+		this.canvas.width = this.width;
+		this.canvas.height = this.height;
 
-    	this.bolt = Bolt.getInstance();
-    	this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
-    	this.gl = this.bolt.getContext();
+		this.bolt = Bolt.getInstance();
+		this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
+		this.gl = this.bolt.getContext();
 
-    	this.shader = new Shader( defaultVertex, defaultFragment );
+		this.shader = new Shader( defaultVertex, defaultFragment );
 
-    	this.camera = new CameraPersp( {
-    		aspect: this.canvas.width / this.canvas.height,
-    		fov: 45,
-    		near: 0.1,
-    		far: 1000,
-    		position: vec3.fromValues( 6, 6, 10 ),
-    		target: vec3.fromValues( 0, 1, 0 ),
-    	} );
+		this.camera = new CameraPersp( {
+			aspect: this.canvas.width / this.canvas.height,
+			fov: 45,
+			near: 0.1,
+			far: 1000,
+			position: vec3.fromValues( 6, 6, 10 ),
+			target: vec3.fromValues( 0, 1, 0 ),
+		} );
 
-    	this.arcball = new CameraArcball( this.camera, 4, 0.08 );
+		this.arcball = new CameraArcball( this.camera, 4, 0.08 );
 
-    	this.camera.lookAt( vec3.fromValues( 0, 0, 0 ) );
+		this.camera.lookAt( vec3.fromValues( 0, 0, 0 ) );
 
-    	this.bolt.setCamera( this.camera );
-    	this.bolt.enableDepth();
+		this.bolt.setCamera( this.camera );
+		this.bolt.enableDepth();
 
-    	this.init();
+		this.init();
 
-    	this.resize();
+		this.resize();
 
-    }
+	}
 
-    generateViewport() {
+	generateViewport() {
 
-    	const fov = this.camera.fov;
-    	const height = 2 * Math.tan( fov / 2 ) * ( this.camera.position[ 2 ] );
-    	const width = height * this.camera.aspect;
+		const fov = this.camera.fov;
+		const height = 2 * Math.tan( fov / 2 ) * ( this.camera.position[ 2 ] );
+		const width = height * this.camera.aspect;
 
-    	return {
-    		height,
-    		width,
-    	};
+		return {
+			height,
+			width,
+		};
 
-    }
+	}
 
-    async init() {
+	async init() {
 
-    	const vp = this.generateViewport();
+		const vp = this.generateViewport();
 
-    	const planeGeometry = new Cube( { width: 1, height: 1, depth: 1 } );
+		const planeGeometry = new Cube( { width: 1, height: 1, depth: 1 } );
 
-    	this.root = new Node();
+		this.root = new Node();
 
-    	const mesh = new Mesh( planeGeometry ).setDrawType( TRIANGLES );
+		const mesh = new Mesh( planeGeometry ).setDrawType( TRIANGLES );
 
-    	this.planeBatch = new Batch(
-    		mesh,
-    		this.shader
-    	);
+		this.planeBatch = new Batch(
+			mesh,
+			this.shader
+		);
 
-    	const count = 5;
+		const count = 5;
 
-    	for ( let index = 0; index < count; index ++ ) {
+		for ( let index = 0; index < count; index ++ ) {
 
-    		const batch = new Batch(
-    			mesh,
-    			this.shader
-    		);
+			const batch = new Batch(
+				mesh,
+				this.shader
+			);
 
-    		//batch.transform.positionX = ( index * 2.5 ) - count;
+			//batch.transform.positionX = ( index * 2.5 ) - count;
 
-    		batch.transform.scaleX = vp.width * 0.5;
-    	    batch.transform.scaleY = vp.height * 0.5;
+			batch.transform.scaleX = vp.width * 0.5;
+			batch.transform.scaleY = vp.height * 0.5;
 
-    		this.batches.push( batch );
+			this.batches.push( batch );
 
-    		batch.setParent( this.root );
+			batch.setParent( this.root );
 
-    	}
+		}
 
-    	this.resize();
+		this.resize();
 
-    }
+	}
 
-    resize() {
+	resize() {
 
-    	this.bolt.resizeFullScreen();
-    	this.camera.updateProjection( this.canvas.width / this.canvas.height );
+		this.bolt.resizeFullScreen();
+		this.camera.updateProjection( this.canvas.width / this.canvas.height );
 
-    	const vp = this.generateViewport();
+		const vp = this.generateViewport();
 
-    	// now resize all batches
+		// now resize all batches
 
-    }
+	}
 
-    earlyUpdate( elapsed: number, delta: number ) {
+	earlyUpdate( elapsed: number, delta: number ) {
 
-    	return;
+		return;
 
-    }
+	}
 
-    update( elapsed: number, delta: number ) {
+	update( elapsed: number, delta: number ) {
 
-    	this.camera.update();
+		this.camera.update();
 
-    	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-    	this.bolt.clear( 0, 0, 0, 1 );
+		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+		this.bolt.clear( 0, 0, 0, 1 );
 
-    	this.bolt.draw( this.root );
+		this.bolt.draw( this.root );
 
-    }
+	}
 
-    lateUpdate( elapsed: number, delta: number ) {
+	lateUpdate( elapsed: number, delta: number ) {
 
-    	return;
+		return;
 
-    }
+	}
 
 }
