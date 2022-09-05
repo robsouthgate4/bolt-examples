@@ -27,6 +27,6 @@ void main() {
 
   float depth = 1.0 - linearizeDepth(Uv) / cameraPlanes.y; // divide by camera far plane to get depth in [0,1]
 
-  FragColor = vec4(texture(map, Uv).rgb * depth, 1.0);
+  FragColor = vec4( texture( map, Uv ).rgb * depth, 1.0);
 
 }

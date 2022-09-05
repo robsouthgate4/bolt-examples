@@ -41,7 +41,6 @@ export default class extends Base {
 	compShader: Shader;
 	depthTexture: Texture2D;
 	uvTexture: Texture2D;
-	fpsCamera: CameraFPS;
 
 	constructor() {
 
@@ -62,8 +61,6 @@ export default class extends Base {
 			position: vec3.fromValues( 0, 3, 6 ),
 			target: vec3.fromValues( 0, 0.5, 0 ),
 		} );
-
-		this.fpsCamera = new CameraFPS( this.camera );
 
 		this.bolt = Bolt.getInstance();
 		this.bolt.init( this.canvas, { antialias: true, dpi: 2, powerPreference: "high-performance" } );
@@ -206,7 +203,7 @@ export default class extends Base {
 
 		if ( ! this.assetsLoaded ) return;
 
-		this.fpsCamera.update( delta * 0.1 );
+		this.camera.update();
 
 		this.bolt.enableDepth();
 		this.bolt.enableCullFace();

@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/basic/orbit";
+import Example from "@/webgl/examples/basic/depth-texture";
 
 export default class Main {
 
