@@ -3,11 +3,11 @@ import { Pass } from "@/webgl/modules/post/passes/Pass";
 
 import vertexShader from "./shaders/composition/composition.vert";
 import fragmentShader from "./shaders/composition/composition.frag";
-import Bolt, { Shader, FBO, Texture2D } from "@bolt-webgl/core";
+import Bolt, { Program, FBO, Texture2D } from "@bolt-webgl/core";
 
 export default class CompositionPass extends Pass {
 
-	shader!: Shader;
+	program!: Program;
 	private _depthTexture!: Texture2D;
 
 	constructor( bolt: Bolt, {
@@ -24,8 +24,8 @@ export default class CompositionPass extends Pass {
 
 		this._texture = texture;
 
-		this.shader = new Shader( vertexShader, fragmentShader );
-		this.shader.activate();
+		this.program = new Program( vertexShader, fragmentShader );
+		this.program.activate();
 
 	}
 
@@ -37,16 +37,16 @@ export default class CompositionPass extends Pass {
 
 		}
 
-		this.shader.activate();
-		this.shader.setTexture( "map", texture ? texture : readFBO.targetTexture );
+		this.program.activate();
+		this.program.setTexture( "map", texture ? texture : readFBO.targetTexture );
 
 		if ( this._depthTexture! == undefined ) {
 
-			this.shader.setTexture( "mapDepth", this._depthTexture );
+			this.program.setTexture( "mapDepth", this._depthTexture );
 
 		}
 
-		this.fullScreenTriangle.draw( this.shader );
+		this.fullScreenTriangle.draw( this.program );
 
 		readFBO.unbind();
 		writeFbo.unbind();

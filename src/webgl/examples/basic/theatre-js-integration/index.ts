@@ -1,6 +1,6 @@
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Texture2D, Batch, Node, CameraPersp } from "@bolt-webgl/core";
+import Bolt, { Program, Texture2D, DrawSet, Node, CameraPersp } from "@bolt-webgl/core";
 import state from "./state.json";
 
 import { vec3, vec4, } from "gl-matrix";
@@ -81,8 +81,8 @@ export default class extends Base {
 			target: vec3.fromValues( 0, 2.5, 0 ),
 		} );
 
-		this.shaderEyes = new Shader( colorVertex, colorFragment );
-		this.shaderBody = new Shader( matcapVertex, matcapFragment );
+		this.shaderEyes = new Program( colorVertex, colorFragment );
+		this.shaderBody = new Program( matcapVertex, matcapFragment );
 
 		this.arcball = new CameraArcball( this.camera, 4, 0.08 );
 
@@ -143,22 +143,22 @@ export default class extends Base {
 
 		this.gltf.traverse( ( node: Node ) => {
 
-			if ( node instanceof Batch ) {
+			if ( node instanceof DrawSet ) {
 
-				if ( node.shader.name === "mat_phantom_body" ) {
+				if ( node.program.name === "mat_phantom_body" ) {
 
-					node.shader = this.shaderBody;
-					node.shader.activate();
-					node.shader.setTexture( "baseTexture", this.matcapTexture );
-					node.shader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
+					node.program = this.shaderBody;
+					node.program.activate();
+					node.program.setTexture( "baseTexture", this.matcapTexture );
+					node.program.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
 
 				}
 
-				if ( node.shader.name === "mat_phantom_eyes" ) {
+				if ( node.program.name === "mat_phantom_eyes" ) {
 
-					node.shader = this.shaderEyes;
-					node.shader.activate();
-					node.shader.setVector4( "baseColor", vec4.fromValues( 0, 0, 0, 1 ) );
+					node.program = this.shaderEyes;
+					node.program.activate();
+					node.program.setVector4( "baseColor", vec4.fromValues( 0, 0, 0, 1 ) );
 
 				}
 

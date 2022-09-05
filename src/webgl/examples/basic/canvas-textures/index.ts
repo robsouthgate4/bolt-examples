@@ -1,7 +1,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Mesh, Batch, Node, CameraPersp, Texture2D, NEAREST } from "@bolt-webgl/core";
+import Bolt, { Program, Mesh, DrawSet, Node, CameraPersp, Texture2D, NEAREST } from "@bolt-webgl/core";
 
 import { vec3, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
@@ -17,7 +17,7 @@ export default class extends Base {
 	bolt: Bolt;
 	gl: WebGL2RenderingContext;
 	arcball: CameraArcball;
-	textureBatch!: Batch;
+	textureBatch!: DrawSet;
 	planeBatch: any;
 	dataTexture!: Texture2D;
 	drawCanvas: any;
@@ -118,9 +118,9 @@ export default class extends Base {
 
 		this.setData();
 
-		const shader = new Shader( vertexShader, fragmentShader );
-		shader.activate();
-		shader.setTexture( "baseTexture", this.dataTexture );
+		const program = new Program( vertexShader, fragmentShader );
+		program.activate();
+		program.setTexture( "baseTexture", this.dataTexture );
 
 		setInterval( () => {
 
@@ -128,7 +128,7 @@ export default class extends Base {
 
 		}, 100 );
 
-		this.textureBatch = new Batch( new Mesh( new Plane( { width: 5, height: 5 } ), ), shader );
+		this.textureBatch = new DrawSet( new Mesh( new Plane( { width: 5, height: 5 } ), ), program );
 
 		this.resize();
 

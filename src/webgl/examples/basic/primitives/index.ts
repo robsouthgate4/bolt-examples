@@ -1,7 +1,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES, CameraPersp } from "@bolt-webgl/core";
+import Bolt, { Program, Mesh, Transform, DrawSet, Node, TRIANGLES, CameraPersp } from "@bolt-webgl/core";
 
 import normalVertex from "./shaders/normal/normal.vert";
 import normalFragment from "./shaders/normal/normal.frag";
@@ -15,14 +15,14 @@ import Floor from "@/webgl/modules/batches/floor";
 export default class extends Base {
 
 	canvas: HTMLCanvasElement;
-	shader: Shader;
+	program: Program;
 	camera: CameraPersp;
 	assetsLoaded?: boolean;
 	torusTransform!: Transform;
-	sphereBatch!: Batch;
-	cubeBatch!: Batch;
-	planeBatch!: Batch;
-	triangleBatch!: Batch;
+	sphereBatch!: DrawSet;
+	cubeBatch!: DrawSet;
+	planeBatch!: DrawSet;
+	triangleBatch!: DrawSet;
 	bolt: Bolt;
 	gl: WebGL2RenderingContext;
 	root!: Node;
@@ -45,7 +45,7 @@ export default class extends Base {
 
 		this.gl = this.bolt.getContext();
 
-		this.shader = new Shader( normalVertex, normalFragment );
+		this.program = new Program( normalVertex, normalFragment );
 
 		this.camera = new CameraPersp( {
 			aspect: this.canvas.width / this.canvas.height,
@@ -76,18 +76,18 @@ export default class extends Base {
 		this.root.name = "root";
 		this.root.transform.positionX = 0;
 
-		this.sphereBatch = new Batch(
+		this.sphereBatch = new DrawSet(
 			new Mesh( sphereGeometry ).setDrawType( TRIANGLES ),
-			this.shader
+			this.program
 		);
 		this.sphereBatch.transform.positionX = - 1.6;
 		this.sphereBatch.transform.scale = vec3.fromValues( 1.5, 1.5, 1.5 );
 		this.sphereBatch.name = "sphere";
 		this.sphereBatch.setParent( this.root );
 
-		this.cubeBatch = new Batch(
+		this.cubeBatch = new DrawSet(
 			new Mesh( cubeGeometry ).setDrawType( TRIANGLES ),
-			this.shader
+			this.program
 		);
 
 		this.cubeBatch.name = "cube";

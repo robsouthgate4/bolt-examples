@@ -1,7 +1,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Transform, Mesh, Node, Batch, CameraPersp } from "@bolt-webgl/core";
+import Bolt, { Program, Transform, Mesh, Node, DrawSet, CameraPersp } from "@bolt-webgl/core";
 
 import defaultVertexInstanced from "./shaders/defaultInstanced/defaultInstanced.vert";
 import defaultFragmentInstanced from "./shaders/defaultInstanced/defaultInstanced.frag";
@@ -12,7 +12,7 @@ import GLTFLoader from "@/webgl/modules/gltf-loader";
 export default class extends Base {
 
 	canvas: HTMLCanvasElement;
-	colorShader: Shader;
+	colorProgram: Program;
 	lightPosition: vec3;
 	camera: CameraPersp;
 	assetsLoaded!: boolean;
@@ -48,7 +48,7 @@ export default class extends Base {
 		this.bolt.init( this.canvas, { antialias: true } );
 		this.bolt.setCamera( this.camera );
 
-		this.colorShader = new Shader( defaultVertexInstanced, defaultFragmentInstanced );
+		this.colorProgram = new Program( defaultVertexInstanced, defaultFragmentInstanced );
 
 		this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
@@ -109,7 +109,7 @@ export default class extends Base {
 
 			if ( node.name === "Torus" ) {
 
-				const batch = <Batch>node.children[ 0 ];
+				const batch = <DrawSet>node.children[ 0 ];
 				const { positions, normals, uvs, indices } = batch.mesh;
 
 				this.torusBuffer = new Mesh( {
@@ -144,18 +144,18 @@ export default class extends Base {
 
 	}
 
-	drawInstances( shader: Shader, elapsed: number ) {
+	drawInstances( program: Program, elapsed: number ) {
 
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.clear( 1, 1, 1, 1 );
 
-		shader.activate();
-		shader.setVector3( "viewPosition", this.camera.position );
-		shader.setFloat( "time", elapsed );
-		shader.setMatrix4( "projection", this.camera.projection );
-		shader.setMatrix4( "view", this.camera.view );
+		program.activate();
+		program.setVector3( "viewPosition", this.camera.position );
+		program.setFloat( "time", elapsed );
+		program.setMatrix4( "projection", this.camera.projection );
+		program.setMatrix4( "view", this.camera.view );
 
-		this.torusBuffer.draw( shader );
+		this.torusBuffer.draw( program );
 
 	}
 
@@ -163,7 +163,7 @@ export default class extends Base {
 
 		if ( ! this.assetsLoaded ) return;
 
-		this.drawInstances( this.colorShader, elapsed );
+		this.drawInstances( this.colorProgram, elapsed );
 
 
 

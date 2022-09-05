@@ -1,7 +1,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Transform, Mesh, FBO, Node, CameraPersp } from "@bolt-webgl/core";
+import Bolt, { Program, Transform, Mesh, FBO, Node, CameraPersp } from "@bolt-webgl/core";
 
 import defaultVertexInstanced from "./shaders/instanced/instanced.vert";
 import defaultFragmentInstanced from "./shaders/instanced/instanced.frag";
@@ -21,7 +21,7 @@ import CameraFPS from "@/webgl/modules/CameraFPS";
 export default class extends Base {
 
 	canvas: HTMLCanvasElement;
-	colorShader: Shader;
+	colorProgram: Program;
 	camera: CameraPersp;
 	cameraFPS!: CameraFPS;
 	assetsLoaded!: boolean;
@@ -33,7 +33,7 @@ export default class extends Base {
 	renderPass!: RenderPass;
 	fxaa!: FXAAPass;
 	dofPass!: DOFPass;
-	depthShader: Shader;
+	depthProgram: Program;
 	depthFBO!: FBO;
 	gl: WebGL2RenderingContext;
 	fxaaPass!: FXAAPass;
@@ -69,8 +69,8 @@ export default class extends Base {
 
 		this.post = new Post( this.bolt );
 
-		this.depthShader = new Shader( depthVertexInstanced, depthFragmentInstanced );
-		this.colorShader = new Shader( defaultVertexInstanced, defaultFragmentInstanced );
+		this.depthProgram = new Program( depthVertexInstanced, depthFragmentInstanced );
+		this.colorProgram = new Program( defaultVertexInstanced, defaultFragmentInstanced );
 
 		this.camera.lookAt( vec3.fromValues( 0, 0, - 50 ) );
 
@@ -99,16 +99,16 @@ export default class extends Base {
 		this.post.add( this.dofPass );
 		this.post.add( this.fxaaPass, true );
 
-		// set shader uniforms
-		this.depthShader.activate();
-		this.depthShader.setVector2( "cameraPlanes", vec2.fromValues( this.camera.near, this.camera.far ) );
+		// set program uniforms
+		this.depthProgram.activate();
+		this.depthProgram.setVector2( "cameraPlanes", vec2.fromValues( this.camera.near, this.camera.far ) );
 
-		this.dofPass.shader.activate();
-		this.dofPass.shader.setTexture( "depthMap", this.depthFBO.targetTexture );
-		this.dofPass.shader.setFloat( "focus", 0.0 );
-		this.dofPass.shader.setFloat( "aperture", 0.028 );
-		this.dofPass.shader.setFloat( "maxBlur", 1.0 );
-		this.dofPass.shader.setFloat( "aspect", this.gl.canvas.width / this.gl.canvas.height );
+		this.dofPass.program.activate();
+		this.dofPass.program.setTexture( "depthMap", this.depthFBO.targetTexture );
+		this.dofPass.program.setFloat( "focus", 0.0 );
+		this.dofPass.program.setFloat( "aperture", 0.028 );
+		this.dofPass.program.setFloat( "maxBlur", 1.0 );
+		this.dofPass.program.setFloat( "aspect", this.gl.canvas.width / this.gl.canvas.height );
 
 		const instanceCount = 500;
 
@@ -176,20 +176,20 @@ export default class extends Base {
 
 	}
 
-	drawInstances( shader: Shader, elapsed: number, delta: number ) {
+	drawInstances( program: Program, elapsed: number, delta: number ) {
 
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.clear( 0.0, 0.0, 0.0, 1 );
 
 		this.cameraFPS.update( delta );
 
-		shader.activate();
-		shader.setVector3( "viewPosition", this.camera.position );
-		shader.setFloat( "time", elapsed );
-		shader.setMatrix4( "projection", this.camera.projection );
-		shader.setMatrix4( "view", this.camera.view );
+		program.activate();
+		program.setVector3( "viewPosition", this.camera.position );
+		program.setFloat( "time", elapsed );
+		program.setMatrix4( "projection", this.camera.projection );
+		program.setMatrix4( "view", this.camera.view );
 
-		this.torusBuffer.draw( shader );
+		this.torusBuffer.draw( program );
 
 	}
 
@@ -201,7 +201,7 @@ export default class extends Base {
 
 			this.depthFBO.bind();
 			this.bolt.enableDepth();
-			this.drawInstances( this.depthShader, elapsed, delta );
+			this.drawInstances( this.depthProgram, elapsed, delta );
 			this.depthFBO.unbind();
 			this.bolt.disableDepth();
 
@@ -210,7 +210,7 @@ export default class extends Base {
 		{ // draw post process stack and set depth map
 
 			this.post.begin();
-			this.drawInstances( this.colorShader, elapsed, delta );
+			this.drawInstances( this.colorProgram, elapsed, delta );
 			this.post.end();
 
 		}

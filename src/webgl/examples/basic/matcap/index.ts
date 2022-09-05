@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Batch, Node, CameraPersp, Texture2D } from "@bolt-webgl/core";
+import Bolt, { Program, DrawSet, Node, CameraPersp, Texture2D } from "@bolt-webgl/core";
 
 import matcapVertex from "./shaders/matcap/matcap.vert";
 import matcapFragment from "./shaders/matcap/matcap.frag";
@@ -21,8 +21,8 @@ export default class extends Base {
 	root!: Node;
 	gltf!: Node;
 	arcball: CameraArcball;
-	shaderEyes: Shader;
-	shaderBody: Shader;
+	shaderEyes: Program;
+	shaderBody: Program;
 	matcapTexture!: Texture2D;
 
 	constructor() {
@@ -52,8 +52,8 @@ export default class extends Base {
 
 		this.gl = this.bolt.getContext();
 
-		this.shaderEyes = new Shader( colorVertex, colorFragment );
-		this.shaderBody = new Shader( matcapVertex, matcapFragment );
+		this.shaderEyes = new Program( colorVertex, colorFragment );
+		this.shaderBody = new Program( matcapVertex, matcapFragment );
 
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.enableDepth();
@@ -83,22 +83,22 @@ export default class extends Base {
 
 		this.gltf.traverse( ( node: Node ) => {
 
-			if ( node instanceof Batch ) {
+			if ( node instanceof DrawSet ) {
 
-				if ( node.shader.name === "mat_phantom_body" ) {
+				if ( node.program.name === "mat_phantom_body" ) {
 
-					node.shader = this.shaderBody;
-					node.shader.activate();
-					node.shader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
-					node.shader.setTexture( "baseTexture", this.matcapTexture );
+					node.program = this.shaderBody;
+					node.program.activate();
+					node.program.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
+					node.program.setTexture( "baseTexture", this.matcapTexture );
 
 				}
 
-				if ( node.shader.name === "mat_phantom_eyes" ) {
+				if ( node.program.name === "mat_phantom_eyes" ) {
 
-					node.shader = this.shaderEyes;
-					node.shader.activate();
-					node.shader.setVector4( "baseColor", vec4.fromValues( 0, 0, 0, 1 ) );
+					node.program = this.shaderEyes;
+					node.program.activate();
+					node.program.setVector4( "baseColor", vec4.fromValues( 0, 0, 0, 1 ) );
 
 				}
 

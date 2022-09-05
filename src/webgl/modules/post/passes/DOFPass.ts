@@ -2,10 +2,10 @@ import { Pass } from "./Pass";
 
 import vertexShader from "./shaders/dof/dof.vert";
 import fragmentShader from "./shaders/dof/dof.frag";
-import Bolt, { Shader, FBO, Texture2D } from "@bolt-webgl/core";
+import Bolt, { Program, FBO, Texture2D } from "@bolt-webgl/core";
 export default class DOFPass extends Pass {
 
-	shader!: Shader;
+	program!: Program;
 	bolt!: Bolt;
 	t: number;
 	gl: WebGL2RenderingContext;
@@ -24,13 +24,13 @@ export default class DOFPass extends Pass {
 
 		this.gl = this.bolt.getContext();
 
-		this.shader = new Shader( vertexShader, fragmentShader );
-		this.shader.activate();
-		this.shader.setFloat( "focus", 610 );
-		this.shader.setFloat( "aperture", 3.1 * 0.0001 );
-		this.shader.setFloat( "maxBlur", 0.005 );
+		this.program = new Program( vertexShader, fragmentShader );
+		this.program.activate();
+		this.program.setFloat( "focus", 610 );
+		this.program.setFloat( "aperture", 3.1 * 0.0001 );
+		this.program.setFloat( "maxBlur", 0.005 );
 
-		this.shader.setFloat( "aspect", this.gl.canvas.width / this.gl.canvas.height );
+		this.program.setFloat( "aspect", this.gl.canvas.width / this.gl.canvas.height );
 
 		this.t = 0;
 
@@ -44,10 +44,10 @@ export default class DOFPass extends Pass {
 
 		}
 
-		this.shader.activate();
-		this.shader.setTexture( "map", texture ? texture : readFBO.targetTexture );
+		this.program.activate();
+		this.program.setTexture( "map", texture ? texture : readFBO.targetTexture );
 
-		this.fullScreenTriangle.draw( this.shader );
+		this.fullScreenTriangle.draw( this.program );
 
 		readFBO.unbind();
 		writeFbo.unbind();

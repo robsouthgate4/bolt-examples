@@ -1,6 +1,6 @@
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES, CameraPersp } from "@bolt-webgl/core";
+import Bolt, { Program, Mesh, Transform, DrawSet, Node, TRIANGLES, CameraPersp } from "@bolt-webgl/core";
 
 import defaultVertex from "./shaders/default/default.vert";
 import defaultFragment from "./shaders/default/default.frag";
@@ -13,20 +13,20 @@ import Cube from "@/webgl/modules/primitives/Cube";
 export default class extends Base {
 
 	canvas: HTMLCanvasElement;
-	shader: Shader;
+	program: Program;
 	camera: CameraPersp;
 	arcball: CameraArcball;
 	assetsLoaded?: boolean;
 	torusTransform!: Transform;
-	sphereBatch!: Batch;
-	cubeBatch!: Batch;
-	planeBatch!: Batch;
-	triangleBatch!: Batch;
+	sphereBatch!: DrawSet;
+	cubeBatch!: DrawSet;
+	planeBatch!: DrawSet;
+	triangleBatch!: DrawSet;
 	bolt: Bolt;
 	root!: Node;
 	viewport!: { height: number; width: number; };
 	gl: WebGL2RenderingContext;
-	batches: Batch[] = [];
+	batches: DrawSet[] = [];
 
 	constructor() {
 
@@ -43,7 +43,7 @@ export default class extends Base {
 		this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
 		this.gl = this.bolt.getContext();
 
-		this.shader = new Shader( defaultVertex, defaultFragment );
+		this.program = new Program( defaultVertex, defaultFragment );
 
 		this.camera = new CameraPersp( {
 			aspect: this.canvas.width / this.canvas.height,
@@ -90,18 +90,18 @@ export default class extends Base {
 
 		const mesh = new Mesh( planeGeometry ).setDrawType( TRIANGLES );
 
-		this.planeBatch = new Batch(
+		this.planeBatch = new DrawSet(
 			mesh,
-			this.shader
+			this.program
 		);
 
 		const count = 5;
 
 		for ( let index = 0; index < count; index ++ ) {
 
-			const batch = new Batch(
+			const batch = new DrawSet(
 				mesh,
-				this.shader
+				this.program
 			);
 
 			//batch.transform.positionX = ( index * 2.5 ) - count;

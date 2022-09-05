@@ -1,11 +1,11 @@
 
 import Base from "@webgl/Base";
-import Bolt, { Batch, CameraPersp, Node, Transform } from "@bolt-webgl/core";
+import Bolt, { DrawSet, CameraPersp, Node, Transform } from "@bolt-webgl/core";
 
 import { quat, vec2, vec3 } from "gl-matrix";
-import CameraArcball from "@/webgl/modules/CameraArcball";
 import Floor from "@/webgl/modules/batches/floor";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
+import Orbit from "@/webgl/modules/Orbit";
 
 /**
  * TODO: INCOMPLETE
@@ -28,7 +28,7 @@ export default class extends Base {
 	_rotationX = quat.create();
 	_rotationY = quat.create();
 	_rotation = quat.create();
-	arcball: CameraArcball;
+	orbit: Orbit;
 
 	constructor() {
 
@@ -47,10 +47,10 @@ export default class extends Base {
 			near: 0.1,
 			far: 1000,
 			position: vec3.fromValues( 4, 5, 8 ),
-			target: vec3.fromValues( 0, 0.5, 0 ),
+			target: vec3.fromValues( 0, 2, 0 ),
 		} );
 
-		this.arcball = new CameraArcball( this.camera, 4, 0.08 );
+		this.orbit = new Orbit( this.camera );
 
 		this.bolt = Bolt.getInstance();
 		this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
@@ -93,7 +93,7 @@ export default class extends Base {
 
 		this.gltf.traverse( ( node: Node ) => {
 
-			if ( node instanceof Batch ) {
+			if ( node instanceof DrawSet ) {
 
 				console.log( node );
 
@@ -125,7 +125,8 @@ export default class extends Base {
 		if ( ! this.assetsLoaded ) return;
 
 
-		this.arcball.update();
+		this.orbit.update();
+		this.camera.update();
 
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.clear( 1, 1, 1, 1 );

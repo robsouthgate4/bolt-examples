@@ -1,7 +1,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES, CameraPersp, UNSIGNED_BYTE, UNSIGNED_SHORT, BACK, FRONT_AND_BACK, FRONT, NONE } from "@bolt-webgl/core";
+import Bolt, { Program, Mesh, Transform, DrawSet, Node, TRIANGLES, CameraPersp, UNSIGNED_BYTE, UNSIGNED_SHORT, BACK, FRONT_AND_BACK, FRONT, NONE } from "@bolt-webgl/core";
 
 import colorVertex from "./shaders/color/color.vert";
 import colorFragment from "./shaders/color/color.frag";
@@ -17,10 +17,10 @@ export default class extends Base {
     camera: CameraPersp;
     assetsLoaded?: boolean;
     torusTransform!: Transform;
-    sphereBatch!: Batch;
-    cubeBatch!: Batch;
-    planeBatch!: Batch;
-    triangleBatch!: Batch;
+    sphereBatch!: DrawSet;
+    cubeBatch!: DrawSet;
+    planeBatch!: DrawSet;
+    triangleBatch!: DrawSet;
     bolt: Bolt;
     gl: WebGL2RenderingContext;
     root!: Node;
@@ -85,7 +85,7 @@ export default class extends Base {
     	};
 
     	const triangleMesh = new Mesh( triangleGeo ).setDrawType( TRIANGLES );
-    	const triShader = new Shader( colorVertex, colorFragment );
+    	const triProgram = new Program( colorVertex, colorFragment );
 
     	const colours = [
     		1, 1, 0,
@@ -94,12 +94,12 @@ export default class extends Base {
     		1, 0, 0
     	];
 
-    	// attributes can be added with a named var and shader
-    	triangleMesh.addAttribute( new Float32Array( colours ), 3, { shader: triShader, attributeName: "aColor" } );
+    	// attributes can be added with a named var and program
+    	triangleMesh.addAttribute( new Float32Array( colours ), 3, { program: triProgram, attributeName: "aColor" } );
 
-    	this.triangleBatch = new Batch(
+    	this.triangleBatch = new DrawSet(
     		triangleMesh,
-    		triShader
+    		triProgram
     	);
 
     	this.triangleBatch.transform.positionY = 1.5;

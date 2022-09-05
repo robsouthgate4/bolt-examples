@@ -1,7 +1,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { CameraPersp, DYNAMIC_DRAW, FLOAT, IBO, POINTS, Shader, STATIC_DRAW, TRIANGLES, UNSIGNED_SHORT, VAO, VBO } from "@bolt-webgl/core";
+import Bolt, { CameraPersp, DYNAMIC_DRAW, FLOAT, IBO, POINTS, Program, STATIC_DRAW, TRIANGLES, UNSIGNED_SHORT, VAO, VBO } from "@bolt-webgl/core";
 
 import particlesVertexInstanced from "./shaders/particles/particles.vert";
 import particlesFragmentInstanced from "./shaders/particles/particles.frag";
@@ -23,13 +23,13 @@ export default class extends Base {
 
 	canvas: HTMLCanvasElement;
 	gl: WebGL2RenderingContext;
-	particleShader!: Shader;
+	particleProgram!: Program;
 	lightPosition: vec3;
 	camera: CameraPersp;
 	assetsLoaded!: boolean;
-	simulationShader!: Shader;
-	simulationShaderLocations!: { oldPosition: number; oldVelocity: number; oldLifeTime: number; initLifeTime: number; initPosition: number; };
-	particleShaderLocations!: { aPosition: number; aOffset: number; aNormal: number; aUV: number; };
+	simulationProgram!: Program;
+	simulationProgramLocations!: { oldPosition: number; oldVelocity: number; oldLifeTime: number; initLifeTime: number; initPosition: number; };
+	particleProgramLocations!: { aPosition: number; aOffset: number; aNormal: number; aUV: number; };
 	tf1?: WebGLTransformFeedback;
 	tf2?: WebGLTransformFeedback;
 	current!: TransformFeedbackObject;
@@ -56,7 +56,7 @@ export default class extends Base {
 
 		this.gl = this.bolt.getContext();
 
-		this.particleShader = new Shader( particlesVertexInstanced, particlesFragmentInstanced );
+		this.particleProgram = new Program( particlesVertexInstanced, particlesFragmentInstanced );
 
 		const transformFeedbackVaryings = [
 			"newPosition",
@@ -64,16 +64,16 @@ export default class extends Base {
 			"newLifeTime"
 		];
 
-		this.simulationShader = new Shader( simulationVertex, simulationFragment,
+		this.simulationProgram = new Program( simulationVertex, simulationFragment,
 			{
 				transformFeedbackVaryings
 			} );
 
-		this.simulationShader.activate();
-		this.simulationShader.setFloat( "lifeTime", 4 );
-		this.simulationShader.setFloat( "time", 0 );
+		this.simulationProgram.activate();
+		this.simulationProgram.setFloat( "lifeTime", 4 );
+		this.simulationProgram.setFloat( "time", 0 );
 
-		this.simulationShaderLocations = {
+		this.simulationProgramLocations = {
 			"oldPosition": 0,
 			"oldVelocity": 1,
 			"oldLifeTime": 2,
@@ -81,7 +81,7 @@ export default class extends Base {
 			"initLifeTime": 4
 		};
 
-		this.particleShaderLocations = {
+		this.particleProgramLocations = {
 			"aPosition": 0,
 			"aOffset": 1,
 			"aNormal": 2,
@@ -170,38 +170,38 @@ export default class extends Base {
 		// create simulation vaos
 		const vaoSim1 = new VAO();
 		vaoSim1.bind();
-		vaoSim1.linkAttrib( offset1VBO, this.simulationShaderLocations.oldPosition, 3, FLOAT );
-		vaoSim1.linkAttrib( init1VBO, this.simulationShaderLocations.initPosition, 3, FLOAT );
-		vaoSim1.linkAttrib( velocity1VBO, this.simulationShaderLocations.oldVelocity, 3, FLOAT );
-		vaoSim1.linkAttrib( life1VBO, this.simulationShaderLocations.oldLifeTime, 1, FLOAT );
-		vaoSim1.linkAttrib( initLife1VBO, this.simulationShaderLocations.initLifeTime, 1, FLOAT );
+		vaoSim1.linkAttrib( offset1VBO, this.simulationProgramLocations.oldPosition, 3, FLOAT );
+		vaoSim1.linkAttrib( init1VBO, this.simulationProgramLocations.initPosition, 3, FLOAT );
+		vaoSim1.linkAttrib( velocity1VBO, this.simulationProgramLocations.oldVelocity, 3, FLOAT );
+		vaoSim1.linkAttrib( life1VBO, this.simulationProgramLocations.oldLifeTime, 1, FLOAT );
+		vaoSim1.linkAttrib( initLife1VBO, this.simulationProgramLocations.initLifeTime, 1, FLOAT );
 		vaoSim1.unbind();
 
 		const vaoSim2 = new VAO();
 		vaoSim2.bind();
-		vaoSim2.linkAttrib( offset2VBO, this.simulationShaderLocations.oldPosition, 3, FLOAT );
-		vaoSim1.linkAttrib( init2VBO, this.simulationShaderLocations.initPosition, 3, FLOAT );
-		vaoSim2.linkAttrib( velocity2VBO, this.simulationShaderLocations.oldVelocity, 3, FLOAT );
-		vaoSim1.linkAttrib( life2VBO, this.simulationShaderLocations.oldLifeTime, 1, FLOAT );
-		vaoSim2.linkAttrib( initLife2VBO, this.simulationShaderLocations.initLifeTime, 1, FLOAT );
+		vaoSim2.linkAttrib( offset2VBO, this.simulationProgramLocations.oldPosition, 3, FLOAT );
+		vaoSim1.linkAttrib( init2VBO, this.simulationProgramLocations.initPosition, 3, FLOAT );
+		vaoSim2.linkAttrib( velocity2VBO, this.simulationProgramLocations.oldVelocity, 3, FLOAT );
+		vaoSim1.linkAttrib( life2VBO, this.simulationProgramLocations.oldLifeTime, 1, FLOAT );
+		vaoSim2.linkAttrib( initLife2VBO, this.simulationProgramLocations.initLifeTime, 1, FLOAT );
 		vaoSim2.unbind();
 
 		// create draw vaos
 		const vaoDraw1 = new VAO();
 		vaoDraw1.bind();
-		vaoDraw1.linkAttrib( meshPositionVBO, this.particleShaderLocations.aPosition, 3, FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
-		vaoDraw1.linkAttrib( meshNormalVBO, this.particleShaderLocations.aNormal, 3, FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
-		vaoDraw1.linkAttrib( offset1VBO, this.particleShaderLocations.aOffset, 3, FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
-		vaoDraw1.linkAttrib( meshUVVBO, this.particleShaderLocations.aUV, 2, FLOAT, 2 * Float32Array.BYTES_PER_ELEMENT, 0 );
+		vaoDraw1.linkAttrib( meshPositionVBO, this.particleProgramLocations.aPosition, 3, FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
+		vaoDraw1.linkAttrib( meshNormalVBO, this.particleProgramLocations.aNormal, 3, FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
+		vaoDraw1.linkAttrib( offset1VBO, this.particleProgramLocations.aOffset, 3, FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
+		vaoDraw1.linkAttrib( meshUVVBO, this.particleProgramLocations.aUV, 2, FLOAT, 2 * Float32Array.BYTES_PER_ELEMENT, 0 );
 		this.gl.vertexAttribDivisor( 1, 1 );
 		vaoDraw1.unbind();
 
 		const vaoDraw2 = new VAO();
 		vaoDraw2.bind();
-		vaoDraw2.linkAttrib( meshPositionVBO, this.particleShaderLocations.aPosition, 3, FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
-		vaoDraw1.linkAttrib( meshNormalVBO, this.particleShaderLocations.aNormal, 3, FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
-		vaoDraw2.linkAttrib( offset2VBO, this.particleShaderLocations.aOffset, 3, FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
-		vaoDraw2.linkAttrib( meshUVVBO, this.particleShaderLocations.aUV, 2, FLOAT, 2 * Float32Array.BYTES_PER_ELEMENT, 0 );
+		vaoDraw2.linkAttrib( meshPositionVBO, this.particleProgramLocations.aPosition, 3, FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
+		vaoDraw1.linkAttrib( meshNormalVBO, this.particleProgramLocations.aNormal, 3, FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
+		vaoDraw2.linkAttrib( offset2VBO, this.particleProgramLocations.aOffset, 3, FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
+		vaoDraw2.linkAttrib( meshUVVBO, this.particleProgramLocations.aUV, 2, FLOAT, 2 * Float32Array.BYTES_PER_ELEMENT, 0 );
 		this.gl.vertexAttribDivisor( 1, 1 );
 		vaoDraw2.unbind();
 
@@ -251,8 +251,8 @@ export default class extends Base {
 
 		{
 
-			this.simulationShader.activate();
-			this.simulationShader.setFloat( "time", elapsed );
+			this.simulationProgram.activate();
+			this.simulationProgram.setFloat( "time", elapsed );
 
 			this.gl.bindVertexArray( this.current.updateVAO.arrayObject );
 
@@ -275,12 +275,12 @@ export default class extends Base {
 
 			const model = mat4.create();
 
-			this.particleShader.activate();
+			this.particleProgram.activate();
 			this.gl.bindVertexArray( this.current.drawVAO.arrayObject );
 
-			this.particleShader.setMatrix4( "projection", this.camera.projection );
-			this.particleShader.setMatrix4( "view", this.camera.view );
-			this.particleShader.setMatrix4( "model", model );
+			this.particleProgram.setMatrix4( "projection", this.camera.projection );
+			this.particleProgram.setMatrix4( "view", this.camera.view );
+			this.particleProgram.setMatrix4( "model", model );
 
 			this.meshIBO.bind();
 			this.gl.drawElementsInstanced( TRIANGLES, this.meshIBO.count, UNSIGNED_SHORT, 0, this.instanceCount );

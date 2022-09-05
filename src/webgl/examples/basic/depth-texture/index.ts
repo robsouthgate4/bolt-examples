@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Batch, Transform, Node, CameraPersp, FBO, Mesh, RBO, FRONT, NONE, BACK } from "@bolt-webgl/core";
+import Bolt, { Program, DrawSet, Transform, Node, CameraPersp, FBO, Mesh, RBO } from "@bolt-webgl/core";
 
 import colorVertex from "./shaders/color/color.vert";
 import colorFragment from "./shaders/color/color.frag";
@@ -12,31 +12,30 @@ import Post from "@/webgl/modules/post";
 import Floor from "@/webgl/modules/batches/floor";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
 import CameraFPS from "@/webgl/modules/CameraFPS";
-import Cube from "@/webgl/modules/primitives/Cube";
 
 export default class extends Base {
 
 	canvas: HTMLCanvasElement;
-	shaderEyes: Shader;
+	shaderEyes: Program;
 	camera: CameraPersp;
 	assetsLoaded?: boolean;
 	torusTransform!: Transform;
-	sphereBatch!: Batch;
-	planeBatch!: Batch;
+	sphereBatch!: DrawSet;
+	planeBatch!: DrawSet;
 	post: Post;
 	bolt = Bolt.getInstance();
 	gl: WebGL2RenderingContext;
 	root!: Node;
 	floorBatch!: Floor;
 	cameraFPS: CameraFPS;
-	shaderBody: Shader;
+	shaderBody: Program;
 	gltf!: Node;
 	depthFBO!: FBO;
 	fullScreenTriangle!: Mesh;
-	compositionShader!: Shader;
+	compProgram!: Program;
 	depthRBO!: RBO;
-	screenBatch!: Batch;
-	cubeBatch!: Batch;
+	screenBatch!: DrawSet;
+	cubeBatch!: DrawSet;
 
 	constructor() {
 
@@ -67,12 +66,12 @@ export default class extends Base {
 
 		this.post = new Post( this.bolt );
 
-		this.compositionShader = new Shader( compositionVertex, compositionFragment );
-		this.compositionShader.activate();
-		this.compositionShader.setVector2( "cameraPlanes", vec2.fromValues( this.camera.near, this.camera.far ) );
+		this.compProgram = new Program( compositionVertex, compositionFragment );
+		this.compProgram.activate();
+		this.compProgram.setVector2( "cameraPlanes", vec2.fromValues( this.camera.near, this.camera.far ) );
 
-		this.shaderEyes = new Shader( colorVertex, colorFragment );
-		this.shaderBody = new Shader( colorVertex, colorFragment );
+		this.shaderEyes = new Program( colorVertex, colorFragment );
+		this.shaderBody = new Program( colorVertex, colorFragment );
 
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.enableDepth();
@@ -99,7 +98,7 @@ export default class extends Base {
 			indices: triangleIndices
 		} );
 
-		this.screenBatch = new Batch( this.fullScreenTriangle, this.compositionShader );
+		this.screenBatch = new DrawSet( this.fullScreenTriangle, this.compProgram );
 
 		const gltfLoader = new GLTFLoader( this.bolt );
 		this.gltf = await gltfLoader.load( "/static/models/gltf/examples/phantom/PhantomLogoPose2.gltf" );
@@ -115,21 +114,21 @@ export default class extends Base {
 
 		this.gltf.traverse( ( node: Node ) => {
 
-			if ( node instanceof Batch ) {
+			if ( node instanceof DrawSet ) {
 
-				if ( node.shader.name === "mat_phantom_body" ) {
+				if ( node.program.name === "mat_phantom_body" ) {
 
-					node.shader = this.shaderBody;
-					node.shader.activate();
-					node.shader.setVector4( "baseColor", vec4.fromValues( 0, 1, 1, 1 ) );
+					node.program = this.shaderBody;
+					node.program.activate();
+					node.program.setVector4( "baseColor", vec4.fromValues( 0, 1, 1, 1 ) );
 
 				}
 
-				if ( node.shader.name === "mat_phantom_eyes" ) {
+				if ( node.program.name === "mat_phantom_eyes" ) {
 
-					node.shader = this.shaderEyes;
-					node.shader.activate();
-					node.shader.setVector4( "baseColor", vec4.fromValues( 0, 0, 0, 1 ) );
+					node.program = this.shaderEyes;
+					node.program.activate();
+					node.program.setVector4( "baseColor", vec4.fromValues( 0, 0, 0, 1 ) );
 
 				}
 
@@ -170,11 +169,11 @@ export default class extends Base {
 		this.bolt.draw( this.root );
 		this.depthFBO.unbind();
 
-		this.compositionShader.activate();
-		this.compositionShader.setTexture( "map", this.depthFBO.targetTexture );
-		this.compositionShader.setTexture( "mapDepth", this.depthFBO.depthTexture );
+		this.compProgram.activate();
+		this.compProgram.setTexture( "map", this.depthFBO.targetTexture );
+		this.compProgram.setTexture( "mapDepth", this.depthFBO.depthTexture );
 
-		this.fullScreenTriangle.draw( this.compositionShader );
+		this.fullScreenTriangle.draw( this.compProgram );
 
 
 	}

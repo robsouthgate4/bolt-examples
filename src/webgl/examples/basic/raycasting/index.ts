@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES, LINES, CameraPersp } from "@bolt-webgl/core";
+import Bolt, { Program, Mesh, Transform, DrawSet, Node, TRIANGLES, LINES, CameraPersp } from "@bolt-webgl/core";
 
 import normalVertex from "./shaders/normal/normal.vert";
 import normalFragment from "./shaders/normal/normal.frag";
@@ -21,20 +21,20 @@ import Cube from "@/webgl/modules/primitives/Cube";
 export default class extends Base {
 
 	canvas: HTMLCanvasElement;
-	shader: Shader;
+	program: Program;
 	camera: CameraPersp;
 	assetsLoaded?: boolean;
 	torusTransform!: Transform;
-	sphereBatch!: Batch;
-	planeBatch!: Batch;
-	triangleBatch!: Batch;
+	sphereBatch!: DrawSet;
+	planeBatch!: DrawSet;
+	triangleBatch!: DrawSet;
 	bolt: Bolt;
 	root!: Node;
 	floorBatch: any;
 	AAbox!: AxisAlignedBox;
-	AABoxHelper!: Batch;
+	AABoxHelper!: DrawSet;
 	raycast: Raycast;
-	intersectionDebugBatch!: Batch;
+	intersectionDebugBatch!: DrawSet;
 	arcball: CameraArcball;
 
 	constructor() {
@@ -51,7 +51,7 @@ export default class extends Base {
 		this.bolt = Bolt.getInstance();
 		this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
 
-		this.shader = new Shader( normalVertex, normalFragment );
+		this.program = new Program( normalVertex, normalFragment );
 
 		this.raycast = new Raycast();
 
@@ -132,14 +132,14 @@ export default class extends Base {
 		vec3.multiply( rayScaled, ray.direction, vec3.fromValues( scale, scale, scale ) );
 		vec3.add( rayEnd, rayEnd, rayScaled );
 
-		const debugRay = new Batch(
+		const debugRay = new DrawSet(
 			new Mesh( {
 				positions: [
 					ray.origin[ 0 ], ray.origin[ 1 ], ray.origin[ 2 ],
 					rayEnd[ 0 ], rayEnd[ 1 ], rayEnd[ 2 ],
 				]
 			} ).setDrawType( LINES ),
-			new Shader( rayVertex, rayFragment )
+			new Program( rayVertex, rayFragment )
 		);
 
 		debugRay.setParent( this.root );
@@ -153,9 +153,9 @@ export default class extends Base {
 		this.root = new Node();
 		this.root.name = "root";
 
-		this.sphereBatch = new Batch(
+		this.sphereBatch = new DrawSet(
 			new Mesh( sphereGeometry ).setDrawType( TRIANGLES ),
-			this.shader
+			this.program
 		);
 
 		this.sphereBatch.mesh.calculateBoxBounds();
@@ -167,7 +167,7 @@ export default class extends Base {
 		this.sphereBatch.updateModelMatrix();
 		this.sphereBatch.setParent( this.root );
 
-		this.intersectionDebugBatch = new Batch( new Mesh( new Cube() ), this.shader );
+		this.intersectionDebugBatch = new DrawSet( new Mesh( new Cube() ), this.program );
 		this.intersectionDebugBatch.transform.scale = vec3.fromValues( 0.2, 0.2, 0.2 );
 		this.intersectionDebugBatch.transform.positionY = - 999;
 

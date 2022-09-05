@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Node, Batch, TextureCube, CameraPersp, Camera, FBOCube, RBO, Mesh, LINEAR, FRONT } from "@bolt-webgl/core";
+import Bolt, { Program, Node, DrawSet, TextureCube, CameraPersp, Camera, FBOCube, RBO, Mesh, LINEAR, FRONT } from "@bolt-webgl/core";
 
 
 import { quat, vec3 } from "gl-matrix";
@@ -21,25 +21,25 @@ import { GeometryBuffers } from "@bolt-webgl/core/build/Mesh";
 export default class extends Base {
 
 	canvas: HTMLCanvasElement;
-	bodyShader!: Shader;
-	eyesShader!: Shader;
+	bodyShader!: Program;
+	eyesShader!: Program;
 	camera: CameraPersp;
 	assetsLoaded?: boolean;
 	bolt: Bolt;
 	gltf!: Node;
 	gl: WebGL2RenderingContext;
 	floor!: Floor;
-	shaderEyes!: Shader;
-	shaderReflection!: Shader;
+	shaderEyes!: Program;
+	shaderReflection!: Program;
 	cubeMaptexture!: TextureCube;
 	cubeCameras: Camera[] = [];
 	cubeFBO: FBOCube;
 	cubeRBO: RBO;
-	cube!: Batch;
-	sphere!: Batch;
-	cube2!: Batch;
+	cube!: DrawSet;
+	sphere!: DrawSet;
+	cube2!: DrawSet;
 	skyBox: any;
-	shaderSky: Shader;
+	shaderSky: Program;
 	cameraParent = new Node();
 	cameraCubeParent = new Node();
 	cameraDebugGeo!: GeometryBuffers;
@@ -79,8 +79,8 @@ export default class extends Base {
 		this.cubeFBO.unbind();
 		this.cubeRBO.unbind();
 
-		this.shaderReflection = new Shader( reflectionVertex, reflectionFragment );
-		this.shaderSky = new Shader( skyVertex, skyFragment );
+		this.shaderReflection = new Program( reflectionVertex, reflectionFragment );
+		this.shaderSky = new Program( skyVertex, skyFragment );
 
 		this.gl = this.bolt.getContext();
 
@@ -92,7 +92,7 @@ export default class extends Base {
 
 		const gltfLoader = new GLTFLoader( this.bolt );
 		const cameraDebugGLTF = await gltfLoader.load( "/static/models/gltf/examples/camera/camera.gltf" );
-		const cameraDebugBatch = cameraDebugGLTF.children[ 0 ].children[ 0 ] as Batch;
+		const cameraDebugBatch = cameraDebugGLTF.children[ 0 ].children[ 0 ] as DrawSet;
 
 		this.cameraDebugGeo = cameraDebugBatch.mesh.buffers;
 
@@ -120,17 +120,17 @@ export default class extends Base {
 		this.shaderReflection.activate();
 		this.shaderReflection.setTexture( "mapReflection", this.cubeFBO.targetTexture );
 
-		this.cube = new Batch( new Mesh( new Cube() ), new Shader( colorVertex, colorFragment ) );
+		this.cube = new DrawSet( new Mesh( new Cube() ), new Program( colorVertex, colorFragment ) );
 		this.cube.transform.position = vec3.fromValues( - 2, 0, 0 );
 
-		this.cube2 = new Batch( new Mesh( new Cube() ), new Shader( colorVertex, colorFragment ) );
+		this.cube2 = new DrawSet( new Mesh( new Cube() ), new Program( colorVertex, colorFragment ) );
 		this.cube2.transform.position = vec3.fromValues( 2, 0, 0 );
 
-		this.skyBox = new Batch( new Mesh( new Cube() ), this.shaderSky );
+		this.skyBox = new DrawSet( new Mesh( new Cube() ), this.shaderSky );
 		this.skyBox.transform.position = vec3.fromValues( 0, 0, 0 );
 		this.skyBox.transform.scale = vec3.fromValues( 100, 100, 100 );
 
-		this.sphere = new Batch( new Mesh( new Sphere() ), this.shaderReflection );
+		this.sphere = new DrawSet( new Mesh( new Sphere() ), this.shaderReflection );
 		this.sphere.transform.position = vec3.fromValues( 0, 0, 0 );
 		this.sphere.transform.scale = vec3.fromValues( 1.5, 1.5, 1.5 );
 
@@ -230,7 +230,7 @@ export default class extends Base {
 
 		this.cubeCameras.forEach( ( camera ) => {
 
-			const cameraDebugBatch = new Batch( new Mesh( this.cameraDebugGeo ), new Shader( colorVertex, colorFragment ) );
+			const cameraDebugBatch = new DrawSet( new Mesh( this.cameraDebugGeo ), new Program( colorVertex, colorFragment ) );
 
 			cameraDebugBatch.transform.quaternion = camera.transform.quaternion;
 			cameraDebugBatch.transform.scale = vec3.fromValues( 0.3, 0.3, 0.3 );

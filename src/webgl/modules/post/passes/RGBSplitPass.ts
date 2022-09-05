@@ -1,4 +1,4 @@
-import Bolt, { Shader, FBO, Texture2D } from "@bolt-webgl/core";
+import Bolt, { Program, FBO, Texture2D } from "@bolt-webgl/core";
 import { Pass } from "./Pass";
 
 import vertexShader from "./shaders/rgbSplit/rgbSplit.vert";
@@ -6,7 +6,7 @@ import fragmentShader from "./shaders/rgbSplit/rgbSplit.frag";
 
 export default class RGBSplitPass extends Pass {
 
-	shader!: Shader;
+	program!: Program;
 
 	constructor( bolt: Bolt, {
 		width = 256,
@@ -18,7 +18,7 @@ export default class RGBSplitPass extends Pass {
 			height
 		} );
 
-		this.shader = new Shader( vertexShader, fragmentShader );
+		this.program = new Program( vertexShader, fragmentShader );
 
 	}
 
@@ -30,9 +30,9 @@ export default class RGBSplitPass extends Pass {
 
 		}
 
-		this.shader.setTexture( "map", texture ? texture : readFBO.targetTexture );
+		this.program.setTexture( "map", texture ? texture : readFBO.targetTexture );
 
-		this.fullScreenTriangle.draw( this.shader );
+		this.fullScreenTriangle.draw( this.program );
 
 		readFBO.unbind();
 		writeFbo.unbind();

@@ -4,11 +4,11 @@ import { Pass } from "./Pass";
 import vertexShader from "./shaders/fxaa/fxaa.vert";
 import fragmentShader from "./shaders/fxaa/fxaa.frag";
 import { vec2 } from "gl-matrix";
-import Bolt, { Shader, FBO, Texture2D } from "@bolt-webgl/core";
+import Bolt, { Program, FBO, Texture2D } from "@bolt-webgl/core";
 
 export default class FXAAPass extends Pass {
 
-	shader!: Shader;
+	program!: Program;
 
 	constructor( bolt: Bolt, {
 		width = 256,
@@ -20,9 +20,9 @@ export default class FXAAPass extends Pass {
 			height
 		} );
 
-		this.shader = new Shader( vertexShader, fragmentShader );
-		this.shader.activate();
-		this.shader.setVector2( "resolution", vec2.fromValues( width, height ) );
+		this.program = new Program( vertexShader, fragmentShader );
+		this.program.activate();
+		this.program.setVector2( "resolution", vec2.fromValues( width, height ) );
 
 	}
 
@@ -34,10 +34,10 @@ export default class FXAAPass extends Pass {
 
 		}
 
-		this.shader.activate();
-		this.shader.setTexture( "map", texture ? texture : readFBO.targetTexture );
+		this.program.activate();
+		this.program.setTexture( "map", texture ? texture : readFBO.targetTexture );
 
-		this.fullScreenTriangle.draw( this.shader );
+		this.fullScreenTriangle.draw( this.program );
 
 		readFBO.unbind();
 		writeFbo.unbind();

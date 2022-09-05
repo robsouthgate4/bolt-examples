@@ -2,7 +2,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Mesh, Transform, Batch, FBO, CameraPersp } from "@bolt-webgl/core";
+import Bolt, { Program, Mesh, Transform, DrawSet, FBO, CameraPersp } from "@bolt-webgl/core";
 
 import defaultVertex from "./shaders/default/default.vert";
 import defaultFragment from "./shaders/default/default.frag";
@@ -17,13 +17,13 @@ import Plane from "@/webgl/modules/primitives/Plane";
 export default class extends Base {
 
 	canvas: HTMLCanvasElement;
-	shader: Shader;
+	program: Program;
 	lightPosition: vec3;
 	camera: CameraPersp;
 	assetsLoaded?: boolean;
 	torusTransform!: Transform;
-	cubeBatch!: Batch;
-	planeBatch!: Batch;
+	cubeBatch!: DrawSet;
+	planeBatch!: DrawSet;
 	bolt: Bolt;
 	shadowMapSize!: number;
 	depthFBO!: FBO;
@@ -46,7 +46,7 @@ export default class extends Base {
 		this.bolt = Bolt.getInstance();
 		this.bolt.init( this.canvas, { antialias: true } );
 
-		this.shader = new Shader( defaultVertex, defaultFragment );
+		this.program = new Program( defaultVertex, defaultFragment );
 		this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
 		this.camera = new CameraPersp( {
@@ -91,17 +91,17 @@ export default class extends Base {
 		const cubeGeometry = new Cube( { widthSegments: 1, heightSegments: 1 } );
 		const planeGeometry = new Plane( { widthSegments: 10, heightSegments: 10 } );
 
-		this.cubeBatch = new Batch(
+		this.cubeBatch = new DrawSet(
 			new Mesh( cubeGeometry ),
-			this.shader
+			this.program
 		);
 
 		this.cubeBatch.transform.position[ 1 ] = 0.5;
 		this.cubeBatch.transform.rotateY( Math.PI * 0.5 );
 
-		this.planeBatch = new Batch(
+		this.planeBatch = new DrawSet(
 			new Mesh( planeGeometry ),
-			this.shader
+			this.program
 		);
 
 		this.planeBatch.transform.rotateX( Math.PI * 0.5 );

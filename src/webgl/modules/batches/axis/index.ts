@@ -1,10 +1,10 @@
-import { Batch, LINES, Mesh, Shader } from "@bolt-webgl/core";
+import { DrawSet, LINES, Mesh, Program } from "@bolt-webgl/core";
 
 import vertexShader from "./shaders/axis.vert";
 import fragmentShader from "./shaders/axis.frag";
 import { vec3 } from "gl-matrix";
 
-export default class Axis extends Batch {
+export default class Axis extends DrawSet {
 
 	constructor() {
 
@@ -24,9 +24,9 @@ export default class Axis extends Batch {
 
 		mesh.addAttribute( new Float32Array( colors ), 3, 3 );
 
-		const shader = new Shader( vertexShader, fragmentShader );
+		const program = new Program( vertexShader, fragmentShader );
 
-		super( mesh, shader );
+		super( mesh, program );
 
 		this.transform.scale = vec3.fromValues( 5, 5, 5 );
 

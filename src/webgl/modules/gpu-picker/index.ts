@@ -1,19 +1,19 @@
-import Bolt, { Batch, CameraPersp, FBO, Node, RBO, RGBA, Shader, UNSIGNED_BYTE } from "@bolt-webgl/core";
+import Bolt, { DrawSet, CameraPersp, FBO, Node, RBO, RGBA, Program, UNSIGNED_BYTE } from "@bolt-webgl/core";
 import { mat4, vec2, vec4 } from "gl-matrix";
 import fragmentShader from "./shaders/picking.frag";
 import vertexShader from "./shaders/picking.vert";
 
 export interface PickingData {
-	batch: Batch,
+	batch: DrawSet,
 	id: number,
-	initialShader: Shader
+	initialShader: Program
 }
 
 export default class GPUPicker {
 
 	private _fbo: FBO;
 	private _rbo: RBO;
-	private _pickingShader!: Shader;
+	private _pickingProgram!: Program;
 	private _bolt: Bolt;
 	private _canvas: HTMLCanvasElement;
 	private _pickingDataArray: PickingData[] = [];
@@ -37,7 +37,7 @@ export default class GPUPicker {
 		this._fbo.unbind();
 		this._rbo.unbind();
 
-		this._pickingShader = new Shader( vertexShader, fragmentShader );
+		this._pickingProgram = new Program( vertexShader, fragmentShader );
 
 	}
 
@@ -104,11 +104,11 @@ export default class GPUPicker {
 
 			node.traverse( ( childNode: Node ) => {
 
-				if ( childNode instanceof Batch ) {
+				if ( childNode instanceof DrawSet ) {
 
 					id ++;
 
-					this._pickingDataArray.push( { batch: childNode, id, initialShader: childNode.shader } );
+					this._pickingDataArray.push( { batch: childNode, id, initialShader: childNode.program } );
 
 				}
 
@@ -165,7 +165,7 @@ export default class GPUPicker {
 
 	/**
 	 * Draws the picking objects to a framebuffer
-	 * Assigns picking shader and passes ID as a uniform
+	 * Assigns picking program and passes ID as a uniform
 	 */
 	_drawPickingBuffer() {
 
@@ -182,16 +182,16 @@ export default class GPUPicker {
 			const pickingItem = this._pickingDataArray[ i ];
 
 			const { batch, id } = pickingItem;
-			batch.shader = this._pickingShader;
-			batch.shader.activate();
+			batch.program = this._pickingProgram;
+			batch.program.activate();
 
 			mat4.multiply( this._viewProjectionMatrix, this._projectionMatrix, this._camera.view );
 
 			// set the projection matrix to be the picking projection matrix ( 1 pixel frustum )
-			batch.shader.setMatrix4( "viewProjection", this._viewProjectionMatrix );
+			batch.program.setMatrix4( "viewProjection", this._viewProjectionMatrix );
 
 			// adapted from https://webgl2fundamentals.org/webgl/lessons/webgl-picking.html
-			batch.shader.setVector4(
+			batch.program.setVector4(
 				"id",
 				vec4.fromValues(
 					( ( id >> 0 ) & 0xFF ) / 0xFF,
@@ -207,7 +207,7 @@ export default class GPUPicker {
 
 	}
 	/**
-	 * reset batches shader to initial shader before picking draw
+	 * reset batches program to initial program before picking draw
 	 */
 	_restoreShaders() {
 
@@ -215,7 +215,7 @@ export default class GPUPicker {
 
 			const pickingItem = this._pickingDataArray[ i ];
 			const { batch, initialShader } = pickingItem;
-			batch.shader = initialShader;
+			batch.program = initialShader;
 
 		}
 

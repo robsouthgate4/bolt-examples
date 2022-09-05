@@ -1,6 +1,6 @@
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES, CameraOrtho } from "@bolt-webgl/core";
+import Bolt, { Program, Mesh, Transform, DrawSet, Node, TRIANGLES, CameraOrtho } from "@bolt-webgl/core";
 
 import normalVertex from "./shaders/normal/normal.vert";
 import normalFragment from "./shaders/normal/normal.frag";
@@ -13,14 +13,14 @@ import Floor from "@/webgl/modules/batches/floor";
 export default class extends Base {
 
 	canvas: HTMLCanvasElement;
-	shader: Shader;
+	program: Program;
 	camera: CameraOrtho;
 	assetsLoaded?: boolean;
 	torusTransform!: Transform;
-	sphereBatch!: Batch;
-	cubeBatch!: Batch;
-	planeBatch!: Batch;
-	triangleBatch!: Batch;
+	sphereBatch!: DrawSet;
+	cubeBatch!: DrawSet;
+	planeBatch!: DrawSet;
+	triangleBatch!: DrawSet;
 	bolt: Bolt;
 	gl: WebGL2RenderingContext;
 	root!: Node;
@@ -44,7 +44,7 @@ export default class extends Base {
 
 		this.gl = this.bolt.getContext();
 
-		this.shader = new Shader( normalVertex, normalFragment );
+		this.program = new Program( normalVertex, normalFragment );
 
 		this.frustumSize = 7;
 		const aspect = this.canvas.width / this.canvas.height;
@@ -75,9 +75,9 @@ export default class extends Base {
 
 		const cubeGeometry = new Cube( { widthSegments: 1, heightSegments: 1 } );
 
-		this.cubeBatch = new Batch(
+		this.cubeBatch = new DrawSet(
 			new Mesh( cubeGeometry ).setDrawType( TRIANGLES ),
-			this.shader
+			this.program
 		);
 
 		this.cubeBatch.name = "cube";
