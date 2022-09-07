@@ -4,7 +4,7 @@ import Bolt, { Program, Node, DrawSet, TextureCube, CameraPersp, Camera, FBOCube
 
 import { quat, vec3 } from "gl-matrix";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
-import Floor from "@/webgl/modules/batches/floor";
+import Floor from "@/webgl/modules/draw-sets/floor";
 import reflectionVertex from "./shaders/reflection/reflection.vert";
 import reflectionFragment from "./shaders/reflection/reflection.frag";
 
@@ -92,9 +92,9 @@ export default class extends Base {
 
 		const gltfLoader = new GLTFLoader( this.bolt );
 		const cameraDebugGLTF = await gltfLoader.load( "/static/models/gltf/examples/camera/camera.gltf" );
-		const cameraDebugBatch = cameraDebugGLTF.children[ 0 ].children[ 0 ] as DrawSet;
+		const cameraDebugDrawSet = cameraDebugGLTF.children[ 0 ].children[ 0 ] as DrawSet;
 
-		this.cameraDebugGeo = cameraDebugBatch.mesh.buffers;
+		this.cameraDebugGeo = cameraDebugDrawSet.mesh.buffers;
 
 		const environmentTexture = new TextureCube( {
 			imagePath: "/static/textures/cubeMaps/sky/",
@@ -230,11 +230,11 @@ export default class extends Base {
 
 		this.cubeCameras.forEach( ( camera ) => {
 
-			const cameraDebugBatch = new DrawSet( new Mesh( this.cameraDebugGeo ), new Program( colorVertex, colorFragment ) );
+			const cameraDebugDrawSet = new DrawSet( new Mesh( this.cameraDebugGeo ), new Program( colorVertex, colorFragment ) );
 
-			cameraDebugBatch.transform.quaternion = camera.transform.quaternion;
-			cameraDebugBatch.transform.scale = vec3.fromValues( 0.3, 0.3, 0.3 );
-			cameraDebugBatch.setParent( this.cameraCubeParent );
+			cameraDebugDrawSet.transform.quaternion = camera.transform.quaternion;
+			cameraDebugDrawSet.transform.scale = vec3.fromValues( 0.3, 0.3, 0.3 );
+			cameraDebugDrawSet.setParent( this.cameraCubeParent );
 
 			camera.setParent( this.cameraCubeParent );
 

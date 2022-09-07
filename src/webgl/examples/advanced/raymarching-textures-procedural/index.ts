@@ -22,7 +22,7 @@ export default class extends Base {
 	camera: CameraPersp;
 	assetsLoaded!: boolean;
 	torusTransform!: Transform;
-	cubeBatch!: DrawSet;
+	cubeDrawSet!: DrawSet;
 	bolt: Bolt;
 	post: Post;
 	arcball!: CameraArcball;
@@ -122,7 +122,7 @@ export default class extends Base {
 		this.program.blendFunction = { src: SRC_ALPHA, dst: ONE_MINUS_SRC_ALPHA };
 
 		// setup nodes
-		this.cubeBatch = new DrawSet(
+		this.cubeDrawSet = new DrawSet(
 			new Mesh( geometry ),
 			this.program
 		);
@@ -166,7 +166,7 @@ export default class extends Base {
 		this.program.setVector3( "viewPosition", this.camera.position );
 		this.program.setFloat( "time", elapsed );
 
-		this.bolt.draw( this.cubeBatch );
+		this.bolt.draw( this.cubeDrawSet );
 
 		this.post.end();
 

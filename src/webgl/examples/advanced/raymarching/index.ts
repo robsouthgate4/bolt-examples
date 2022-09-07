@@ -6,7 +6,7 @@ import vertexShader from "./shaders/raymarch.vert";
 import fragmentShader from "./shaders/raymarch.frag";
 
 import { vec3, } from "gl-matrix";
-import CameraArcball from "@webgl/modules/CameraArcball";
+import Orbit from "@webgl/modules/Orbit";
 import Cube from "@/webgl/modules/primitives/Cube";
 import Post from "@/webgl/modules/post";
 import FXAAPass from "@/webgl/modules/post/passes/FXAAPass";
@@ -20,10 +20,10 @@ export default class extends Base {
 	camera: CameraPersp;
 	assetsLoaded!: boolean;
 	torusTransform!: Transform;
-	cubeBatch!: DrawSet;
+	cubeDrawSet!: DrawSet;
 	bolt: Bolt;
 	post: Post;
-	arcball: CameraArcball;
+	orbit: Orbit;
 
 	constructor() {
 
@@ -51,7 +51,7 @@ export default class extends Base {
 			target: vec3.fromValues( 0, 0, 0 ),
 		} );
 
-		this.arcball = new CameraArcball( this.camera, 4, 0.08 );
+		this.orbit = new Orbit( this.camera );
 
 		this.post = new Post( this.bolt );
 
@@ -83,7 +83,7 @@ export default class extends Base {
 		this.program.setTexture( "mapEqui", equiTexture );
 
 		// setup nodes
-		this.cubeBatch = new DrawSet(
+		this.cubeDrawSet = new DrawSet(
 			new Mesh( geometry ),
 			this.program
 		);
@@ -109,9 +109,9 @@ export default class extends Base {
 	update( elapsed: number, delta: number ) {
 
 		if ( ! this.assetsLoaded ) return;
+		this.orbit.update();
 
 		this.post.begin();
-		this.arcball.update();
 
 		const bgColor = 211 / 255;
 
@@ -122,7 +122,7 @@ export default class extends Base {
 		this.program.setVector3( "viewPosition", this.camera.position );
 		this.program.setFloat( "time", elapsed );
 
-		this.bolt.draw( this.cubeBatch );
+		this.bolt.draw( this.cubeDrawSet );
 
 		this.post.end();
 

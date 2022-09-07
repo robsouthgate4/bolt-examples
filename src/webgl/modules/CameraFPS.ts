@@ -1,4 +1,5 @@
-import { glMatrix, mat4, vec3 } from "gl-matrix";
+import { glMatrix, vec3 } from "gl-matrix";
+
 import { Camera } from "@bolt-webgl/core";
 
 export default class CameraFPS {
@@ -13,8 +14,7 @@ export default class CameraFPS {
 	private _camera: Camera;
 	private _active: boolean;
 
-	constructor(
-		camera: Camera ) {
+	constructor( camera: Camera ) {
 
 		this._camera = camera;
 		this._active = false;
@@ -36,85 +36,20 @@ export default class CameraFPS {
 
 		window.addEventListener( "mousemove", this.handleMouseMove.bind( this ) );
 
-		window.addEventListener( "keyup", e => {
+		window.addEventListener( "keyup", ( e ) => {
 
-			if ( e.key === "w" ) {
+			const keys = [ "w", "s", "a", "d", "e", "q" ];
+			if ( keys.includes( e.key ) ) {
 
-				this._activeKeys = this._activeKeys.filter( ( e ) => e !== 'w' );
-
-			}
-
-			if ( e.key === "s" ) {
-
-				this._activeKeys = this._activeKeys.filter( ( e ) => e !== 's' );
-
-
-			}
-
-			if ( e.key === "a" ) {
-
-				this._activeKeys = this._activeKeys.filter( ( e ) => e !== 'a' );
-
-
-			}
-
-			if ( e.key === "d" ) {
-
-				this._activeKeys = this._activeKeys.filter( ( e ) => e !== 'd' );
-
-			}
-
-			if ( e.key === "e" ) {
-
-				this._activeKeys = this._activeKeys.filter( ( e ) => e !== 'e' );
-
-			}
-
-			if ( e.key === "q" ) {
-
-				this._activeKeys = this._activeKeys.filter( ( e ) => e !== 'q' );
+				this._activeKeys = this._activeKeys.filter( ( k ) => k !== e.key );
 
 			}
 
 		} );
 
-		window.addEventListener( "keydown", e => {
+		window.addEventListener( "keydown", ( e ) => {
 
-			if ( e.key === "w" ) {
-
-				this._activeKeys.push( "w" );
-
-			}
-
-			if ( e.key === "s" ) {
-
-				this._activeKeys.push( "s" );
-
-			}
-
-			if ( e.key === "a" ) {
-
-				this._activeKeys.push( "a" );
-
-			}
-
-			if ( e.key === "d" ) {
-
-				this._activeKeys.push( "d" );
-
-			}
-
-			if ( e.key === "e" ) {
-
-				this._activeKeys.push( "e" );
-
-			}
-
-			if ( e.key === "q" ) {
-
-				this._activeKeys.push( "q" );
-
-			}
+			this._activeKeys.push( e.key );
 
 			if ( e.code === "Space" ) {
 
@@ -166,19 +101,23 @@ export default class CameraFPS {
 		this._yaw += xOffset;
 		this._pitch += yOffset;
 
-		if ( this._pitch > 89.0 )
-			this._pitch = 89.0;
-		if ( this._pitch < - 89.0 )
-			this._pitch = - 89.0;
+		if ( this._pitch > 89.0 ) this._pitch = 89.0;
+		if ( this._pitch < - 89.0 ) this._pitch = - 89.0;
+
+		const yawRadian = glMatrix.toRadian( this._yaw );
+		const pitchRadian = glMatrix.toRadian( this._pitch );
+		const yawCos = Math.cos( yawRadian );
+		const yawSin = Math.sin( yawRadian );
+		const pitchCos = Math.cos( pitchRadian );
+		const pitchSin = Math.sin( pitchRadian );
 
 		const direction = vec3.create();
-		direction[ 0 ] = Math.cos( glMatrix.toRadian( this._yaw ) ) * Math.cos( glMatrix.toRadian( this._pitch ) );
-		direction[ 1 ] = Math.sin( glMatrix.toRadian( this._pitch ) );
-		direction[ 2 ] = Math.sin( glMatrix.toRadian( this._yaw ) ) * Math.cos( glMatrix.toRadian( this._pitch ) );
+		direction[ 0 ] = yawCos * pitchCos;
+		direction[ 1 ] = pitchSin;
+		direction[ 2 ] = yawSin * pitchCos;
 
 		vec3.normalize( direction, direction );
 		vec3.copy( this._camera.forward, direction );
-
 
 	}
 
@@ -192,7 +131,11 @@ export default class CameraFPS {
 
 			const tempForward = vec3.clone( this._camera.forward );
 
-			vec3.multiply( tempForward, tempForward, vec3.fromValues( this._cameraSpeed, this._cameraSpeed, this._cameraSpeed ) );
+			vec3.multiply(
+				tempForward,
+				tempForward,
+				vec3.fromValues( this._cameraSpeed, this._cameraSpeed, this._cameraSpeed )
+			);
 			vec3.add( this._camera.position, this._camera.position, tempForward );
 
 		}
@@ -201,7 +144,11 @@ export default class CameraFPS {
 
 			const tempForward = vec3.clone( this._camera.forward );
 
-			vec3.multiply( tempForward, tempForward, vec3.fromValues( this._cameraSpeed, this._cameraSpeed, this._cameraSpeed ) );
+			vec3.multiply(
+				tempForward,
+				tempForward,
+				vec3.fromValues( this._cameraSpeed, this._cameraSpeed, this._cameraSpeed )
+			);
 			vec3.sub( this._camera.position, this._camera.position, tempForward );
 
 		}
@@ -213,7 +160,12 @@ export default class CameraFPS {
 			vec3.cross( tempPos, this._camera.forward, this._camera.up );
 			vec3.normalize( tempPos, tempPos );
 
-			vec3.multiply( tempPos, tempPos, vec3.fromValues( this._cameraSpeed, this._cameraSpeed, this._cameraSpeed ) );
+			vec3.multiply(
+				tempPos,
+				tempPos,
+				vec3.fromValues( this._cameraSpeed, this._cameraSpeed, this._cameraSpeed )
+			);
+
 			vec3.sub( this._camera.position, this._camera.position, tempPos );
 
 		}
@@ -225,23 +177,34 @@ export default class CameraFPS {
 			vec3.cross( tempPos, this._camera.forward, this._camera.up );
 			vec3.normalize( tempPos, tempPos );
 
-			vec3.multiply( tempPos, tempPos, vec3.fromValues( this._cameraSpeed, this._cameraSpeed, this._cameraSpeed ) );
+			vec3.multiply(
+				tempPos,
+				tempPos,
+				vec3.fromValues( this._cameraSpeed, this._cameraSpeed, this._cameraSpeed )
+			);
 			vec3.add( this._camera.position, this._camera.position, tempPos );
 
 		}
 
 		if ( this._activeKeys.includes( "e" ) ) {
 
-			vec3.add( this._camera.position, this._camera.position, vec3.fromValues( 0, this._cameraSpeed, 0 ) );
+			vec3.add(
+				this._camera.position,
+				this._camera.position,
+				vec3.fromValues( 0, this._cameraSpeed, 0 )
+			);
 
 		}
 
 		if ( this._activeKeys.includes( "q" ) ) {
 
-			vec3.add( this._camera.position, this._camera.position, vec3.fromValues( 0, - this._cameraSpeed, 0 ) );
+			vec3.add(
+				this._camera.position,
+				this._camera.position,
+				vec3.fromValues( 0, - this._cameraSpeed, 0 )
+			);
 
 		}
-
 
 	}
 
@@ -264,6 +227,5 @@ export default class CameraFPS {
 		this._active = value;
 
 	}
-
 
 }

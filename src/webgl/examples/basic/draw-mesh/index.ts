@@ -9,7 +9,7 @@ import colorFragment from "./shaders/color/color.frag";
 import { vec3, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
 import { GeometryBuffers } from "@bolt-webgl/core/build/Mesh";
-import Floor from "@/webgl/modules/batches/floor";
+import Floor from "@/webgl/modules/draw-sets/floor";
 
 export default class extends Base {
 
@@ -17,14 +17,14 @@ export default class extends Base {
     camera: CameraPersp;
     assetsLoaded?: boolean;
     torusTransform!: Transform;
-    sphereBatch!: DrawSet;
-    cubeBatch!: DrawSet;
-    planeBatch!: DrawSet;
-    triangleBatch!: DrawSet;
+    sphereDrawSet!: DrawSet;
+    cubeDrawSet!: DrawSet;
+    planeDrawSet!: DrawSet;
+    triangleDrawSet!: DrawSet;
     bolt: Bolt;
     gl: WebGL2RenderingContext;
     root!: Node;
-    floorBatch: any;
+    floorDrawSet: any;
     arcball: CameraArcball;
 
     constructor() {
@@ -69,9 +69,9 @@ export default class extends Base {
     	this.root.name = "root";
     	this.root.transform.positionX = 0;
 
-    	this.floorBatch = new Floor();
-    	this.floorBatch.name = "floor";
-    	this.floorBatch.setParent( this.root );
+    	this.floorDrawSet = new Floor();
+    	this.floorDrawSet.name = "floor";
+    	this.floorDrawSet.setParent( this.root );
 
     	// draw a simple quad
     	const triangleGeo: GeometryBuffers = {
@@ -97,15 +97,15 @@ export default class extends Base {
     	// attributes can be added with a named var and program
     	triangleMesh.addAttribute( new Float32Array( colours ), 3, { program: triProgram, attributeName: "aColor" } );
 
-    	this.triangleBatch = new DrawSet(
+    	this.triangleDrawSet = new DrawSet(
     		triangleMesh,
     		triProgram
     	);
 
-    	this.triangleBatch.transform.positionY = 1.5;
-    	this.triangleBatch.transform.scale = vec3.fromValues( 3, 3, 3 );
+    	this.triangleDrawSet.transform.positionY = 1.5;
+    	this.triangleDrawSet.transform.scale = vec3.fromValues( 3, 3, 3 );
 
-    	this.triangleBatch.setParent( this.root );
+    	this.triangleDrawSet.setParent( this.root );
 
     	this.resize();
 

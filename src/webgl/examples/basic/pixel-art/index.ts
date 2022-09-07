@@ -11,7 +11,7 @@ import FXAAPass from "@/webgl/modules/post/passes/FXAAPass";
 import RGBSplitPass from "@/webgl/modules/post/passes/RGBSplitPass";
 import PixelatePass from "@/webgl/modules/post/passes/PixelatePass";
 import RenderPass from "@/webgl/modules/post/passes/RenderPass";
-import Floor from "@/webgl/modules/batches/floor";
+import Floor from "@/webgl/modules/draw-sets/floor";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
 export default class extends Base {
 
@@ -20,8 +20,8 @@ export default class extends Base {
 	camera: CameraPersp;
 	assetsLoaded?: boolean;
 	torusTransform!: Transform;
-	sphereBatch!: DrawSet;
-	planeBatch!: DrawSet;
+	sphereDrawSet!: DrawSet;
+	planeDrawSet!: DrawSet;
 	post: Post;
 	fxaa!: FXAAPass;
 	rbgSplit!: RGBSplitPass;
@@ -30,7 +30,7 @@ export default class extends Base {
 	bolt = Bolt.getInstance();
 	gl: WebGL2RenderingContext;
 	root!: Node;
-	floorBatch!: Floor;
+	floorDrawSet!: Floor;
 	arcball: CameraArcball;
 	shaderBody: Program;
 	gltf!: Node;
@@ -97,8 +97,8 @@ export default class extends Base {
 		this.post.add( this.pixelate, true );
 
 		this.root = new Node();
-		this.floorBatch = new Floor();
-		this.floorBatch.setParent( this.root );
+		this.floorDrawSet = new Floor();
+		this.floorDrawSet.setParent( this.root );
 
 		this.gltf.transform.positionY = 2;
 		this.gltf.setParent( this.root );

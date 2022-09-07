@@ -18,10 +18,10 @@ export default class extends Base {
 	arcball: CameraArcball;
 	assetsLoaded?: boolean;
 	torusTransform!: Transform;
-	sphereBatch!: DrawSet;
-	cubeBatch!: DrawSet;
-	planeBatch!: DrawSet;
-	triangleBatch!: DrawSet;
+	sphereDrawSet!: DrawSet;
+	cubeDrawSet!: DrawSet;
+	planeDrawSet!: DrawSet;
+	triangleDrawSet!: DrawSet;
 	bolt: Bolt;
 	root!: Node;
 	viewport!: { height: number; width: number; };
@@ -90,7 +90,7 @@ export default class extends Base {
 
 		const mesh = new Mesh( planeGeometry ).setDrawType( TRIANGLES );
 
-		this.planeBatch = new DrawSet(
+		this.planeDrawSet = new DrawSet(
 			mesh,
 			this.program
 		);

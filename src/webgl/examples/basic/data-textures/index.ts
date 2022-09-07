@@ -17,8 +17,8 @@ export default class extends Base {
 	bolt: Bolt;
 	gl: WebGL2RenderingContext;
 	arcball: CameraArcball;
-	textureBatch!: DrawSet;
-	planeBatch: any;
+	textureDrawSet!: DrawSet;
+	planeDrawSet: any;
 	dataTexture!: Texture2D;
 
 	constructor() {
@@ -105,7 +105,7 @@ export default class extends Base {
 
 		}, 100 );
 
-		this.textureBatch = new DrawSet( new Mesh( new Plane( { width: 5, height: 5 } ), ), program );
+		this.textureDrawSet = new DrawSet( new Mesh( new Plane( { width: 5, height: 5 } ), ), program );
 
 		this.resize();
 
@@ -131,7 +131,7 @@ export default class extends Base {
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.clear( 1, 1, 1, 1 );
 
-		this.bolt.draw( this.textureBatch );
+		this.bolt.draw( this.textureDrawSet );
 
 	}
 

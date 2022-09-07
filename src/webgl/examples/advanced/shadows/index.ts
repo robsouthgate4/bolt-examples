@@ -22,8 +22,8 @@ export default class extends Base {
 	camera: CameraPersp;
 	assetsLoaded?: boolean;
 	torusTransform!: Transform;
-	cubeBatch!: DrawSet;
-	planeBatch!: DrawSet;
+	cubeDrawSet!: DrawSet;
+	planeDrawSet!: DrawSet;
 	bolt: Bolt;
 	shadowMapSize!: number;
 	depthFBO!: FBO;
@@ -91,21 +91,21 @@ export default class extends Base {
 		const cubeGeometry = new Cube( { widthSegments: 1, heightSegments: 1 } );
 		const planeGeometry = new Plane( { widthSegments: 10, heightSegments: 10 } );
 
-		this.cubeBatch = new DrawSet(
+		this.cubeDrawSet = new DrawSet(
 			new Mesh( cubeGeometry ),
 			this.program
 		);
 
-		this.cubeBatch.transform.position[ 1 ] = 0.5;
-		this.cubeBatch.transform.rotateY( Math.PI * 0.5 );
+		this.cubeDrawSet.transform.position[ 1 ] = 0.5;
+		this.cubeDrawSet.transform.rotateY( Math.PI * 0.5 );
 
-		this.planeBatch = new DrawSet(
+		this.planeDrawSet = new DrawSet(
 			new Mesh( planeGeometry ),
 			this.program
 		);
 
-		this.planeBatch.transform.rotateX( Math.PI * 0.5 );
-		this.planeBatch.transform.scale = vec3.fromValues( 10, 10, 10 );
+		this.planeDrawSet.transform.rotateX( Math.PI * 0.5 );
+		this.planeDrawSet.transform.scale = vec3.fromValues( 10, 10, 10 );
 
 		this.resize();
 
@@ -133,8 +133,8 @@ export default class extends Base {
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.clear( 1, 1, 1, 1 );
 
-		this.bolt.draw( this.planeBatch );
-		this.bolt.draw( this.cubeBatch );
+		this.bolt.draw( this.planeDrawSet );
+		this.bolt.draw( this.cubeDrawSet );
 
 	}
 

@@ -8,7 +8,7 @@ import normalFragment from "./shaders/normal/normal.frag";
 import { vec3, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
 import Cube from "@/webgl/modules/primitives/Cube";
-import Floor from "@/webgl/modules/batches/floor";
+import Floor from "@/webgl/modules/draw-sets/floor";
 
 export default class extends Base {
 
@@ -17,14 +17,14 @@ export default class extends Base {
 	camera: CameraOrtho;
 	assetsLoaded?: boolean;
 	torusTransform!: Transform;
-	sphereBatch!: DrawSet;
-	cubeBatch!: DrawSet;
-	planeBatch!: DrawSet;
-	triangleBatch!: DrawSet;
+	sphereDrawSet!: DrawSet;
+	cubeDrawSet!: DrawSet;
+	planeDrawSet!: DrawSet;
+	triangleDrawSet!: DrawSet;
 	bolt: Bolt;
 	gl: WebGL2RenderingContext;
 	root!: Node;
-	floorBatch: any;
+	floorDrawSet: any;
 	arcball: CameraArcball;
 	frustumSize: number;
 
@@ -75,16 +75,16 @@ export default class extends Base {
 
 		const cubeGeometry = new Cube( { widthSegments: 1, heightSegments: 1 } );
 
-		this.cubeBatch = new DrawSet(
+		this.cubeDrawSet = new DrawSet(
 			new Mesh( cubeGeometry ).setDrawType( TRIANGLES ),
 			this.program
 		);
 
-		this.cubeBatch.name = "cube";
-		this.cubeBatch.transform.positionY = 0.75;
+		this.cubeDrawSet.name = "cube";
+		this.cubeDrawSet.transform.positionY = 0.75;
 
-		this.floorBatch = new Floor();
-		this.floorBatch.name = "floor";
+		this.floorDrawSet = new Floor();
+		this.floorDrawSet.name = "floor";
 
 	}
 
@@ -118,12 +118,12 @@ export default class extends Base {
 		this.bolt.clear( 1, 1, 1, 1 );
 
 		// applied to quaternion
-		this.cubeBatch.transform.rotateX( 0.5 * delta );
-		this.cubeBatch.transform.rotateY( 1 * delta );
-		this.cubeBatch.transform.rotateZ( - 1.5 * delta );
+		this.cubeDrawSet.transform.rotateX( 0.5 * delta );
+		this.cubeDrawSet.transform.rotateY( 1 * delta );
+		this.cubeDrawSet.transform.rotateZ( - 1.5 * delta );
 
-		this.bolt.draw( this.cubeBatch );
-		this.bolt.draw( this.floorBatch );
+		this.bolt.draw( this.cubeDrawSet );
+		this.bolt.draw( this.floorDrawSet );
 
 
 	}

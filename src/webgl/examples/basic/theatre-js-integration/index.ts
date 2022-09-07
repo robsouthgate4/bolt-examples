@@ -15,7 +15,7 @@ import colorFragment from "../matcap/shaders/color/color.frag";
 import { getProject, ISheetObject, types as t } from "@theatre/core";
 import studio from "@theatre/studio";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
-import Floor from "@/webgl/modules/batches/floor";
+import Floor from "@/webgl/modules/draw-sets/floor";
 
 export default class extends Base {
 

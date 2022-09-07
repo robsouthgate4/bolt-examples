@@ -12,8 +12,8 @@ import compositionFragment from "./shaders/composition/composition.frag";
 import { vec2, vec3, vec4, } from "gl-matrix";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
 import Post from "@/webgl/modules/post";
-import Axis from "@/webgl/modules/batches/axis";
-import Floor from "@/webgl/modules/batches/floor";
+import Axis from "@/webgl/modules/draw-sets/axis";
+import Floor from "@/webgl/modules/draw-sets/floor";
 import ShaderPass from "@/webgl/modules/post/passes/ShaderPass";
 
 export default class extends Base {
@@ -34,7 +34,7 @@ export default class extends Base {
 	normalTexture: Texture2D;
 	geometryProgram: Program;
 	gBufferRBO: RBO;
-	cubeBatch!: DrawSet;
+	cubeDrawSet!: DrawSet;
 	comp: ShaderPass;
 	compProgram: Program;
 	depthTexture: Texture2D;

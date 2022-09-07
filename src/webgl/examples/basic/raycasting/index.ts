@@ -10,7 +10,7 @@ import rayFragment from "./shaders/ray/ray.frag";
 
 import { vec3 } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
-import Floor from "@/webgl/modules/batches/floor";
+import Floor from "@/webgl/modules/draw-sets/floor";
 import AxisAlignedBox from "@/webgl/modules/raycast/AxisAlignedBox";
 import { BoxBounds } from "@bolt-webgl/core/build/Mesh";
 import Ray from "@/webgl/modules/raycast/Ray";
@@ -25,16 +25,16 @@ export default class extends Base {
 	camera: CameraPersp;
 	assetsLoaded?: boolean;
 	torusTransform!: Transform;
-	sphereBatch!: DrawSet;
-	planeBatch!: DrawSet;
-	triangleBatch!: DrawSet;
+	sphereDrawSet!: DrawSet;
+	planeDrawSet!: DrawSet;
+	triangleDrawSet!: DrawSet;
 	bolt: Bolt;
 	root!: Node;
-	floorBatch: any;
+	floorDrawSet: any;
 	AAbox!: AxisAlignedBox;
 	AABoxHelper!: DrawSet;
 	raycast: Raycast;
-	intersectionDebugBatch!: DrawSet;
+	intersectionDebugDrawSet!: DrawSet;
 	arcball: CameraArcball;
 
 	constructor() {
@@ -79,7 +79,7 @@ export default class extends Base {
 
 			const ray = this.raycast.generateRayFromCamera( nx, ny, this.camera );
 
-			this.AAbox.transform( this.sphereBatch.modelMatrix );
+			this.AAbox.transform( this.sphereDrawSet.modelMatrix );
 
 			const intersectsBox = ray.intersectsBox( { min: this.AAbox.min, max: this.AAbox.max } );
 
@@ -89,14 +89,14 @@ export default class extends Base {
 
 				// now run the triangle intersection test
 
-				for ( let i = 0; i < this.sphereBatch.mesh.faces.length; i ++ ) {
+				for ( let i = 0; i < this.sphereDrawSet.mesh.faces.length; i ++ ) {
 
-					const tri = this.sphereBatch.mesh.faces[ i ].vertices.map( ( vertex ) => {
+					const tri = this.sphereDrawSet.mesh.faces[ i ].vertices.map( ( vertex ) => {
 
 						// transform the face by the sphere world matrix
 
 						const vecTransformed = vec3.fromValues( vertex[ 0 ], vertex[ 1 ], vertex[ 2 ] );
-						vec3.transformMat4( vecTransformed, vecTransformed, this.sphereBatch.modelMatrix );
+						vec3.transformMat4( vecTransformed, vecTransformed, this.sphereDrawSet.modelMatrix );
 
 						return vec3.fromValues( vecTransformed[ 0 ], vecTransformed[ 1 ], vecTransformed[ 2 ] );
 
@@ -114,7 +114,7 @@ export default class extends Base {
 
 			}
 
-			this.intersectionDebugBatch.transform.position = hit;
+			this.intersectionDebugDrawSet.transform.position = hit;
 
 			this._debugDrawRay( ray, 20 );
 
@@ -153,34 +153,34 @@ export default class extends Base {
 		this.root = new Node();
 		this.root.name = "root";
 
-		this.sphereBatch = new DrawSet(
+		this.sphereDrawSet = new DrawSet(
 			new Mesh( sphereGeometry ).setDrawType( TRIANGLES ),
 			this.program
 		);
 
-		this.sphereBatch.mesh.calculateBoxBounds();
-		const bounds: BoxBounds = this.sphereBatch.mesh.bounds;
+		this.sphereDrawSet.mesh.calculateBoxBounds();
+		const bounds: BoxBounds = this.sphereDrawSet.mesh.bounds;
 
-		this.sphereBatch.name = "cube";
-		this.sphereBatch.transform.positionY = 1;
-		this.sphereBatch.transform.scale = vec3.fromValues( 1, 1, 1 );
-		this.sphereBatch.updateModelMatrix();
-		this.sphereBatch.setParent( this.root );
+		this.sphereDrawSet.name = "cube";
+		this.sphereDrawSet.transform.positionY = 1;
+		this.sphereDrawSet.transform.scale = vec3.fromValues( 1, 1, 1 );
+		this.sphereDrawSet.updateModelMatrix();
+		this.sphereDrawSet.setParent( this.root );
 
-		this.intersectionDebugBatch = new DrawSet( new Mesh( new Cube() ), this.program );
-		this.intersectionDebugBatch.transform.scale = vec3.fromValues( 0.2, 0.2, 0.2 );
-		this.intersectionDebugBatch.transform.positionY = - 999;
+		this.intersectionDebugDrawSet = new DrawSet( new Mesh( new Cube() ), this.program );
+		this.intersectionDebugDrawSet.transform.scale = vec3.fromValues( 0.2, 0.2, 0.2 );
+		this.intersectionDebugDrawSet.transform.positionY = - 999;
 
-		this.intersectionDebugBatch.setParent( this.root );
+		this.intersectionDebugDrawSet.setParent( this.root );
 
 		this.AAbox = new AxisAlignedBox( bounds.min, bounds.max );
 		this.AAbox.createVisualiser();
-		this.AAbox.transform( this.sphereBatch.modelMatrix );
+		this.AAbox.transform( this.sphereDrawSet.modelMatrix );
 		this.AAbox.visualiser?.setParent( this.root );
 
-		this.floorBatch = new Floor();
-		this.floorBatch.name = "floor";
-		this.floorBatch.setParent( this.root );
+		this.floorDrawSet = new Floor();
+		this.floorDrawSet.name = "floor";
+		this.floorDrawSet.setParent( this.root );
 
 		this.resize();
 

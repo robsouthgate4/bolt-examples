@@ -10,7 +10,7 @@ import { vec3, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
 import Sphere from "@/webgl/modules/primitives/Sphere";
 import Cube from "@/webgl/modules/primitives/Cube";
-import Floor from "@/webgl/modules/batches/floor";
+import Floor from "@/webgl/modules/draw-sets/floor";
 
 export default class extends Base {
 
@@ -19,14 +19,14 @@ export default class extends Base {
 	camera: CameraPersp;
 	assetsLoaded?: boolean;
 	torusTransform!: Transform;
-	sphereBatch!: DrawSet;
-	cubeBatch!: DrawSet;
-	planeBatch!: DrawSet;
-	triangleBatch!: DrawSet;
+	sphereDrawSet!: DrawSet;
+	cubeDrawSet!: DrawSet;
+	planeDrawSet!: DrawSet;
+	triangleDrawSet!: DrawSet;
 	bolt: Bolt;
 	gl: WebGL2RenderingContext;
 	root!: Node;
-	floorBatch: any;
+	floorDrawSet: any;
 	arcball: CameraArcball;
 
 	constructor() {
@@ -76,30 +76,30 @@ export default class extends Base {
 		this.root.name = "root";
 		this.root.transform.positionX = 0;
 
-		this.sphereBatch = new DrawSet(
+		this.sphereDrawSet = new DrawSet(
 			new Mesh( sphereGeometry ).setDrawType( TRIANGLES ),
 			this.program
 		);
-		this.sphereBatch.transform.positionX = - 1.6;
-		this.sphereBatch.transform.scale = vec3.fromValues( 1.5, 1.5, 1.5 );
-		this.sphereBatch.name = "sphere";
-		this.sphereBatch.setParent( this.root );
+		this.sphereDrawSet.transform.positionX = - 1.6;
+		this.sphereDrawSet.transform.scale = vec3.fromValues( 1.5, 1.5, 1.5 );
+		this.sphereDrawSet.name = "sphere";
+		this.sphereDrawSet.setParent( this.root );
 
-		this.cubeBatch = new DrawSet(
+		this.cubeDrawSet = new DrawSet(
 			new Mesh( cubeGeometry ).setDrawType( TRIANGLES ),
 			this.program
 		);
 
-		this.cubeBatch.name = "cube";
-		this.cubeBatch.transform.scale = vec3.fromValues( 1.5, 1.5, 1.5 );
-		this.cubeBatch.draw = true;
-		this.cubeBatch.setParent( this.root );
+		this.cubeDrawSet.name = "cube";
+		this.cubeDrawSet.transform.scale = vec3.fromValues( 1.5, 1.5, 1.5 );
+		this.cubeDrawSet.draw = true;
+		this.cubeDrawSet.setParent( this.root );
 
-		this.floorBatch = new Floor();
-		this.floorBatch.name = "floor";
-		this.floorBatch.setParent( this.root );
+		this.floorDrawSet = new Floor();
+		this.floorDrawSet.name = "floor";
+		this.floorDrawSet.setParent( this.root );
 
-		this.cubeBatch.transform.positionX = 1.5;
+		this.cubeDrawSet.transform.positionX = 1.5;
 
 		this.resize();
 

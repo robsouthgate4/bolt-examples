@@ -8,7 +8,7 @@ import CameraArcball from "@webgl/modules/CameraArcball";
 import diffuseVertex from "./shaders/diffuse/diffuse.vert";
 import diffuseFragment from "./shaders/diffuse/diffuse.frag";
 import { GlTf } from "@/webgl/modules/gltf-loader/types/gltf";
-import Floor from "@/webgl/modules/batches/floor";
+import Floor from "@/webgl/modules/draw-sets/floor";
 import Sphere from "@/webgl/modules/primitives/Sphere";
 import GPUPicker from "@/webgl/modules/gpu-picker";
 
@@ -145,20 +145,20 @@ export default class extends Base {
 				program.activate();
 				program.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
 
-				const sphereBatch = new DrawSet(
+				const sphereDrawSet = new DrawSet(
 					new Mesh( new Sphere( { widthSegments: 8, heightSegments: 8 } ) ),
 					program
 				);
 
 				// generate ids to match picker against
 				this.pickingDataArray.push( {
-					batch: sphereBatch,
+					batch: sphereDrawSet,
 					id
 				} );
 
-				sphereBatch.transform.positionX = ( x - ( xCount * 0.45 ) ) * gridPadding;
-				sphereBatch.transform.positionY = y * gridPadding + 0.75;
-				sphereBatch.setParent( this.root );
+				sphereDrawSet.transform.positionX = ( x - ( xCount * 0.45 ) ) * gridPadding;
+				sphereDrawSet.transform.positionY = y * gridPadding + 0.75;
+				sphereDrawSet.setParent( this.root );
 
 			}
 

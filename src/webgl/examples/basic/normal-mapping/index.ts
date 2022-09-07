@@ -10,7 +10,7 @@ import colorFragment from "./shaders/color/color.frag";
 import { vec2, vec3, vec4, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
 import Sphere from "@/webgl/modules/primitives/Sphere";
-import Floor from "@/webgl/modules/batches/floor";
+import Floor from "@/webgl/modules/draw-sets/floor";
 export default class extends Base {
 
 	canvas: HTMLCanvasElement;
@@ -24,8 +24,8 @@ export default class extends Base {
 	normalMapProgram: Program;
 	matcapTexture!: Texture2D;
 	normalTexture!: Texture2D;
-	sphereBatch!: DrawSet;
-	floorBatch: any;
+	sphereDrawSet!: DrawSet;
+	floorDrawSet: any;
 
 	constructor() {
 
@@ -90,12 +90,12 @@ export default class extends Base {
 		this.normalMapProgram.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
 
 		this.root = new Node();
-		this.sphereBatch = new DrawSet( new Mesh( new Sphere( { widthSegments: 24, heightSegments: 24 } ) ), this.normalMapProgram );
-		this.sphereBatch.transform.positionY = 1;
-		this.sphereBatch.setParent( this.root );
+		this.sphereDrawSet = new DrawSet( new Mesh( new Sphere( { widthSegments: 24, heightSegments: 24 } ) ), this.normalMapProgram );
+		this.sphereDrawSet.transform.positionY = 1;
+		this.sphereDrawSet.setParent( this.root );
 
-		this.floorBatch = new Floor();
-		this.floorBatch.setParent( this.root );
+		this.floorDrawSet = new Floor();
+		this.floorDrawSet.setParent( this.root );
 
 		this.resize();
 
@@ -123,7 +123,7 @@ export default class extends Base {
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.clear( 0.6, 0.6, 0.6, 1 );
 
-		this.sphereBatch.transform.rotateY( 0.15 * delta );
+		this.sphereDrawSet.transform.rotateY( 0.15 * delta );
 
 		this.bolt.draw( this.root );
 

@@ -13,149 +13,146 @@ import normalFragment from "./shaders/normal/normal.frag";
 import { vec3, } from "gl-matrix";
 import Orbit from "@webgl/modules/Orbit";
 import { GeometryBuffers } from "@bolt-webgl/core/build/Mesh";
-import Floor from "@/webgl/modules/batches/floor";
+import Floor from "@/webgl/modules/draw-sets/floor";
 import Cube from "@/webgl/modules/primitives/Cube";
 
 export default class extends Base {
 
-    canvas: HTMLCanvasElement;
-    camera: CameraPersp;
-    assetsLoaded?: boolean;
-    torusTransform!: Transform;
-    sphereBatch!: DrawSet;
-    cubeBatch!: DrawSet;
-    planeBatch!: DrawSet;
-    triangleBatch!: DrawSet;
-    bolt: Bolt;
-    gl: WebGL2RenderingContext;
-    root!: Node;
-    floorBatch: any;
-    orbit!: Orbit;
+	canvas: HTMLCanvasElement;
+	camera: CameraPersp;
+	assetsLoaded?: boolean;
+	torusTransform!: Transform;
+	sphereDrawSet!: DrawSet;
+	cubeDrawSet!: DrawSet;
+	planeDrawSet!: DrawSet;
+	triangleDrawSet!: DrawSet;
+	bolt: Bolt;
+	gl: WebGL2RenderingContext;
+	root!: Node;
+	floorDrawSet: any;
+	orbit!: Orbit;
 
-    constructor() {
+	constructor() {
 
-    	super();
+		super();
 
-    	this.width = window.innerWidth;
-    	this.height = window.innerHeight;
+		this.width = window.innerWidth;
+		this.height = window.innerHeight;
 
-    	this.canvas = <HTMLCanvasElement>document.getElementById( "experience" );
-    	this.canvas.width = this.width;
-    	this.canvas.height = this.height;
+		this.canvas = <HTMLCanvasElement>document.getElementById( "experience" );
+		this.canvas.width = this.width;
+		this.canvas.height = this.height;
 
-    	this.bolt = Bolt.getInstance();
-    	this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
+		this.bolt = Bolt.getInstance();
+		this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
 
-    	this.gl = this.bolt.getContext();
+		this.gl = this.bolt.getContext();
 
-    	this.camera = new CameraPersp( {
-    		aspect: this.canvas.width / this.canvas.height,
-    		fov: 45,
-    		near: 0.1,
-    		far: 1000,
-    		position: vec3.fromValues( 20, 1, 10 ),
-    		target: vec3.fromValues( 0, 1, 0 ),
-    	} );
+		this.camera = new CameraPersp( {
+			aspect: this.canvas.width / this.canvas.height,
+			fov: 45,
+			near: 0.1,
+			far: 1000,
+			position: vec3.fromValues( 10, 1, 8 ),
+			target: vec3.fromValues( 0, 1, 0 ),
+		} );
 
-    	this.bolt.setCamera( this.camera );
-    	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-    	this.bolt.enableDepth();
+		this.bolt.setCamera( this.camera );
+		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+		this.bolt.enableDepth();
 
-    	this.init();
-
-
-    }
-
-    async init() {
-
-    	this.root = new Node();
-    	this.root.name = "root";
-
-    	this.floorBatch = new Floor();
-    	this.floorBatch.name = "floor";
-    	this.floorBatch.setParent( this.root );
-
-    	// draw a simple quad
-    	const triangleGeo: GeometryBuffers = {
-    		positions: [
-    			- 0.5, 0.5, 0.0,
-    			- 0.5, - 0.5, 0.0,
-    			0.5, - 0.5, 0.0,
-    			0.5, 0.5, 0.0
-    		],
-    		indices: [ 0, 1, 2, 0, 2, 3 ]
-    	};
+		this.init();
 
 
+	}
 
-    	const cubeMesh = new Mesh( new Cube() );
-    	const cubeProgram = new Program( normalVertex, normalFragment );
-    	const cubeBatch = new DrawSet( cubeMesh, cubeProgram );
+	async init() {
 
-    	cubeBatch.transform.position = vec3.fromValues( 0, 3, 6 );
-    	cubeBatch.transform.lookAt( vec3.fromValues( 0, 1.5, 0 ) );
+		this.root = new Node();
+		this.root.name = "root";
 
-    	this.orbit = new Orbit( cubeBatch );
+		this.floorDrawSet = new Floor();
+		this.floorDrawSet.name = "floor";
+		this.floorDrawSet.setParent( this.root );
 
-    	cubeBatch.setParent( this.root );
+		// draw a simple quad
+		const triangleGeo: GeometryBuffers = {
+			positions: [
+				- 0.5, 0.5, 0.0,
+				- 0.5, - 0.5, 0.0,
+				0.5, - 0.5, 0.0,
+				0.5, 0.5, 0.0
+			],
+			indices: [ 0, 1, 2, 0, 2, 3 ]
+		};
 
-    	const triangleMesh = new Mesh( triangleGeo );
-    	const triProgram = new Program( colorVertex, colorFragment );
+		const cubeMesh = new Mesh( new Cube() );
+		const cubeProgram = new Program( normalVertex, normalFragment );
+		const cubeDrawSet = new DrawSet( cubeMesh, cubeProgram );
 
-    	const colours = [
-    		1, 1, 0,
-    		0, 1, 1,
-    		0, 0, 1,
-    		1, 0, 0
-    	];
+		cubeDrawSet.transform.position = vec3.fromValues( 0, 3, 6 );
+		cubeDrawSet.transform.lookAt( vec3.fromValues( 0, 1.5, 0 ) );
 
-    	// attributes can be added with a named var and program
-    	triangleMesh.addAttribute( new Float32Array( colours ), 3, { program: triProgram, attributeName: "aColor" } );
+		this.orbit = new Orbit( cubeDrawSet );
 
-    	this.triangleBatch = new DrawSet(
-    		triangleMesh,
-    		triProgram
-    	);
+		cubeDrawSet.setParent( this.root );
 
-    	this.triangleBatch.transform.positionY = 1.5;
-    	this.triangleBatch.transform.scale = vec3.fromValues( 3, 3, 3 );
+		const triangleMesh = new Mesh( triangleGeo );
+		const triProgram = new Program( colorVertex, colorFragment );
 
-    	this.triangleBatch.setParent( this.root );
+		const colours = [
+			1, 1, 0,
+			0, 1, 1,
+			0, 0, 1,
+			1, 0, 0
+		];
 
-    	this.resize();
+		// attributes can be added with a named var and program
+		triangleMesh.addAttribute( new Float32Array( colours ), 3, { program: triProgram, attributeName: "aColor" } );
 
-    }
+		this.triangleDrawSet = new DrawSet(
+			triangleMesh,
+			triProgram
+		);
 
-    resize() {
+		this.triangleDrawSet.transform.positionY = 1.5;
+		this.triangleDrawSet.transform.scale = vec3.fromValues( 3, 3, 3 );
 
-    	this.bolt.resizeFullScreen();
-    	this.camera.updateProjection( this.canvas.width / this.canvas.height );
+		this.triangleDrawSet.setParent( this.root );
 
-    }
+		this.resize();
 
-    earlyUpdate( elapsed: number, delta: number ) {
+	}
 
-    	return;
+	resize() {
 
-    }
+		this.bolt.resizeFullScreen();
+		this.camera.updateProjection( this.canvas.width / this.canvas.height );
 
-    update( elapsed: number, delta: number ) {
+	}
 
-    	this.camera.update();
+	earlyUpdate( elapsed: number, delta: number ) {
 
-    	this.orbit.update();
+		return;
 
-    	this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-    	this.bolt.clear( 1, 1, 1, 1 );
+	}
 
-    	this.bolt.draw( this.root );
+	update( elapsed: number, delta: number ) {
 
-    }
+		this.camera.update();
+		this.orbit.update();
 
-    lateUpdate( elapsed: number, delta: number ) {
+		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
+		this.bolt.clear( 1, 1, 1, 1 );
 
-    	return;
+		this.bolt.draw( this.root );
 
-    }
+	}
+
+	lateUpdate( elapsed: number, delta: number ) {
+
+		return;
+
+	}
 
 }

@@ -9,7 +9,7 @@ import compositionFragment from "./shaders/composition/composition.frag";
 
 import { vec2, vec3, vec4, } from "gl-matrix";
 import Post from "@/webgl/modules/post";
-import Floor from "@/webgl/modules/batches/floor";
+import Floor from "@/webgl/modules/draw-sets/floor";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
 import CameraFPS from "@/webgl/modules/CameraFPS";
 
@@ -20,13 +20,13 @@ export default class extends Base {
 	camera: CameraPersp;
 	assetsLoaded?: boolean;
 	torusTransform!: Transform;
-	sphereBatch!: DrawSet;
-	planeBatch!: DrawSet;
+	sphereDrawSet!: DrawSet;
+	planeDrawSet!: DrawSet;
 	post: Post;
 	bolt = Bolt.getInstance();
 	gl: WebGL2RenderingContext;
 	root!: Node;
-	floorBatch!: Floor;
+	floorDrawSet!: Floor;
 	cameraFPS: CameraFPS;
 	shaderBody: Program;
 	gltf!: Node;
@@ -34,8 +34,8 @@ export default class extends Base {
 	fullScreenTriangle!: Mesh;
 	compProgram!: Program;
 	depthRBO!: RBO;
-	screenBatch!: DrawSet;
-	cubeBatch!: DrawSet;
+	screenDrawSet!: DrawSet;
+	cubeDrawSet!: DrawSet;
 
 	constructor() {
 
@@ -98,7 +98,7 @@ export default class extends Base {
 			indices: triangleIndices
 		} );
 
-		this.screenBatch = new DrawSet( this.fullScreenTriangle, this.compProgram );
+		this.screenDrawSet = new DrawSet( this.fullScreenTriangle, this.compProgram );
 
 		const gltfLoader = new GLTFLoader( this.bolt );
 		this.gltf = await gltfLoader.load( "/static/models/gltf/examples/phantom/PhantomLogoPose2.gltf" );
@@ -106,8 +106,8 @@ export default class extends Base {
 		this.assetsLoaded = true;
 
 		this.root = new Node();
-		this.floorBatch = new Floor();
-		this.floorBatch.setParent( this.root );
+		this.floorDrawSet = new Floor();
+		this.floorDrawSet.setParent( this.root );
 
 		this.gltf.transform.positionY = 2;
 		this.gltf.setParent( this.root );

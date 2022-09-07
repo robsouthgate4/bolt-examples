@@ -56,7 +56,7 @@ export default class GLTFLoader {
 	private _root!: Node;
 	private _skins!: Skin[];
 	private _nodes!: { id: number; node: Node; mesh: number | undefined; skin: number | undefined; localBindTransform: Transform; animatedTransform: mat4; children: number[]; }[];
-	private _batches!: ( DrawSet | undefined )[][]
+	private _drawSets!: ( DrawSet | undefined )[][]
 	private _skinNodes!: { nodeIndex: number; skinIndex: number; meshIndex?: number; }[];
 	private _useSkinShader = false;
 	private _json!: GlTf;
@@ -135,7 +135,7 @@ export default class GLTFLoader {
 		}
 
 		// map batches
-		this._batches = this._json.meshes!.map( ( mesh, index ) => this._parseBatch( this._json, mesh, buffers, index ) );
+		this._drawSets = this._json.meshes!.map( ( mesh, index ) => this._parseDrawSet( this._json, mesh, buffers, index ) );
 
 
 		// arrange scene graph
@@ -159,7 +159,7 @@ export default class GLTFLoader {
 
 				if ( node.mesh !== undefined ) {
 
-					const b = this._batches[ node.mesh ];
+					const b = this._drawSets[ node.mesh ];
 
 					b.forEach( ( batch?: DrawSet ) => {
 
@@ -196,7 +196,7 @@ export default class GLTFLoader {
 
 			if ( mesh !== undefined ) {
 
-				const b = this._batches[ mesh ];
+				const b = this._drawSets[ mesh ];
 
 				if ( b !== undefined ) {
 
@@ -297,7 +297,7 @@ export default class GLTFLoader {
 
 	}
 
-	_parseBatch( gltf: GlTf, mesh: GLTFMesh, buffers: ArrayBufferLike[], index: number ) {
+	_parseDrawSet( gltf: GlTf, mesh: GLTFMesh, buffers: ArrayBufferLike[], index: number ) {
 
 		const node = this._nodes.find( ( n ) => n.mesh === index );
 
@@ -334,7 +334,7 @@ export default class GLTFLoader {
 
 				s = ( this._materials && primitive.material !== undefined ) ? this._materials[ primitive.material as number ] : new Program( vertexShader, fragmentShader );
 
-				if ( node!.skin !== undefined ) {
+				if ( node && node.skin !== undefined ) {
 
 					// form skinned mesh data if joints defined
 					m = new SkinMesh( geometry );

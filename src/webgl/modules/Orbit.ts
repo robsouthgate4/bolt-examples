@@ -1,45 +1,70 @@
-import { vec2, vec3 } from "gl-matrix";
+import { vec3 } from "gl-matrix";
 import { Node } from "@bolt-webgl/core";
-
 export default class Orbit {
 
 	private _mouseDown: boolean;
-	private _azimuth: number;
-	private _elevation: number;
-	private _rotateAmountX: number;
 	private _mouseXOnDown: number;
-	private _rotationTargetXOnMouseDown: number;
-	private _rotateTargetX: number;
-	private _rotateTargetY: number;
-	private _radius: number;
-	private _damping: number;
 	private _mouseYOnDown!: number;
-	private _rotateAmountY!: number;
-	private _rotationTargetYOnMouseDown!: number;
+	private _azimuthStart: number;
+	private _elevationStart!: number;
+	private _radius!: number;
 	private _initialSpherical: number[];
-	private _scrollSpeed: number;
 	private _shiftKeyDown: boolean;
 	private _node: Node;
 	private _offset = vec3.create();
 	private _target = vec3.create();
 	private _forward = vec3.create();
 	private _up = vec3.fromValues( 0, 1, 0 );
+	private _ease: number;
+
+	private _sphericalTarget = { radius: 1, azimuth: 0, elevation: 0 };
+	private _sphericalCurrent = { radius: 1, azimuth: 0, elevation: 0 };
+
+	private _panTarget = vec3.create();
+	private _panStart = vec3.create();
+	private _panSpeed: number;
+	private _zoomSpeed: number;
+	private _rotateSpeed: number;
+	private _minElevation: number;
+	private _maxElevation: number;
+	private _minAzimuth: number;
+	private _maxAzimuth: number;
 
 	constructor(
 		node: Node,
-		speed = 3,
-		damping = 1,
-		scrollSpeed = 0.3 ) {
+		{
+			panSpeed = 3,
+			rotateSpeed = 3,
+			ease = 0.25,
+			zoomSpeed = 1,
+			minElevation = 0,
+			maxElevation = Math.PI * 0.5,
+			minAzimuth = 0,
+			maxAzimuth = Math.PI,
+		} = {} ) {
+
+		this._ease = ease;
+		this._panSpeed = panSpeed;
+		this._zoomSpeed = zoomSpeed;
+		this._rotateSpeed = rotateSpeed;
+		this._minElevation = minElevation;
+		this._maxElevation = maxElevation;
+		this._minAzimuth = minAzimuth;
+		this._maxAzimuth = maxAzimuth;
 
 		this._node = node;
-		this._offset = node.transform.position; // 0, 0, 30
-		this._target = node.transform.lookTarget; // 0, 2, 0
+		this._offset = node.transform.position;
+		this._target = node.transform.lookTarget;
+		this._panTarget = vec3.clone( this._target );
 
 		// subtract camera target from node position to get offset vector
 		vec3.subtract( this._offset, this._offset, this._target ); // 0, -2, 30
 
-		// get radius from lenth of offset
-		this._radius = vec3.length( this._offset );
+		const rad = vec3.length( this._offset );
+
+		// get radius from length of offset
+		this._sphericalCurrent.radius = rad;
+		this._sphericalTarget.radius = rad;
 
 		// get the initail spherical coordinates from offset
 		this._initialSpherical = this._cartesianToSpherical(
@@ -49,23 +74,14 @@ export default class Orbit {
 
 		this._mouseDown = false;
 
-		this._azimuth = this._initialSpherical[ 0 ];
-		this._elevation = this._initialSpherical[ 1 ];
-
-		this._scrollSpeed = scrollSpeed;
-		this._damping = damping;
-
-		this._rotateAmountX = speed || 1;
-		this._rotateAmountY = speed || 1;
+		this._sphericalCurrent.azimuth = this._sphericalTarget.azimuth = this._initialSpherical[ 0 ];
+		this._sphericalCurrent.elevation = this._sphericalTarget.elevation = this._initialSpherical[ 1 ];
 
 		this._mouseXOnDown = 0;
 		this._mouseYOnDown = 0;
 
-		this._rotationTargetXOnMouseDown = 0;
-		this._rotationTargetYOnMouseDown = 0;
-
-		this._rotateTargetX = this._azimuth;
-		this._rotateTargetY = this._elevation;
+		this._azimuthStart = 0;
+		this._elevationStart = 0;
 
 		this._shiftKeyDown = false;
 
@@ -119,7 +135,7 @@ export default class Orbit {
 
 		const direction = Math.sign( ev.deltaY );
 
-		this._radius -= direction * this._scrollSpeed;
+		this._sphericalTarget.radius += ( direction * this._zoomSpeed );
 
 
 	}
@@ -127,17 +143,18 @@ export default class Orbit {
 	private _handleMouseDown( ev: MouseEvent ) {
 
 		this._mouseDown = true;
+
 		this._mouseXOnDown = this._getMousePosition( ev ).x;
 		this._mouseYOnDown = this._getMousePosition( ev ).y;
 
 		if ( ! this._shiftKeyDown ) {
 
-			this._rotationTargetXOnMouseDown = this._rotateTargetX;
-			this._rotationTargetYOnMouseDown = this._rotateTargetY;
+			this._azimuthStart = this._sphericalCurrent.azimuth;
+			this._elevationStart = this._sphericalCurrent.elevation;
 
 		} else {
 
-
+			this._panStart = vec3.clone( this._target );
 
 		}
 
@@ -149,36 +166,37 @@ export default class Orbit {
 
 		if ( ! this._shiftKeyDown ) {
 
-			const mouseX = this._getMousePosition( ev ).x * this._rotateAmountX;
-			const mouseY = this._getMousePosition( ev ).y * this._rotateAmountY;
+			const mouseX = this._getMousePosition( ev ).x;
+			const mouseY = this._getMousePosition( ev ).y;
 
-			this._rotateTargetX = this._rotationTargetXOnMouseDown + ( mouseX - ( this._mouseXOnDown * this._rotateAmountX ) );
-			this._rotateTargetY = this._rotationTargetYOnMouseDown - ( mouseY - ( this._mouseYOnDown * this._rotateAmountY ) );
+			const deltaX = ( mouseX - this._mouseXOnDown ) * this._rotateSpeed;
+			const deltaY = ( mouseY - this._mouseYOnDown ) * this._rotateSpeed;
+
+			this._sphericalTarget.azimuth = this._azimuthStart + deltaX;
+			this._sphericalTarget.elevation = this._elevationStart - deltaY;
 
 		} else {
 
-			// TODO: panning
+			const mouseX = this._getMousePosition( ev ).x;
+			const mouseY = this._getMousePosition( ev ).y;
 
-			console.log( this._mouseXOnDown );
+			const deltaX = ( mouseX - this._mouseXOnDown ) * this._panSpeed;
+			const deltaY = ( mouseY - this._mouseYOnDown ) * this._panSpeed;
 
-			const mouseX = this._getMousePosition( ev ).x - this._mouseXOnDown;
-			const mouseY = this._getMousePosition( ev ).y - this._mouseYOnDown;
+			// apply left and right panning
+			const tempVecA = vec3.clone( this._forward );
+			vec3.cross( tempVecA, this._forward, this._up );
+			const tempVecRight = vec3.clone( tempVecA );
+			vec3.normalize( tempVecA, tempVecA );
+			vec3.add( this._panTarget, this._panStart, vec3.scale( tempVecA, tempVecA, deltaX ) );
 
-
-			const newDirection = vec3.create();
-
-			vec3.cross( newDirection, this._forward, this._up );
-			vec3.normalize( newDirection, newDirection );
-			vec3.multiply( newDirection, newDirection, vec3.fromValues( 0.1, 0.1, 0.1 ) );
-
-			newDirection[ 0 ] += mouseX;
-
-			vec3.add( this._target, this._target, newDirection );
-
+			// apply up and down panning
+			const tempVecUp = vec3.create();
+			vec3.cross( tempVecUp, tempVecRight, this._forward );
+			vec3.normalize( tempVecUp, tempVecUp );
+			vec3.sub( this._panTarget, this._panTarget, vec3.scale( tempVecUp, tempVecUp, deltaY ) );
 
 		}
-
-
 
 	}
 
@@ -193,7 +211,7 @@ export default class Orbit {
 		let elevation;
 		let azimuth;
 
-		if ( this._radius === 0 ) {
+		if ( this._sphericalCurrent.radius === 0 ) {
 
 			elevation = 0;
 			azimuth = 0;
@@ -201,11 +219,11 @@ export default class Orbit {
 		} else {
 
 			elevation = Math.atan2( x, z );
-			azimuth = Math.acos( Math.min( Math.max( y / this._radius, - 1 ), 1 ) );
+			azimuth = Math.acos( Math.min( Math.max( y / this._sphericalCurrent.radius, - 1 ), 1 ) );
 
 		}
 
-		return [ azimuth, elevation, this._radius ];
+		return [ azimuth, elevation, this._sphericalCurrent.radius ];
 
 	}
 
@@ -213,17 +231,16 @@ export default class Orbit {
 
 		const direction = vec3.create();
 
-		const sineAzimuth = Math.sin( this._azimuth );
-		const cosineAzimuth = Math.cos( this._azimuth );
-		const sineElevation = Math.sin( this._elevation );
-		const cosineElevation = Math.cos( this._elevation );
+		const sineAzimuth = Math.sin( this._sphericalCurrent.azimuth );
+		const cosineAzimuth = Math.cos( this._sphericalCurrent.azimuth );
+		const sineElevation = Math.sin( this._sphericalCurrent.elevation );
+		const cosineElevation = Math.cos( this._sphericalCurrent.elevation );
 
-		direction[ 0 ] = this._radius * cosineElevation * cosineAzimuth;
-		direction[ 1 ] = this._radius * sineElevation;
-		direction[ 2 ] = this._radius * cosineElevation * sineAzimuth;
+		direction[ 0 ] = this._sphericalCurrent.radius * cosineElevation * cosineAzimuth;
+		direction[ 1 ] = this._sphericalCurrent.radius * sineElevation;
+		direction[ 2 ] = this._sphericalCurrent.radius * cosineElevation * sineAzimuth;
 
 		vec3.copy( this._forward, direction );
-		vec3.normalize( this._forward, this._forward );
 
 		return direction;
 
@@ -231,15 +248,22 @@ export default class Orbit {
 
 	update() {
 
-		//this._azimuth += ( this._rotateTargetX - this._azimuth ) * this._damping;
-		//this._elevation += ( this._rotateTargetY - this._elevation ) * this._damping;
+		// constraints
+		this._sphericalTarget.elevation = Math.max( this._sphericalTarget.elevation, this._minElevation );
+		this._sphericalTarget.elevation = Math.min( this._maxElevation, this._sphericalTarget.elevation );
 
-		// set new spherical coordinates
-		this._azimuth = this._rotateTargetX;
-		this._elevation = this._rotateTargetY;
+		this._sphericalTarget.azimuth = Math.max( this._sphericalTarget.azimuth, this._minAzimuth );
+		this._sphericalTarget.azimuth = Math.min( this._maxAzimuth, this._sphericalTarget.azimuth );
 
-		// this._elevation = Math.max( this._elevation, 0 );
-		// this._elevation = Math.min( Math.PI / 2, this._elevation );
+		this._sphericalTarget.radius = Math.max( this._sphericalTarget.radius, 0.001 );
+
+		// lerp to target spherical position
+		this._sphericalCurrent.azimuth += ( this._sphericalTarget.azimuth - this._sphericalCurrent.azimuth ) * this._ease;
+		this._sphericalCurrent.elevation += ( this._sphericalTarget.elevation - this._sphericalCurrent.elevation ) * this._ease;
+		this._sphericalCurrent.radius += ( this._sphericalTarget.radius - this._sphericalCurrent.radius ) * this._ease;
+
+		// lerp to target pan position
+		vec3.lerp( this._target, this._target, this._panTarget, this._ease );
 
 		// map spherical coordinates to cartesian
 		const newOffset = this._spherialToCartesian();
@@ -252,7 +276,7 @@ export default class Orbit {
 		// copy camera target to camera position
 		this._node.transform.position = vec3.clone( this._target );
 
-		// add the offset back to the camera position
+		// add the offset back to the camera position to ensure correct zoom path
 		vec3.add( this._node.transform.position, this._node.transform.position, this._offset );
 
 		// look at the target
@@ -285,27 +309,87 @@ export default class Orbit {
 
 	}
 
-	public get scrollSpeed(): number {
+	public get rotateSpeed(): number {
 
-		return this._scrollSpeed;
-
-	}
-
-	public set scrollSpeed( value: number ) {
-
-		this._scrollSpeed = value;
+		return this._rotateSpeed;
 
 	}
 
-	public get damping(): number {
+	public set rotateSpeed( value: number ) {
 
-		return this._damping;
+		this._rotateSpeed = value;
 
 	}
 
-	public set damping( value: number ) {
+	public get zoomSpeed(): number {
 
-		this._damping = value;
+		return this._zoomSpeed;
+
+	}
+
+	public set zoomSpeed( value: number ) {
+
+		this._zoomSpeed = value;
+
+	}
+
+	public get panSpeed(): number {
+
+		return this._panSpeed;
+
+	}
+
+	public set panSpeed( value: number ) {
+
+		this._panSpeed = value;
+
+	}
+
+	public get maxAzimuth(): number {
+
+		return this._maxAzimuth;
+
+	}
+
+	public set maxAzimuth( value: number ) {
+
+		this._maxAzimuth = value;
+
+	}
+
+	public get minAzimuth(): number {
+
+		return this._minAzimuth;
+
+	}
+
+	public set minAzimuth( value: number ) {
+
+		this._minAzimuth = value;
+
+	}
+
+	public get minElevation(): number {
+
+		return this._minElevation;
+
+	}
+
+	public set minElevation( value: number ) {
+
+		this._minElevation = value;
+
+	}
+
+	public get maxElevation(): number {
+
+		return this._maxElevation;
+
+	}
+
+	public set maxElevation( value: number ) {
+
+		this._maxElevation = value;
 
 	}
 

@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/basic/gltf-animation";
+import Example from "@/webgl/examples/basic/animation";
 
 export default class Main {
 
