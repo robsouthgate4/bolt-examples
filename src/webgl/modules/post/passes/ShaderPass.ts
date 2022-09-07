@@ -1,21 +1,21 @@
 
 import { Pass } from "./Pass";
-import Bolt, { Shader, FBO, Texture2D } from "@bolt-webgl/core";
+import Bolt, { Program, FBO, Texture2D } from "@bolt-webgl/core";
 
 interface ShaderPassParams {
 	width: number;
 	height: number;
-	shader: Shader
+	program: Program
 }
 
 export default class ShaderPass extends Pass {
 
-	shader!: Shader;
+	program!: Program;
 
 	constructor( bolt: Bolt, {
 		width = 256,
 		height = 256,
-		shader
+		program
 	}: ShaderPassParams ) {
 
 		super( bolt, {
@@ -23,7 +23,7 @@ export default class ShaderPass extends Pass {
 			height
 		} );
 
-		this.shader = shader;
+		this.program = program;
 
 	}
 
@@ -35,10 +35,10 @@ export default class ShaderPass extends Pass {
 
 		}
 
-		this.shader.activate();
-		this.shader.setTexture( "map", texture ? texture : readFBO.targetTexture );
+		this.program.activate();
+		this.program.setTexture( "map", texture ? texture : readFBO.targetTexture );
 
-		this.fullScreenTriangle.draw( this.shader );
+		this.fullScreenTriangle.draw( this.program );
 
 		readFBO.unbind();
 		writeFbo.unbind();

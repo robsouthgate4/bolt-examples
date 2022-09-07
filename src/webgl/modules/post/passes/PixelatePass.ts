@@ -2,12 +2,12 @@ import { Pass } from "./Pass";
 
 import vertexShader from "./shaders/pixelate/pixelate.vert";
 import fragmentShader from "./shaders/pixelate/pixelate.frag";
-import Bolt, { Shader, FBO, Texture2D } from "@bolt-webgl/core";
+import Bolt, { Program, FBO, Texture2D } from "@bolt-webgl/core";
 
 
 export default class PixelatePass extends Pass {
 
-	shader!: Shader;
+	program!: Program;
 	private _xPixels: number;
 	private _yPixels: number;
 
@@ -26,26 +26,26 @@ export default class PixelatePass extends Pass {
 		this._xPixels = xPixels;
 		this._yPixels = yPixels;
 
-		this.shader = new Shader( vertexShader, fragmentShader );
-		this.shader.activate();
-		this.shader.setFloat( "xPixels", this._xPixels );
-		this.shader.setFloat( "yPixels", this._yPixels );
+		this.program = new Program( vertexShader, fragmentShader );
+		this.program.activate();
+		this.program.setFloat( "xPixels", this._xPixels );
+		this.program.setFloat( "yPixels", this._yPixels );
 
 	}
 
 	set pixelCountX( x: number ) {
 
 		this._xPixels = x;
-		this.shader.activate();
-		this.shader.setFloat( "xPixels", x );
+		this.program.activate();
+		this.program.setFloat( "xPixels", x );
 
 	}
 
 	set pixelCountY( y: number ) {
 
 		this._yPixels = y;
-		this.shader.activate();
-		this.shader.setFloat( "yPixels", y );
+		this.program.activate();
+		this.program.setFloat( "yPixels", y );
 
 	}
 
@@ -57,9 +57,9 @@ export default class PixelatePass extends Pass {
 
 		}
 
-		this.shader.setTexture( "map", texture ? texture : readFBO.targetTexture );
+		this.program.setTexture( "map", texture ? texture : readFBO.targetTexture );
 
-		this.fullScreenTriangle.draw( this.shader );
+		this.fullScreenTriangle.draw( this.program );
 
 		readFBO.unbind();
 		writeFbo.unbind();

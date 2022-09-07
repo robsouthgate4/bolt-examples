@@ -1,4 +1,4 @@
-import { Mesh, Node, Shader } from "@bolt-webgl/core";
+import { Mesh, Node, Program } from "@bolt-webgl/core";
 import { GeometryBuffers, MeshParams } from "@bolt-webgl/core/build/Mesh";
 import { mat4 } from "gl-matrix";
 import Skin from "./Skin";
@@ -15,25 +15,25 @@ export default class SkinMesh extends Mesh {
 
 	}
 
-	draw( shader: Shader, node: Node ) {
+	draw( program: Program, node: Node ) {
 
 		if ( ! this._skin || ! node ) return;
 
 		this._skin.update( node! );
 
-		// activate shader and pass joint data to shader
-		shader.activate();
-		shader.setTexture( "jointTexture", this._skin.jointTexture );
+		// activate program and pass joint data to program
+		program.activate();
+		program.setTexture( "jointTexture", this._skin.jointTexture );
 
 		this._skin.jointMatrices.forEach( ( jointMatrix, i ) => {
 
-			shader.setMatrix4( `jointTransforms[${i}]`, jointMatrix );
+			program.setMatrix4( `jointTransforms[${i}]`, jointMatrix );
 
 		} );
 
-		shader.setFloat( "jointCount", this._skin.joints.length );
+		program.setFloat( "jointCount", this._skin.joints.length );
 
-		super.draw( shader );
+		super.draw( program );
 
 	}
 

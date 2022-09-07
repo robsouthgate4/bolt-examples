@@ -1,7 +1,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Node, Batch, FBO, Texture2D, COLOR_ATTACHMENT0, RBO, NEAREST, CameraPersp } from "@bolt-webgl/core";
+import Bolt, { Program, Node, DrawSet, FBO, Texture2D, COLOR_ATTACHMENT0, RBO, CameraPersp } from "@bolt-webgl/core";
 
 import FXAAPass from "@/webgl/modules/post/passes/FXAAPass";
 import geometryVertex from "./shaders/geometry/geometry.vert";
@@ -10,19 +10,17 @@ import compositionVertex from "./shaders/composition/composition.vert";
 import compositionFragment from "./shaders/composition/composition.frag";
 
 import { vec2, vec3, vec4, } from "gl-matrix";
-import CameraFPS from "@webgl/modules/CameraFPS";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
 import Post from "@/webgl/modules/post";
-import Axis from "@/webgl/modules/batches/axis";
-import Floor from "@/webgl/modules/batches/floor";
-import Cube from "@/webgl/modules/primitives/Cube";
+import Axis from "@/webgl/modules/draw-sets/axis";
+import Floor from "@/webgl/modules/draw-sets/floor";
 import ShaderPass from "@/webgl/modules/post/passes/ShaderPass";
 
 export default class extends Base {
 
 	canvas: HTMLCanvasElement;
-	bodyShader!: Shader;
-	eyesShader!: Shader;
+	bodyShader!: Program;
+	eyesShader!: Program;
 	camera: CameraPersp;
 	assetsLoaded?: boolean;
 	bolt: Bolt;
@@ -34,11 +32,11 @@ export default class extends Base {
 	floor!: Floor;
 	gBuffer: FBO;
 	normalTexture: Texture2D;
-	geometryShader: Shader;
+	geometryProgram: Program;
 	gBufferRBO: RBO;
-	cubeBatch!: Batch;
+	cubeDrawSet!: DrawSet;
 	comp: ShaderPass;
-	compShader: Shader;
+	compProgram: Program;
 	depthTexture: Texture2D;
 	uvTexture: Texture2D;
 
@@ -68,9 +66,9 @@ export default class extends Base {
 
 		this.gl = this.bolt.getContext();
 
-		this.geometryShader = new Shader( geometryVertex, geometryFragment );
-		this.geometryShader.activate();
-		this.geometryShader.setVector2( "cameraPlanes", vec2.fromValues( this.camera.near, this.camera.far ) );
+		this.geometryProgram = new Program( geometryVertex, geometryFragment );
+		this.geometryProgram.activate();
+		this.geometryProgram.setVector2( "cameraPlanes", vec2.fromValues( this.camera.near, this.camera.far ) );
 
 		this.bolt.enableDepth();
 
@@ -92,15 +90,15 @@ export default class extends Base {
 
 		this.post = new Post( this.bolt );
 
-		this.compShader = new Shader( compositionVertex, compositionFragment );
-		this.compShader.activate();
-		this.compShader.setVector2( "resolution", vec2.fromValues( this.canvas.clientWidth, this.canvas.clientHeight ) );
-		this.compShader.setFloat( "thickness", 0.75 );
+		this.compProgram = new Program( compositionVertex, compositionFragment );
+		this.compProgram.activate();
+		this.compProgram.setVector2( "resolution", vec2.fromValues( this.canvas.clientWidth, this.canvas.clientHeight ) );
+		this.compProgram.setFloat( "thickness", 0.75 );
 
 		this.comp = new ShaderPass( this.bolt, {
 			width: this.width,
 			height: this.height,
-			shader: this.compShader
+			program: this.compProgram
 		} ).setEnabled( true );
 
 		this.fxaa = new FXAAPass( this.bolt, {
@@ -131,13 +129,13 @@ export default class extends Base {
 
 		this.gltf.traverse( ( node: Node ) => {
 
-			if ( node instanceof Batch ) {
+			if ( node instanceof DrawSet ) {
 
 
-				node.shader = new Shader( geometryVertex, geometryFragment );
-				node.shader.activate();
-				node.shader.setVector2( "cameraPlanes", vec2.fromValues( this.camera.near, this.camera.far ) );
-				node.shader.setVector4( "baseColor", vec4.fromValues( Math.random(), Math.random(), Math.random(), 1 ) );
+				node.program = new Program( geometryVertex, geometryFragment );
+				node.program.activate();
+				node.program.setVector2( "cameraPlanes", vec2.fromValues( this.camera.near, this.camera.far ) );
+				node.program.setVector4( "baseColor", vec4.fromValues( Math.random(), Math.random(), Math.random(), 1 ) );
 
 			}
 
@@ -151,8 +149,8 @@ export default class extends Base {
 
 		this.bolt.resizeFullScreen();
 		this.camera.updateProjection( this.canvas.width / this.canvas.height );
-		this.compShader.activate();
-		this.compShader.setVector2( "resolution", vec2.fromValues( this.gl.canvas.width, this.gl.canvas.height ) );
+		this.compProgram.activate();
+		this.compProgram.setVector2( "resolution", vec2.fromValues( this.gl.canvas.width, this.gl.canvas.height ) );
 		this.post.resize( this.gl.canvas.width, this.gl.canvas.height );
 		this.gBuffer.resize( this.gl.canvas.width, this.gl.canvas.height );
 		this.gBufferRBO.resize( this.gl.canvas.width, this.gl.canvas.height );
@@ -172,9 +170,9 @@ export default class extends Base {
 
 		this.gltf.traverse( ( node: Node ) => {
 
-			if ( node instanceof Batch ) {
+			if ( node instanceof DrawSet ) {
 
-				//node.shader = this.geometryShader;
+				//node.program = this.geometryProgram;
 
 			}
 
@@ -184,7 +182,7 @@ export default class extends Base {
 
 		if ( sceneType === "geometry" ) {
 
-			// render geo shader here
+			// render geo program here
 
 		} else {
 
@@ -213,10 +211,10 @@ export default class extends Base {
 		this.gBuffer.unbind();
 
 		this.post.begin();
-		this.comp.shader.activate();
-		this.comp.shader.setTexture( "normal", this.normalTexture );
-		this.comp.shader.setTexture( "depth", this.depthTexture );
-		this.comp.shader.setTexture( "uv", this.uvTexture );
+		this.comp.program.activate();
+		this.comp.program.setTexture( "normal", this.normalTexture );
+		this.comp.program.setTexture( "depth", this.depthTexture );
+		this.comp.program.setTexture( "uv", this.uvTexture );
 		this.drawScene( "normal", delta );
 		this.post.end();
 

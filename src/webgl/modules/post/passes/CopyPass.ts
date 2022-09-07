@@ -3,11 +3,11 @@ import { Pass } from "./Pass";
 
 import vertexShader from "./shaders/copy/copy.vert";
 import fragmentShader from "./shaders/copy/copy.frag";
-import Bolt, { Shader, FBO, Texture2D } from "@bolt-webgl/core";
+import Bolt, { Program, FBO, Texture2D } from "@bolt-webgl/core";
 
 export default class CopyPass extends Pass {
 
-	shader!: Shader;
+	program!: Program;
 
 	constructor( bolt: Bolt, {
 		width = 256,
@@ -23,8 +23,8 @@ export default class CopyPass extends Pass {
 
 		this._texture = texture;
 
-		this.shader = new Shader( vertexShader, fragmentShader );
-		this.shader.activate();
+		this.program = new Program( vertexShader, fragmentShader );
+		this.program.activate();
 
 	}
 
@@ -37,10 +37,10 @@ export default class CopyPass extends Pass {
 		}
 
 
-		this.shader.activate();
-		this.shader.setTexture( "map", texture ? texture : readFBO.targetTexture );
+		this.program.activate();
+		this.program.setTexture( "map", texture ? texture : readFBO.targetTexture );
 
-		this.fullScreenTriangle.draw( this.shader );
+		this.fullScreenTriangle.draw( this.program );
 
 		readFBO.unbind();
 		writeFbo.unbind();

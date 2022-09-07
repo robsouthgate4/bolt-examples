@@ -1,7 +1,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { CameraPersp, Shader, Transform, VAO, VBO } from "@bolt-webgl/core";
+import Bolt, { CameraPersp, Program, Transform, VAO, VBO } from "@bolt-webgl/core";
 
 import particlesVertexInstanced from "./shaders/particles/particles.vert";
 import particlesFragmentInstanced from "./shaders/particles/particles.frag";
@@ -16,14 +16,14 @@ export default class extends Base {
 
 	canvas: HTMLCanvasElement;
 	gl: WebGL2RenderingContext;
-	particleShader!: Shader;
+	particleProgram!: Program;
 	lightPosition: vec3;
 	camera: CameraPersp;
 	assetsLoaded!: boolean;
 	cubeTransform!: Transform;
-	simulationShader!: Shader;
-	simulationShaderLocations!: { oldPosition: number; oldVelocity: number; };
-	particleShaderLocations!: { aPosition: number; };
+	simulationProgram!: Program;
+	simulationProgramLocations!: { oldPosition: number; oldVelocity: number; };
+	particleProgramLocations!: { aPosition: number; };
 	tf1?: WebGLTransformFeedback;
 	tf2?: WebGLTransformFeedback;
 	current!: { updateVAO: VAO; tf: WebGLTransformFeedback; drawVAO: VAO; };
@@ -52,23 +52,23 @@ export default class extends Base {
 
 		this.gl = this.bolt.getContext();
 
-		this.particleShader = new Shader( particlesVertexInstanced, particlesFragmentInstanced );
+		this.particleProgram = new Program( particlesVertexInstanced, particlesFragmentInstanced );
 
 		const transformFeedbackVaryings = [
 			"newPosition",
 		];
 
-		this.simulationShader = new Shader( simulationVertex, simulationFragment,
+		this.simulationProgram = new Program( simulationVertex, simulationFragment,
 			{
 				transformFeedbackVaryings
 			} );
 
-		this.simulationShaderLocations = {
+		this.simulationProgramLocations = {
 			"oldPosition": 0,
 			"oldVelocity": 1
 		};
 
-		this.particleShaderLocations = {
+		this.particleProgramLocations = {
 			"aPosition": 0
 		};
 
@@ -127,24 +127,24 @@ export default class extends Base {
 
 		const vaoUpdate1 = new VAO();
 		vaoUpdate1.bind();
-		vaoUpdate1.linkAttrib( position1VBO, this.simulationShaderLocations.oldPosition, 3, this.gl.FLOAT );
-		vaoUpdate1.linkAttrib( velocityBuffer, this.simulationShaderLocations.oldVelocity, 3, this.gl.FLOAT );
+		vaoUpdate1.linkAttrib( position1VBO, this.simulationProgramLocations.oldPosition, 3, this.gl.FLOAT );
+		vaoUpdate1.linkAttrib( velocityBuffer, this.simulationProgramLocations.oldVelocity, 3, this.gl.FLOAT );
 		vaoUpdate1.unbind();
 
 		const vaoUpdate2 = new VAO();
 		vaoUpdate2.bind();
-		vaoUpdate2.linkAttrib( position2VBO, this.simulationShaderLocations.oldPosition, 3, this.gl.FLOAT );
-		vaoUpdate2.linkAttrib( velocityBuffer, this.simulationShaderLocations.oldVelocity, 3, this.gl.FLOAT );
+		vaoUpdate2.linkAttrib( position2VBO, this.simulationProgramLocations.oldPosition, 3, this.gl.FLOAT );
+		vaoUpdate2.linkAttrib( velocityBuffer, this.simulationProgramLocations.oldVelocity, 3, this.gl.FLOAT );
 		vaoUpdate2.unbind();
 
 		const vaoDraw1 = new VAO();
 		vaoDraw1.bind();
-		vaoDraw1.linkAttrib( position1VBO, this.particleShaderLocations.aPosition, 3, this.gl.FLOAT );
+		vaoDraw1.linkAttrib( position1VBO, this.particleProgramLocations.aPosition, 3, this.gl.FLOAT );
 		vaoDraw1.unbind();
 
 		const vaoDraw2 = new VAO();
 		vaoDraw2.bind();
-		vaoDraw2.linkAttrib( position2VBO, this.particleShaderLocations.aPosition, 3, this.gl.FLOAT );
+		vaoDraw2.linkAttrib( position2VBO, this.particleProgramLocations.aPosition, 3, this.gl.FLOAT );
 		vaoDraw2.unbind();
 
 		this.tf1 = <WebGLTransformFeedback> this.createTransformFeedback( position1VBO.buffer );
@@ -189,7 +189,7 @@ export default class extends Base {
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.clear( 1, 1, 1, 1 );
 
-		this.gl.useProgram( this.simulationShader.program );
+		this.gl.useProgram( this.simulationProgram.program );
 		this.gl.bindVertexArray( this.current.updateVAO.arrayObject );
 
 		this.gl.enable( this.gl.RASTERIZER_DISCARD );
@@ -206,12 +206,12 @@ export default class extends Base {
 
 		const model = mat4.create();
 
-		this.particleShader.activate();
+		this.particleProgram.activate();
 		this.gl.bindVertexArray( this.current.drawVAO.arrayObject );
 
-		this.particleShader.setMatrix4( "projection", this.camera.projection );
-		this.particleShader.setMatrix4( "view", this.camera.view );
-		this.particleShader.setMatrix4( "model", model );
+		this.particleProgram.setMatrix4( "projection", this.camera.projection );
+		this.particleProgram.setMatrix4( "view", this.camera.view );
+		this.particleProgram.setMatrix4( "model", model );
 
 		this.gl.drawArrays( this.gl.POINTS, 0, this.instanceCount );
 

@@ -1,9 +1,9 @@
-import { Batch, LINES, Mesh, Shader } from "@bolt-webgl/core";
+import { DrawSet, LINES, Mesh, Program } from "@bolt-webgl/core";
 
 import vertexShader from "./shaders/axis.vert";
 import fragmentShader from "./shaders/axis.frag";
 
-export default class Floor extends Batch {
+export default class Floor extends DrawSet {
 
 	constructor() {
 
@@ -44,9 +44,9 @@ export default class Floor extends Batch {
 			indices,
 		} ).setDrawType( LINES );
 
-		const shader = new Shader( vertexShader, fragmentShader );
+		const program = new Program( vertexShader, fragmentShader );
 
-		super( mesh, shader );
+		super( mesh, program );
 
 	}
 

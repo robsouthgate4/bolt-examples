@@ -1,4 +1,4 @@
-import { Batch, LINES, Mesh, Shader } from "@bolt-webgl/core";
+import { DrawSet, LINES, Mesh, Program } from "@bolt-webgl/core";
 import { mat3, mat4, vec3, vec4 } from "gl-matrix";
 import Ray from "./Ray";
 
@@ -15,7 +15,7 @@ export default class AxisAlignedBox {
 	private _min: vec3;
 	private _center: vec3;
 	private _extents: vec3;
-	private _visualiser?: Batch | undefined;
+	private _visualiser?: DrawSet | undefined;
 
 
 	/**
@@ -56,7 +56,7 @@ export default class AxisAlignedBox {
 			positions: [ 0.5, 0.5, 0.5, - 0.5, 0.5, 0.5, - 0.5, - 0.5, 0.5, 0.5, - 0.5, 0.5, 0.5, 0.5, - 0.5, - 0.5, 0.5, - 0.5, - 0.5, - 0.5, - 0.5, 0.5, - 0.5, - 0.5 ]
 		} ).setDrawType( LINES );
 
-		const batch = new Batch( mesh, new Shader( helperVertex, helperFragment ) );
+		const batch = new DrawSet( mesh, new Program( helperVertex, helperFragment ) );
 
 		batch.transform.position = this._center;
 
@@ -175,12 +175,12 @@ export default class AxisAlignedBox {
 
 	}
 
-	public get visualiser(): Batch | undefined {
+	public get visualiser(): DrawSet | undefined {
 
 		return this._visualiser;
 
 	}
-	public set visualiser( value: Batch | undefined ) {
+	public set visualiser( value: DrawSet | undefined ) {
 
 		this._visualiser = value;
 

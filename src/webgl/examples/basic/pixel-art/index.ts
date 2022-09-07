@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Batch, Transform, Node, CameraPersp } from "@bolt-webgl/core";
+import Bolt, { Program, DrawSet, Transform, Node, CameraPersp } from "@bolt-webgl/core";
 
 import colorVertex from "./shaders/color/color.vert";
 import colorFragment from "./shaders/color/color.frag";
@@ -11,17 +11,17 @@ import FXAAPass from "@/webgl/modules/post/passes/FXAAPass";
 import RGBSplitPass from "@/webgl/modules/post/passes/RGBSplitPass";
 import PixelatePass from "@/webgl/modules/post/passes/PixelatePass";
 import RenderPass from "@/webgl/modules/post/passes/RenderPass";
-import Floor from "@/webgl/modules/batches/floor";
+import Floor from "@/webgl/modules/draw-sets/floor";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
 export default class extends Base {
 
 	canvas: HTMLCanvasElement;
-	shaderEyes: Shader;
+	shaderEyes: Program;
 	camera: CameraPersp;
 	assetsLoaded?: boolean;
 	torusTransform!: Transform;
-	sphereBatch!: Batch;
-	planeBatch!: Batch;
+	sphereDrawSet!: DrawSet;
+	planeDrawSet!: DrawSet;
 	post: Post;
 	fxaa!: FXAAPass;
 	rbgSplit!: RGBSplitPass;
@@ -30,9 +30,9 @@ export default class extends Base {
 	bolt = Bolt.getInstance();
 	gl: WebGL2RenderingContext;
 	root!: Node;
-	floorBatch!: Floor;
+	floorDrawSet!: Floor;
 	arcball: CameraArcball;
-	shaderBody: Shader;
+	shaderBody: Program;
 	gltf!: Node;
 
 	constructor() {
@@ -64,8 +64,8 @@ export default class extends Base {
 
 		this.post = new Post( this.bolt );
 
-		this.shaderEyes = new Shader( colorVertex, colorFragment );
-		this.shaderBody = new Shader( colorVertex, colorFragment );
+		this.shaderEyes = new Program( colorVertex, colorFragment );
+		this.shaderBody = new Program( colorVertex, colorFragment );
 
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.enableDepth();
@@ -97,29 +97,29 @@ export default class extends Base {
 		this.post.add( this.pixelate, true );
 
 		this.root = new Node();
-		this.floorBatch = new Floor();
-		this.floorBatch.setParent( this.root );
+		this.floorDrawSet = new Floor();
+		this.floorDrawSet.setParent( this.root );
 
 		this.gltf.transform.positionY = 2;
 		this.gltf.setParent( this.root );
 
 		this.gltf.traverse( ( node: Node ) => {
 
-			if ( node instanceof Batch ) {
+			if ( node instanceof DrawSet ) {
 
-				if ( node.shader.name === "mat_phantom_body" ) {
+				if ( node.program.name === "mat_phantom_body" ) {
 
-					node.shader = this.shaderBody;
-					node.shader.activate();
-					node.shader.setVector4( "baseColor", vec4.fromValues( 0.7, 0.7, 0.7, 1 ) );
+					node.program = this.shaderBody;
+					node.program.activate();
+					node.program.setVector4( "baseColor", vec4.fromValues( 0.7, 0.7, 0.7, 1 ) );
 
 				}
 
-				if ( node.shader.name === "mat_phantom_eyes" ) {
+				if ( node.program.name === "mat_phantom_eyes" ) {
 
-					node.shader = this.shaderEyes;
-					node.shader.activate();
-					node.shader.setVector4( "baseColor", vec4.fromValues( 0, 0, 0, 1 ) );
+					node.program = this.shaderEyes;
+					node.program.activate();
+					node.program.setVector4( "baseColor", vec4.fromValues( 0, 0, 0, 1 ) );
 
 				}
 

@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES, LINES, CameraPersp } from "@bolt-webgl/core";
+import Bolt, { Program, Mesh, Transform, DrawSet, Node, TRIANGLES, LINES, CameraPersp } from "@bolt-webgl/core";
 
 import normalVertex from "./shaders/normal/normal.vert";
 import normalFragment from "./shaders/normal/normal.frag";
@@ -10,7 +10,7 @@ import rayFragment from "./shaders/ray/ray.frag";
 
 import { vec3 } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
-import Floor from "@/webgl/modules/batches/floor";
+import Floor from "@/webgl/modules/draw-sets/floor";
 import AxisAlignedBox from "@/webgl/modules/raycast/AxisAlignedBox";
 import { BoxBounds } from "@bolt-webgl/core/build/Mesh";
 import Ray from "@/webgl/modules/raycast/Ray";
@@ -21,20 +21,20 @@ import Cube from "@/webgl/modules/primitives/Cube";
 export default class extends Base {
 
 	canvas: HTMLCanvasElement;
-	shader: Shader;
+	program: Program;
 	camera: CameraPersp;
 	assetsLoaded?: boolean;
 	torusTransform!: Transform;
-	sphereBatch!: Batch;
-	planeBatch!: Batch;
-	triangleBatch!: Batch;
+	sphereDrawSet!: DrawSet;
+	planeDrawSet!: DrawSet;
+	triangleDrawSet!: DrawSet;
 	bolt: Bolt;
 	root!: Node;
-	floorBatch: any;
+	floorDrawSet: any;
 	AAbox!: AxisAlignedBox;
-	AABoxHelper!: Batch;
+	AABoxHelper!: DrawSet;
 	raycast: Raycast;
-	intersectionDebugBatch!: Batch;
+	intersectionDebugDrawSet!: DrawSet;
 	arcball: CameraArcball;
 
 	constructor() {
@@ -51,7 +51,7 @@ export default class extends Base {
 		this.bolt = Bolt.getInstance();
 		this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
 
-		this.shader = new Shader( normalVertex, normalFragment );
+		this.program = new Program( normalVertex, normalFragment );
 
 		this.raycast = new Raycast();
 
@@ -79,7 +79,7 @@ export default class extends Base {
 
 			const ray = this.raycast.generateRayFromCamera( nx, ny, this.camera );
 
-			this.AAbox.transform( this.sphereBatch.modelMatrix );
+			this.AAbox.transform( this.sphereDrawSet.modelMatrix );
 
 			const intersectsBox = ray.intersectsBox( { min: this.AAbox.min, max: this.AAbox.max } );
 
@@ -89,14 +89,14 @@ export default class extends Base {
 
 				// now run the triangle intersection test
 
-				for ( let i = 0; i < this.sphereBatch.mesh.faces.length; i ++ ) {
+				for ( let i = 0; i < this.sphereDrawSet.mesh.faces.length; i ++ ) {
 
-					const tri = this.sphereBatch.mesh.faces[ i ].vertices.map( ( vertex ) => {
+					const tri = this.sphereDrawSet.mesh.faces[ i ].vertices.map( ( vertex ) => {
 
 						// transform the face by the sphere world matrix
 
 						const vecTransformed = vec3.fromValues( vertex[ 0 ], vertex[ 1 ], vertex[ 2 ] );
-						vec3.transformMat4( vecTransformed, vecTransformed, this.sphereBatch.modelMatrix );
+						vec3.transformMat4( vecTransformed, vecTransformed, this.sphereDrawSet.modelMatrix );
 
 						return vec3.fromValues( vecTransformed[ 0 ], vecTransformed[ 1 ], vecTransformed[ 2 ] );
 
@@ -114,7 +114,7 @@ export default class extends Base {
 
 			}
 
-			this.intersectionDebugBatch.transform.position = hit;
+			this.intersectionDebugDrawSet.transform.position = hit;
 
 			this._debugDrawRay( ray, 20 );
 
@@ -132,14 +132,14 @@ export default class extends Base {
 		vec3.multiply( rayScaled, ray.direction, vec3.fromValues( scale, scale, scale ) );
 		vec3.add( rayEnd, rayEnd, rayScaled );
 
-		const debugRay = new Batch(
+		const debugRay = new DrawSet(
 			new Mesh( {
 				positions: [
 					ray.origin[ 0 ], ray.origin[ 1 ], ray.origin[ 2 ],
 					rayEnd[ 0 ], rayEnd[ 1 ], rayEnd[ 2 ],
 				]
 			} ).setDrawType( LINES ),
-			new Shader( rayVertex, rayFragment )
+			new Program( rayVertex, rayFragment )
 		);
 
 		debugRay.setParent( this.root );
@@ -153,34 +153,34 @@ export default class extends Base {
 		this.root = new Node();
 		this.root.name = "root";
 
-		this.sphereBatch = new Batch(
+		this.sphereDrawSet = new DrawSet(
 			new Mesh( sphereGeometry ).setDrawType( TRIANGLES ),
-			this.shader
+			this.program
 		);
 
-		this.sphereBatch.mesh.calculateBoxBounds();
-		const bounds: BoxBounds = this.sphereBatch.mesh.bounds;
+		this.sphereDrawSet.mesh.calculateBoxBounds();
+		const bounds: BoxBounds = this.sphereDrawSet.mesh.bounds;
 
-		this.sphereBatch.name = "cube";
-		this.sphereBatch.transform.positionY = 1;
-		this.sphereBatch.transform.scale = vec3.fromValues( 1, 1, 1 );
-		this.sphereBatch.updateModelMatrix();
-		this.sphereBatch.setParent( this.root );
+		this.sphereDrawSet.name = "cube";
+		this.sphereDrawSet.transform.positionY = 1;
+		this.sphereDrawSet.transform.scale = vec3.fromValues( 1, 1, 1 );
+		this.sphereDrawSet.updateModelMatrix();
+		this.sphereDrawSet.setParent( this.root );
 
-		this.intersectionDebugBatch = new Batch( new Mesh( new Cube() ), this.shader );
-		this.intersectionDebugBatch.transform.scale = vec3.fromValues( 0.2, 0.2, 0.2 );
-		this.intersectionDebugBatch.transform.positionY = - 999;
+		this.intersectionDebugDrawSet = new DrawSet( new Mesh( new Cube() ), this.program );
+		this.intersectionDebugDrawSet.transform.scale = vec3.fromValues( 0.2, 0.2, 0.2 );
+		this.intersectionDebugDrawSet.transform.positionY = - 999;
 
-		this.intersectionDebugBatch.setParent( this.root );
+		this.intersectionDebugDrawSet.setParent( this.root );
 
 		this.AAbox = new AxisAlignedBox( bounds.min, bounds.max );
 		this.AAbox.createVisualiser();
-		this.AAbox.transform( this.sphereBatch.modelMatrix );
+		this.AAbox.transform( this.sphereDrawSet.modelMatrix );
 		this.AAbox.visualiser?.setParent( this.root );
 
-		this.floorBatch = new Floor();
-		this.floorBatch.name = "floor";
-		this.floorBatch.setParent( this.root );
+		this.floorDrawSet = new Floor();
+		this.floorDrawSet.name = "floor";
+		this.floorDrawSet.setParent( this.root );
 
 		this.resize();
 

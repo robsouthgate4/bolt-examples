@@ -1,4 +1,4 @@
-import Bolt, { Batch, CLAMP_TO_EDGE, FLOAT, LINEAR, Mesh, Node, Shader, Texture2D, Transform } from "@bolt-webgl/core";
+import Bolt, { DrawSet, CLAMP_TO_EDGE, FLOAT, LINEAR, Mesh, Node, Program, Texture2D, Transform } from "@bolt-webgl/core";
 import { GeometryBuffers } from "@bolt-webgl/core/build/Mesh";
 import { mat4, quat, vec3, vec4 } from "gl-matrix";
 import { Accessor, GlTf, Material, Mesh as GLTFMesh, MeshPrimitive, Node as GLTFNode, Texture as GLTFTexture, Skin as GLTFSkin, BufferView, Animation as GLTFAnimation } from "./types/gltf";
@@ -51,12 +51,12 @@ export default class GLTFLoader {
 	}
 
 	private _path!: string;
-	private _materials!: Shader[];
+	private _materials!: Program[];
 	private _textures!: Texture2D[];
 	private _root!: Node;
 	private _skins!: Skin[];
 	private _nodes!: { id: number; node: Node; mesh: number | undefined; skin: number | undefined; localBindTransform: Transform; animatedTransform: mat4; children: number[]; }[];
-	private _batches!: ( Batch | undefined )[][]
+	private _drawSets!: ( DrawSet | undefined )[][]
 	private _skinNodes!: { nodeIndex: number; skinIndex: number; meshIndex?: number; }[];
 	private _useSkinShader = false;
 	private _json!: GlTf;
@@ -135,7 +135,7 @@ export default class GLTFLoader {
 		}
 
 		// map batches
-		this._batches = this._json.meshes!.map( ( mesh, index ) => this._parseBatch( this._json, mesh, buffers, index ) );
+		this._drawSets = this._json.meshes!.map( ( mesh, index ) => this._parseDrawSet( this._json, mesh, buffers, index ) );
 
 
 		// arrange scene graph
@@ -159,9 +159,9 @@ export default class GLTFLoader {
 
 				if ( node.mesh !== undefined ) {
 
-					const b = this._batches[ node.mesh ];
+					const b = this._drawSets[ node.mesh ];
 
-					b.forEach( ( batch?: Batch ) => {
+					b.forEach( ( batch?: DrawSet ) => {
 
 						batch?.setParent( this._nodes[ i ].node );
 
@@ -196,11 +196,11 @@ export default class GLTFLoader {
 
 			if ( mesh !== undefined ) {
 
-				const b = this._batches[ mesh ];
+				const b = this._drawSets[ mesh ];
 
 				if ( b !== undefined ) {
 
-					b.forEach( ( batch?: Batch ) => {
+					b.forEach( ( batch?: DrawSet ) => {
 
 						const mesh = batch!.mesh as SkinMesh;
 
@@ -297,7 +297,7 @@ export default class GLTFLoader {
 
 	}
 
-	_parseBatch( gltf: GlTf, mesh: GLTFMesh, buffers: ArrayBufferLike[], index: number ) {
+	_parseDrawSet( gltf: GlTf, mesh: GLTFMesh, buffers: ArrayBufferLike[], index: number ) {
 
 		const node = this._nodes.find( ( n ) => n.mesh === index );
 
@@ -330,16 +330,16 @@ export default class GLTFLoader {
 				const weights = this._getBufferByAttribute( gltf, buffers, mesh, primitive, "WEIGHTS_0" ) || undefined;
 
 				let m: Mesh | SkinMesh;
-				let s: Shader;
+				let s: Program;
 
-				s = ( this._materials && primitive.material !== undefined ) ? this._materials[ primitive.material as number ] : new Shader( vertexShader, fragmentShader );
+				s = ( this._materials && primitive.material !== undefined ) ? this._materials[ primitive.material as number ] : new Program( vertexShader, fragmentShader );
 
-				if ( node!.skin !== undefined ) {
+				if ( node && node.skin !== undefined ) {
 
 					// form skinned mesh data if joints defined
 					m = new SkinMesh( geometry );
-					m.addAttribute( Float32Array.from( joints!.data ), joints!.size, { shader: s, attributeName: "aJoints" } );
-					m.addAttribute( weights!.data, weights!.size, { shader: s, attributeName: "aWeights" }, FLOAT );
+					m.addAttribute( Float32Array.from( joints!.data ), joints!.size, { program: s, attributeName: "aJoints" } );
+					m.addAttribute( weights!.data, weights!.size, { program: s, attributeName: "aWeights" }, FLOAT );
 
 				} else {
 
@@ -347,7 +347,7 @@ export default class GLTFLoader {
 
 				}
 
-				const batch = new Batch( m, s );
+				const batch = new DrawSet( m, s );
 				batch.name = mesh.name;
 
 				return batch;
@@ -358,9 +358,9 @@ export default class GLTFLoader {
 
 	}
 
-	_parseMaterials( gltf: GlTf, material: Material, index: number ): Shader {
+	_parseMaterials( gltf: GlTf, material: Material, index: number ): Program {
 
-		//TODO:Full PBR shader setup
+		//TODO:Full PBR program setup
 
 		let hasSkin = false;
 
@@ -385,10 +385,10 @@ export default class GLTFLoader {
 
 		} );
 
-		// get the shader for this material
-		const shader = hasSkin ? new Shader( skinVertexShader, skinFragmentShader ) : new Shader( vertexShader, fragmentShader );
+		// get the program for this material
+		const program = hasSkin ? new Program( skinVertexShader, skinFragmentShader ) : new Program( vertexShader, fragmentShader );
 
-		shader.name = material.name;
+		program.name = material.name;
 
 		if ( material.extensions !== undefined ) {
 
@@ -404,17 +404,17 @@ export default class GLTFLoader {
 
 			const { baseColorTexture, baseColorFactor } = material.pbrMetallicRoughness;
 
-			shader.activate();
+			program.activate();
 
 			if ( baseColorTexture !== undefined ) {
 
-				shader.setTexture( "baseTexture", this._textures[ baseColorTexture.index ] );
+				program.setTexture( "baseTexture", this._textures[ baseColorTexture.index ] );
 
 			}
 
 			if ( baseColorFactor !== undefined ) {
 
-				shader.setVector4(
+				program.setVector4(
 					"baseColorFactor",
 					vec4.fromValues(
 						baseColorFactor[ 0 ],
@@ -427,7 +427,7 @@ export default class GLTFLoader {
 
 		}
 
-		return shader;
+		return program;
 
 	}
 

@@ -1,6 +1,6 @@
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Texture2D, Batch, Node, CameraPersp, Mesh } from "@bolt-webgl/core";
+import Bolt, { Program, Texture2D, DrawSet, Node, CameraPersp, Mesh } from "@bolt-webgl/core";
 
 import { vec2, vec3, vec4 } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
@@ -8,12 +8,12 @@ import CameraArcball from "@webgl/modules/CameraArcball";
 import diffuseVertex from "./shaders/diffuse/diffuse.vert";
 import diffuseFragment from "./shaders/diffuse/diffuse.frag";
 import { GlTf } from "@/webgl/modules/gltf-loader/types/gltf";
-import Floor from "@/webgl/modules/batches/floor";
+import Floor from "@/webgl/modules/draw-sets/floor";
 import Sphere from "@/webgl/modules/primitives/Sphere";
 import GPUPicker from "@/webgl/modules/gpu-picker";
 
 interface PickingData {
-	batch: Batch,
+	batch: DrawSet,
 	id: number
 }
 
@@ -28,7 +28,7 @@ export default class extends Base {
 	gl: WebGL2RenderingContext;
 	arcball!: CameraArcball;
 
-	shader: any;
+	program: any;
 	shaderEyes: any;
 	gltf!: GlTf;
 	matcapTexture!: Texture2D;
@@ -65,7 +65,7 @@ export default class extends Base {
 			target: vec3.fromValues( 0, 10, 0 ),
 		} );
 
-		this.shader = new Shader( diffuseVertex, diffuseFragment );
+		this.program = new Program( diffuseVertex, diffuseFragment );
 
 		this.arcball = new CameraArcball( this.camera, 4, 0.08 );
 
@@ -105,14 +105,14 @@ export default class extends Base {
 					if ( pickingItem.id === this.currentPickerID ) {
 
 						batch.transform.scale = vec3.fromValues( 1.1, 1.1, 1.1 );
-						batch.shader.activate();
-						batch.shader.setVector4( "baseColor", vec4.fromValues( 0.9, 0.9, 1, 1 ) );
+						batch.program.activate();
+						batch.program.setVector4( "baseColor", vec4.fromValues( 0.9, 0.9, 1, 1 ) );
 
 					} else {
 
 						batch.transform.scale = vec3.fromValues( 1, 1, 1 );
-						batch.shader.activate();
-						batch.shader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
+						batch.program.activate();
+						batch.program.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
 
 					}
 
@@ -141,24 +141,24 @@ export default class extends Base {
 
 				id ++;
 
-				const shader = new Shader( diffuseVertex, diffuseFragment );
-				shader.activate();
-				shader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
+				const program = new Program( diffuseVertex, diffuseFragment );
+				program.activate();
+				program.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
 
-				const sphereBatch = new Batch(
+				const sphereDrawSet = new DrawSet(
 					new Mesh( new Sphere( { widthSegments: 8, heightSegments: 8 } ) ),
-					shader
+					program
 				);
 
 				// generate ids to match picker against
 				this.pickingDataArray.push( {
-					batch: sphereBatch,
+					batch: sphereDrawSet,
 					id
 				} );
 
-				sphereBatch.transform.positionX = ( x - ( xCount * 0.45 ) ) * gridPadding;
-				sphereBatch.transform.positionY = y * gridPadding + 0.75;
-				sphereBatch.setParent( this.root );
+				sphereDrawSet.transform.positionX = ( x - ( xCount * 0.45 ) ) * gridPadding;
+				sphereDrawSet.transform.positionY = y * gridPadding + 0.75;
+				sphereDrawSet.setParent( this.root );
 
 			}
 

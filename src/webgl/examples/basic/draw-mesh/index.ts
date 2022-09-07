@@ -1,7 +1,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Mesh, Transform, Batch, Node, TRIANGLES, CameraPersp, UNSIGNED_BYTE, UNSIGNED_SHORT, BACK, FRONT_AND_BACK, FRONT, NONE } from "@bolt-webgl/core";
+import Bolt, { Program, Mesh, Transform, DrawSet, Node, TRIANGLES, CameraPersp, UNSIGNED_BYTE, UNSIGNED_SHORT, BACK, FRONT_AND_BACK, FRONT, NONE } from "@bolt-webgl/core";
 
 import colorVertex from "./shaders/color/color.vert";
 import colorFragment from "./shaders/color/color.frag";
@@ -9,7 +9,7 @@ import colorFragment from "./shaders/color/color.frag";
 import { vec3, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
 import { GeometryBuffers } from "@bolt-webgl/core/build/Mesh";
-import Floor from "@/webgl/modules/batches/floor";
+import Floor from "@/webgl/modules/draw-sets/floor";
 
 export default class extends Base {
 
@@ -17,14 +17,14 @@ export default class extends Base {
     camera: CameraPersp;
     assetsLoaded?: boolean;
     torusTransform!: Transform;
-    sphereBatch!: Batch;
-    cubeBatch!: Batch;
-    planeBatch!: Batch;
-    triangleBatch!: Batch;
+    sphereDrawSet!: DrawSet;
+    cubeDrawSet!: DrawSet;
+    planeDrawSet!: DrawSet;
+    triangleDrawSet!: DrawSet;
     bolt: Bolt;
     gl: WebGL2RenderingContext;
     root!: Node;
-    floorBatch: any;
+    floorDrawSet: any;
     arcball: CameraArcball;
 
     constructor() {
@@ -69,9 +69,9 @@ export default class extends Base {
     	this.root.name = "root";
     	this.root.transform.positionX = 0;
 
-    	this.floorBatch = new Floor();
-    	this.floorBatch.name = "floor";
-    	this.floorBatch.setParent( this.root );
+    	this.floorDrawSet = new Floor();
+    	this.floorDrawSet.name = "floor";
+    	this.floorDrawSet.setParent( this.root );
 
     	// draw a simple quad
     	const triangleGeo: GeometryBuffers = {
@@ -85,7 +85,7 @@ export default class extends Base {
     	};
 
     	const triangleMesh = new Mesh( triangleGeo ).setDrawType( TRIANGLES );
-    	const triShader = new Shader( colorVertex, colorFragment );
+    	const triProgram = new Program( colorVertex, colorFragment );
 
     	const colours = [
     		1, 1, 0,
@@ -94,18 +94,18 @@ export default class extends Base {
     		1, 0, 0
     	];
 
-    	// attributes can be added with a named var and shader
-    	triangleMesh.addAttribute( new Float32Array( colours ), 3, { shader: triShader, attributeName: "aColor" } );
+    	// attributes can be added with a named var and program
+    	triangleMesh.addAttribute( new Float32Array( colours ), 3, { program: triProgram, attributeName: "aColor" } );
 
-    	this.triangleBatch = new Batch(
+    	this.triangleDrawSet = new DrawSet(
     		triangleMesh,
-    		triShader
+    		triProgram
     	);
 
-    	this.triangleBatch.transform.positionY = 1.5;
-    	this.triangleBatch.transform.scale = vec3.fromValues( 3, 3, 3 );
+    	this.triangleDrawSet.transform.positionY = 1.5;
+    	this.triangleDrawSet.transform.scale = vec3.fromValues( 3, 3, 3 );
 
-    	this.triangleBatch.setParent( this.root );
+    	this.triangleDrawSet.setParent( this.root );
 
     	this.resize();
 

@@ -1,7 +1,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { Shader, Transform, Mesh, CameraPersp, SRC_ALPHA, ONE_MINUS_SRC_ALPHA, Texture3D, RED, R8, UNSIGNED_BYTE, LINEAR_MIPMAP_LINEAR, LINEAR, REPEAT, BACK, FRONT } from "@bolt-webgl/core";
+import Bolt, { Program, Transform, Mesh, CameraPersp, SRC_ALPHA, ONE_MINUS_SRC_ALPHA, Texture3D, RED, R8, UNSIGNED_BYTE, LINEAR_MIPMAP_LINEAR, LINEAR, REPEAT, BACK, FRONT } from "@bolt-webgl/core";
 import vertexShader from "./shaders/raymarch.vert";
 import fragmentShader from "./shaders/raymarch.frag";
 
@@ -10,19 +10,19 @@ import CameraArcball from "@webgl/modules/CameraArcball";
 import Cube from "@/webgl/modules/primitives/Cube";
 import Post from "@/webgl/modules/post";
 import FXAAPass from "@/webgl/modules/post/passes/FXAAPass";
-import { Batch } from "@bolt-webgl/core/";
+import { DrawSet } from "@bolt-webgl/core/";
 
 import { createNoise3D } from "simplex-noise";
 
 export default class extends Base {
 
 	canvas: HTMLCanvasElement;
-	shader: Shader;
+	program: Program;
 	lightPosition: vec3;
 	camera: CameraPersp;
 	assetsLoaded!: boolean;
 	torusTransform!: Transform;
-	cubeBatch!: Batch;
+	cubeDrawSet!: DrawSet;
 	bolt: Bolt;
 	post: Post;
 	arcball!: CameraArcball;
@@ -41,7 +41,7 @@ export default class extends Base {
 		this.bolt = Bolt.getInstance();
 		this.bolt.init( this.canvas, { antialias: true, powerPreference: "high-performance" } );
 
-		this.shader = new Shader( vertexShader, fragmentShader );
+		this.program = new Program( vertexShader, fragmentShader );
 		this.lightPosition = vec3.fromValues( 0, 10, 0 );
 
 		this.camera = new CameraPersp( {
@@ -116,15 +116,15 @@ export default class extends Base {
 
 		this.assetsLoaded = true;
 
-		this.shader.activate();
-		this.shader.setTexture( "mapVolume", volumeTexture );
-		this.shader.transparent = true;
-		this.shader.blendFunction = { src: SRC_ALPHA, dst: ONE_MINUS_SRC_ALPHA };
+		this.program.activate();
+		this.program.setTexture( "mapVolume", volumeTexture );
+		this.program.transparent = true;
+		this.program.blendFunction = { src: SRC_ALPHA, dst: ONE_MINUS_SRC_ALPHA };
 
 		// setup nodes
-		this.cubeBatch = new Batch(
+		this.cubeDrawSet = new DrawSet(
 			new Mesh( geometry ),
-			this.shader
+			this.program
 		);
 
 		this.resize();
@@ -162,11 +162,11 @@ export default class extends Base {
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.clear( bgColor, bgColor, bgColor, 1 );
 
-		this.shader.activate();
-		this.shader.setVector3( "viewPosition", this.camera.position );
-		this.shader.setFloat( "time", elapsed );
+		this.program.activate();
+		this.program.setVector3( "viewPosition", this.camera.position );
+		this.program.setFloat( "time", elapsed );
 
-		this.bolt.draw( this.cubeBatch );
+		this.bolt.draw( this.cubeDrawSet );
 
 		this.post.end();
 

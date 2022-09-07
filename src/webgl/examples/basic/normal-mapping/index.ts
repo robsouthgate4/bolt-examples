@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { Shader, Batch, Node, CameraPersp, Texture2D, REPEAT, Mesh } from "@bolt-webgl/core";
+import Bolt, { Program, DrawSet, Node, CameraPersp, Texture2D, REPEAT, Mesh } from "@bolt-webgl/core";
 
 import normalmapVertex from "./shaders/normal-map/normal-map.vert";
 import normalmapFragment from "./shaders/normal-map/normal-map.frag";
@@ -10,22 +10,22 @@ import colorFragment from "./shaders/color/color.frag";
 import { vec2, vec3, vec4, } from "gl-matrix";
 import CameraArcball from "@webgl/modules/CameraArcball";
 import Sphere from "@/webgl/modules/primitives/Sphere";
-import Floor from "@/webgl/modules/batches/floor";
+import Floor from "@/webgl/modules/draw-sets/floor";
 export default class extends Base {
 
 	canvas: HTMLCanvasElement;
-	shaderEyes: Shader;
+	shaderEyes: Program;
 	camera: CameraPersp;
 	assetsLoaded?: boolean;
 	bolt = Bolt.getInstance();
 	gl: WebGL2RenderingContext;
 	root!: Node;
 	arcball: CameraArcball;
-	normalMapShader: Shader;
+	normalMapProgram: Program;
 	matcapTexture!: Texture2D;
 	normalTexture!: Texture2D;
-	sphereBatch!: Batch;
-	floorBatch: any;
+	sphereDrawSet!: DrawSet;
+	floorDrawSet: any;
 
 	constructor() {
 
@@ -54,8 +54,8 @@ export default class extends Base {
 
 		this.gl = this.bolt.getContext();
 
-		this.shaderEyes = new Shader( colorVertex, colorFragment );
-		this.normalMapShader = new Shader( normalmapVertex, normalmapFragment );
+		this.shaderEyes = new Program( colorVertex, colorFragment );
+		this.normalMapProgram = new Program( normalmapVertex, normalmapFragment );
 
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.enableDepth();
@@ -82,20 +82,20 @@ export default class extends Base {
 
 		this.assetsLoaded = true;
 
-		this.normalMapShader.activate();
-		this.normalMapShader.setTexture( "baseTexture", this.matcapTexture );
-		this.normalMapShader.setVector2( "normalUVScale", vec2.fromValues( 2, 2 ) );
-		this.normalMapShader.setFloat( "normalHeight", 0.1 );
-		this.normalMapShader.setTexture( "normalTexture", this.normalTexture );
-		this.normalMapShader.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
+		this.normalMapProgram.activate();
+		this.normalMapProgram.setTexture( "baseTexture", this.matcapTexture );
+		this.normalMapProgram.setVector2( "normalUVScale", vec2.fromValues( 2, 2 ) );
+		this.normalMapProgram.setFloat( "normalHeight", 0.1 );
+		this.normalMapProgram.setTexture( "normalTexture", this.normalTexture );
+		this.normalMapProgram.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
 
 		this.root = new Node();
-		this.sphereBatch = new Batch( new Mesh( new Sphere( { widthSegments: 24, heightSegments: 24 } ) ), this.normalMapShader );
-		this.sphereBatch.transform.positionY = 1;
-		this.sphereBatch.setParent( this.root );
+		this.sphereDrawSet = new DrawSet( new Mesh( new Sphere( { widthSegments: 24, heightSegments: 24 } ) ), this.normalMapProgram );
+		this.sphereDrawSet.transform.positionY = 1;
+		this.sphereDrawSet.setParent( this.root );
 
-		this.floorBatch = new Floor();
-		this.floorBatch.setParent( this.root );
+		this.floorDrawSet = new Floor();
+		this.floorDrawSet.setParent( this.root );
 
 		this.resize();
 
@@ -123,7 +123,7 @@ export default class extends Base {
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.clear( 0.6, 0.6, 0.6, 1 );
 
-		this.sphereBatch.transform.rotateY( 0.15 * delta );
+		this.sphereDrawSet.transform.rotateY( 0.15 * delta );
 
 		this.bolt.draw( this.root );
 
