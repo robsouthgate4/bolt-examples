@@ -14,7 +14,7 @@ import Floor from "@/webgl/modules/draw-sets/floor";
 export default class extends Base {
 
 	canvas: HTMLCanvasElement;
-	shaderEyes: Program;
+	programEyes: Program;
 	camera: CameraPersp;
 	assetsLoaded?: boolean;
 	bolt = Bolt.getInstance();
@@ -54,7 +54,7 @@ export default class extends Base {
 
 		this.gl = this.bolt.getContext();
 
-		this.shaderEyes = new Program( colorVertex, colorFragment );
+		this.programEyes = new Program( colorVertex, colorFragment );
 		this.normalMapProgram = new Program( normalmapVertex, normalmapFragment );
 
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );

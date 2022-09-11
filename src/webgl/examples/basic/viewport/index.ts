@@ -138,7 +138,6 @@ export default class extends Base {
 
 	update( elapsed: number, delta: number ) {
 
-		this.camera.update();
 
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.clear( 0, 0, 0, 1 );

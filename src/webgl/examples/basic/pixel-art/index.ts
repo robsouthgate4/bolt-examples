@@ -16,7 +16,7 @@ import GLTFLoader from "@/webgl/modules/gltf-loader";
 export default class extends Base {
 
 	canvas: HTMLCanvasElement;
-	shaderEyes: Program;
+	programEyes: Program;
 	camera: CameraPersp;
 	assetsLoaded?: boolean;
 	torusTransform!: Transform;
@@ -32,7 +32,7 @@ export default class extends Base {
 	root!: Node;
 	floorDrawSet!: Floor;
 	arcball: CameraArcball;
-	shaderBody: Program;
+	programBody: Program;
 	gltf!: Node;
 
 	constructor() {
@@ -64,8 +64,8 @@ export default class extends Base {
 
 		this.post = new Post( this.bolt );
 
-		this.shaderEyes = new Program( colorVertex, colorFragment );
-		this.shaderBody = new Program( colorVertex, colorFragment );
+		this.programEyes = new Program( colorVertex, colorFragment );
+		this.programBody = new Program( colorVertex, colorFragment );
 
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.enableDepth();
@@ -109,7 +109,7 @@ export default class extends Base {
 
 				if ( node.program.name === "mat_phantom_body" ) {
 
-					node.program = this.shaderBody;
+					node.program = this.programBody;
 					node.program.activate();
 					node.program.setVector4( "baseColor", vec4.fromValues( 0.7, 0.7, 0.7, 1 ) );
 
@@ -117,7 +117,7 @@ export default class extends Base {
 
 				if ( node.program.name === "mat_phantom_eyes" ) {
 
-					node.program = this.shaderEyes;
+					node.program = this.programEyes;
 					node.program.activate();
 					node.program.setVector4( "baseColor", vec4.fromValues( 0, 0, 0, 1 ) );
 
@@ -150,19 +150,19 @@ export default class extends Base {
 
 		if ( ! this.assetsLoaded ) return;
 
-		this.camera.update();
+
 
 		this.post.begin();
 
-		this.shaderBody.activate();
-		this.shaderBody.setFloat( "time", elapsed );
+		this.programBody.activate();
+		this.programBody.setFloat( "time", elapsed );
 
 		this.camera.transform.positionX = 10 * Math.sin( elapsed * 0.5 );
 		this.camera.transform.positionZ = 10 * Math.cos( elapsed * 0.5 );
 		this.camera.lookAt( vec3.fromValues( 0, 3, 0 ) );
 
-		this.shaderEyes.activate();
-		this.shaderEyes.setFloat( "time", elapsed );
+		this.programEyes.activate();
+		this.programEyes.setFloat( "time", elapsed );
 
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.clear( 0.9, 0.9, 0.9, 1 );

@@ -21,8 +21,8 @@ export default class extends Base {
 	root!: Node;
 	gltf!: Node;
 	arcball: CameraArcball;
-	shaderEyes: Program;
-	shaderBody: Program;
+	programEyes: Program;
+	programBody: Program;
 	matcapTexture!: Texture2D;
 
 	constructor() {
@@ -52,8 +52,8 @@ export default class extends Base {
 
 		this.gl = this.bolt.getContext();
 
-		this.shaderEyes = new Program( colorVertex, colorFragment );
-		this.shaderBody = new Program( matcapVertex, matcapFragment );
+		this.programEyes = new Program( colorVertex, colorFragment );
+		this.programBody = new Program( matcapVertex, matcapFragment );
 
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.enableDepth();
@@ -87,7 +87,7 @@ export default class extends Base {
 
 				if ( node.program.name === "mat_phantom_body" ) {
 
-					node.program = this.shaderBody;
+					node.program = this.programBody;
 					node.program.activate();
 					node.program.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
 					node.program.setTexture( "baseTexture", this.matcapTexture );
@@ -96,7 +96,7 @@ export default class extends Base {
 
 				if ( node.program.name === "mat_phantom_eyes" ) {
 
-					node.program = this.shaderEyes;
+					node.program = this.programEyes;
 					node.program.activate();
 					node.program.setVector4( "baseColor", vec4.fromValues( 0, 0, 0, 1 ) );
 

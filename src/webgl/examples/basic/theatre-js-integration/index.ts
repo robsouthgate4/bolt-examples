@@ -50,8 +50,8 @@ export default class extends Base {
 	};
 
 	theatreProject!: ISheetObject<typeof this.dudeMotionConfig>;
-	shaderBody: any;
-	shaderEyes: any;
+	programBody: any;
+	programEyes: any;
 	gltf!: Node;
 	matcapTexture!: Texture2D;
 	floor!: Floor;
@@ -81,8 +81,8 @@ export default class extends Base {
 			target: vec3.fromValues( 0, 2.5, 0 ),
 		} );
 
-		this.shaderEyes = new Program( colorVertex, colorFragment );
-		this.shaderBody = new Program( matcapVertex, matcapFragment );
+		this.programEyes = new Program( colorVertex, colorFragment );
+		this.programBody = new Program( matcapVertex, matcapFragment );
 
 		this.arcball = new CameraArcball( this.camera, 4, 0.08 );
 
@@ -147,7 +147,7 @@ export default class extends Base {
 
 				if ( node.program.name === "mat_phantom_body" ) {
 
-					node.program = this.shaderBody;
+					node.program = this.programBody;
 					node.program.activate();
 					node.program.setTexture( "baseTexture", this.matcapTexture );
 					node.program.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
@@ -156,7 +156,7 @@ export default class extends Base {
 
 				if ( node.program.name === "mat_phantom_eyes" ) {
 
-					node.program = this.shaderEyes;
+					node.program = this.programEyes;
 					node.program.activate();
 					node.program.setVector4( "baseColor", vec4.fromValues( 0, 0, 0, 1 ) );
 

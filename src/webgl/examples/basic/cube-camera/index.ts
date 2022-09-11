@@ -29,8 +29,8 @@ export default class extends Base {
 	gltf!: Node;
 	gl: WebGL2RenderingContext;
 	floor!: Floor;
-	shaderEyes!: Program;
-	shaderReflection!: Program;
+	programEyes!: Program;
+	programReflection!: Program;
 	cubeMaptexture!: TextureCube;
 	cubeCameras: Camera[] = [];
 	cubeFBO: FBOCube;
@@ -39,7 +39,7 @@ export default class extends Base {
 	sphere!: DrawSet;
 	cube2!: DrawSet;
 	skyBox: any;
-	shaderSky: Program;
+	programSky: Program;
 	cameraParent = new Node();
 	cameraCubeParent = new Node();
 	cameraDebugGeo!: GeometryBuffers;
@@ -79,8 +79,8 @@ export default class extends Base {
 		this.cubeFBO.unbind();
 		this.cubeRBO.unbind();
 
-		this.shaderReflection = new Program( reflectionVertex, reflectionFragment );
-		this.shaderSky = new Program( skyVertex, skyFragment );
+		this.programReflection = new Program( reflectionVertex, reflectionFragment );
+		this.programSky = new Program( skyVertex, skyFragment );
 
 		this.gl = this.bolt.getContext();
 
@@ -114,11 +114,11 @@ export default class extends Base {
 		await environmentTexture.load();
 		this.assetsLoaded = true;
 
-		this.shaderSky.activate();
-		this.shaderSky.setTexture( "mapEnvironment", environmentTexture );
+		this.programSky.activate();
+		this.programSky.setTexture( "mapEnvironment", environmentTexture );
 
-		this.shaderReflection.activate();
-		this.shaderReflection.setTexture( "mapReflection", this.cubeFBO.targetTexture );
+		this.programReflection.activate();
+		this.programReflection.setTexture( "mapReflection", this.cubeFBO.targetTexture );
 
 		this.cube = new DrawSet( new Mesh( new Cube() ), new Program( colorVertex, colorFragment ) );
 		this.cube.transform.position = vec3.fromValues( - 2, 0, 0 );
@@ -126,11 +126,11 @@ export default class extends Base {
 		this.cube2 = new DrawSet( new Mesh( new Cube() ), new Program( colorVertex, colorFragment ) );
 		this.cube2.transform.position = vec3.fromValues( 2, 0, 0 );
 
-		this.skyBox = new DrawSet( new Mesh( new Cube() ), this.shaderSky );
+		this.skyBox = new DrawSet( new Mesh( new Cube() ), this.programSky );
 		this.skyBox.transform.position = vec3.fromValues( 0, 0, 0 );
 		this.skyBox.transform.scale = vec3.fromValues( 100, 100, 100 );
 
-		this.sphere = new DrawSet( new Mesh( new Sphere() ), this.shaderReflection );
+		this.sphere = new DrawSet( new Mesh( new Sphere() ), this.programReflection );
 		this.sphere.transform.position = vec3.fromValues( 0, 0, 0 );
 		this.sphere.transform.scale = vec3.fromValues( 1.5, 1.5, 1.5 );
 
@@ -295,8 +295,8 @@ export default class extends Base {
 			this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 			this.bolt.clear( 1, 1, 1, 1 );
 
-			this.shaderReflection.activate();
-			this.shaderReflection.setVector3( "cameraPosition", this.camera.worldPosition );
+			this.programReflection.activate();
+			this.programReflection.setVector3( "cameraPosition", this.camera.worldPosition );
 
 			// set the default scene camera
 			this.bolt.setCamera( this.camera );
@@ -325,7 +325,7 @@ export default class extends Base {
 
 		this.cameraParent.updateModelMatrix();
 		this.cameraParent.transform.lookAt( vec3.fromValues( 0, 0, 0 ) );
-		this.camera.update();
+
 
 		this.bolt.enableCullFace();
 		this.bolt.enableDepth();
