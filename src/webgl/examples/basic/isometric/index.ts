@@ -111,7 +111,7 @@ export default class extends Base {
 
 	update( elapsed: number, delta: number ) {
 
-		this.camera.update();
+
 		this.arcball.update();
 
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );

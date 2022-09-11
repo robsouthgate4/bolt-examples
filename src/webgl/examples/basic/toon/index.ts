@@ -201,7 +201,7 @@ export default class extends Base {
 
 		if ( ! this.assetsLoaded ) return;
 
-		this.camera.update();
+
 
 		this.bolt.enableDepth();
 		this.bolt.enableCullFace();

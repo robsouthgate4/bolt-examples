@@ -39,8 +39,8 @@ export default class Orbit {
 			zoomSpeed = 1,
 			minElevation = 0,
 			maxElevation = Math.PI * 0.5,
-			minAzimuth = 0,
-			maxAzimuth = Math.PI,
+			minAzimuth = - Infinity,
+			maxAzimuth = Infinity,
 		} = {} ) {
 
 		this._ease = ease;

@@ -5,7 +5,7 @@ import colorVertex from "./shaders/color/color.vert";
 import colorFragment from "./shaders/color/color.frag";
 
 import { vec3, vec4, } from "gl-matrix";
-import CameraArcball from "@webgl/modules/CameraArcball";
+import Orbit from "@webgl/modules/Orbit";
 import Post from "@/webgl/modules/post";
 import FXAAPass from "@/webgl/modules/post/passes/FXAAPass";
 import RGBSplitPass from "@/webgl/modules/post/passes/RGBSplitPass";
@@ -16,7 +16,7 @@ import GLTFLoader from "@/webgl/modules/gltf-loader";
 export default class extends Base {
 
 	canvas: HTMLCanvasElement;
-	shaderEyes: Program;
+	programEyes: Program;
 	camera: CameraPersp;
 	assetsLoaded?: boolean;
 	torusTransform!: Transform;
@@ -31,8 +31,8 @@ export default class extends Base {
 	gl: WebGL2RenderingContext;
 	root!: Node;
 	floorDrawSet!: Floor;
-	arcball: CameraArcball;
-	shaderBody: Program;
+	orbit: Orbit;
+	programBody: Program;
 	gltf!: Node;
 
 	constructor() {
@@ -55,7 +55,7 @@ export default class extends Base {
 			target: vec3.fromValues( 0, 3, 0 ),
 		} );
 
-		this.arcball = new CameraArcball( this.camera, 4, 0.08 );
+		this.orbit = new Orbit( this.camera );
 
 		this.bolt.init( this.canvas, { antialias: false, dpi: 2 } );
 		this.bolt.setCamera( this.camera );
@@ -64,8 +64,8 @@ export default class extends Base {
 
 		this.post = new Post( this.bolt );
 
-		this.shaderEyes = new Program( colorVertex, colorFragment );
-		this.shaderBody = new Program( colorVertex, colorFragment );
+		this.programEyes = new Program( colorVertex, colorFragment );
+		this.programBody = new Program( colorVertex, colorFragment );
 
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.enableDepth();
@@ -115,7 +115,7 @@ export default class extends Base {
 
 				if ( node.program.name === "mat_phantom_body" ) {
 
-					node.program = this.shaderBody;
+					node.program = this.programBody;
 					node.program.activate();
 					node.program.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
 
@@ -123,7 +123,7 @@ export default class extends Base {
 
 				if ( node.program.name === "mat_phantom_eyes" ) {
 
-					node.program = this.shaderEyes;
+					node.program = this.programEyes;
 					node.program.activate();
 					node.program.setVector4( "baseColor", vec4.fromValues( 0, 0, 0, 1 ) );
 
@@ -156,7 +156,7 @@ export default class extends Base {
 
 		if ( ! this.assetsLoaded ) return;
 
-		this.arcball.update();
+		this.orbit.update();
 
 		this.post.begin();
 

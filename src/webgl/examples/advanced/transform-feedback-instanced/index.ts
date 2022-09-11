@@ -244,7 +244,7 @@ export default class extends Base {
 
 		if ( ! this.assetsLoaded ) return;
 
-		this.camera.update();
+
 
 		this.bolt.setViewPort( 0, 0, this.gl.canvas.width, this.gl.canvas.height );
 		this.bolt.clear( 0, 0, 0, 1 );

@@ -29,7 +29,7 @@ export default class extends Base {
 	arcball!: CameraArcball;
 
 	program: any;
-	shaderEyes: any;
+	programEyes: any;
 	gltf!: GlTf;
 	matcapTexture!: Texture2D;
 	floor!: Floor;

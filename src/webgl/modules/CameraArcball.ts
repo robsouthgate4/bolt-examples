@@ -232,7 +232,7 @@ export default class CameraArcball {
 		this._position[ 2 ] = newPosition[ 2 ];
 
 		this._camera.transform.lookAt( this._camera.target, this._camera.up );
-		this._camera.update();
+
 
 
 	}

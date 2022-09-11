@@ -16,7 +16,7 @@ import CameraFPS from "@/webgl/modules/CameraFPS";
 export default class extends Base {
 
 	canvas: HTMLCanvasElement;
-	shaderEyes: Program;
+	programEyes: Program;
 	camera: CameraPersp;
 	assetsLoaded?: boolean;
 	torusTransform!: Transform;
@@ -28,7 +28,7 @@ export default class extends Base {
 	root!: Node;
 	floorDrawSet!: Floor;
 	cameraFPS: CameraFPS;
-	shaderBody: Program;
+	programBody: Program;
 	gltf!: Node;
 	depthFBO!: FBO;
 	fullScreenTriangle!: Mesh;
@@ -70,8 +70,8 @@ export default class extends Base {
 		this.compProgram.activate();
 		this.compProgram.setVector2( "cameraPlanes", vec2.fromValues( this.camera.near, this.camera.far ) );
 
-		this.shaderEyes = new Program( colorVertex, colorFragment );
-		this.shaderBody = new Program( colorVertex, colorFragment );
+		this.programEyes = new Program( colorVertex, colorFragment );
+		this.programBody = new Program( colorVertex, colorFragment );
 
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.enableDepth();
@@ -118,7 +118,7 @@ export default class extends Base {
 
 				if ( node.program.name === "mat_phantom_body" ) {
 
-					node.program = this.shaderBody;
+					node.program = this.programBody;
 					node.program.activate();
 					node.program.setVector4( "baseColor", vec4.fromValues( 0, 1, 1, 1 ) );
 
@@ -126,7 +126,7 @@ export default class extends Base {
 
 				if ( node.program.name === "mat_phantom_eyes" ) {
 
-					node.program = this.shaderEyes;
+					node.program = this.programEyes;
 					node.program.activate();
 					node.program.setVector4( "baseColor", vec4.fromValues( 0, 0, 0, 1 ) );
 
@@ -161,14 +161,13 @@ export default class extends Base {
 
 		this.cameraFPS.update( delta );
 
-		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 
 		this.depthFBO.bind();
-		this.bolt.enableDepth();
 		this.bolt.clear( 0.9, 0.9, 0.9, 1 );
 		this.bolt.draw( this.root );
 		this.depthFBO.unbind();
 
+		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.compProgram.activate();
 		this.compProgram.setTexture( "map", this.depthFBO.targetTexture );
 		this.compProgram.setTexture( "mapDepth", this.depthFBO.depthTexture );

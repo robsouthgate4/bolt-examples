@@ -155,7 +155,7 @@ export default class extends Base {
 		this.camera.transform.positionZ = 3 * Math.cos( elapsed * 0.5 );
 		this.camera.lookAt( vec3.fromValues( 0, 0, 0 ) );
 
-		this.camera.update();
+
 
 		const bgColor = 0 / 255;
 
