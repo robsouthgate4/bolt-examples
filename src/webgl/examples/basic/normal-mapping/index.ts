@@ -8,7 +8,7 @@ import colorVertex from "./shaders/color/color.vert";
 import colorFragment from "./shaders/color/color.frag";
 
 import { vec2, vec3, vec4, } from "gl-matrix";
-import CameraArcball from "@webgl/modules/CameraArcball";
+import Orbit from "@webgl/modules/Orbit";
 import Sphere from "@/webgl/modules/primitives/Sphere";
 import Floor from "@/webgl/modules/draw-sets/floor";
 export default class extends Base {
@@ -20,7 +20,7 @@ export default class extends Base {
 	bolt = Bolt.getInstance();
 	gl: WebGL2RenderingContext;
 	root!: Node;
-	arcball: CameraArcball;
+	orbit: Orbit;
 	normalMapProgram: Program;
 	matcapTexture!: Texture2D;
 	normalTexture!: Texture2D;
@@ -47,7 +47,7 @@ export default class extends Base {
 			target: vec3.fromValues( 0, 1, 0 ),
 		} );
 
-		this.arcball = new CameraArcball( this.camera, 4, 0.08 );
+		this.orbit = new Orbit( this.camera );
 
 		this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
 		this.bolt.setCamera( this.camera );
@@ -84,7 +84,7 @@ export default class extends Base {
 
 		this.normalMapProgram.activate();
 		this.normalMapProgram.setTexture( "baseTexture", this.matcapTexture );
-		this.normalMapProgram.setVector2( "normalUVScale", vec2.fromValues( 2, 2 ) );
+		this.normalMapProgram.setVector2( "normalUVScale", vec2.fromValues( 0.5, 0.5 ) );
 		this.normalMapProgram.setFloat( "normalHeight", 0.1 );
 		this.normalMapProgram.setTexture( "normalTexture", this.normalTexture );
 		this.normalMapProgram.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
@@ -118,10 +118,10 @@ export default class extends Base {
 
 		if ( ! this.assetsLoaded ) return;
 
-		this.arcball.update();
+		this.orbit.update();
 
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
-		this.bolt.clear( 0.6, 0.6, 0.6, 1 );
+		this.bolt.clear( 0, 0, 0, 1 );
 
 		this.sphereDrawSet.transform.rotateY( 0.15 * delta );
 
