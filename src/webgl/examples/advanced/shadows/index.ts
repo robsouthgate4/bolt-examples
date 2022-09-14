@@ -97,15 +97,11 @@ export default class extends Base {
 
 		this.programSurface = new Program( floorVertex, floorFragment );
 		this.programSurface.activate();
-		this.programSurface.setTexture( "shadowMap", this.shadowFBO.depthTexture );
-		this.programSurface.setMatrix4( "lightSpaceMatrix", this.lightSpaceMatrix );
-		this.programSurface.setVector3( "lightPosition", this.shadowLight.position );
 		this.programSurface.setFloat( "shadowStrength", 0.1 );
 
 		this.programShadow = new Program( shadowVertex, shadowFragment );
 		this.programShadow.activate();
 		this.programShadow.setMatrix4( "lightSpaceMatrix", this.lightSpaceMatrix );
-
 
 		this.shadowMapper = new ShadowMapper( {
 			bolt: this.bolt,
@@ -139,45 +135,48 @@ export default class extends Base {
 
 		this.gltf.traverse( ( node: Node ) => {
 
-			if ( node instanceof DrawSet ) {
-
-				if ( node.program.name === "mat_phantom_body" ) {
-
-					node.name = "phantom_body";
-
-					node.program = this.programBody;
-					node.program.activate();
-					node.program.setTexture( "shadowMap", this.shadowFBO.depthTexture );
-					node.program.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
-					node.program.setMatrix4( "lightSpaceMatrix", this.lightSpaceMatrix );
-					node.program.setTexture( "baseTexture", this.matcapTexture );
-					node.program.setFloat( "shadowStrength", 0.1 );
-
-					node.setParent( this.phantomRoot );
-
-				}
-
-				if ( node.program.name === "mat_phantom_eyes" ) {
-
-					node.name = "phantom_eyes";
-
-					node.program = this.programEyes;
-					node.program.activate();
-					node.program.setTexture( "shadowMap", this.shadowFBO.depthTexture );
-					node.program.setMatrix4( "lightSpaceMatrix", this.lightSpaceMatrix );
-					node.program.setVector4( "baseColor", vec4.fromValues( 0, 0, 0, 1 ) );
-					node.program.setFloat( "shadowStrength", 0.1 );
-
-					node.setParent( this.phantomRoot );
-
-				}
-
-
-			}
+			this.assignPrograms( node );
 
 		} );
 
+		this.shadowMapper.add( this.phantomRoot );
+
 		this.resize();
+
+	}
+
+	assignPrograms( node: Node ) {
+
+		if ( node instanceof DrawSet ) {
+
+			if ( node.program.name === "mat_phantom_body" ) {
+
+				node.name = "phantom_body";
+
+				node.program = this.programBody;
+				node.program.activate();
+				node.program.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
+				node.program.setTexture( "baseTexture", this.matcapTexture );
+				node.program.setFloat( "shadowStrength", 0.1 );
+
+				node.setParent( this.phantomRoot );
+
+			}
+
+			if ( node.program.name === "mat_phantom_eyes" ) {
+
+				node.name = "phantom_eyes";
+
+				node.program = this.programEyes;
+				node.program.activate();
+				node.program.setVector4( "baseColor", vec4.fromValues( 0, 0, 0, 1 ) );
+				node.program.setFloat( "shadowStrength", 0.1 );
+
+				node.setParent( this.phantomRoot );
+
+			}
+
+		}
 
 	}
 
@@ -203,52 +202,7 @@ export default class extends Base {
 		vec3.scale( this.wallRight.transform.scale, this.wallRight.transform.scale, structureScale );
 		this.wallRight.setParent( this.structureRoot );
 
-	}
-
-	setDefaultPrograms() {
-
-		// set programs to original
-
-		this.phantomRoot.traverse( ( node: Node ) => {
-
-			if ( node instanceof DrawSet ) {
-
-				if ( node.name === "phantom_body" ) {
-
-					node.program = this.programBody;
-
-				}
-
-				if ( node.name === "phantom_eyes" ) {
-
-					node.program = this.programEyes;
-
-				}
-
-			}
-
-		} );
-
-
-		this.floor.program = this.programSurface;
-		this.wallBack.program = this.programSurface;
-		this.wallRight.program = this.programSurface;
-
-	}
-
-	setShadowPrograms() {
-
-		// set programs to shadow
-
-		this.phantomRoot.traverse( ( node: Node ) => {
-
-			if ( node instanceof DrawSet ) {
-
-				node.program = this.programShadow;
-
-			}
-
-		} );
+		this.shadowMapper.add( this.structureRoot );
 
 	}
 
@@ -274,31 +228,10 @@ export default class extends Base {
 		this.phantomRoot.transform.positionY = 4 + Math.sin( elapsed * 1 ) * 0.5;
 		this.phantomRoot.transform.rotateY( delta );
 
-		// draw to shadow map
-		{
-
-			this.shadowFBO.bind();
-
-			this.bolt.enableCullFace();
-			this.bolt.cullFace( FRONT );
-
-			this.setShadowPrograms();
-
-			this.bolt.clear( 0, 0, 0, 0 );
-
-			this.bolt.draw( this.phantomRoot );
-
-			this.shadowFBO.unbind();
-
-			this.bolt.cullFace( BACK );
-			this.bolt.disableCullFace();
-
-		}
+		this.shadowMapper.draw( this.phantomRoot );
 
 		// draw scene as normal
 		{
-
-			this.setDefaultPrograms();
 
 			this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 			this.bolt.clear( 0.9, 0.9, 0.9, 1 );

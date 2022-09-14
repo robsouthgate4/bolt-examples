@@ -53,4 +53,6 @@ void main() {
 
     FragColor = vec4( vec3( 1.0 - ( shadow * shadowStrength ) ), 1.0);
 
+    //FragColor = texture( shadowMap, Uv );
+
 }

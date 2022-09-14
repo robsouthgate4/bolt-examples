@@ -44,7 +44,7 @@ export default class ShadowMapper {
 		this._width = width;
 		this._height = height;
 
-		this._fbo = new FBO( { width: 1024, height: 1024, depth: true } );
+		this._fbo = new FBO( { width, height, depth: true } );
 
 		this._lightSpaceMatrix = mat4.create();
 		mat4.multiply( this._lightSpaceMatrix, this._light.projection, this._light.view );
@@ -59,30 +59,23 @@ export default class ShadowMapper {
 	 */
 	add( node: Node ) {
 
-		// node.traverse( ( node: Node ) => {
+		node.traverse( ( node: Node ) => {
 
-		// 	if ( node instanceof DrawSet ) {
+			if ( node instanceof DrawSet ) {
 
-		// 		node.program.activate();
-		// 		node.program.setMatrix4( "lightSpaceMatrix", this._lightSpaceMatrix );
-		// 		node.program.setVector3( "lightPosition", this._light.position );
-		// 		node.program.setTexture( "shadowMap", this._fbo.depthTexture );
+				node.program.activate();
+				node.program.setMatrix4( "lightSpaceMatrix", this._lightSpaceMatrix );
+				node.program.setVector3( "lightPosition", this._light.position );
+				node.program.setTexture( "shadowMap", this._fbo.depthTexture );
 
-		// 		this._drawCache.push( {
-		// 			initialProgram: node.program,
-		// 			drawset: node
-		// 		} );
+				this._drawCache.push( {
+					initialProgram: node.program,
+					drawset: node
+				} );
 
-		// 	}
+			}
 
-		// } );
-
-		// drawset.program.activate();
-		// drawset.program.setMatrix4( "lightSpaceMatrix", this._lightSpaceMatrix );
-		// drawset.program.setVector3( "lightPosition", this._light.position );
-		// drawset.program.setTexture( "shadowMap", this._fbo.depthTexture );
-
-		// this._drawCache.push( { initialProgram: drawset.program, drawset: drawset } );
+		} );
 
 	}
 
@@ -92,23 +85,7 @@ export default class ShadowMapper {
 
 	}
 
-	private _setDepthShader() {
-
-
-
-	}
-
-	private _overrideDefault() {
-
-
-
-	}
-
-	draw( nodes: Node[] ) {
-
-		this._drawCache = [];
-
-		//this._drawCache.push( ...nodes );
+	draw( node: Node ) {
 
 		{
 
@@ -117,52 +94,17 @@ export default class ShadowMapper {
 			this._bolt.enableCullFace();
 			this._bolt.cullFace( FRONT );
 
-			this._bolt.clear( 0, 0, 0, 0 );
+			this._bolt.clear( 0, 0, 0, 1 );
 
-			// for ( let i = this._drawCache.length - 1; i >= 0; i -- ) {
+			for ( let i = this._drawCache.length - 1; i >= 0; i -- ) {
 
-			// 	const drawGroup = this._drawCache[ i ];
-			// 	drawGroup.drawset.program = this._depthProgram;
-			// 	drawGroup.drawset.updateModelMatrix();
-			// 	this._bolt.draw( drawGroup.drawset );
+				const drawGroup = this._drawCache[ i ];
+				console.log( drawGroup );
+				drawGroup.drawset.program = this._depthProgram;
 
-			// }
-			// nodes[ 0 ].traverse( ( node: Node ) => {
+			}
 
-			// 	if ( node instanceof DrawSet ) {
-
-			// 		node.program = this._depthProgram;
-
-			// 	}
-
-
-			// } );
-
-			nodes.forEach( ( node: Node ) => {
-
-				node.traverse( ( node: Node ) => {
-
-					if ( node instanceof DrawSet ) {
-
-						node.program = this._depthProgram;
-
-					}
-
-
-				} );
-
-				this._bolt.draw( node );
-
-			} );
-
-			// for ( let i = this._drawCache.length - 1; i >= 0; i -- ) {
-
-			// 	const drawGroup = this._drawCache[ i ];
-			// 	drawGroup.drawset.program = this._depthProgram;
-			// 	drawGroup.drawset.updateModelMatrix();
-			// 	this._bolt.draw( drawGroup.drawset );
-
-			// }
+			this._bolt.draw( node );
 
 			this._fbo.unbind();
 
@@ -173,13 +115,12 @@ export default class ShadowMapper {
 
 		{
 
-			// for ( let i = this._drawCache.length - 1; i >= 0; i -- ) {
+			for ( let i = this._drawCache.length - 1; i >= 0; i -- ) {
 
-			// 	const drawGroup = this._drawCache[ i ];
-			// 	drawGroup.drawset.program = drawGroup.initialProgram;
-			// 	drawGroup.drawset.program.activate();
+				const drawGroup = this._drawCache[ i ];
+				drawGroup.drawset.program = drawGroup.initialProgram;
 
-			// }
+			}
 
 		}
 
