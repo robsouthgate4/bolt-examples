@@ -1,7 +1,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { Program, Transform, Mesh, Node, DrawSet, CameraPersp } from "@bolt-webgl/core";
+import Bolt, { Program, Transform, Mesh, Node, DrawSet, CameraPersp, FLOAT } from "@bolt-webgl/core";
 
 import defaultVertexInstanced from "./shaders/defaultInstanced/defaultInstanced.vert";
 import defaultFragmentInstanced from "./shaders/defaultInstanced/defaultInstanced.frag";
@@ -32,7 +32,7 @@ export default class extends Base {
 
 		const devicePixelRatio = Math.min( 2, window.devicePixelRatio || 1 );
 
-		this.width = window.innerWidth * devicePixelRatio;
+		this.width = window.innerHeight * devicePixelRatio;
 		this.height = window.innerHeight * devicePixelRatio;
 
 		this.canvas = <HTMLCanvasElement>document.getElementById( "experience" );
@@ -51,7 +51,7 @@ export default class extends Base {
 		this.cameraFPS = new CameraFPS( this.camera );
 
 		this.bolt = Bolt.getInstance();
-		this.bolt.init( this.canvas, { antialias: true } );
+		this.bolt.init( this.canvas, { antialias: true, dpi: devicePixelRatio, powerPreference: "high-performance" } );
 		this.bolt.setCamera( this.camera );
 
 		this.colorProgram = new Program( defaultVertexInstanced, defaultFragmentInstanced );
@@ -65,7 +65,6 @@ export default class extends Base {
 
 		this.parent = new Node();
 
-
 		this.init();
 
 
@@ -76,6 +75,8 @@ export default class extends Base {
 		const instanceCount = 3000;
 
 		const instanceMatrices: mat4[] = [];
+
+		const colours: number[] = [];
 
 		for ( let i = 0; i < instanceCount; i ++ ) {
 
@@ -102,9 +103,13 @@ export default class extends Base {
 			mat4.multiply( combined, translation, rotation );
 			mat4.multiply( combined, combined, scale );
 
+			colours.push( Math.random(), Math.random(), Math.random() );
+
 			instanceMatrices.push( combined );
 
 		}
+
+		console.log( colours );
 
 		const gltfLoader = new GLTFLoader( this.bolt );
 
@@ -117,6 +122,8 @@ export default class extends Base {
 		gltf.traverse( ( node: Node ) => {
 
 			if ( node.name === "Torus" && node.children.length > 0 ) {
+
+				// extract torus geometry buffers to construct a mesh for instancing
 
 				const batch = <DrawSet>node.children[ 0 ];
 				const { positions, normals, uvs, indices } = batch.mesh.buffers;
@@ -132,12 +139,14 @@ export default class extends Base {
 					instanceMatrices
 				} );
 
+				this.torusBuffer.setInstancedAttribute( new Float32Array( colours ), 3, { attributeName: "aColor", program: this.colorProgram }, FLOAT, 0, 1 );
+
+
 			}
 
 		} );
 
-
-
+		// create a new drawset for the instanced torus
 		this.torusDrawSet = new DrawSet( this.torusBuffer, this.colorProgram );
 		this.torusDrawSet.setParent( this.parent );
 
@@ -177,6 +186,7 @@ export default class extends Base {
 
 		if ( ! this.assetsLoaded ) return;
 
+		// rotate parent node, needs modl * instance matrix in shadee
 		this.parent.transform.rotateY( 0.001 );
 
 		this.drawInstances( this.colorProgram, elapsed, delta );

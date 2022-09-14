@@ -338,8 +338,8 @@ export default class GLTFLoader {
 
 					// form skinned mesh data if joints defined
 					m = new SkinMesh( geometry );
-					m.addAttribute( Float32Array.from( joints!.data ), joints!.size, { program: s, attributeName: "aJoints" } );
-					m.addAttribute( weights!.data, weights!.size, { program: s, attributeName: "aWeights" }, FLOAT );
+					m.setAttribute( Float32Array.from( joints!.data ), joints!.size, { program: s, attributeName: "aJoints" } );
+					m.setAttribute( weights!.data, weights!.size, { program: s, attributeName: "aWeights" }, FLOAT );
 
 				} else {
 

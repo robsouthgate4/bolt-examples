@@ -108,7 +108,7 @@ export default class extends Base {
 		];
 
 		// attributes can be added with a named var and program
-		triangleMesh.addAttribute( new Float32Array( colours ), 3, { program: triProgram, attributeName: "aColor" } );
+		triangleMesh.setAttribute( new Float32Array( colours ), 3, { program: triProgram, attributeName: "aColor" } );
 
 		this.triangleDrawSet = new DrawSet(
 			triangleMesh,

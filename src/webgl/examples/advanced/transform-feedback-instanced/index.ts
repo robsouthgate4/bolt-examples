@@ -41,6 +41,7 @@ export default class extends Base {
 	meshIBO!: IBO;
 	bolt: Bolt;
 	orbit: Orbit;
+	model = mat4.create();
 
 	constructor() {
 
@@ -54,7 +55,7 @@ export default class extends Base {
 		this.canvas.height = this.height;
 
 		this.bolt = Bolt.getInstance();
-		this.bolt.init( this.canvas, { antialias: true, dpi: 2, powerPreference: "high-performance" } );
+		this.bolt.init( this.canvas, { antialias: true, dpi: Math.min( 2, window.devicePixelRatio ), powerPreference: "high-performance" } );
 
 		this.gl = this.bolt.getContext();
 
@@ -261,9 +262,9 @@ export default class extends Base {
 
 			this.gl.enable( this.gl.RASTERIZER_DISCARD );
 
-			this.gl.bindTransformFeedback( this.gl.TRANSFORM_FEEDBACK, this.current.tf );
 			this.gl.bindVertexArray( this.current.updateVAO.arrayObject );
 
+			this.gl.bindTransformFeedback( this.gl.TRANSFORM_FEEDBACK, this.current.tf );
 			this.gl.beginTransformFeedback( POINTS );
 			this.gl.drawArrays( POINTS, 0, this.instanceCount );
 			this.gl.endTransformFeedback();
@@ -276,14 +277,12 @@ export default class extends Base {
 
 		{
 
-			const model = mat4.create();
-
 			this.particleProgram.activate();
 			this.gl.bindVertexArray( this.current.drawVAO.arrayObject );
 
 			this.particleProgram.setMatrix4( "projection", this.camera.projection );
 			this.particleProgram.setMatrix4( "view", this.camera.view );
-			this.particleProgram.setMatrix4( "model", model );
+			this.particleProgram.setMatrix4( "model", this.model );
 
 			this.meshIBO.bind();
 			this.gl.drawElementsInstanced( TRIANGLES, this.meshIBO.count, this.gl.UNSIGNED_INT, 0, this.instanceCount );

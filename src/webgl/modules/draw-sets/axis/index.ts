@@ -22,7 +22,7 @@ export default class Axis extends DrawSet {
 			0.0, 0.0, 1.0, 0.0, 0.0, 1.0
 		];
 
-		mesh.addAttribute( new Float32Array( colors ), 3, 3 );
+		mesh.setAttribute( new Float32Array( colors ), 3, 3 );
 
 		const program = new Program( vertexShader, fragmentShader );
 
