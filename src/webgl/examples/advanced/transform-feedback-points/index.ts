@@ -10,7 +10,6 @@ import simulationVertex from "./shaders/simulation/simulation.vert";
 import simulationFragment from "./shaders/simulation/simulation.frag";
 
 import { mat4, vec3, } from "gl-matrix";
-import CameraFPS from "@webgl/modules/CameraFPS";
 
 export default class extends Base {
 
@@ -92,11 +91,11 @@ export default class extends Base {
 
 	}
 
-	createTransformFeedback( buffer: WebGLBuffer ) {
+	createTransformFeedback( buffer: WebGLBuffer, index: number ) {
 
 		const tf = this.gl.createTransformFeedback();
 		this.gl.bindTransformFeedback( this.gl.TRANSFORM_FEEDBACK, tf );
-		this.gl.bindBufferBase( this.gl.TRANSFORM_FEEDBACK_BUFFER, 0, buffer );
+		this.gl.bindBufferBase( this.gl.TRANSFORM_FEEDBACK_BUFFER, index, buffer );
 		return tf;
 
 	}
@@ -120,9 +119,9 @@ export default class extends Base {
 
 		}
 
-		const position1VBO = new VBO( new Float32Array( positions ), this.gl.DYNAMIC_DRAW );
-		const position2VBO = new VBO( new Float32Array( positions ), this.gl.DYNAMIC_DRAW );
-		const velocityBuffer = new VBO( new Float32Array( velocities ), this.gl.DYNAMIC_DRAW );
+		const position1VBO = new VBO( new Float32Array( positions ), this.gl.DYNAMIC_COPY );
+		const position2VBO = new VBO( new Float32Array( positions ), this.gl.DYNAMIC_COPY );
+		const velocityBuffer = new VBO( new Float32Array( velocities ), this.gl.DYNAMIC_COPY );
 
 
 		const vaoUpdate1 = new VAO();
@@ -147,8 +146,8 @@ export default class extends Base {
 		vaoDraw2.linkAttrib( position2VBO, this.particleProgramLocations.aPosition, 3, this.gl.FLOAT );
 		vaoDraw2.unbind();
 
-		this.tf1 = <WebGLTransformFeedback> this.createTransformFeedback( position1VBO.buffer );
-		this.tf2 = <WebGLTransformFeedback> this.createTransformFeedback( position2VBO.buffer );
+		this.tf1 = <WebGLTransformFeedback> this.createTransformFeedback( position1VBO.buffer, 0 );
+		this.tf2 = <WebGLTransformFeedback> this.createTransformFeedback( position2VBO.buffer, 0 );
 
 		this.gl.bindBuffer( this.gl.ARRAY_BUFFER, null );
 		this.gl.bindBuffer( this.gl.TRANSFORM_FEEDBACK_BUFFER, null );
@@ -199,8 +198,9 @@ export default class extends Base {
 
 		this.gl.drawArrays( this.gl.POINTS, 0, this.instanceCount );
 
-		this.gl.endTransformFeedback();
 		this.gl.bindTransformFeedback( this.gl.TRANSFORM_FEEDBACK, null );
+		//this.gl.bindBufferBase( this.gl.TRANSFORM_FEEDBACK_BUFFER, 0, null );
+		this.gl.endTransformFeedback();
 
 		this.gl.disable( this.gl.RASTERIZER_DISCARD );
 

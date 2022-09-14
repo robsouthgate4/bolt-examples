@@ -6,8 +6,7 @@ import defaultVertex from "./shaders/default/default.vert";
 import defaultFragment from "./shaders/default/default.frag";
 
 import { vec3 } from "gl-matrix";
-import Plane from "@/webgl/modules/primitives/Plane";
-import CameraArcball from "@/webgl/modules/CameraArcball";
+import Orbit from "@webgl/modules/orbit";
 import Cube from "@/webgl/modules/primitives/Cube";
 
 export default class extends Base {
@@ -15,7 +14,7 @@ export default class extends Base {
 	canvas: HTMLCanvasElement;
 	program: Program;
 	camera: CameraPersp;
-	arcball: CameraArcball;
+	orbit: Orbit;
 	assetsLoaded?: boolean;
 	torusTransform!: Transform;
 	sphereDrawSet!: DrawSet;
@@ -54,7 +53,7 @@ export default class extends Base {
 			target: vec3.fromValues( 0, 1, 0 ),
 		} );
 
-		this.arcball = new CameraArcball( this.camera, 4, 0.08 );
+		this.orbit = new Orbit( this.camera );
 
 		this.camera.lookAt( vec3.fromValues( 0, 0, 0 ) );
 

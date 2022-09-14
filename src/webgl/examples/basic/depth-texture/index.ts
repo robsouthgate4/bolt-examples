@@ -11,7 +11,7 @@ import { vec2, vec3, vec4, } from "gl-matrix";
 import Post from "@/webgl/modules/post";
 import Floor from "@/webgl/modules/draw-sets/floor";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
-import CameraFPS from "@/webgl/modules/CameraFPS";
+import CameraFPS from "@webgl/modules/camera-fps";
 
 export default class extends Base {
 

@@ -8,7 +8,7 @@ import colorVertex from "./shaders/color/color.vert";
 import colorFragment from "./shaders/color/color.frag";
 
 import { vec3, vec4, } from "gl-matrix";
-import CameraArcball from "@webgl/modules/CameraArcball";
+import Orbit from "@webgl/modules/orbit";
 import GLTFLoader from "@webgl/modules/gltf-loader";
 
 export default class extends Base {
@@ -20,7 +20,7 @@ export default class extends Base {
 	gl: WebGL2RenderingContext;
 	root!: Node;
 	gltf!: Node;
-	arcball: CameraArcball;
+	orbit: Orbit;
 	programEyes: Program;
 	programBody: Program;
 	matcapTexture!: Texture2D;
@@ -45,7 +45,7 @@ export default class extends Base {
 			target: vec3.fromValues( 0, 3, 0 ),
 		} );
 
-		this.arcball = new CameraArcball( this.camera, 4, 0.08 );
+		this.orbit = new Orbit( this.camera );
 
 		this.bolt.init( this.canvas, { antialias: true, dpi: 2 } );
 		this.bolt.setCamera( this.camera );
@@ -128,7 +128,7 @@ export default class extends Base {
 
 		if ( ! this.assetsLoaded ) return;
 
-		this.arcball.update();
+		this.orbit.update();
 
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.clear( 0.9, 0.9, 0, 1 );

@@ -7,7 +7,7 @@ import normalVertex from "./shaders/normal/normal.vert";
 import normalFragment from "./shaders/normal/normal.frag";
 
 import { vec3, } from "gl-matrix";
-import CameraArcball from "@webgl/modules/CameraArcball";
+import Orbit from "@webgl/modules/orbit";
 import Sphere from "@/webgl/modules/primitives/Sphere";
 import Cube from "@/webgl/modules/primitives/Cube";
 import Floor from "@/webgl/modules/draw-sets/floor";
@@ -27,7 +27,7 @@ export default class extends Base {
 	gl: WebGL2RenderingContext;
 	root!: Node;
 	floorDrawSet: any;
-	arcball: CameraArcball;
+	orbit: Orbit;
 
 	constructor() {
 
@@ -56,7 +56,7 @@ export default class extends Base {
 			target: vec3.fromValues( 0, 0, 0 ),
 		} );
 
-		this.arcball = new CameraArcball( this.camera, 4, 0.08 );
+		this.orbit = new Orbit( this.camera );
 
 		this.bolt.setCamera( this.camera );
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
@@ -119,7 +119,7 @@ export default class extends Base {
 
 	update( elapsed: number, delta: number ) {
 
-		this.arcball.update();
+		this.orbit.update();
 
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.clear( 1, 1, 1, 1 );

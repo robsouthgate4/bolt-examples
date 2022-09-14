@@ -11,7 +11,7 @@ import normalFragment from "./shaders/normal/normal.frag";
 
 
 import { vec3, } from "gl-matrix";
-import Orbit from "@webgl/modules/Orbit";
+import Orbit from "@webgl/modules/orbit";
 import { GeometryBuffers } from "@bolt-webgl/core/build/Mesh";
 import Floor from "@/webgl/modules/draw-sets/floor";
 import Cube from "@/webgl/modules/primitives/Cube";

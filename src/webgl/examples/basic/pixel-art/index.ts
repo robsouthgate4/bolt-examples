@@ -5,7 +5,7 @@ import colorVertex from "./shaders/color/color.vert";
 import colorFragment from "./shaders/color/color.frag";
 
 import { vec3, vec4, } from "gl-matrix";
-import CameraArcball from "@webgl/modules/CameraArcball";
+import Orbit from "@webgl/modules/orbit";
 import Post from "@/webgl/modules/post";
 import FXAAPass from "@/webgl/modules/post/passes/FXAAPass";
 import RGBSplitPass from "@/webgl/modules/post/passes/RGBSplitPass";
@@ -31,7 +31,7 @@ export default class extends Base {
 	gl: WebGL2RenderingContext;
 	root!: Node;
 	floorDrawSet!: Floor;
-	arcball: CameraArcball;
+	orbit: Orbit;
 	programBody: Program;
 	gltf!: Node;
 
@@ -55,7 +55,7 @@ export default class extends Base {
 			target: vec3.fromValues( 0, 3, 0 ),
 		} );
 
-		this.arcball = new CameraArcball( this.camera, 4, 0.08 );
+		this.orbit = new Orbit( this.camera );
 
 		this.bolt.init( this.canvas, { antialias: false, dpi: 2 } );
 		this.bolt.setCamera( this.camera );

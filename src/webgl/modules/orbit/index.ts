@@ -1,5 +1,6 @@
 import { vec3 } from "gl-matrix";
 import { Node } from "@bolt-webgl/core";
+
 export default class Orbit {
 
 	private _mouseDown: boolean;

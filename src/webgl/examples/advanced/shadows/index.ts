@@ -15,7 +15,7 @@ import shadowFragment from "./shaders/shadow/shadow.frag";
 
 import { mat4, vec3, vec4, } from "gl-matrix";
 import GLTFLoader from "@webgl/modules/gltf-loader";
-import Orbit from "@/webgl/modules/Orbit";
+import Orbit from "@webgl/modules/orbit";
 import Plane from "@/webgl/modules/primitives/Plane";
 import ShadowMapper from "@/webgl/modules/shadow-mapper";
 
@@ -228,6 +228,7 @@ export default class extends Base {
 		this.phantomRoot.transform.positionY = 4 + Math.sin( elapsed * 1 ) * 0.5;
 		this.phantomRoot.transform.rotateY( delta );
 
+		// draw phantom into the shadow map
 		this.shadowMapper.draw( this.phantomRoot );
 
 		// draw scene as normal

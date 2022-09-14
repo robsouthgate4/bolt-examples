@@ -8,7 +8,7 @@ import colorVertex from "./shaders/color/color.vert";
 import colorFragment from "./shaders/color/color.frag";
 
 import { vec2, vec3, vec4, } from "gl-matrix";
-import Orbit from "@webgl/modules/Orbit";
+import Orbit from "@webgl/modules/orbit";
 import Sphere from "@/webgl/modules/primitives/Sphere";
 import Floor from "@/webgl/modules/draw-sets/floor";
 export default class extends Base {

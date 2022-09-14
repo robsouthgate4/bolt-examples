@@ -6,7 +6,7 @@ import normalVertex from "./shaders/normal/normal.vert";
 import normalFragment from "./shaders/normal/normal.frag";
 
 import { vec3, } from "gl-matrix";
-import Orbit from "@webgl/modules/Orbit";
+import Orbit from "@webgl/modules/orbit";
 import Cube from "@/webgl/modules/primitives/Cube";
 import Floor from "@/webgl/modules/draw-sets/floor";
 

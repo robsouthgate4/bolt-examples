@@ -4,7 +4,7 @@ import Bolt, { Program, Texture2D, DrawSet, Node, CameraPersp } from "@bolt-webg
 import state from "./state.json";
 
 import { vec3, vec4, } from "gl-matrix";
-import CameraArcball from "@webgl/modules/CameraArcball";
+import Orbit from "@webgl/modules/orbit";
 
 import matcapVertex from "../matcap/shaders/matcap/matcap.vert";
 import matcapFragment from "../matcap/shaders/matcap/matcap.frag";
@@ -26,7 +26,7 @@ export default class extends Base {
 	assetsLoaded?: boolean;
 	bolt: Bolt;
 	gl: WebGL2RenderingContext;
-	arcball: CameraArcball;
+	orbit: Orbit;
 
 	dudeMotionConfig = {
 		x: t.number( 0, {
@@ -84,7 +84,7 @@ export default class extends Base {
 		this.programEyes = new Program( colorVertex, colorFragment );
 		this.programBody = new Program( matcapVertex, matcapFragment );
 
-		this.arcball = new CameraArcball( this.camera, 4, 0.08 );
+		this.orbit = new Orbit( this.camera );
 
 		this.bolt.setCamera( this.camera );
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
@@ -187,7 +187,7 @@ export default class extends Base {
 
 		if ( ! this.assetsLoaded ) return;
 
-		this.arcball.update();
+		this.orbit.update();
 
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.clear( 0.6, 0.6, 0.6, 1 );

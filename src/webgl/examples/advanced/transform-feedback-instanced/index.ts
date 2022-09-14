@@ -12,6 +12,7 @@ import simulationFragment from "./shaders/simulation/simulation.frag";
 import { mat4, vec3 } from "gl-matrix";
 
 import Plane from "@/webgl/modules/primitives/Plane";
+import Orbit from "@webgl/modules/orbit";
 
 interface TransformFeedbackObject {
 	updateVAO: VAO;
@@ -34,11 +35,12 @@ export default class extends Base {
 	tf2?: WebGLTransformFeedback;
 	current!: TransformFeedbackObject;
 	next!: TransformFeedbackObject;
-	instanceCount = 200000;
+	instanceCount = 80000;
 	tfVelocity1?: WebGLTransformFeedback;
 	tfVelocity2?: WebGLTransformFeedback;
 	meshIBO!: IBO;
 	bolt: Bolt;
+	orbit: Orbit;
 
 	constructor() {
 
@@ -95,9 +97,11 @@ export default class extends Base {
 			fov: 45,
 			near: 0.1,
 			far: 1000,
-			position: vec3.fromValues( 0, 0, 60 ),
+			position: vec3.fromValues( 0, 0, 30 ),
 			target: vec3.fromValues( 0, 1, 0 ),
 		} );
+
+		this.orbit = new Orbit( this.camera );
 
 		this.bolt.setCamera( this.camera );
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
@@ -170,20 +174,20 @@ export default class extends Base {
 		// create simulation vaos
 		const vaoSim1 = new VAO();
 		vaoSim1.bind();
-		vaoSim1.linkAttrib( offset1VBO, this.simulationProgramLocations.oldPosition, 3, FLOAT );
-		vaoSim1.linkAttrib( init1VBO, this.simulationProgramLocations.initPosition, 3, FLOAT );
-		vaoSim1.linkAttrib( velocity1VBO, this.simulationProgramLocations.oldVelocity, 3, FLOAT );
-		vaoSim1.linkAttrib( life1VBO, this.simulationProgramLocations.oldLifeTime, 1, FLOAT );
-		vaoSim1.linkAttrib( initLife1VBO, this.simulationProgramLocations.initLifeTime, 1, FLOAT );
+		vaoSim1.linkAttrib( offset1VBO, this.simulationProgramLocations.oldPosition, 3, FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
+		vaoSim1.linkAttrib( init1VBO, this.simulationProgramLocations.initPosition, 3, FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
+		vaoSim1.linkAttrib( velocity1VBO, this.simulationProgramLocations.oldVelocity, 3, FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
+		vaoSim1.linkAttrib( life1VBO, this.simulationProgramLocations.oldLifeTime, 1, FLOAT, 1 * Float32Array.BYTES_PER_ELEMENT, 0 );
+		vaoSim1.linkAttrib( initLife1VBO, this.simulationProgramLocations.initLifeTime, 1, FLOAT, 1 * Float32Array.BYTES_PER_ELEMENT, 0 );
 		vaoSim1.unbind();
 
 		const vaoSim2 = new VAO();
 		vaoSim2.bind();
-		vaoSim2.linkAttrib( offset2VBO, this.simulationProgramLocations.oldPosition, 3, FLOAT );
-		vaoSim1.linkAttrib( init2VBO, this.simulationProgramLocations.initPosition, 3, FLOAT );
-		vaoSim2.linkAttrib( velocity2VBO, this.simulationProgramLocations.oldVelocity, 3, FLOAT );
-		vaoSim1.linkAttrib( life2VBO, this.simulationProgramLocations.oldLifeTime, 1, FLOAT );
-		vaoSim2.linkAttrib( initLife2VBO, this.simulationProgramLocations.initLifeTime, 1, FLOAT );
+		vaoSim2.linkAttrib( offset2VBO, this.simulationProgramLocations.oldPosition, 3, FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
+		vaoSim1.linkAttrib( init2VBO, this.simulationProgramLocations.initPosition, 3, FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
+		vaoSim2.linkAttrib( velocity2VBO, this.simulationProgramLocations.oldVelocity, 3, FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
+		vaoSim1.linkAttrib( life2VBO, this.simulationProgramLocations.oldLifeTime, 1, FLOAT, 1 * Float32Array.BYTES_PER_ELEMENT, 0 );
+		vaoSim2.linkAttrib( initLife2VBO, this.simulationProgramLocations.initLifeTime, 1, FLOAT, 1 * Float32Array.BYTES_PER_ELEMENT, 0 );
 		vaoSim2.unbind();
 
 		// create draw vaos
@@ -244,7 +248,7 @@ export default class extends Base {
 
 		if ( ! this.assetsLoaded ) return;
 
-
+		this.orbit.update();
 
 		this.bolt.setViewPort( 0, 0, this.gl.canvas.width, this.gl.canvas.height );
 		this.bolt.clear( 0, 0, 0, 1 );
@@ -254,11 +258,11 @@ export default class extends Base {
 			this.simulationProgram.activate();
 			this.simulationProgram.setFloat( "time", elapsed );
 
-			this.gl.bindVertexArray( this.current.updateVAO.arrayObject );
 
 			this.gl.enable( this.gl.RASTERIZER_DISCARD );
 
 			this.gl.bindTransformFeedback( this.gl.TRANSFORM_FEEDBACK, this.current.tf );
+			this.gl.bindVertexArray( this.current.updateVAO.arrayObject );
 
 			this.gl.beginTransformFeedback( POINTS );
 			this.gl.drawArrays( POINTS, 0, this.instanceCount );
@@ -266,7 +270,6 @@ export default class extends Base {
 
 			this.gl.disable( this.gl.RASTERIZER_DISCARD );
 			this.gl.bindTransformFeedback( this.gl.TRANSFORM_FEEDBACK, null );
-
 
 
 		}
