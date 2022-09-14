@@ -5,7 +5,7 @@ import colorVertex from "./shaders/color/color.vert";
 import colorFragment from "./shaders/color/color.frag";
 
 import { vec3, vec4, } from "gl-matrix";
-import Orbit from "@webgl/modules/Orbit";
+import Orbit from "@webgl/modules/orbit";
 import Post from "@/webgl/modules/post";
 import FXAAPass from "@/webgl/modules/post/passes/FXAAPass";
 import RGBSplitPass from "@/webgl/modules/post/passes/RGBSplitPass";

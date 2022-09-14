@@ -12,32 +12,47 @@ in vec3 FragPosition;
 in vec3 Color;
 in vec4 ShadowCoord;
 
-uniform vec4 baseColor;
 uniform sampler2D shadowMap;
+uniform float shadowStrength;
 
-float unpackRGBA (vec4 v) {
-        return dot(v, 1.0 / vec4(1.0, 255.0, 65025.0, 16581375.0));
-    }
-
-void main() {
-
-    vec3 projCoords = ShadowCoord.xyz / ShadowCoord.w;
+float getShadow( vec4 shadowCoord )
+{
+    vec3 projCoords = shadowCoord.xyz / shadowCoord.w;
 
     projCoords = projCoords * 0.5 + 0.5;
 
-    float closestDepth = texture(shadowMap, projCoords.xy).r;
+    if(projCoords.z < 0.0 || projCoords.z > 1.0 || projCoords.x < 0.0 || projCoords.x > 1.0 || projCoords.y < 0.0 || projCoords.y > 1.0) {
+        return 0.0;
+    }
 
     float currentDepth = projCoords.z;
 
-    float bias = 0.001;
+    float bias = 0.005;
 
-    float shadow = (currentDepth - bias) < closestDepth ? 0.0 : 0.2;
+    float shadow = 0.0;
+    vec2 texelSize = 1.0 / vec2( textureSize( shadowMap, 0 ) );
 
-    if(projCoords.z > 1.0)
-        shadow = 0.0;
+    for(int x = -1; x <= 1; ++x)
+    {
+        for(int y = -1; y <= 1; ++y)
+        {
+            float pcfDepth = texture( shadowMap, projCoords.xy + vec2( x, y ) * texelSize ).r;
+            shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
+        }
+    }
 
-    FragColor = vec4(vec3(1.0 - shadow), 1.0);
+    shadow /= 9.0;
 
-    //FragColor = vec4( vec3( texture( shadowMap, Uv ).rrr ) , 1.0);
+    return shadow;
+}
+
+
+void main() {
+
+    float shadow = getShadow( ShadowCoord );
+
+    FragColor = vec4( vec3( 1.0 - ( shadow * shadowStrength ) ), 1.0);
+
+    //FragColor = texture( shadowMap, Uv );
 
 }

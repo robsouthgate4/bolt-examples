@@ -9,7 +9,7 @@ import rayFragment from "./shaders/ray/ray.frag";
 
 
 import { vec3 } from "gl-matrix";
-import CameraArcball from "@webgl/modules/CameraArcball";
+import Orbit from "@webgl/modules/orbit";
 import Floor from "@/webgl/modules/draw-sets/floor";
 import AxisAlignedBox from "@/webgl/modules/raycast/AxisAlignedBox";
 import { BoxBounds } from "@bolt-webgl/core/build/Mesh";
@@ -35,7 +35,7 @@ export default class extends Base {
 	AABoxHelper!: DrawSet;
 	raycast: Raycast;
 	intersectionDebugDrawSet!: DrawSet;
-	arcball: CameraArcball;
+	orbit: Orbit;
 
 	constructor() {
 
@@ -64,7 +64,7 @@ export default class extends Base {
 			target: vec3.fromValues( 0, 1, 0 ),
 		} );
 
-		this.arcball = new CameraArcball( this.camera, 4, 0.08 );
+		this.orbit = new Orbit( this.camera );
 
 		this.bolt.setCamera( this.camera );
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
@@ -201,7 +201,7 @@ export default class extends Base {
 
 	update( elapsed: number, delta: number ) {
 
-		this.arcball.update();
+		this.orbit.update();
 
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.clear( 1, 1, 1, 1 );

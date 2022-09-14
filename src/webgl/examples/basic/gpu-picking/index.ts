@@ -3,7 +3,7 @@ import Base from "@webgl/Base";
 import Bolt, { Program, Texture2D, DrawSet, Node, CameraPersp, Mesh } from "@bolt-webgl/core";
 
 import { vec2, vec3, vec4 } from "gl-matrix";
-import CameraArcball from "@webgl/modules/CameraArcball";
+import Orbit from "@webgl/modules/orbit";
 
 import diffuseVertex from "./shaders/diffuse/diffuse.vert";
 import diffuseFragment from "./shaders/diffuse/diffuse.frag";
@@ -26,10 +26,10 @@ export default class extends Base {
 	assetsLoaded?: boolean;
 	bolt: Bolt;
 	gl: WebGL2RenderingContext;
-	arcball!: CameraArcball;
+	orbit!: Orbit;
 
-	program: any;
-	programEyes: any;
+	program: Program;
+	programEyes!: Program;
 	gltf!: GlTf;
 	matcapTexture!: Texture2D;
 	floor!: Floor;
@@ -67,7 +67,7 @@ export default class extends Base {
 
 		this.program = new Program( diffuseVertex, diffuseFragment );
 
-		this.arcball = new CameraArcball( this.camera, 4, 0.08 );
+		this.orbit = new Orbit( this.camera );
 
 		this.bolt.setCamera( this.camera );
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
@@ -187,7 +187,7 @@ export default class extends Base {
 
 	update( elapsed: number, delta: number ) {
 
-		this.arcball.update();
+		this.orbit.update();
 
 
 

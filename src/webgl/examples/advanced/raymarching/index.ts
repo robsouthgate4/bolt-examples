@@ -6,7 +6,7 @@ import vertexShader from "./shaders/raymarch.vert";
 import fragmentShader from "./shaders/raymarch.frag";
 
 import { vec3, } from "gl-matrix";
-import Orbit from "@webgl/modules/Orbit";
+import Orbit from "@webgl/modules/orbit";
 import Cube from "@/webgl/modules/primitives/Cube";
 import Post from "@/webgl/modules/post";
 import FXAAPass from "@/webgl/modules/post/passes/FXAAPass";

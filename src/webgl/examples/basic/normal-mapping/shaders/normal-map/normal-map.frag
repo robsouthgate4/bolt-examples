@@ -13,7 +13,7 @@ in vec3 WorldPosition;
 
 uniform vec4 baseColor;
 uniform sampler2D baseTexture;
-uniform sampler2D normalTexture2D;
+uniform sampler2D normalTexture;
 uniform vec2 normalUVScale;
 uniform float normalHeight;
 uniform mat4 view;
@@ -55,6 +55,6 @@ void main() {
     float diffuse = dot(normal, lightPosition) * 0.1;
     diffuse = min(0.8, max(diffuse, 0.5));
 
-    FragColor = vec4(color.rgb * diffuse, 1.0);
+    FragColor = vec4(normal, 1.0);
 
 }

@@ -6,7 +6,7 @@ import vertexShader from "./shaders/raymarch.vert";
 import fragmentShader from "./shaders/raymarch.frag";
 
 import { vec3, } from "gl-matrix";
-import CameraArcball from "@webgl/modules/CameraArcball";
+import Orbit from "@webgl/modules/orbit";
 import Cube from "@/webgl/modules/primitives/Cube";
 import Post from "@/webgl/modules/post";
 import FXAAPass from "@/webgl/modules/post/passes/FXAAPass";
@@ -23,7 +23,7 @@ export default class extends Base {
 	cubeDrawSet!: DrawSet;
 	bolt: Bolt;
 	post: Post;
-	arcball: CameraArcball;
+	orbit: Orbit;
 
 	constructor() {
 
@@ -51,7 +51,7 @@ export default class extends Base {
 			target: vec3.fromValues( 0, 0, 0 ),
 		} );
 
-		this.arcball = new CameraArcball( this.camera, 4, 0.08 );
+		this.orbit = new Orbit( this.camera );
 
 		this.post = new Post( this.bolt );
 
@@ -121,7 +121,7 @@ export default class extends Base {
 		if ( ! this.assetsLoaded ) return;
 
 		this.post.begin();
-		this.arcball.update();
+		this.orbit.update();
 
 		this.bolt.enableCullFace();
 		this.bolt.cullFace( BACK );

@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/advanced/shadows";
+import Example from "@/webgl/examples/advanced/depth-of-field";
 
 export default class Main {
 

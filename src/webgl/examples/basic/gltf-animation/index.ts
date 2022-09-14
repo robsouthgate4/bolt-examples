@@ -5,7 +5,7 @@ import Bolt, { DrawSet, CameraPersp, Node, Transform } from "@bolt-webgl/core";
 import { quat, vec2, vec3 } from "gl-matrix";
 import Floor from "@/webgl/modules/draw-sets/floor";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
-import Orbit from "@/webgl/modules/Orbit";
+import Orbit from "@webgl/modules/orbit";
 
 /**
  * TODO: INCOMPLETE

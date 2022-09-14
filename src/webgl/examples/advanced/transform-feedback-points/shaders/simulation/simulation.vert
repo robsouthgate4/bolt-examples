@@ -9,6 +9,6 @@ out vec3 newPosition;
 
 void main() {
 
-  newPosition = oldPosition + (oldVelocity * 0.01);
+  newPosition = oldPosition + (oldVelocity);
 
 }

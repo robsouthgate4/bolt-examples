@@ -4,7 +4,7 @@ import Base from "@webgl/Base";
 import Bolt, { Program, Mesh, DrawSet, CameraPersp, Texture2D, NEAREST } from "@bolt-webgl/core";
 
 import { vec3, } from "gl-matrix";
-import CameraArcball from "@webgl/modules/CameraArcball";
+import Orbit from "@webgl/modules/orbit";
 import vertexShader from "./shaders/texture/texture.vert";
 import fragmentShader from "./shaders/texture/texture.frag";
 import Plane from "@/webgl/modules/primitives/Plane";
@@ -16,7 +16,7 @@ export default class extends Base {
 	assetsLoaded?: boolean;
 	bolt: Bolt;
 	gl: WebGL2RenderingContext;
-	arcball: CameraArcball;
+	orbit: Orbit;
 	textureDrawSet!: DrawSet;
 	planeDrawSet: any;
 	dataTexture!: Texture2D;
@@ -46,7 +46,7 @@ export default class extends Base {
 			target: vec3.fromValues( 0, 0, 0 ),
 		} );
 
-		this.arcball = new CameraArcball( this.camera, 4, 0.08 );
+		this.orbit = new Orbit( this.camera );
 
 		this.bolt.setCamera( this.camera );
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );

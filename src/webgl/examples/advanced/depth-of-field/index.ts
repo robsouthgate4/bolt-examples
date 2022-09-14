@@ -16,7 +16,7 @@ import DOFPass from "@/webgl/modules/post/passes/DOFPass";
 import FXAAPass from "@/webgl/modules/post/passes/FXAAPass";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
 import Sphere from "@/webgl/modules/primitives/Sphere";
-import CameraFPS from "@/webgl/modules/CameraFPS";
+import CameraFPS from "@webgl/modules/camera-fps";
 
 export default class extends Base {
 

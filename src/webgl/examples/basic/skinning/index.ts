@@ -3,7 +3,7 @@ import Base from "@webgl/Base";
 import Bolt, { BACK, CameraPersp, FRONT, Node, } from "@bolt-webgl/core";
 
 import { quat, vec3 } from "gl-matrix";
-import CameraArcball from "@/webgl/modules/CameraArcball";
+import Orbit from "@webgl/modules/orbit";
 import Floor from "@/webgl/modules/draw-sets/floor";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
 
@@ -18,7 +18,7 @@ export default class extends Base {
 	bolt: Bolt;
 	gltf!: Node;
 	floor: Floor;
-	arcball: CameraArcball;
+	orbit: Orbit;
 	_neckNode?: Node;
 
 	constructor() {
@@ -41,7 +41,7 @@ export default class extends Base {
 			target: vec3.fromValues( 0, 2, 0 ),
 		} );
 
-		this.arcball = new CameraArcball( this.camera, 4, 0.08 );
+		this.orbit = new Orbit( this.camera );
 
 		this.bolt = Bolt.getInstance();
 		this.bolt.init( this.canvas, { antialias: true, dpi: 2, powerPreference: "high-performance" } );
@@ -102,7 +102,7 @@ export default class extends Base {
 
 		if ( ! this.assetsLoaded ) return;
 
-		this.arcball.update();
+		this.orbit.update();
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.clear( 1, 1, 1, 1 );
 

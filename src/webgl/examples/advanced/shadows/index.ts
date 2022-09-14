@@ -15,8 +15,9 @@ import shadowFragment from "./shaders/shadow/shadow.frag";
 
 import { mat4, vec3, vec4, } from "gl-matrix";
 import GLTFLoader from "@webgl/modules/gltf-loader";
-import Orbit from "@/webgl/modules/Orbit";
+import Orbit from "@webgl/modules/orbit";
 import Plane from "@/webgl/modules/primitives/Plane";
+import ShadowMapper from "@/webgl/modules/shadow-mapper";
 
 export default class extends Base {
 
@@ -25,20 +26,22 @@ export default class extends Base {
 	assetsLoaded?: boolean;
 	bolt = Bolt.getInstance();
 	gl: WebGL2RenderingContext;
-	root!: Node;
+	phantomRoot = new Node();
+	structureRoot = new Node();
 	gltf!: Node;
 	orbit: Orbit;
 	programEyes: Program;
 	programBody: Program;
 	matcapTexture!: Texture2D;
 	floor!: DrawSet;
-	//shadowCamera: CameraOrtho;
+	wallBack!: DrawSet;
+	wallRight!: DrawSet;
 	shadowFBO: FBO;
 	programShadow: Program;
-	programFloor: Program;
-	//frustumSize: number;
+	programSurface: Program;
 	lightSpaceMatrix: mat4;
-	biasMatrix: mat4;
+	shadowLight: CameraOrtho;
+	shadowMapper: ShadowMapper;
 
 	constructor() {
 
@@ -57,32 +60,25 @@ export default class extends Base {
 			fov: 45,
 			near: 0.1,
 			far: 1000,
-			position: vec3.fromValues( 3, 7, 16 ),
+			position: vec3.fromValues( - 12, 7, 13 ),
 			target: vec3.fromValues( 0, 4, 0 ),
 		} );
 
-		const frustumSize = 4;
+		const frustumSize = 7;
 
-		const shadowLight = new CameraOrtho( {
+		this.shadowLight = new CameraOrtho( {
 			left: - frustumSize,
 			right: frustumSize,
 			bottom: - frustumSize,
 			top: frustumSize,
 			near: 0.1,
-			far: 35,
-			position: vec3.fromValues( - 2, 10, - 1 ),
+			far: 20,
+			position: vec3.fromValues( - 10, 8, 2 ),
 			target: vec3.fromValues( 0, 0, 0 ),
 		} );
 
 		this.lightSpaceMatrix = mat4.create();
-		mat4.multiply( this.lightSpaceMatrix, shadowLight.projection, shadowLight.view );
-
-		this.biasMatrix = mat4.fromValues(
-			0.5, 0.0, 0.0, 0.0,
-			0.0, 0.5, 0.0, 0.0,
-			0.0, 0.0, 0.5, 0.0,
-			0.5, 0.5, 0.5, 1.0
-		);
+		mat4.multiply( this.lightSpaceMatrix, this.shadowLight.projection, this.shadowLight.view );
 
 		this.orbit = new Orbit( this.camera, { maxElevation: Infinity, minElevation: - Infinity } );
 		this.bolt.setCamera( this.camera );
@@ -96,15 +92,23 @@ export default class extends Base {
 
 		this.programBody = new Program( matcapVertex, matcapFragment );
 		this.programBody.name = "mat_phantom_body";
+		this.programBody.activate();
+		this.programBody.setVector3( "lightPosition", this.shadowLight.position );
 
-		this.programFloor = new Program( floorVertex, floorFragment );
-		this.programFloor.activate();
-		this.programFloor.setTexture( "shadowMap", this.shadowFBO.depthTexture );
-		this.programFloor.setMatrix4( "lightSpaceMatrix", this.lightSpaceMatrix );
+		this.programSurface = new Program( floorVertex, floorFragment );
+		this.programSurface.activate();
+		this.programSurface.setFloat( "shadowStrength", 0.1 );
 
 		this.programShadow = new Program( shadowVertex, shadowFragment );
 		this.programShadow.activate();
 		this.programShadow.setMatrix4( "lightSpaceMatrix", this.lightSpaceMatrix );
+
+		this.shadowMapper = new ShadowMapper( {
+			bolt: this.bolt,
+			light: this.shadowLight,
+			width: 1024,
+			height: 1024
+		} );
 
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.enableDepth();
@@ -127,93 +131,78 @@ export default class extends Base {
 
 		this.assetsLoaded = true;
 
-		this.root = new Node();
-
-		this.gltf.transform.positionY = 3;
-		this.gltf.setParent( this.root );
-
-		this.floor = new DrawSet( new Mesh( new Plane() ), this.programFloor );
-		this.floor.transform.rotationX = - 90;
-		vec3.scale( this.floor.transform.scale, this.floor.transform.scale, 10 );
-
-		this.floor.setParent( this.root );
+		this.createStructure();
 
 		this.gltf.traverse( ( node: Node ) => {
 
-			if ( node instanceof DrawSet ) {
-
-				if ( node.program.name === "mat_phantom_body" ) {
-
-					node.name = "phantom_body";
-
-					node.program = this.programBody;
-					node.program.activate();
-					node.program.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
-					node.program.setTexture( "baseTexture", this.matcapTexture );
-
-				}
-
-				if ( node.program.name === "mat_phantom_eyes" ) {
-
-					node.name = "phantom_eyes";
-
-					node.program = this.programEyes;
-					node.program.activate();
-					node.program.setVector4( "baseColor", vec4.fromValues( 0, 0, 0, 1 ) );
-
-				}
-
-
-			}
+			this.assignPrograms( node );
 
 		} );
+
+		this.shadowMapper.add( this.phantomRoot );
 
 		this.resize();
 
 	}
 
-	setDefaultPrograms() {
+	assignPrograms( node: Node ) {
 
-		// set programs to original
+		if ( node instanceof DrawSet ) {
 
-		this.root.traverse( ( node: Node ) => {
+			if ( node.program.name === "mat_phantom_body" ) {
 
-			if ( node instanceof DrawSet ) {
+				node.name = "phantom_body";
 
-				if ( node.name === "phantom_body" ) {
+				node.program = this.programBody;
+				node.program.activate();
+				node.program.setVector4( "baseColor", vec4.fromValues( 1, 1, 1, 1 ) );
+				node.program.setTexture( "baseTexture", this.matcapTexture );
+				node.program.setFloat( "shadowStrength", 0.1 );
 
-					node.program = this.programBody;
-
-				}
-
-				if ( node.name === "phantom_eyes" ) {
-
-					node.program = this.programEyes;
-
-				}
+				node.setParent( this.phantomRoot );
 
 			}
 
-		} );
+			if ( node.program.name === "mat_phantom_eyes" ) {
 
+				node.name = "phantom_eyes";
 
-		this.floor.program = this.programFloor;
+				node.program = this.programEyes;
+				node.program.activate();
+				node.program.setVector4( "baseColor", vec4.fromValues( 0, 0, 0, 1 ) );
+				node.program.setFloat( "shadowStrength", 0.1 );
+
+				node.setParent( this.phantomRoot );
+
+			}
+
+		}
 
 	}
 
-	setShadowPrograms() {
+	createStructure() {
 
-		// set programs to shadow
+		const structureScale = 10;
 
-		this.root.traverse( ( node: Node ) => {
+		this.floor = new DrawSet( new Mesh( new Plane() ), this.programSurface );
+		this.floor.transform.rotationX = - 90;
+		vec3.scale( this.floor.transform.scale, this.floor.transform.scale, structureScale );
+		this.floor.setParent( this.structureRoot );
 
-			if ( node instanceof DrawSet ) {
+		this.wallBack = new DrawSet( new Mesh( new Plane() ), this.programSurface );
+		this.wallBack.transform.positionZ = - structureScale * 0.5;
+		this.wallBack.transform.positionY = structureScale * 0.5;
+		vec3.scale( this.wallBack.transform.scale, this.wallBack.transform.scale, structureScale );
+		this.wallBack.setParent( this.structureRoot );
 
-				node.program = this.programShadow;
+		this.wallRight = new DrawSet( new Mesh( new Plane() ), this.programSurface );
+		this.wallRight.transform.positionY = structureScale * 0.5;
+		this.wallRight.transform.positionX = structureScale * 0.5;
+		this.wallRight.transform.rotationY = - 90;
+		vec3.scale( this.wallRight.transform.scale, this.wallRight.transform.scale, structureScale );
+		this.wallRight.setParent( this.structureRoot );
 
-			}
-
-		} );
+		this.shadowMapper.add( this.structureRoot );
 
 	}
 
@@ -221,7 +210,6 @@ export default class extends Base {
 
 		this.bolt.resizeFullScreen();
 		this.camera.updateProjection( this.gl.canvas.width / this.gl.canvas.height );
-		this.shadowFBO.resize( this.shadowFBO.width, this.shadowFBO.height );
 
 	}
 
@@ -235,39 +223,22 @@ export default class extends Base {
 
 		if ( ! this.assetsLoaded ) return;
 
-		// draw to shadow map
-		{
+		this.orbit.update();
 
-			this.shadowFBO.bind();
+		this.phantomRoot.transform.positionY = 4 + Math.sin( elapsed * 1 ) * 0.5;
+		this.phantomRoot.transform.rotateY( delta );
 
-			this.bolt.cullFace( FRONT );
-
-			this.setShadowPrograms();
-
-			this.bolt.clear( 1, 1, 1, 1 );
-			this.bolt.draw( this.root );
-
-			this.shadowFBO.unbind();
-
-		}
+		// draw phantom into the shadow map
+		this.shadowMapper.draw( this.phantomRoot );
 
 		// draw scene as normal
 		{
 
-			this.bolt.setCamera( this.camera );
-
-			this.bolt.cullFace( BACK );
-
-			this.gltf.transform.rotateY( 0.01 );
-
-			this.orbit.update();
-
-			this.setDefaultPrograms();
-
 			this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 			this.bolt.clear( 0.9, 0.9, 0.9, 1 );
 
-			this.bolt.draw( this.root );
+			this.bolt.draw( this.phantomRoot );
+			this.bolt.draw( this.structureRoot );
 
 		}
 

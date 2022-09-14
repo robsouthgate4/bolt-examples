@@ -214,6 +214,8 @@ export default class CameraFPS {
 		vec3.add( this._camera.target, this._camera.position, this._camera.forward );
 		this._camera.transform.lookAt( this._camera.target, this._camera.up );
 
+		this._camera.update();
+
 
 	}
 

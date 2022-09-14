@@ -12,7 +12,7 @@ void main() {
 
   vec4 mvPosition = model * view * vec4(aPosition, 1.0);
 
-  gl_PointSize = 1. * (300.0 / -mvPosition.z);
+  gl_PointSize = 2. * (300.0 / -mvPosition.z);
   ;
 
   gl_Position = projection * mvPosition;

@@ -38,7 +38,7 @@ void main() {
     modelView[2][1] = 0.;  // 9
     modelView[2][2] = 1.;  // 10
 
-    vec4 mvPosition = modelView * vec4(pos + (aOffset + 1.2), 1.0);
+    vec4 mvPosition = modelView * vec4(pos + (aOffset), 1.0);
 
     gl_Position = projection * mvPosition;
 }
