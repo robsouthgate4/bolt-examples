@@ -139,7 +139,7 @@ export default class extends Base {
 					instanceMatrices
 				} );
 
-				this.torusBuffer.setInstancedAttribute( new Float32Array( colours ), 3, { attributeName: "aColor", program: this.colorProgram }, FLOAT, 0, 1 );
+				this.torusBuffer.setAttribute( new Float32Array( colours ), 3, { attributeName: "aColor", program: this.colorProgram }, FLOAT, 0, 1 );
 
 
 			}
