@@ -1,7 +1,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { CameraPersp, DYNAMIC_DRAW, FLOAT, IBO, POINTS, Program, STATIC_DRAW, TRIANGLES, UNSIGNED_SHORT, VAO, VBO } from "@bolt-webgl/core";
+import Bolt, { CameraPersp, DYNAMIC_DRAW, FLOAT, IBO, POINTS, Program, STATIC_DRAW, TRIANGLES, VAO, VBO } from "@bolt-webgl/core";
 
 import particlesVertexInstanced from "./shaders/particles/particles.vert";
 import particlesFragmentInstanced from "./shaders/particles/particles.frag";
@@ -153,7 +153,7 @@ export default class extends Base {
 		const meshNormalVBO = new VBO( new Float32Array( particleGeometry.normals ), STATIC_DRAW );
 		const meshUVVBO = new VBO( new Float32Array( particleGeometry.uvs ), STATIC_DRAW );
 
-		this.meshIBO = new IBO( new Uint16Array( particleGeometry.indices ) );
+		this.meshIBO = new IBO( new Uint32Array( particleGeometry.indices ) );
 
 		// buffers
 		const offset1VBO = new VBO( new Float32Array( offsets ), DYNAMIC_DRAW );
@@ -286,7 +286,7 @@ export default class extends Base {
 			this.particleProgram.setMatrix4( "model", model );
 
 			this.meshIBO.bind();
-			this.gl.drawElementsInstanced( TRIANGLES, this.meshIBO.count, UNSIGNED_SHORT, 0, this.instanceCount );
+			this.gl.drawElementsInstanced( TRIANGLES, this.meshIBO.count, this.gl.UNSIGNED_INT, 0, this.instanceCount );
 			this.meshIBO.unbind();
 
 		}

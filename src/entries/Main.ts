@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/advanced/depth-of-field";
+import Example from "@/webgl/examples/basic/instancing";
 
 export default class Main {
 

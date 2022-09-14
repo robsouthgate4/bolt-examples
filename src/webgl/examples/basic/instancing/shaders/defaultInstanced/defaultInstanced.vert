@@ -17,5 +17,5 @@ uniform mat4 view;
 void main() {
 
   Normal = aNormal;
-  gl_Position = projection * view * aInstanceMatrix * vec4(aPosition, 1.0);
+  gl_Position = projection * view * model * aInstanceMatrix * vec4(aPosition, 1.0);
 }
