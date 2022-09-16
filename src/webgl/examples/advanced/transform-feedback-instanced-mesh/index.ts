@@ -1,7 +1,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { CameraPersp, DrawSet, DYNAMIC_DRAW, FLOAT, IBO, Mesh, POINTS, Program, STATIC_DRAW, TRIANGLES, VAO, VBO } from "@bolt-webgl/core";
+import Bolt, { CameraPersp, DrawSet, DYNAMIC_DRAW, FLOAT, IBO, Mesh, Program, VAO, VBO } from "@bolt-webgl/core";
 
 import particlesVertexInstanced from "./shaders/particles/particles.vert";
 import particlesFragmentInstanced from "./shaders/particles/particles.frag";
@@ -13,11 +13,11 @@ import { mat4, vec3 } from "gl-matrix";
 
 import Plane from "@/webgl/modules/primitives/Plane";
 import Orbit from "@webgl/modules/orbit";
+import TransformFeedback from "@/webgl/modules/transform-feedback";
 
 interface TransformFeedbackObject {
 	updateVAO: VAO;
 	tf: WebGLTransformFeedback;
-	drawSet: DrawSet;
 }
 
 export default class extends Base {
@@ -42,8 +42,10 @@ export default class extends Base {
 	bolt: Bolt;
 	orbit: Orbit;
 	model = mat4.create();
-	meshA!: Mesh;
+	mesh!: Mesh;
 	meshB!: Mesh;
+	drawSet!: DrawSet;
+	transformFeedback!: TransformFeedback;
 
 	constructor() {
 
@@ -110,19 +112,10 @@ export default class extends Base {
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.enableDepth();
 
+		this.transformFeedback = new TransformFeedback( { bolt: this.bolt, count: this.instanceCount } );
+
 		this.init();
 
-
-	}
-
-	createTransformFeedback( buffer1: WebGLBuffer, buffer2: WebGLBuffer, buffer3: WebGLBuffer ) {
-
-		const tf = this.gl.createTransformFeedback();
-		this.gl.bindTransformFeedback( this.gl.TRANSFORM_FEEDBACK, tf );
-		this.gl.bindBufferBase( this.gl.TRANSFORM_FEEDBACK_BUFFER, 0, buffer1 );
-		this.gl.bindBufferBase( this.gl.TRANSFORM_FEEDBACK_BUFFER, 1, buffer2 );
-		this.gl.bindBufferBase( this.gl.TRANSFORM_FEEDBACK_BUFFER, 2, buffer3 );
-		return tf;
 
 	}
 
@@ -151,12 +144,7 @@ export default class extends Base {
 		// create vbos
 		const particleGeometry = new Plane( { width: 0.05, height: 0.05 } );
 
-		this.meshA = new Mesh( particleGeometry, {
-			instanced: true,
-			instanceCount: this.instanceCount,
-		} );
-
-		this.meshB = new Mesh( particleGeometry, {
+		this.mesh = new Mesh( particleGeometry, {
 			instanced: true,
 			instanceCount: this.instanceCount,
 		} );
@@ -165,61 +153,58 @@ export default class extends Base {
 		const offset1VBO = new VBO( new Float32Array( offsets ), DYNAMIC_DRAW );
 		const offset2VBO = new VBO( new Float32Array( offsets ), DYNAMIC_DRAW );
 
-		const init1VBO = new VBO( new Float32Array( offsets ), DYNAMIC_DRAW );
-		const init2VBO = new VBO( new Float32Array( offsets ), DYNAMIC_DRAW );
-
 		const velocity1VBO = new VBO( new Float32Array( velocities ), DYNAMIC_DRAW );
 		const velocity2VBO = new VBO( new Float32Array( velocities ), DYNAMIC_DRAW );
 
 		const life1VBO = new VBO( new Float32Array( lifeTimes ), DYNAMIC_DRAW );
 		const life2VBO = new VBO( new Float32Array( lifeTimes ), DYNAMIC_DRAW );
 
+		const init1VBO = new VBO( new Float32Array( offsets ), DYNAMIC_DRAW );
 		const initLife1VBO = new VBO( new Float32Array( lifeTimes ), DYNAMIC_DRAW );
-		const initLife2VBO = new VBO( new Float32Array( lifeTimes ), DYNAMIC_DRAW );
 
-		// create simulation vaos
-		const vaoSim1 = new VAO();
-		vaoSim1.bind();
-		vaoSim1.linkAttrib( offset1VBO, this.simulationProgramLocations.oldPosition, 3, FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
-		vaoSim1.linkAttrib( init1VBO, this.simulationProgramLocations.initPosition, 3, FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
-		vaoSim1.linkAttrib( velocity1VBO, this.simulationProgramLocations.oldVelocity, 3, FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
-		vaoSim1.linkAttrib( life1VBO, this.simulationProgramLocations.oldLifeTime, 1, FLOAT, 1 * Float32Array.BYTES_PER_ELEMENT, 0 );
-		vaoSim1.linkAttrib( initLife1VBO, this.simulationProgramLocations.initLifeTime, 1, FLOAT, 1 * Float32Array.BYTES_PER_ELEMENT, 0 );
-		vaoSim1.unbind();
+		this.transformFeedback.bindVAOS(
+			[
+				{
+					vbo1: offset1VBO,
+					vbo2: offset2VBO,
+					attributeLocation: this.simulationProgramLocations.oldPosition,
+					size: 3,
+					requiresSwap: true
+				},
+				{
+					vbo1: velocity1VBO,
+					vbo2: velocity2VBO,
+					attributeLocation: this.simulationProgramLocations.oldVelocity,
+					size: 3,
+					requiresSwap: true
+				},
+				{
+					vbo1: life1VBO,
+					vbo2: life2VBO,
+					attributeLocation: this.simulationProgramLocations.oldLifeTime,
+					size: 1,
+					requiresSwap: true
+				},
+				{
+					vbo1: init1VBO,
+					vbo2: init1VBO,
+					attributeLocation: this.simulationProgramLocations.initPosition,
+					size: 3,
+					requiresSwap: false
+				},
+				{
+					vbo1: initLife1VBO,
+					vbo2: initLife1VBO,
+					attributeLocation: this.simulationProgramLocations.initLifeTime,
+					size: 1,
+					requiresSwap: false
+				}
+			]
+		);
 
-		const vaoSim2 = new VAO();
-		vaoSim2.bind();
-		vaoSim2.linkAttrib( offset2VBO, this.simulationProgramLocations.oldPosition, 3, FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
-		vaoSim1.linkAttrib( init2VBO, this.simulationProgramLocations.initPosition, 3, FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
-		vaoSim2.linkAttrib( velocity2VBO, this.simulationProgramLocations.oldVelocity, 3, FLOAT, 3 * Float32Array.BYTES_PER_ELEMENT, 0 );
-		vaoSim1.linkAttrib( life2VBO, this.simulationProgramLocations.oldLifeTime, 1, FLOAT, 1 * Float32Array.BYTES_PER_ELEMENT, 0 );
-		vaoSim2.linkAttrib( initLife2VBO, this.simulationProgramLocations.initLifeTime, 1, FLOAT, 1 * Float32Array.BYTES_PER_ELEMENT, 0 );
-		vaoSim2.unbind();
+		this.mesh.setVBO( offset1VBO, 3, this.particleProgramLocations.aOffset, FLOAT, 0, 1 );
 
-
-		// create transform feedback objects
-		this.tf1 = <WebGLTransformFeedback> this.createTransformFeedback( offset1VBO.buffer, velocity1VBO.buffer, life1VBO.buffer );
-		this.tf2 = <WebGLTransformFeedback> this.createTransformFeedback( offset2VBO.buffer, velocity2VBO.buffer, life2VBO.buffer );
-		this.gl.bindBuffer( this.gl.TRANSFORM_FEEDBACK_BUFFER, null );
-
-		this.meshA.setVBO( offset1VBO, 3, this.particleProgramLocations.aOffset, FLOAT, 0, 1 );
-		this.meshB.setVBO( offset2VBO, 3, this.particleProgramLocations.aOffset, FLOAT, 0, 1 );
-
-		const drawSetA = new DrawSet( this.meshA, this.particleProgram );
-		const drawSetB = new DrawSet( this.meshB, this.particleProgram );
-
-		// create current / next ojects ready for swap
-		this.current = {
-			updateVAO: vaoSim1,
-			tf: this.tf2,
-			drawSet: drawSetB,
-		};
-
-		this.next = {
-			updateVAO: vaoSim2,
-			tf: this.tf1,
-			drawSet: drawSetA
-		};
+		this.drawSet = new DrawSet( this.mesh, this.particleProgram );
 
 		this.resize();
 
@@ -251,37 +236,18 @@ export default class extends Base {
 
 			this.simulationProgram.activate();
 			this.simulationProgram.setFloat( "time", elapsed );
-
-			this.gl.enable( this.gl.RASTERIZER_DISCARD );
-
-			this.gl.bindVertexArray( this.current.updateVAO.arrayObject );
-
-			this.gl.bindTransformFeedback( this.gl.TRANSFORM_FEEDBACK, this.current.tf );
-			this.gl.beginTransformFeedback( POINTS );
-			this.gl.drawArrays( POINTS, 0, this.instanceCount );
-			this.gl.endTransformFeedback();
-
-			this.gl.disable( this.gl.RASTERIZER_DISCARD );
-			this.gl.bindTransformFeedback( this.gl.TRANSFORM_FEEDBACK, null );
-
-			this.gl.bindVertexArray( null );
+			this.transformFeedback.compute();
 
 
 		}
 
 		{
 
-			this.bolt.draw( this.current.drawSet );
+			this.bolt.draw( this.drawSet );
 
 		}
 
-		{
 
-			const temp = this.current;
-			this.current = this.next;
-			this.next = temp;
-
-		}
 
 	}
 

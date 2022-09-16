@@ -36,7 +36,6 @@ export default class extends Base {
 	floor!: DrawSet;
 	wallBack!: DrawSet;
 	wallRight!: DrawSet;
-	shadowFBO: FBO;
 	programShadow: Program;
 	programSurface: Program;
 	lightSpaceMatrix: mat4;
@@ -83,8 +82,6 @@ export default class extends Base {
 		this.orbit = new Orbit( this.camera, { maxElevation: Infinity, minElevation: - Infinity } );
 		this.bolt.setCamera( this.camera );
 
-		this.shadowFBO = new FBO( { width: 1024, height: 1024, depth: true } );
-
 		this.gl = this.bolt.getContext();
 
 		this.programEyes = new Program( colorVertex, colorFragment );
@@ -97,7 +94,7 @@ export default class extends Base {
 
 		this.programSurface = new Program( floorVertex, floorFragment );
 		this.programSurface.activate();
-		this.programSurface.setFloat( "shadowStrength", 0.1 );
+		this.programSurface.setFloat( "shadowStrength", 0.5 );
 
 		this.programShadow = new Program( shadowVertex, shadowFragment );
 		this.programShadow.activate();
