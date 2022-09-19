@@ -109,8 +109,6 @@ export default class extends Base {
 
 		}
 
-		console.log( colours );
-
 		const gltfLoader = new GLTFLoader( this.bolt );
 
 		const gltf: Node = await gltfLoader.load( "/static/models/gltf/torus.gltf" );

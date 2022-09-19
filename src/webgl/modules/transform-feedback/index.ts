@@ -1,5 +1,4 @@
-import Bolt, { FLOAT, POINTS, VAO, VBO } from "@bolt-webgl/core";
-import { AttribPointer } from "@bolt-webgl/core/build/Mesh";
+import Bolt, { AttribPointer, FLOAT, POINTS, VAO, VBO, } from "@bolt-webgl/core";
 
 
 export interface VBOSwapDefinition {
@@ -72,7 +71,7 @@ export default class TransformFeedback {
 		this._tf1 = this._createTransformFeedback( this._vboSwapDefinitions.map( ( vboDefinition ) => vboDefinition.vbo1.buffer ) );
 		this._tf2 = this._createTransformFeedback( this._vboSwapDefinitions.map( ( vboDefinition ) => vboDefinition.vbo2.buffer ) );
 
-		// create current / next ojects ready for swap
+		// create current / next objects ready for swap
 		this._current = {
 			updateVAO: this._vao1,
 			tf: this._tf2,

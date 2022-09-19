@@ -170,7 +170,7 @@ export default class extends Base {
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.compProgram.activate();
 		this.compProgram.setTexture( "map", this.depthFBO.targetTexture );
-		this.compProgram.setTexture( "mapDepth", this.depthFBO.depthTexture );
+		this.compProgram.setTexture( "mapDepth", this.depthFBO.depthTexture! );
 
 		this.fullScreenTriangle.draw( this.compProgram );
 

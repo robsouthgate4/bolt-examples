@@ -12,7 +12,7 @@ import { vec3 } from "gl-matrix";
 import Orbit from "@webgl/modules/orbit";
 import Floor from "@/webgl/modules/draw-sets/floor";
 import AxisAlignedBox from "@/webgl/modules/raycast/AxisAlignedBox";
-import { BoxBounds } from "@bolt-webgl/core/build/Mesh";
+import { BoxBounds } from "@bolt-webgl/core";
 import Ray from "@/webgl/modules/raycast/Ray";
 import Raycast from "@/webgl/modules/raycast";
 import Sphere from "@/webgl/modules/primitives/Sphere";

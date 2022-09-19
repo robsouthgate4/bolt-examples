@@ -1,7 +1,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { Program, Mesh, Transform, DrawSet, Node, CameraPersp } from "@bolt-webgl/core";
+import Bolt, { Program, Mesh, Transform, DrawSet, Node, CameraPersp, GeometryBuffers } from "@bolt-webgl/core";
 
 import colorVertex from "./shaders/color/color.vert";
 import colorFragment from "./shaders/color/color.frag";
@@ -12,7 +12,7 @@ import normalFragment from "./shaders/normal/normal.frag";
 
 import { vec3, } from "gl-matrix";
 import Orbit from "@webgl/modules/orbit";
-import { GeometryBuffers } from "@bolt-webgl/core/build/Mesh";
+
 import Floor from "@/webgl/modules/draw-sets/floor";
 import Cube from "@/webgl/modules/primitives/Cube";
 

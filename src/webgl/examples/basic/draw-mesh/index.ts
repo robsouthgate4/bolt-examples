@@ -1,14 +1,14 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { Program, Mesh, Transform, DrawSet, Node, TRIANGLES, CameraPersp, UNSIGNED_BYTE, UNSIGNED_SHORT, BACK, FRONT_AND_BACK, FRONT, NONE } from "@bolt-webgl/core";
+import Bolt, { Program, Mesh, Transform, DrawSet, Node, TRIANGLES, CameraPersp, UNSIGNED_BYTE, UNSIGNED_SHORT, BACK, FRONT_AND_BACK, FRONT, NONE, GeometryBuffers } from "@bolt-webgl/core";
 
 import colorVertex from "./shaders/color/color.vert";
 import colorFragment from "./shaders/color/color.frag";
 
 import { vec3, } from "gl-matrix";
 import Orbit from "@webgl/modules/orbit";
-import { GeometryBuffers } from "@bolt-webgl/core/build/Mesh";
+
 import Floor from "@/webgl/modules/draw-sets/floor";
 
 export default class extends Base {
