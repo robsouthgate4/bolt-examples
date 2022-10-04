@@ -19,6 +19,8 @@ uniform mat4 view;
 
 uniform mat4 camera;
 
+
+
 void main() {
     Uv = aUv;
 

@@ -199,7 +199,7 @@ export default class extends Base {
 		this.gl.drawArrays( this.gl.POINTS, 0, this.instanceCount );
 
 		this.gl.bindTransformFeedback( this.gl.TRANSFORM_FEEDBACK, null );
-		//this.gl.bindBufferBase( this.gl.TRANSFORM_FEEDBACK_BUFFER, 0, null );
+		this.gl.bindBufferBase( this.gl.TRANSFORM_FEEDBACK_BUFFER, 0, null );
 		this.gl.endTransformFeedback();
 
 		this.gl.disable( this.gl.RASTERIZER_DISCARD );

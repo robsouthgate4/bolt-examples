@@ -16,6 +16,7 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
+		"@bolt-webgl/core": "file:.yalc/@bolt-webgl/core",
 		"@theatre/core": "^0.4.7",
 		"@types/stats.js": "^0.17.0",
 		"gl-matrix": "^3.4.3",

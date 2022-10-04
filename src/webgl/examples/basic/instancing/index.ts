@@ -1,13 +1,14 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { Program, Transform, Mesh, Node, DrawSet, CameraPersp } from "@bolt-webgl/core";
+import Bolt, { Program, Transform, Mesh, Node, DrawSet, CameraPersp, FLOAT } from "@bolt-webgl/core";
 
 import defaultVertexInstanced from "./shaders/defaultInstanced/defaultInstanced.vert";
 import defaultFragmentInstanced from "./shaders/defaultInstanced/defaultInstanced.frag";
 
 import { mat4, quat, vec3, } from "gl-matrix";
 import GLTFLoader from "@/webgl/modules/gltf-loader";
+import CameraFPS from "@/webgl/modules/camera-fps";
 
 export default class extends Base {
 
@@ -21,6 +22,9 @@ export default class extends Base {
 	toruseGLTFBuffer!: Mesh;
 	bolt: Bolt;
 	arcball: any;
+	torusDrawSet!: DrawSet;
+	cameraFPS: CameraFPS;
+	parent!: Node;
 
 	constructor() {
 
@@ -28,7 +32,7 @@ export default class extends Base {
 
 		const devicePixelRatio = Math.min( 2, window.devicePixelRatio || 1 );
 
-		this.width = window.innerWidth * devicePixelRatio;
+		this.width = window.innerHeight * devicePixelRatio;
 		this.height = window.innerHeight * devicePixelRatio;
 
 		this.canvas = <HTMLCanvasElement>document.getElementById( "experience" );
@@ -40,12 +44,14 @@ export default class extends Base {
 			fov: 45,
 			near: 0.1,
 			far: 1000,
-			position: vec3.fromValues( 0, 3, 10 ),
+			position: vec3.fromValues( 0, 3, 0 ),
 			target: vec3.fromValues( 0, 0, 0 ),
 		} );
 
+		this.cameraFPS = new CameraFPS( this.camera );
+
 		this.bolt = Bolt.getInstance();
-		this.bolt.init( this.canvas, { antialias: true } );
+		this.bolt.init( this.canvas, { antialias: true, dpi: devicePixelRatio, powerPreference: "high-performance" } );
 		this.bolt.setCamera( this.camera );
 
 		this.colorProgram = new Program( defaultVertexInstanced, defaultFragmentInstanced );
@@ -57,6 +63,8 @@ export default class extends Base {
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.enableDepth();
 
+		this.parent = new Node();
+
 		this.init();
 
 
@@ -64,15 +72,17 @@ export default class extends Base {
 
 	async init() {
 
-		const instanceCount = 1000;
+		const instanceCount = 3000;
 
 		const instanceMatrices: mat4[] = [];
 
+		const colours: number[] = [];
+
 		for ( let i = 0; i < instanceCount; i ++ ) {
 
-			const x = ( Math.random() * 2 - 1 ) * 50;
+			const x = ( Math.random() * 2 - 1 ) * 100;
 			const y = ( Math.random() * 2 - 1 ) * 20;
-			const z = Math.random() * 200;
+			const z = ( Math.random() * 2 - 1 ) * 200;
 
 			const tempTranslation = vec3.fromValues( x, y, - z );
 
@@ -93,6 +103,8 @@ export default class extends Base {
 			mat4.multiply( combined, translation, rotation );
 			mat4.multiply( combined, combined, scale );
 
+			colours.push( Math.random(), Math.random(), Math.random() );
+
 			instanceMatrices.push( combined );
 
 		}
@@ -107,10 +119,12 @@ export default class extends Base {
 
 		gltf.traverse( ( node: Node ) => {
 
-			if ( node.name === "Torus" ) {
+			if ( node.name === "Torus" && node.children.length > 0 ) {
+
+				// extract torus geometry buffers to construct a mesh for instancing
 
 				const batch = <DrawSet>node.children[ 0 ];
-				const { positions, normals, uvs, indices } = batch.mesh;
+				const { positions, normals, uvs, indices } = batch.mesh.buffers;
 
 				this.torusBuffer = new Mesh( {
 					positions,
@@ -123,9 +137,16 @@ export default class extends Base {
 					instanceMatrices
 				} );
 
+				this.torusBuffer.setAttribute( new Float32Array( colours ), 3, { attributeName: "aColor", program: this.colorProgram }, FLOAT, 0, 1 );
+
+
 			}
 
 		} );
+
+		// create a new drawset for the instanced torus
+		this.torusDrawSet = new DrawSet( this.torusBuffer, this.colorProgram );
+		this.torusDrawSet.setParent( this.parent );
 
 		this.resize();
 
@@ -144,18 +165,18 @@ export default class extends Base {
 
 	}
 
-	drawInstances( program: Program, elapsed: number ) {
+	drawInstances( program: Program, elapsed: number, delta: number ) {
 
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.clear( 1, 1, 1, 1 );
 
-		program.activate();
-		program.setVector3( "viewPosition", this.camera.position );
-		program.setFloat( "time", elapsed );
-		program.setMatrix4( "projection", this.camera.projection );
-		program.setMatrix4( "view", this.camera.view );
+		this.cameraFPS.update( delta );
 
-		this.torusBuffer.draw( program );
+		this.torusDrawSet.program.activate();
+		this.torusDrawSet.program.setVector3( "viewPosition", this.camera.position );
+		this.torusDrawSet.program.setFloat( "time", elapsed );
+
+		this.bolt.draw( this.parent );
 
 	}
 
@@ -163,8 +184,10 @@ export default class extends Base {
 
 		if ( ! this.assetsLoaded ) return;
 
-		this.drawInstances( this.colorProgram, elapsed );
+		// rotate parent node, needs modl * instance matrix in shadee
+		this.parent.transform.rotateY( 0.001 );
 
+		this.drawInstances( this.colorProgram, elapsed, delta );
 
 
 	}

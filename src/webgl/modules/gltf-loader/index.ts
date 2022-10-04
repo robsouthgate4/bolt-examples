@@ -1,5 +1,5 @@
-import Bolt, { DrawSet, CLAMP_TO_EDGE, FLOAT, LINEAR, Mesh, Node, Program, Texture2D, Transform } from "@bolt-webgl/core";
-import { GeometryBuffers } from "@bolt-webgl/core/build/Mesh";
+import Bolt, { DrawSet, CLAMP_TO_EDGE, FLOAT, LINEAR, Mesh, Node, Program, Texture2D, Transform, GeometryBuffers } from "@bolt-webgl/core";
+
 import { mat4, quat, vec3, vec4 } from "gl-matrix";
 import { Accessor, GlTf, Material, Mesh as GLTFMesh, MeshPrimitive, Node as GLTFNode, Texture as GLTFTexture, Skin as GLTFSkin, BufferView, Animation as GLTFAnimation } from "./types/gltf";
 import { TypedArray } from "./types/typedArray";
@@ -314,7 +314,7 @@ export default class GLTFLoader {
 				const indices = this._getBufferFromFile( gltf, buffers, indexAccesor ) || undefined;
 
 				// form bolt default geo buffers
-				const geometry: GeometryBuffers = {
+				const geometry = {
 					// every geometry should have position data by default
 					positions: this._getBufferByAttribute( gltf, buffers, mesh, primitive, "POSITION" )!.data as Float32Array,
 					normals: normals ? normals!.data as Float32Array : undefined,
@@ -338,8 +338,8 @@ export default class GLTFLoader {
 
 					// form skinned mesh data if joints defined
 					m = new SkinMesh( geometry );
-					m.addAttribute( Float32Array.from( joints!.data ), joints!.size, { program: s, attributeName: "aJoints" } );
-					m.addAttribute( weights!.data, weights!.size, { program: s, attributeName: "aWeights" }, FLOAT );
+					m.setAttribute( Float32Array.from( joints!.data ), joints!.size, { program: s, attributeName: "aJoints" } );
+					m.setAttribute( weights!.data, weights!.size, { program: s, attributeName: "aWeights" }, FLOAT );
 
 				} else {
 

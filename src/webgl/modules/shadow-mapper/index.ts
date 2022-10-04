@@ -66,7 +66,7 @@ export default class ShadowMapper {
 				node.program.activate();
 				node.program.setMatrix4( "lightSpaceMatrix", this._lightSpaceMatrix );
 				node.program.setVector3( "lightPosition", this._light.position );
-				node.program.setTexture( "shadowMap", this._fbo.depthTexture );
+				node.program.setTexture( "shadowMap", this._fbo.depthTexture! );
 
 				this._drawCache.push( {
 					initialProgram: node.program,

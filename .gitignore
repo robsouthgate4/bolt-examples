@@ -34,3 +34,6 @@ yarn-error.log*
 # IDEs
 .vscode
 .idea
+
+.yalc
+yalc.lock

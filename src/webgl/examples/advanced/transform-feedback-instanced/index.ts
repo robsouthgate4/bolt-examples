@@ -1,7 +1,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { CameraPersp, DYNAMIC_DRAW, FLOAT, IBO, POINTS, Program, STATIC_DRAW, TRIANGLES, UNSIGNED_SHORT, VAO, VBO } from "@bolt-webgl/core";
+import Bolt, { CameraPersp, DYNAMIC_DRAW, FLOAT, IBO, POINTS, Program, STATIC_DRAW, TRIANGLES, UNSIGNED_INT, VAO, VBO } from "@bolt-webgl/core";
 
 import particlesVertexInstanced from "./shaders/particles/particles.vert";
 import particlesFragmentInstanced from "./shaders/particles/particles.frag";
@@ -41,6 +41,7 @@ export default class extends Base {
 	meshIBO!: IBO;
 	bolt: Bolt;
 	orbit: Orbit;
+	model = mat4.create();
 
 	constructor() {
 
@@ -54,7 +55,7 @@ export default class extends Base {
 		this.canvas.height = this.height;
 
 		this.bolt = Bolt.getInstance();
-		this.bolt.init( this.canvas, { antialias: true, dpi: 2, powerPreference: "high-performance" } );
+		this.bolt.init( this.canvas, { antialias: true, dpi: Math.min( 2, window.devicePixelRatio ), powerPreference: "high-performance" } );
 
 		this.gl = this.bolt.getContext();
 
@@ -153,7 +154,7 @@ export default class extends Base {
 		const meshNormalVBO = new VBO( new Float32Array( particleGeometry.normals ), STATIC_DRAW );
 		const meshUVVBO = new VBO( new Float32Array( particleGeometry.uvs ), STATIC_DRAW );
 
-		this.meshIBO = new IBO( new Uint16Array( particleGeometry.indices ) );
+		this.meshIBO = new IBO( new Uint32Array( particleGeometry.indices ) );
 
 		// buffers
 		const offset1VBO = new VBO( new Float32Array( offsets ), DYNAMIC_DRAW );
@@ -261,9 +262,9 @@ export default class extends Base {
 
 			this.gl.enable( this.gl.RASTERIZER_DISCARD );
 
-			this.gl.bindTransformFeedback( this.gl.TRANSFORM_FEEDBACK, this.current.tf );
 			this.gl.bindVertexArray( this.current.updateVAO.arrayObject );
 
+			this.gl.bindTransformFeedback( this.gl.TRANSFORM_FEEDBACK, this.current.tf );
 			this.gl.beginTransformFeedback( POINTS );
 			this.gl.drawArrays( POINTS, 0, this.instanceCount );
 			this.gl.endTransformFeedback();
@@ -271,23 +272,24 @@ export default class extends Base {
 			this.gl.disable( this.gl.RASTERIZER_DISCARD );
 			this.gl.bindTransformFeedback( this.gl.TRANSFORM_FEEDBACK, null );
 
+			this.gl.bindVertexArray( null );
 
 		}
 
 		{
-
-			const model = mat4.create();
 
 			this.particleProgram.activate();
 			this.gl.bindVertexArray( this.current.drawVAO.arrayObject );
 
 			this.particleProgram.setMatrix4( "projection", this.camera.projection );
 			this.particleProgram.setMatrix4( "view", this.camera.view );
-			this.particleProgram.setMatrix4( "model", model );
+			this.particleProgram.setMatrix4( "model", this.model );
 
 			this.meshIBO.bind();
-			this.gl.drawElementsInstanced( TRIANGLES, this.meshIBO.count, UNSIGNED_SHORT, 0, this.instanceCount );
+			this.gl.drawElementsInstanced( TRIANGLES, this.meshIBO.count, UNSIGNED_INT, 0, this.instanceCount );
 			this.meshIBO.unbind();
+
+			this.gl.bindVertexArray( null );
 
 		}
 

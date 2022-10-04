@@ -1,5 +1,5 @@
 
-import Example from "@/webgl/examples/advanced/depth-of-field";
+import Example from "@/webgl/examples/advanced/transform-feedback-instanced-mesh";
 
 export default class Main {
 

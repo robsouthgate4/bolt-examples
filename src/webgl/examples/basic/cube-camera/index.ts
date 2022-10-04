@@ -1,5 +1,5 @@
 import Base from "@webgl/Base";
-import Bolt, { Program, Node, DrawSet, TextureCube, CameraPersp, Camera, FBOCube, RBO, Mesh, LINEAR, FRONT } from "@bolt-webgl/core";
+import Bolt, { Program, Node, DrawSet, TextureCube, CameraPersp, Camera, FBOCube, RBO, Mesh, LINEAR, FRONT, GeometryBuffers} from "@bolt-webgl/core";
 
 
 import { quat, vec3 } from "gl-matrix";
@@ -16,7 +16,7 @@ import skyFragment from "./shaders/sky/sky.frag";
 
 import Sphere from "@/webgl/modules/primitives/Sphere";
 import Cube from "@/webgl/modules/primitives/Cube";
-import { GeometryBuffers } from "@bolt-webgl/core/build/Mesh";
+
 
 export default class extends Base {
 

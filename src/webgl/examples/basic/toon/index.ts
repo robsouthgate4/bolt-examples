@@ -15,6 +15,7 @@ import Post from "@/webgl/modules/post";
 import Axis from "@/webgl/modules/draw-sets/axis";
 import Floor from "@/webgl/modules/draw-sets/floor";
 import ShaderPass from "@/webgl/modules/post/passes/ShaderPass";
+import Orbit from "@/webgl/modules/orbit";
 
 export default class extends Base {
 
@@ -39,6 +40,7 @@ export default class extends Base {
 	compProgram: Program;
 	depthTexture: Texture2D;
 	uvTexture: Texture2D;
+	orbit: Orbit;
 
 	constructor() {
 
@@ -63,6 +65,8 @@ export default class extends Base {
 		this.bolt = Bolt.getInstance();
 		this.bolt.init( this.canvas, { antialias: true, dpi: 2, powerPreference: "high-performance" } );
 		this.bolt.setCamera( this.camera );
+
+		this.orbit = new Orbit( this.camera );
 
 		this.gl = this.bolt.getContext();
 
@@ -167,6 +171,8 @@ export default class extends Base {
 
 		this.bolt.setViewPort( 0, 0, this.canvas.width, this.canvas.height );
 		this.bolt.clear( 0.9, 0.9, 0.9, 1 );
+
+		this.orbit.update();
 
 		this.gltf.traverse( ( node: Node ) => {
 

@@ -1,7 +1,7 @@
 
 
 import Base from "@webgl/Base";
-import Bolt, { Program, Transform, Mesh, FBO, Node, CameraPersp } from "@bolt-webgl/core";
+import Bolt, { Program, Transform, Mesh, FBO, Node, CameraPersp, DrawSet } from "@bolt-webgl/core";
 
 import defaultVertexInstanced from "./shaders/instanced/instanced.vert";
 import defaultFragmentInstanced from "./shaders/instanced/instanced.frag";
@@ -37,6 +37,7 @@ export default class extends Base {
 	depthFBO!: FBO;
 	gl: WebGL2RenderingContext;
 	fxaaPass!: FXAAPass;
+	torusDrawSet!: DrawSet;
 
 	constructor() {
 
@@ -157,6 +158,8 @@ export default class extends Base {
 			instanceMatrices
 		} );
 
+		this.torusDrawSet = new DrawSet( this.torusBuffer, this.colorProgram );
+
 		this.resize();
 
 	}
@@ -184,12 +187,10 @@ export default class extends Base {
 		this.cameraFPS.update( delta );
 
 		program.activate();
-		program.setVector3( "viewPosition", this.camera.position );
 		program.setFloat( "time", elapsed );
-		program.setMatrix4( "projection", this.camera.projection );
-		program.setMatrix4( "view", this.camera.view );
 
-		this.torusBuffer.draw( program );
+		this.torusDrawSet.program = program;
+		this.bolt.draw( this.torusDrawSet );
 
 	}
 

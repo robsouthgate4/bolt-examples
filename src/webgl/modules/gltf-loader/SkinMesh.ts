@@ -1,5 +1,5 @@
 import { Mesh, Node, Program } from "@bolt-webgl/core";
-import { GeometryBuffers, MeshParams } from "@bolt-webgl/core/build/Mesh";
+import { GeometryBuffers, MeshParams } from "@bolt-webgl/core";
 import { mat4 } from "gl-matrix";
 import Skin from "./Skin";
 
