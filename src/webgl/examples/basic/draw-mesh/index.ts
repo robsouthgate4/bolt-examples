@@ -8,7 +8,6 @@ import colorFragment from "./shaders/color/color.frag";
 
 import { vec3, } from "gl-matrix";
 import Orbit from "@webgl/modules/orbit";
-
 import Floor from "@/webgl/modules/draw-sets/floor";
 
 export default class extends Base {

@@ -274,7 +274,6 @@ export default class extends Base {
 
 			this.gl.bindVertexArray( null );
 
-
 		}
 
 		{
